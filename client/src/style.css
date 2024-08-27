@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    font-family: 'Montserrat', sans-serif;
+    font-optical-sizing: auto;
+    font-style: normal;
+  }
+  section {
+    @apply py-[30px];
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-full w-[1440px] px-[25px];
+  }
+  .text_title {
+    @apply py-[15px] text-[24px] text-title font-bold;
+  }
+  .text_subTitle {
+    @apply text-[18px] text-title font-bold;
+  }
+  .text_para {
+    @apply text-[14px] text-black font-normal;
+  }
+  .text_secondary {
+    @apply text-[14px] text-footer font-normal;
+  }
+  .text_link {
+    @apply text-[12px] text-link font-bold;
+  }
+  .btn {
+    @apply text-[16px] text-white font-bold px-[68px] py-[10px] rounded-lg;
+  }
+  .tag {
+    @apply text-[10px] text-black font-bold px-[20px] py-[6px] rounded-xl;
+  }
+}
+
+@media only screen and (max-width: 1024px) {
+  .container {
+    @apply w-full px-[20px];
+  }
+  section {
+    @apply py-[20px];
+  }
+}

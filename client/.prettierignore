@@ -1,0 +1,15 @@
+node_modules/
+
+.prettierrc
+.prettierignore
+
+build/**/*.js
+
+*.min.js
+
+*.json
+
+src/styles/**/*.css
+src/styles/**/*.scss
+
+*.config.js
