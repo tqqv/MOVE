@@ -2,6 +2,7 @@
   import logo from '@assets/logo.svg';
   import wallet from '@icons/wallet.vue';
   import Button from 'primevue/button';
+  import Divider from '@/components/Divider.vue';
 </script>
 
 <template>
@@ -12,6 +13,10 @@
       <div class="p-5"><wallet fill="fill-primary" stroke="stroke-none" /></div>
       <!-- Icon PrimeVue -->
       <div class="p-5"><i class="pi pi-star text-[50px] text-primary"></i></div>
+      <div class="flex items-center gap-x-[30px]">
+        <h1 class="text_title">Featured</h1>
+        <Divider />
+      </div>
       <div class="text-center w-full h-40 shadow flex justify-center items-center flex-col">
         <h1 class="text_subTitle">What are your interests?</h1>
         <p class="text_para">
