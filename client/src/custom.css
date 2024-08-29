@@ -1,3 +1,13 @@
 .shadow {
   box-shadow: rgba(0, 0, 0, 0.075) 0px 5px 15px;
 }
+.padding-nav {
+  padding-top: 102px;
+}
+.active-nav {
+  width: 4px;
+  height: 20px;
+  position: absolute;
+  background-color: white;
+  left: 0;
+}
