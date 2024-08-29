@@ -1,4 +1,5 @@
 <script setup>
+  import { ref } from 'vue';
   import verified from '@icons/verified.vue';
   const userFollowers = [
     {
@@ -32,6 +33,14 @@
   ];
   // xử lý khi streaming la true sẽ luôn lên trên
   const sortedUserFollowers = userFollowers.sort((a, b) => b.isStreaming - a.isStreaming);
+
+  // xu ly show va hidden sidebar
+  const isShow = ref(true);
+
+  const handleShow = () => {
+    isShow.value = !isShow.value;
+  };
+
   //  TRUYENP PROPS
   // const props = defineProps({
   //   userFollowers: {
@@ -42,13 +51,21 @@
 </script>
 
 <template>
-  <div class="w-[251px] h-[703px] border-2 border-gray-dark">
+  <!-- SHOW -->
+  <div
+    v-if="isShow"
+    class="w-[251px] h-[703px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+  >
     <div class="flex flex-col px-4 py-4">
       <div class="flex items-center justify-between">
         <h2 class="uppercase text_subTitle text-[13px]">follow channels</h2>
-        <i class="pi pi-arrow-left cursor-pointer" style="font-size: 1rem; font-weight: 800"></i>
+        <i
+          class="pi pi-arrow-left cursor-pointer text-[19px]"
+          style="font-weight: 800"
+          @click="handleShow"
+        ></i>
       </div>
-      <div class="flex flex-col gap-y-4 my-5 ">
+      <div class="flex flex-col gap-y-4 my-5">
         <div
           v-for="userFollower in sortedUserFollowers"
           :key="userFollower.id"
@@ -83,6 +100,41 @@
             <div v-else class="flex flex-row text_secondary text-body text-[12px] gap-x-2">
               <p class="">{{ userFollower.totalVideos }} videos</p>
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- HIDDEN -->
+  <div
+    v-else
+    class="w-[89px] h-[703px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+  >
+    <div class="flex flex-col px-4 py-4">
+      <div class="flex items-center justify-center">
+        <i
+          class="pi pi-align-right cursor-pointer text-[19.5px]"
+          style="font-weight: 800"
+          @click="handleShow"
+        ></i>
+      </div>
+      <div class="flex flex-col gap-y-4 my-5">
+        <div
+          v-for="userFollower in sortedUserFollowers"
+          :key="userFollower.id"
+          class="flex items-center gap-x-3 cursor-pointer"
+        >
+          <div
+            :class="[
+              'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
+              userFollower.isStreaming ? 'border-[3px] border-red' : '',
+            ]"
+          >
+            <img
+              :src="userFollower.avatar"
+              alt="Avatar"
+              class="w-full h-full rounded-full object-cover"
+            />
           </div>
         </div>
       </div>

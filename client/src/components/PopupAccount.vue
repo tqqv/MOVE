@@ -21,7 +21,7 @@
 </script>
 
 <template>
-  <div class="shadow-lg rounded-md max-w-[260px]">
+  <div class="shadow-lg rounded-md w-[260px]">
     <div class="px-4 py-5">
       <div class="flex flex-row gap-x-3 items-center py-3">
         <img :src="user.avatar" alt="avatar people" class="rounded-full object-cover w-12 h-12" />
@@ -33,27 +33,27 @@
 
       <div class="flex flex-col justify-start text-[13px] px-1">
         <div class="flex flex-col gap-y-4">
-          <div class="flex flex-row items-center gap-x-2 item-menu cursor-pointer">
-            <dashboard class="fill-black" />
-            <h1 class="mb-1">Dashboard</h1>
+          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
+            <dashboard class="fill-black group-hover:fill-primary" />
+            <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
           </div>
-          <div class="flex flex-row items-center gap-x-2 item-menu cursor-pointer">
-            <wallet class="fill-black" />
-            <h1 class="mb-1">Wallet ({{ user.REPs }} REPs)</h1>
-          </div>
-        </div>
-        <hr class="h-px bg-gray-dark border-0 my-4" />
-        <div class="flex flex-col gap-y-3">
-          <div class="flex flex-row items-center gap-x-2 item-menu cursor-pointer">
-            <i class="pi pi-cog" style="font-size: 1.5rem"></i>
-            <h1 class="">Setting</h1>
+          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
+            <wallet class="fill-black group-hover:fill-primary" />
+            <h1 class="mb-1 group-hover:text-primary">Wallet ({{ user.REPs }} REPs)</h1>
           </div>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />
         <div class="flex flex-col gap-y-3">
-          <div class="flex flex-row items-center pt-1 gap-x-2 item-menu cursor-pointer">
-            <logout class="fill-black" />
-            <h1 class="mb-1">Logout</h1>
+          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
+            <i class="pi pi-cog group-hover:text-primary" style="font-size: 1.5rem"></i>
+            <h1 class="group-hover:text-primary">Setting</h1>
+          </div>
+        </div>
+        <hr class="h-px bg-gray-dark border-0 my-4" />
+        <div class="flex flex-col gap-y-3">
+          <div class="flex flex-row items-center pt-1 gap-x-2 group cursor-pointer">
+            <logout class="fill-black group-hover:fill-primary" />
+            <h1 class="mb-1 group-hover:text-primary">Logout</h1>
           </div>
         </div>
       </div>
@@ -61,12 +61,4 @@
   </div>
 </template>
 
-<style>
-  .item-menu:hover {
-    color: #13d0b4;
-  }
-
-  .item-menu:hover svg {
-    fill: #13d0b4;
-  }
-</style>
+<style></style>
