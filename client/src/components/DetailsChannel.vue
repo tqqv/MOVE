@@ -1,4 +1,4 @@
-<script>
+<script setup>
   import Avatar from 'primevue/avatar';
   import MMAImage from '../assets/category/MMA.png';
   import Verified from './icons/verified.vue';
@@ -6,25 +6,12 @@
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
 
-  export default {
-    components: {
-      Avatar,
-      Verified,
-      Live,
-      share,
-      heart,
-    },
-    data() {
-      return {
-        videoDetails: {
-          nameChannel: 'dianeTV',
-          avatar: MMAImage,
-          followers: 2222,
-          status: 'Offline',
-          isLive: true,
-        },
-      };
-    },
+  const videoDetails = {
+    nameChannel: 'dianeTV',
+    avatar: MMAImage,
+    followers: 2222,
+    status: 'Offline',
+    isLive: true,
   };
 </script>
 
@@ -35,7 +22,7 @@
         <div class="relative inline-block">
           <div
             :class="[
-              'w-[56px] h-[56px] rounded-full flex items-center justify-center',
+              'size-[56px] rounded-full flex items-center justify-center',
               videoDetails.isLive ? 'border-[3px] border-[#FF3131] p-0.5' : '',
             ]"
           >
@@ -65,5 +52,3 @@
     </div>
   </div>
 </template>
-
-<style lang="scss"></style>
