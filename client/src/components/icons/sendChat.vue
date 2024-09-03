@@ -11,6 +11,7 @@
     xmlns="http://www.w3.org/2000/svg"
     :width="width ? width : '16px'"
     :height="height ? height : '14px'"
+    viewBox="0 0 18 10"
     class="overflow-visible"
   >
     <g :class="[fill, stroke]">
