@@ -2,11 +2,7 @@
   import logo from '@assets/logo.svg';
 
   import verified from '@icons/verified.vue';
-  import dashboard from '@icons/dashboard.vue';
-  import wallet from '@icons/wallet.vue';
-  import logout from '@icons/logout.vue';
   import notification from '@icons/notification.vue';
-  import setting from '@icons/setting.vue';
   import upload from '@icons/upload.vue';
   import rep from '@icons/rep.vue';
 
@@ -17,20 +13,31 @@
   import OverlayBadge from 'primevue/overlaybadge';
   import Divider from 'primevue/divider';
 
+  import PopupAccount from '@components/PopupAccount.vue';
+  import Notification from '@/components/notification/Notification.vue';
+
   import { ref } from 'vue';
 
   const isMobileMenuOpen = ref(false);
+  const isUserMenuOpen = ref(false);
+  const isNotiMenuOpen = ref(false);
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  };
+  const toggleUserMenu = () => {
+    isUserMenuOpen.value = !isUserMenuOpen.value;
+  };
+  const toogleNotiMenu = () => {
+    isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
 </script>
 <template>
   <nav class="bg-black text-white fixed w-full z-[99999]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
+        <!-- Mobile menu button-->
         <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
-          <!-- Mobile menu button-->
           <button
             @click="toggleMobileMenu"
             type="button"
@@ -96,12 +103,33 @@
           <!-- Guest -->
           <!-- <Button class="btn px-[40px] text-nowrap">Log In</Button> -->
           <h2 class="text-nowrap text_nav">Get REP$</h2>
-          <OverlayBadge value="4" severity="danger" class="inline-flex">
-            <notification fill="fill-white" />
-          </OverlayBadge>
+
+          <div class="relative">
+            <OverlayBadge
+              value="4"
+              severity="danger"
+              class="inline-flex cursor-pointer"
+              size="small"
+              id="noti-menu-button"
+              @click="toogleNotiMenu"
+            >
+              <notification fill="fill-white" class="scale-110" />
+            </OverlayBadge>
+            <div
+              v-if="isNotiMenuOpen"
+              class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="noti-menu-button"
+              tabindex="-1"
+            >
+              <Notification @toogleNotiMenu="toogleNotiMenu" />
+            </div>
+          </div>
           <div class="relative">
             <div>
               <button
+                @click="toggleUserMenu"
                 type="button"
                 class="relative size-[40px] flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
                 id="user-menu-button"
@@ -116,74 +144,16 @@
                 />
               </button>
             </div>
-            <!-- <div
-              class="absolute right-0 z-10 mt-5 w-[255px] origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+            <div
+              v-if="isUserMenuOpen"
+              class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
               role="menu"
               aria-orientation="vertical"
               aria-labelledby="user-menu-button"
               tabindex="-1"
             >
-              <div class="p-[16px]">
-                <div class="flex items-center gap-x-2">
-                  <Avatar
-                    image="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                    class="size-[48px]"
-                    shape="circle"
-                  />
-                  <h2 class="text-[17px] font-semibold text-nowrap">duckies</h2>
-                  <verified class="fill-blue mt-[-5px]" />
-                </div>
-                <Divider class="my-[6px]" />
-                <div>
-                  <a
-                    href="#"
-                    class="block py-1 group"
-                    role="menuitem"
-                    tabindex="-1"
-                    id="user-menu-item-0"
-                    ><div class="flex items-center gap-x-1">
-                      <dashboard class="mt-1 group-hover:fill-primary" />
-                      <p class="text_para">Dashboard</p>
-                    </div></a
-                  >
-                  <a
-                    href="#"
-                    class="group block py-1"
-                    role="menuitem"
-                    tabindex="-1"
-                    id="user-menu-item-1"
-                    ><div class="flex items-center gap-x-1">
-                      <wallet class="group-hover:fill-primary" />
-                      <p class="text_para">Wallet (0 REPs)</p>
-                    </div></a
-                  >
-                </div>
-                <Divider class="my-[6px]" />
-                <a
-                  href="#"
-                  class="group block py-1"
-                  role="menuitem"
-                  tabindex="-1"
-                  id="user-menu-item-1"
-                  ><div class="flex items-center gap-x-1">
-                    <setting class="ml-[-3px] group-hover:fill-primary" />
-                    <p class="text_para">Settings</p>
-                  </div></a
-                >
-                <Divider class="my-[6px]" />
-                <a
-                  href="#"
-                  class="group block py-1"
-                  role="menuitem"
-                  tabindex="-1"
-                  id="user-menu-item-1"
-                  ><div class="flex items-center gap-x-1">
-                    <logout class="mt-1 group-hover:fill-primary" />
-                    <p class="text_para">Log out</p>
-                  </div></a
-                >
-              </div>
-            </div> -->
+              <PopupAccount />
+            </div>
           </div>
         </div>
       </div>
