@@ -1,6 +1,20 @@
 .shadow {
   box-shadow: rgba(0, 0, 0, 0.075) 0px 5px 15px;
 }
+
+/* scrollbar */
+.scrollbar-custom::-webkit-scrollbar {
+  width: 8px;
+}
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: rgba(19, 208, 180, 0.8);
+  border-radius: 4px;
+}
+.scrollbar-custom::-webkit-scrollbar-track {
+  background-color: rgb(19, 208, 180, 0.2);
+  border-radius: 4px;
+}
+
 .padding-nav {
   padding-top: 102px;
 }
