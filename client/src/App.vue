@@ -1,5 +1,5 @@
 <script setup>
-  import Test from '@components/GirdVideo.vue';
+  import Test from '@pages/Test.vue';
 </script>
 
 <template>
