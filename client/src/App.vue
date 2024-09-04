@@ -1,7 +1,5 @@
-<script setup>
-  import Test from '@pages/Test.vue';
-</script>
+<script setup></script>
 
 <template>
-  <Test />
+  <router-view />
 </template>
