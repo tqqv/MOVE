@@ -1,6 +1,7 @@
 const express = require("express");
 var dotenv = require("dotenv");
 var cors = require("cors");
+var cookieParser = require("cookie-parser");
 const { connection } = require("./config/connectDB");
 const authRouter = require("./routes/authRoute.js");
 
@@ -14,6 +15,7 @@ const corsOptions = {
 
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello World from the backend!");

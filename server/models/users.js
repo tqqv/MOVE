@@ -28,7 +28,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       username: {
         type: DataTypes.STRING(50),
-        allowNull: false,
+        allowNull: true,
         unique: "username",
       },
       email: {
@@ -85,6 +85,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING(20),
         allowNull: true,
         defaultValue: "user",
+      },
+      referralCode: {
+        type: DataTypes.INTEGER,
+        unique: true,
       },
     },
     {
