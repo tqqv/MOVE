@@ -6,11 +6,7 @@ const loginController = async (req, res, next) => {
   // console.log(loginResult);
   if (loginResult.cookie) {
     // console.log("hiiiiiiiiiii");
-    res.cookie(
-      loginResult.cookie.cookieName,
-      loginResult.cookie.token,
-      loginResult.cookie.expires
-    );
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token);
   }
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
     req,

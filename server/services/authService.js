@@ -27,6 +27,7 @@ const register = async (userData) => {
       ),
       // username: userData.username.length >= 6,
     };
+
     if (!conditions.email) {
       return {
         status: 400,
@@ -47,6 +48,7 @@ const register = async (userData) => {
           "Password must be at least 8 characters long, and include uppercase, lowercase, number, and special character",
       };
     }
+
     const salt = bcrypt.genSaltSync(10);
     const hash = bcrypt.hashSync(userData.password, salt);
     const newUser = new User({
@@ -54,7 +56,16 @@ const register = async (userData) => {
       password: hash,
     });
 
-    await newUser.save();
+    const savedUser = await newUser.save();
+
+    const referralCode = 1000 + savedUser.dataValues.id;
+
+    savedUser.referralCode = referralCode;
+
+    await savedUser.save();
+    //
+    // Nếu tạo bảng để link cái referralCode thì Viết logic code ở đây
+    // Code here
 
     return {
       status: 200,
