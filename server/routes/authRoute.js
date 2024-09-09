@@ -17,6 +17,7 @@ const authRouter = express.Router();
 authRouter.post("/login", loginController);
 authRouter.post("/register", registerController);
 authRouter.get("/logout", verifyUser, logoutController);
+
 // verify email
 authRouter.post("/mail-verify", verifyUser, sendMailVerifyController);
 authRouter.get("/verify-account/:token", verifyAccountController);

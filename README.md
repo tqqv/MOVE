@@ -11,13 +11,7 @@
 3. Chọn cơ sở dữ liệu:
    USE `move`;
 
-4. Tạo người dùng mới và cấp quyền cho người dùng này:
-
-- CREATE USER 'user1'@'%' IDENTIFIED BY 'passworduser1';
-- GRANT ALL PRIVILEGES ON `move`.\* TO 'user1'@'%';
-- FLUSH PRIVILEGES;
-
-5. Thoát mysql
+4. Thoát mysql
 
 - exit
 

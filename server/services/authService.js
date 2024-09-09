@@ -106,6 +106,10 @@ const login = async (userData) => {
     };
   }
 
+  // console.log(user.dataValues);
+
+  // const { password, role, ...rest } = user.dataValues;
+
   const token = jwt.sign(
     { id: user.id, role: user.role },
     process.env.JWT_SECRET_KEY,
@@ -118,6 +122,7 @@ const login = async (userData) => {
     cookie: {
       cookieName: "accessToken",
       token: token,
+      expires: token.expiresIn,
     },
     status: 200,
     message: "Successfully login",
@@ -364,3 +369,4 @@ module.exports = {
   resetPassword,
   verifyTokenRs,
 };
+

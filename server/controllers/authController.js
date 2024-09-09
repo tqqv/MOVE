@@ -1,4 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
+
 var {
   login,
   register,
@@ -38,6 +39,7 @@ const logoutController = async (req, res, next) => {
   res.clearCookie("accessToken");
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
+
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
