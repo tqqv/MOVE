@@ -59,13 +59,3 @@
     />
   </div>
 </template>
-
-<style>
-  .p-tablist-active-bar {
-    background-color: #13d0b4;
-    height: 4px;
-  }
-  .p-tab-active {
-    color: #13d0b4;
-  }
-</style>
