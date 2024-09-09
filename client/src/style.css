@@ -45,8 +45,14 @@
   .btn {
     @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px];
   }
+  .btnDisable {
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px];
+  }
   .tag {
     @apply text-[10px] text-black font-bold px-[20px] py-[6px] rounded-xl;
+  }
+  .input_custom {
+    @apply p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
   }
 }
 
