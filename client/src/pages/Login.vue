@@ -1,7 +1,7 @@
 <script setup>
   import LoginForm from '@/components/login/LoginPopup.vue';
   import SignupForm from '@/components/login/SignupPopup.vue';
-  import ForgotPasswordPopup from '@/pages/ForgotPasswordPopup.vue';
+  import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import Tabs from 'primevue/tabs';
