@@ -4,10 +4,24 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class User extends Model {
     static associate(models) {
-      // Định nghĩa quan hệ với Category
-      // this.belongsTo(models.Category, { foreignKey: "categoryId" });
-      // Định nghĩa quan hệ với TaskStatus
-      // this.belongsTo(models.TaskStatus, { foreignKey: "taskStatusId" });
+
+      // one-to-many channel
+      this.hasOne(models.Channel, {
+        foreignKey: 'userId'
+      });
+
+      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
+      this.hasMany(models.Video, {
+        foreignKey: 'userId',
+        as: 'userVideos', // Alias cho videos của người dùng
+      });
+
+      // Many-to-many relationship through CategoryFollow
+      this.belongsToMany(models.Category, {
+        through: models.CategoryFollow,
+        foreignKey: 'userId',
+        as: 'followedCategories', // Alias for the categories the user follows
+      });
     }
   }
   User.init(
@@ -63,11 +77,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       REPs: {
         type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      bio: {
-        type: DataTypes.TEXT,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 0,
       },
       country: {
         type: DataTypes.STRING(50),
@@ -90,6 +101,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         unique: true,
       },
+      isLive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+      }
     },
     {
       sequelize,
