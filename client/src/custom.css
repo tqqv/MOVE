@@ -25,3 +25,10 @@
   background-color: white;
   left: 0;
 }
+.p-tablist-active-bar {
+  background-color: #13d0b4;
+  height: 4px;
+}
+.p-tab-active {
+  color: #13d0b4;
+}
