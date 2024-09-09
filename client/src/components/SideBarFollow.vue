@@ -54,7 +54,7 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="w-[251px] h-[703px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block w-[251px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-4 py-4">
       <div class="flex items-center justify-between">
@@ -108,7 +108,7 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="w-[89px] h-[703px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block w-[89px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-4 py-4">
       <div class="flex items-center justify-center">
