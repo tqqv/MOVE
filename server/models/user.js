@@ -77,7 +77,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       REPs: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 0,
       },
       country: {
         type: DataTypes.STRING(50),
