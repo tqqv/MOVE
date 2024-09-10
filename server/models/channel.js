@@ -24,6 +24,10 @@ module.exports = (sequelize, DataTypes) => {
                     key: "id",
                 }
             },
+            channelName: {
+                type: DataTypes.STRING(255),
+                allowNull: false,
+            },
             bio: {
                 type: DataTypes.TEXT,
                 allowNull: true,

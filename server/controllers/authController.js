@@ -3,11 +3,13 @@ const responseHandler = require("../middlewares/responseHandler");
 var {
   login,
   register,
-  sendMailVeriry,
+  sendMailVerify,
   verifyAccount,
   forgotPassword,
   resetPassword,
   verifyTokenRs,
+  getProfile,
+  editProfile,
 } = require("../services/authService");
 
 // authenticate
@@ -46,7 +48,7 @@ const sendMailVerifyController = async (req, res, next) => {
   const email = req.body.email;
   // console.log("controller:", email);
   const id = req.user.id;
-  const result = await sendMailVeriry(email, id);
+  const result = await sendMailVerify(email, id);
 
   responseHandler(result.status, null, result.message)(req, res, next);
 };
@@ -86,6 +88,21 @@ const resetPasswordController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
+const getProfileController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await getProfile(userId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const editProfileController = async (req, res, next) => {
+  const userId = req.user.id;
+  const data = req.body;
+  const result = await editProfile(userId, data);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   loginController,
   registerController,
@@ -95,4 +112,6 @@ module.exports = {
   sendMailForgotPass,
   resetPasswordController,
   verifyTokenRsController,
+  getProfileController,
+  editProfileController,
 };
