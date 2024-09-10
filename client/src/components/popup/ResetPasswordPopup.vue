@@ -30,7 +30,6 @@
 
   const submitResetForm = () => {
     if (!isButtonDisabled.value) {
-      // Handle form submission here
       console.log('Form Submitted', {
         password: password.value,
         confirmPassword: confirmPassword.value,

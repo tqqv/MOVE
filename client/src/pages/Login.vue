@@ -1,61 +1,46 @@
 <script setup>
   import LoginForm from '@/components/login/LoginPopup.vue';
   import SignupForm from '@/components/login/SignupPopup.vue';
-  import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
-  import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import Tabs from 'primevue/tabs';
   import TabList from 'primevue/tablist';
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
-  import { ref } from 'vue';
   import logoBlack from '@assets/logoBlack.svg';
-
-  const showLoginPopup = ref(false);
-  const showForgotPasswordPopup = ref(false);
+  import { useTabStore } from '@/stores/tab.store';
+  import { computed } from 'vue';
 
   const scrollableTabs = [
     { title: 'Login', value: '0', component: LoginForm },
     { title: 'Sign Up', value: '1', component: SignupForm },
   ];
-
-  const openForgotPassword = () => {
-    showLoginPopup.value = false;
-    showForgotPasswordPopup.value = true;
+  const tabStore = useTabStore();
+  const onTabChange = (event) => {
+    tabStore.setActiveTab(event.value);
   };
+  const activeTab = computed(() => tabStore.activeTab);
 
-  const backToLoginPopup = () => {
-    showForgotPasswordPopup.value = false;
-    showLoginPopup.value = true;
-  };
+  console.log(tabStore.activeTab);
 </script>
 
 <template>
-  <div>
-    <Button label="Show" @click="showLoginPopup = true" />
-
-    <Dialog v-model:visible="showLoginPopup" :draggable="false" class="w-[560px]">
-      <template #header>
-        <img :src="logoBlack" alt="Logo" class="h-8 mx-auto" />
-      </template>
-      <Tabs value="0" scrollable class="mb-4 custom-tabs">
-        <TabList>
-          <Tab v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
-            {{ tab.title }}
-          </Tab>
-        </TabList>
-        <TabPanels>
-          <TabPanel v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
-            <component :is="tab.component" @openForgotPassword="openForgotPassword" />
-          </TabPanel>
-        </TabPanels>
-      </Tabs>
-    </Dialog>
-
-    <ForgotPasswordPopup
-      v-model:visible="showForgotPasswordPopup"
-      @backToLogin="backToLoginPopup"
-    />
-  </div>
+  <Dialog modal :draggable="false" class="w-[560px]">
+    <template #header>
+      <img :src="logoBlack" alt="Logo" class="h-8 mx-auto" />
+    </template>
+    <Tabs :value="activeTab" @tab-change="onTabChange" scrollable class="mb-4">
+      <TabList>
+        <Tab v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
+          {{ tab.title }}
+        </Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
+          <component :is="tab.component" />
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  </Dialog>
 </template>
+<style scoped></style>

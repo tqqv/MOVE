@@ -1,18 +1,18 @@
 <script setup>
-  import { ref, computed, defineEmits } from 'vue';
+  import { ref, computed } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
   import facebook from '@/components/icons/facebook.vue';
+  import { usePopupStore } from '@/stores';
 
   const showLoginWithEmail = ref(false);
   const email = ref('');
   const password = ref('');
   const showPassword = ref(false);
-  const emit = defineEmits(['openForgotPassword']);
 
+  const popupStore = usePopupStore();
   const buttonColor = computed(() => {
     return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
   });
-
   const isButtonDisabled = computed(() => {
     return !(email.value.trim() && password.value.trim());
   });
@@ -23,8 +23,9 @@
 
   const submitLoginForm = () => {};
 
-  const emitForgotPassword = () => {
-    emit('openForgotPassword');
+  const openForgotPassword = () => {
+    popupStore.closeLoginPopup();
+    popupStore.openForgotPasswordPopup();
   };
 </script>
 
@@ -75,7 +76,7 @@
           </button>
         </div>
         <div>
-          <span @click="emitForgotPassword" class="text-link text-sm cursor-pointer"
+          <span @click="openForgotPassword" class="text-link text-sm cursor-pointer"
             >Forgot password?</span
           >
         </div>
