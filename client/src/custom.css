@@ -32,3 +32,17 @@
 .p-tab-active {
   color: #13d0b4;
 }
+
+/* CUSTOM DIALOG */
+.p-dialog-header{
+  padding: 20px 20px 5px 20px;
+}
+
+.p-dialog-title{
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.p-dialog{
+  margin: 0 12px;
+}

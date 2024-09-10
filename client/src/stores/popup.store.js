@@ -13,6 +13,10 @@ export const usePopupStore = defineStore('popup', () => {
     showChangePassword.value = false;
   };
 
+  const openChangePasswordSuccess = () => {
+    showChangePasswordSuccess.value = true;
+  };
+
   const closeChangePasswordSuccess = () => {
     showChangePasswordSuccess.value = false;
   };
@@ -20,6 +24,7 @@ export const usePopupStore = defineStore('popup', () => {
     showChangePassword,
     showChangePasswordSuccess,
     openChangePassword,
+    openChangePasswordSuccess,
     closeChangePassword,
     closeChangePasswordSuccess,
   };

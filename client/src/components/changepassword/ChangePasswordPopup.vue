@@ -42,10 +42,10 @@
     :draggable="false"
     v-model:visible="popupStore.showChangePassword"
     header="Change Password"
-    class="w-full md:w-[474px] mx-3 md:mx-0"
+    class="w-full md:w-[474px]"
   >
     <div class="py-2">
-      <p class="mb-4 text-[11px] md:text-[14px]">
+      <p class="mb-4 text-[12px] md:text-[14px]">
         Please enter your old and new password. Make sure your password is alphanumeric with at
         least 8 characters.
       </p>

@@ -2,14 +2,15 @@
   import { ref, computed, defineEmits } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
-  import ChangePasswordPopup from '../changepassword/ChangePasswordPopup.vue';
+  import ChangePasswordPopup from '../ChangePassword/ChangePasswordPopup.vue';
   import { usePopupStore } from '@/stores/popup.store';
-  import ChangePasswordSuccessPopup from '../changepassword/ChangePasswordSuccessPopup.vue';
+  import ChangePasswordSuccessPopup from '../ChangePassword/ChangePasswordSuccessPopup.vue';
 
   const username = ref('npmh310');
   const email = ref('No found email');
   const fullname = ref('Minh Hieu');
   const gender = ref('Male');
+  const selectedDate = ref(new Date().toISOString().slice(0, 10));
 
   const setDisabledEmail = ref('true');
   const handleSetDisabledEmail = () => {};
@@ -61,7 +62,7 @@
               type="email"
               :disabled="setDisabledEmail"
               class="input_custom"
-              :class="{ 'italic text-body text-[12px] md:text-[14px]': setDisabledEmail }"
+              :class="{ 'italic text-body ': setDisabledEmail }"
               required
             />
             <p
@@ -107,44 +108,26 @@
           <!-- DATE OF BIRTH -->
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
-            <div class="flex gap-x-4">
-              <select
-                name="date"
-                class="text-md flex-1 px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>31</option>
-              </select>
-              <select
-                name="month"
-                class="text-md flex-1 px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>Dec</option>
-              </select>
-              <select
-                name="year"
-                class="text-md flex-1 px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>2002</option>
-              </select>
+            <div class="flex">
+              <input
+                v-model="selectedDate"
+                class="w-full select_custom text-[14px]"
+                type="date"
+                name=""
+              />
             </div>
           </div>
           <!-- COUNTRY VS STATE -->
           <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
             <div class="flex flex-col gap-y-2 flex-1">
               <label for="gender" class="text_para">Country</label>
-              <select
-                name="country"
-                class="text-md px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
+              <select name="country" class="select_custom">
                 <option>Vietnam</option>
               </select>
             </div>
             <div class="flex flex-col gap-y-2 flex-1">
               <label for="gender" class="text_para">State</label>
-              <select
-                name="country"
-                class="text-md px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
+              <select name="country" class="select_custom">
                 <option>Quang Nam</option>
               </select>
             </div>
