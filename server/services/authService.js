@@ -152,7 +152,7 @@ const generateVerificationToken = (userId, email) => {
 // setup mail and generate token - END
 
 // Send mail and verify account - START
-const sendMailVeriry = async (email, id) => {
+const sendMailVerify = async (email, id) => {
   try {
     const emailCheck = await User.findOne({ where: { email: email } });
     // console.log(emailCheck);
@@ -360,13 +360,73 @@ const resetPassword = async (email, userId, newPassword, confirmPassword) => {
 };
 // logic Forgot password - END
 
+const getProfile = async (id) => {
+  try {
+    const user = await User.findByPk(id);
+    if(!user){
+      return {
+        status: 200,
+        message: "User not found"
+      }
+    }
+
+    return {
+      status: 200,
+      data: user,
+      message: "Get profile successfully"
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      message: error.message,
+      data: null
+    }
+  }
+}
+
+const editProfile = async (id, data) => {
+  try {
+    const user = await User.findByPk(id);
+    if(!user){
+      return {
+        status: 400,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    const updateUser = await user.update(data)
+    if(!updateUser) {
+      return {
+        status: 400,
+        data: null,
+        message: "Update failed."
+      }
+    }
+
+    return {
+      status: 200,
+      data: updateUser,
+      message: "Update successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   login,
   register,
-  sendMailVeriry,
+  sendMailVerify,
   forgotPassword,
   verifyAccount,
   resetPassword,
   verifyTokenRs,
+  getProfile,
+  editProfile,
 };
 
