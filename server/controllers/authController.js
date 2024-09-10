@@ -3,6 +3,19 @@ const responseHandler = require("../middlewares/responseHandler");
 var { login, register } = require("../services/authService");
 var jwt = require("jsonwebtoken");
 
+var {
+  login,
+  register,
+  sendMailVerify,
+  verifyAccount,
+  forgotPassword,
+  resetPassword,
+  verifyTokenRs,
+  getProfile,
+  editProfile,
+} = require("../services/authService");
+
+// authenticate
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
   // console.log(loginResult);
@@ -44,11 +57,78 @@ const googleLogin = async(req, res, next) => {
     { expiresIn: "15d" }
   );
   return res.status(200).send({token, user});
-} 
+}
+
+//Verify account
+const sendMailVerifyController = async (req, res, next) => {
+  const email = req.body.email;
+  // console.log("controller:", email);
+  const id = req.user.id;
+  const result = await sendMailVerify(email, id);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
+const verifyAccountController = async (req, res, next) => {
+  const token = req.params.token;
+  // console.log("test: ", token);
+  const result = await verifyAccount(token);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
+// Forgot pasword
+const verifyTokenRsController = async (req, res, next) => {
+  const token = req.params.token;
+  const result = await verifyTokenRs(token);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+};
+
+const sendMailForgotPass = async (req, res, next) => {
+  const email = req.body.email;
+  const result = await forgotPassword(email);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
+const resetPasswordController = async (req, res, next) => {
+  const data = req.body;
+
+  const result = await resetPassword(
+    data.email,
+    data.userId,
+    data.newPassword,
+    data.confirmPassword
+  );
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
+const getProfileController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await getProfile(userId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const editProfileController = async (req, res, next) => {
+  const userId = req.user.id;
+  const data = req.body;
+  const result = await editProfile(userId, data);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 
 module.exports = {
   loginController,
   registerController,
   logoutController,
-  googleLogin
+  googleLogin,
+  sendMailVerifyController,
+  verifyAccountController,
+  sendMailForgotPass,
+  resetPasswordController,
+  verifyTokenRsController,
+  getProfileController,
+  editProfileController,
 };

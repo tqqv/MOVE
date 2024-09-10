@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       });
 
-      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
+      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)  
       this.hasMany(models.Video, {
         foreignKey: 'userId',
         as: 'userVideos', // Alias cho videos của người dùng
@@ -50,6 +50,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         unique: "email",
       },
+      fullName: {
+        type: DataTypes.STRING(255),
+        allowNull: false,
+      },
       isVerified: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
@@ -77,7 +81,8 @@ module.exports = (sequelize, DataTypes) => {
       },
       REPs: {
         type: DataTypes.INTEGER,
-        allowNull: true,
+        allowNull: false,
+        defaultValue: 0,
       },
       country: {
         type: DataTypes.STRING(50),
