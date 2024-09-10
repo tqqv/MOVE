@@ -67,7 +67,7 @@
   }
   
   .input_custom {
-    @apply p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
+    @apply px-2 py-3 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
   }
 }
 

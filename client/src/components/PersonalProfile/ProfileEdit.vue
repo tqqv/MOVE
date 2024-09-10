@@ -2,6 +2,9 @@
   import { ref, computed, defineEmits } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
+  import ChangePasswordPopup from '../changepassword/ChangePasswordPopup.vue';
+  import { usePopupStore } from '@/stores/popup.store';
+  import ChangePasswordSuccessPopup from '../changepassword/ChangePasswordSuccessPopup.vue';
 
   const username = ref('npmh310');
   const email = ref('No found email');
@@ -16,6 +19,18 @@
   function updateSelection(value) {
     selectedGender.value = value;
   }
+
+  // OPEN POPUP
+
+  const popupStore = usePopupStore();
+
+  const openPasswordDialog = () => {
+    popupStore.openChangePassword();
+  };
+  // const showDialog = ref(false);
+  // const openPasswordDialog = () => {
+  //   showDialog.value = true;
+  // };
 </script>
 <template>
   <form class="my-2">
@@ -65,7 +80,11 @@
           <!--FORGOT PASSWORD  -->
           <div class="flex flex-col gap-y-1">
             <label for="password" class="text_para">Password</label>
-            <span class="text-primary cursor-pointer text-[14px] underline">Change password</span>
+            <span
+              class="text-primary cursor-pointer text-[14px] underline"
+              @click="openPasswordDialog"
+              >Change password</span
+            >
           </div>
           <!-- GENDER -->
           <div class="flex flex-col gap-y-2">
@@ -137,7 +156,9 @@
           </div>
         </div>
       </div>
-      <Button label="Save settings" class="btn w-full md:w-1/2 mt-8" />
+      <Button type="submit" label="Save settings" class="btn w-full md:w-1/2 mt-8" />
     </div>
+    <ChangePasswordPopup />
+    <ChangePasswordSuccessPopup />
   </form>
 </template>
