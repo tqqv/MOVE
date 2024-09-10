@@ -26,9 +26,26 @@
   left: 0;
 }
 .p-tablist-active-bar {
-  background-color: #13d0b4;
-  height: 4px;
+  display: none;
 }
 .p-tab-active {
+  border-color: #13d0b4;
   color: #13d0b4;
+  border-width: 0 0 4px 0;
 }
+.p-dialog-content {
+  padding: 0 1rem 0rem 1rem;
+}
+.p-tabpanels {
+  padding-bottom: 0;
+}
+.p-dialog-header {
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+}
+.p-tablist {
+  padding: 0 18px;
+}
+/* .p-tablist-tab-list {
+  justify-content: center;
+} */
