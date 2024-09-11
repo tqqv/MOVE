@@ -2,7 +2,7 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Subcribe extends Model {
+  class Subscribe extends Model {
     static associate(models) {
         // Define relationships if necessary
         this.belongsTo(models.User, {
@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         });
     }
   }
-  Subcribe.init(
+  Subscribe.init(
     {
         userId: {
             type: DataTypes.INTEGER,
@@ -44,9 +44,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Subcribe",
+      modelName: "Subscribe",
       tableName: "categories",
       timestamps: true,
   });
-  return Subcribe;
+  return Subscribe;
 };

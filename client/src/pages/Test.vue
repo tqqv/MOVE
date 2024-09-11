@@ -7,6 +7,12 @@
   import Button from 'primevue/button';
   import Divider from '@/components/Divider.vue';
   import Navbar from '@/components/Navbar.vue';
+  import { usePopupStore } from '@/stores';
+  const popupStore = usePopupStore();
+
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+  };
 
   const store = useAuthStore();
   // get state, getter
@@ -55,6 +61,9 @@
         </select>
       </div>
       <p>{{ $t('heading', { msg: 'Viet' }) }}</p>
+    </div>
+    <div class="container mt-3 text-center">
+      <button class="btn" @click="openLoginPopup">Sign up</button>
     </div>
   </section>
 </template>
