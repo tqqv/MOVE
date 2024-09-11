@@ -19,6 +19,9 @@ var {
   verifyTokenRs,
   getProfile,
   editProfile,
+  changePassword,
+  requestChannel,
+  statusRequestChannel,
 } = require("../services/authService");
 
 // authenticate
@@ -111,6 +114,28 @@ const editProfileController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const changePasswordController = async (req, res, next) => {
+  const userId = req.user.id;
+  const data = req.body;
+  const result = await changePassword(userId, data.oldPass, data.newPass, data.confirmPass)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const requestChannelController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await requestChannel(userId);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const setStatusRqChannel = async (req, res, next) => {
+  const data = req.body;
+  const result = await statusRequestChannel(data.userId, data.status)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
 const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 
@@ -170,6 +195,9 @@ module.exports = {
   verifyTokenRsController,
   getProfileController,
   editProfileController,
+  changePasswordController,
+  requestChannelController,
+  setStatusRqChannel,
   googleLogin,
   googleCallback,
   facebookLogin,

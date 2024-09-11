@@ -7,12 +7,12 @@ module.exports = (sequelize, DataTypes) => {
         // Define relationships if necessary
         this.belongsTo(models.User, {
             foreignKey: 'userId',
-            as: 'user',
+            as: 'subscribeUser',
             onDelete: 'CASCADE',
         });
         this.belongsTo(models.Channel, {
             foreignKey: 'channelId',
-            as: 'category',
+            as: 'subscribeChannel',
             onDelete: 'CASCADE',
         });
     }
@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Subscribe",
-      tableName: "categories",
+      tableName: "subscribes",
       timestamps: true,
   });
   return Subscribe;

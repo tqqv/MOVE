@@ -10,13 +10,15 @@ const {
   resetPasswordController,
   getProfileController,
   editProfileController,
+  changePasswordController,
+  requestChannelController,
+  setStatusRqChannel,
   googleLogin,
   googleCallback,
   facebookCallback,
-  facebookLogin
-  // getTestController,
+  facebookLogin,
 } = require("../controllers/authController");
-const { verifyUser } = require("../middlewares/verifyToken");
+const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
 const authRouter = express.Router();
 
@@ -35,7 +37,11 @@ authRouter.post("/reset-password", resetPasswordController);
 authRouter.get("/getProfile", verifyUser, getProfileController)
 authRouter.put("/editProfile", verifyUser, editProfileController)
 
-// authRouter.get("/", getTestController);
+authRouter.put("/changePassword", verifyUser, changePasswordController)
+
+authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
+
+authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
 
 // SSO google
 authRouter.get("/google", googleLogin);
