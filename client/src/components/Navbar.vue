@@ -12,15 +12,19 @@
   import Avatar from 'primevue/avatar';
   import OverlayBadge from 'primevue/overlaybadge';
   import Divider from 'primevue/divider';
-
   import PopupAccount from '@components/PopupAccount.vue';
   import Notification from '@/components/notification/Notification.vue';
-
+  import Login from '@/pages/Login.vue';
   import { ref } from 'vue';
+  import { usePopupStore } from '@/stores';
+  import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
+  const popupStore = usePopupStore();
+
+  console.log(popupStore.showForgotPasswordPopup);
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -31,9 +35,12 @@
   const toogleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+  };
 </script>
 <template>
-  <nav class="bg-black text-white fixed w-full z-[99999]">
+  <nav class="bg-black text-white fixed w-full z-[100]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <!-- Mobile menu button-->
@@ -101,8 +108,8 @@
             <Button icon="pi pi-search" class="btn rounded-s-none" />
           </InputGroup>
           <!-- Guest -->
-          <!-- <Button class="btn px-[40px] text-nowrap">Log In</Button> -->
-          <h2 class="text-nowrap text_nav">Get REP$</h2>
+          <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
+          <!-- <h2 class="text-nowrap text_nav">Get REP$</h2>
 
           <div class="relative">
             <OverlayBadge
@@ -154,7 +161,7 @@
             >
               <PopupAccount />
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
     </div>
@@ -224,4 +231,6 @@
       </div>
     </div>
   </nav>
+  <Login v-model:visible="popupStore.showLoginPopup" />
+  <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
 </template>

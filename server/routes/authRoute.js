@@ -8,9 +8,17 @@ const {
   verifyTokenRsController,
   sendMailForgotPass,
   resetPasswordController,
-  // getTestController,
+  getProfileController,
+  editProfileController,
+  changePasswordController,
+  requestChannelController,
+  setStatusRqChannel,
+  googleLogin,
+  googleCallback,
+  facebookCallback,
+  facebookLogin,
 } = require("../controllers/authController");
-const { verifyUser } = require("../middlewares/verifyToken");
+const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
 const authRouter = express.Router();
 
@@ -26,6 +34,21 @@ authRouter.get("/verify-token/:token", verifyTokenRsController);
 authRouter.post("/forgot-password", sendMailForgotPass);
 authRouter.post("/reset-password", resetPasswordController);
 
-// authRouter.get("/", getTestController);
+authRouter.get("/getProfile", verifyUser, getProfileController)
+authRouter.put("/editProfile", verifyUser, editProfileController)
+
+authRouter.put("/changePassword", verifyUser, changePasswordController)
+
+authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
+
+authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
+
+// SSO google
+authRouter.get("/google", googleLogin);
+authRouter.get("/google/callback", googleCallback);
+
+// SSO facebook
+authRouter.get("/facebook", facebookLogin);
+authRouter.get("/facebook/callback", facebookCallback);
 
 module.exports = authRouter;

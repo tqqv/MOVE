@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       });
 
+      this.hasOne(models.RequestChannel, {
+        foreignKey: 'userId'
+      });
+
       // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
       this.hasMany(models.Video, {
         foreignKey: 'userId',
@@ -22,6 +26,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         as: 'followedCategories', // Alias for the categories the user follows
       });
+
+      this.belongsToMany(models.Channel, {
+        through: models.Subscribe,
+        foreignKey: 'userId',
+        as: 'userSubscribe', // Alias for the categories the user follows
+      });
     }
   }
   User.init(
@@ -33,11 +43,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       googleId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       facebookId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       username: {
@@ -50,6 +60,10 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         unique: "email",
       },
+      fullName: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
       isVerified: {
         type: DataTypes.BOOLEAN,
         allowNull: true,
@@ -57,7 +71,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       phoneNumber: {
         type: DataTypes.STRING(20),

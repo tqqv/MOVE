@@ -4,6 +4,7 @@ var cors = require("cors");
 var cookieParser = require("cookie-parser");
 const { connection } = require("./config/connectDB");
 const authRouter = require("./routes/authRoute.js");
+const channelRouter = require("./routes/channelRoute.js");
 
 dotenv.config();
 const app = express();
@@ -22,6 +23,7 @@ app.get("/", (req, res) => {
 });
 
 app.use("/api/auth", authRouter);
+app.use("/api/channel", channelRouter);
 
 // connect DB
 connection();

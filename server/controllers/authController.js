@@ -1,13 +1,27 @@
+const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
+var { login, register, generateJwtToken } = require("../services/authService");
+var { loginByGoogle } = require("../services/googleService.js");
+var { loginByFacebook } = require("../services/facebookService.js");
+var jwt = require("jsonwebtoken");
+const passport = require('passport');
+require('../utils/google/passport.js');
+require('../utils/facebook/passport.js');
+
 
 var {
   login,
   register,
-  sendMailVeriry,
+  sendMailVerify,
   verifyAccount,
   forgotPassword,
   resetPassword,
   verifyTokenRs,
+  getProfile,
+  editProfile,
+  changePassword,
+  requestChannel,
+  statusRequestChannel,
 } = require("../services/authService");
 
 // authenticate
@@ -40,13 +54,12 @@ const logoutController = async (req, res, next) => {
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
 
-
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
   const email = req.body.email;
   // console.log("controller:", email);
   const id = req.user.id;
-  const result = await sendMailVeriry(email, id);
+  const result = await sendMailVerify(email, id);
 
   responseHandler(result.status, null, result.message)(req, res, next);
 };
@@ -86,6 +99,91 @@ const resetPasswordController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
+const getProfileController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await getProfile(userId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const editProfileController = async (req, res, next) => {
+  const userId = req.user.id;
+  const data = req.body;
+  const result = await editProfile(userId, data);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const changePasswordController = async (req, res, next) => {
+  const userId = req.user.id;
+  const data = req.body;
+  const result = await changePassword(userId, data.oldPass, data.newPass, data.confirmPass)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const requestChannelController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await requestChannel(userId);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const setStatusRqChannel = async (req, res, next) => {
+  const data = req.body;
+  const result = await statusRequestChannel(data.userId, data.status)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+
+const googleCallback = (req, res, next) => {
+  passport.authenticate(
+    'google',
+    { failureRedirect: '/login', failureMessage: true },
+    async (error, user) => {
+      const loginResult = await loginByGoogle(error, user);
+
+      if (loginResult.cookie) {
+        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          httpOnly: true,
+          expires: loginResult.cookie.expires,
+        })
+      }
+      return responseHandler(
+        loginResult.status,
+        loginResult.data,
+        loginResult.message
+      )(req, res, next);
+    }
+  )(req, res, next);
+};
+const facebookLogin = passport.authenticate('facebook');
+
+const facebookCallback = (req, res, next) => {
+  passport.authenticate(
+    'facebook',
+    { failureRedirect: '/login', failureMessage: true },
+    async (error, user) => {
+      const loginResult = await loginByFacebook(error, user);
+
+      if (loginResult.cookie) {
+        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          httpOnly: true,
+          expires: loginResult.cookie.expires,
+        })
+      }
+      return responseHandler(
+        loginResult.status,
+        loginResult.data,
+        loginResult.message
+      )(req, res, next);
+    }
+  )(req, res, next);
+};
+
 module.exports = {
   loginController,
   registerController,
@@ -95,4 +193,13 @@ module.exports = {
   sendMailForgotPass,
   resetPasswordController,
   verifyTokenRsController,
+  getProfileController,
+  editProfileController,
+  changePasswordController,
+  requestChannelController,
+  setStatusRqChannel,
+  googleLogin,
+  googleCallback,
+  facebookLogin,
+  facebookCallback
 };

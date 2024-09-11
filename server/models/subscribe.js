@@ -2,22 +2,22 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Subcribe extends Model {
+  class Subscribe extends Model {
     static associate(models) {
         // Define relationships if necessary
         this.belongsTo(models.User, {
             foreignKey: 'userId',
-            as: 'user',
+            as: 'subscribeUser',
             onDelete: 'CASCADE',
         });
         this.belongsTo(models.Channel, {
             foreignKey: 'channelId',
-            as: 'category',
+            as: 'subscribeChannel',
             onDelete: 'CASCADE',
         });
     }
   }
-  Subcribe.init(
+  Subscribe.init(
     {
         userId: {
             type: DataTypes.INTEGER,
@@ -44,9 +44,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Subcribe",
-      tableName: "categories",
+      modelName: "Subscribe",
+      tableName: "subscribes",
       timestamps: true,
   });
-  return Subcribe;
+  return Subscribe;
 };

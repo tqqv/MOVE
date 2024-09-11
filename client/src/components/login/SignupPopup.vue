@@ -20,7 +20,7 @@
   const submitSignupForm = () => {};
 </script>
 <template>
-  <div class="flex flex-col items-center space-y-4">
+  <div class="items-center space-y-4">
     <button
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
@@ -37,13 +37,13 @@
       </span>
       <span class="flex-grow text-center">Sign up with Facebook</span>
     </button>
-    <div class="flex items-center w-full my-2">
+    <div class="flex items-center w-full">
       <hr class="flex-grow border-t border-[#CCCCCC]" />
       <span class="mx-2 text-gray-500">or</span>
       <hr class="flex-grow border-t border-[#CCCCCC]" />
     </div>
-    <form @submit.prevent="submitSignupForm" class="w-full mt-4 space-y-8">
-      <div class="space-y-2">
+    <form @submit.prevent="submitSignupForm" class="w-full space-y-4">
+      <div>
         <div>
           <label for="email" class="text_para">Email</label>
           <input v-model="email" type="email" class="input_custom" required />
