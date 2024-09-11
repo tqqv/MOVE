@@ -3,7 +3,21 @@ var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const { User } = db;
 var nodemailer = require("nodemailer");
-const { where } = require("sequelize");
+
+const generateJwtToken = (user) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: "15d" }
+      );
+      resolve(token);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
 
 const register = async (userData) => {
   try {
@@ -428,5 +442,5 @@ module.exports = {
   verifyTokenRs,
   getProfile,
   editProfile,
+  generateJwtToken
 };
-

@@ -10,6 +10,10 @@ const {
   resetPasswordController,
   getProfileController,
   editProfileController,
+  googleLogin,
+  googleCallback,
+  facebookCallback,
+  facebookLogin
   // getTestController,
 } = require("../controllers/authController");
 const { verifyUser } = require("../middlewares/verifyToken");
@@ -32,5 +36,13 @@ authRouter.get("/getProfile", verifyUser, getProfileController)
 authRouter.put("/editProfile", verifyUser, editProfileController)
 
 // authRouter.get("/", getTestController);
+
+// SSO google
+authRouter.get("/google", googleLogin);
+authRouter.get("/google/callback", googleCallback);
+
+// SSO facebook
+authRouter.get("/facebook", facebookLogin);
+authRouter.get("/facebook/callback", facebookCallback);
 
 module.exports = authRouter;
