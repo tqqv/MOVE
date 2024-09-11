@@ -93,8 +93,7 @@ const unSubscribeChannel = async (userId, channelId) => {
   }
 }
 
-// Function ni dùng cho API subscribeer của người khác - của mình lun cũng được
-const listSubscribe = async (channelId) => {
+const listSubscribeOfChannel = async (channelId) => {
   try {
     const subscribeed = await Subscribe.findAll({
       where: {
@@ -135,5 +134,5 @@ module.exports = {
   createChannel,
   subscribeChannel,
   unSubscribeChannel,
-  listSubscribe
+  listSubscribeOfChannel
 }

@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { listSubscribe, subscribeChannel, unSubscribeChannel } = require("../services/channelService");
+const { subscribeChannel, unSubscribeChannel, listSubscribeOfChannel } = require("../services/channelService");
 
 
 
@@ -7,7 +7,7 @@ const getListSubscribe = async(req, res, next) => {
     const channelId = req.params.channelId;
     console.log(channelId);
 
-    const result = await listSubscribe(channelId);
+    const result = await listSubscribeOfChannel(channelId);
 
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }

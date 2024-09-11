@@ -8,6 +8,6 @@ channelRouter.get("/getListFollowed/:channelId", getListSubscribe)
 
 // unsub/sub
 channelRouter.post("/subcribe", verifyUser, subChannelController)
-channelRouter.post("/subcribe", verifyUser, unSubChannelController)
+channelRouter.post("/unSubcribe", verifyUser, unSubChannelController)
 
 module.exports = channelRouter;

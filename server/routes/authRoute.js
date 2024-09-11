@@ -11,9 +11,11 @@ const {
   getProfileController,
   editProfileController,
   changePasswordController,
+  requestChannelController,
+  setStatusRqChannel,
   // getTestController,
 } = require("../controllers/authController");
-const { verifyUser } = require("../middlewares/verifyToken");
+const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
 const authRouter = express.Router();
 
@@ -34,6 +36,9 @@ authRouter.put("/editProfile", verifyUser, editProfileController)
 
 authRouter.put("/changePassword", verifyUser, changePasswordController)
 
+authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
+
+authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
 // authRouter.get("/", getTestController);
 
 module.exports = authRouter;

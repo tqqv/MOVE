@@ -11,6 +11,8 @@ var {
   getProfile,
   editProfile,
   changePassword,
+  requestChannel,
+  statusRequestChannel,
 } = require("../services/authService");
 
 // authenticate
@@ -112,6 +114,20 @@ const changePasswordController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 }
 
+const requestChannelController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await requestChannel(userId);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const setStatusRqChannel = async (req, res, next) => {
+  const data = req.body;
+  const result = await statusRequestChannel(data.userId, data.status)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
 module.exports = {
   loginController,
   registerController,
@@ -123,5 +139,7 @@ module.exports = {
   verifyTokenRsController,
   getProfileController,
   editProfileController,
-  changePasswordController
+  changePasswordController,
+  requestChannelController,
+  setStatusRqChannel
 };

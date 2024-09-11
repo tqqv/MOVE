@@ -1,9 +1,9 @@
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User } = db;
+const { User, RequestChannel } = db;
 var nodemailer = require("nodemailer");
-const { where } = require("sequelize");
+const { createChannel } = require("./channelService.js");
 
 const register = async (userData) => {
   try {
@@ -420,7 +420,7 @@ const editProfile = async (id, data) => {
 
 const changePassword = async (userId, oldPass, newPass, confirmPass) => {
   try {
-    const user = User.findByPk(userId);
+    const user = await User.findByPk(userId);
 
     if(!user) {
       return {
@@ -485,6 +485,118 @@ const changePassword = async (userId, oldPass, newPass, confirmPass) => {
   }
 }
 
+const requestChannel = async(userId) => {
+  try {
+    const user = await User.findByPk(userId)
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+
+    if(user.role !== "user") {
+      return {
+        status: 400,
+        message: "You are not a User"
+      }
+    }
+
+    const request = await RequestChannel.findOne({
+      where : {
+        userId: userId
+      }
+    })
+
+    if (request) {
+      const currentDate = new Date();
+      const createdAt = new Date(request.createdAt);
+      const daysDifference = Math.floor((currentDate.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysDifference >= 15) {
+        if (request.status === "rejected") {
+          request.status = "pending";
+          await request.save();
+
+          return {
+            status: 200,
+            message: "Create request channel successfully."
+          };
+        } else {
+          return {
+            status: 400,
+            message: "You can't send request."
+          };
+        }
+      } else {
+        return {
+          status: 400,
+          message: `Request must be older than 15 days. Please wait ${15 - daysDifference} days to send new request.`
+        };
+      }
+    }
+
+
+    await RequestChannel.create({userId: userId})
+
+    return {
+      status: 200,
+      message: "Create request channel successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
+
+const statusRequestChannel = async(userId, status) => {
+  // API của admin
+  try {
+    const request = await RequestChannel.findOne({
+      where: {
+        userId: userId
+      }
+    })
+    if(!request){
+      return {
+        status: 400,
+        message: "Request not found."
+      }
+    }
+
+    const user = await User.findByPk(userId);
+
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+
+    request.status = status;
+    await request.save()
+
+    if(status === "approved") {
+      await createChannel(userId);
+      user.role = "streamer";
+      await user.save();
+    }
+
+    return {
+      status: 200,
+      message: "Update status successfully."
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   login,
   register,
@@ -495,5 +607,7 @@ module.exports = {
   verifyTokenRs,
   getProfile,
   editProfile,
-  changePassword
+  changePassword,
+  requestChannel,
+  statusRequestChannel
 };

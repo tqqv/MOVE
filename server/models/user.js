@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       });
 
+      this.hasOne(models.RequestChannel, {
+        foreignKey: 'userId'
+      });
+
       // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
       this.hasMany(models.Video, {
         foreignKey: 'userId',
