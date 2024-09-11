@@ -11,7 +11,7 @@ const getProfile = (profile) => {
         console.log(profile)
         return {
             googleId: id,
-            name: displayName,
+            fullName: displayName,
             email,
             provider
         }
@@ -23,7 +23,7 @@ passport.use(
   new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    callbackURL: '/auth/google/callback'
+    callbackURL: '/api/auth/google/callback'
   },
   async (acceessToken, refreshToken, profile, done) => {
     try {
@@ -35,9 +35,7 @@ passport.use(
             const existingEmailAccount = await User.findOne({
                 where: {email: getProfile(profile).email}
             })
-
             if(!existingEmailAccount) {
-                const userInfo = getProfile(profile);
                 const newAccount = await User.create(getProfile(profile))
                 return done(null, newAccount)
             }

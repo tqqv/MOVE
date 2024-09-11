@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Channel, Subcribe } = db;
+const { Channel, Subscribe } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -30,7 +30,7 @@ const createChannel = async (userId) => {
 
 const followChannel = async (userId, channelId) => {
   try {
-    const subscribe = Subcribe.create({userId: userId, channelId: channelId})
+    const subscribe = Subscribe.create({userId: userId, channelId: channelId})
     if(!subscribe) {
       return {
           status: 400,
@@ -54,7 +54,7 @@ const followChannel = async (userId, channelId) => {
 
 const unFollowChannel = async (userId, channelId) => {
   try {
-    const subscribe = Subcribe.destroy({
+    const subscribe = Subscribe.destroy({
       where: {
         userId: userId,
         channelId: channelId

@@ -1,7 +1,13 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
-var { login, register } = require("../services/authService");
+var { login, register, generateJwtToken } = require("../services/authService");
+var { loginByGoogle } = require("../services/googleService.js");
+var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
+const passport = require('passport');
+require('../utils/google/passport.js');
+require('../utils/facebook/passport.js');
+
 
 var {
   login,
@@ -44,20 +50,6 @@ const logoutController = async (req, res, next) => {
   res.clearCookie("accessToken");
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
-
-const googleLogin = async(req, res, next) => {
-  if(!req.user) {
-    return responseHandler(401, null, "User was not authenticated")(req, res, next);
-  }
-  const {email} = req.user;
-  const user = await User.findOne({where: {email}})
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET_KEY,
-    { expiresIn: "15d" }
-  );
-  return res.status(200).send({token, user});
-}
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
@@ -119,11 +111,58 @@ const editProfileController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+
+const googleCallback = (req, res, next) => {
+  passport.authenticate(
+    'google',
+    { failureRedirect: '/login', failureMessage: true },
+    async (error, user) => {
+      const loginResult = await loginByGoogle(error, user);
+
+      if (loginResult.cookie) {
+        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          httpOnly: true,
+          expires: loginResult.cookie.expires,
+        })
+      }
+      return responseHandler(
+        loginResult.status,
+        loginResult.data,
+        loginResult.message
+      )(req, res, next);
+    }
+  )(req, res, next);
+};
+const facebookLogin = passport.authenticate('facebook');
+
+const facebookCallback = (req, res, next) => {
+  passport.authenticate(
+    'facebook',
+    { failureRedirect: '/login', failureMessage: true },
+    async (error, user) => {
+      const loginResult = await loginByFacebook(error, user);
+
+      if (loginResult.cookie) {
+        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          httpOnly: true,
+          expires: loginResult.cookie.expires,
+        })
+      }
+      return responseHandler(
+        loginResult.status,
+        loginResult.data,
+        loginResult.message
+      )(req, res, next);
+    }
+  )(req, res, next);
+};
+
 module.exports = {
   loginController,
   registerController,
   logoutController,
-  googleLogin,
   sendMailVerifyController,
   verifyAccountController,
   sendMailForgotPass,
@@ -131,4 +170,8 @@ module.exports = {
   verifyTokenRsController,
   getProfileController,
   editProfileController,
+  googleLogin,
+  googleCallback,
+  facebookLogin,
+  facebookCallback
 };
