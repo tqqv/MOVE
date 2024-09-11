@@ -56,6 +56,7 @@ const register = async (userData) => {
     const newUser = new User({
       email: userData.email,
       password: hash,
+      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png"
     });
 
     const savedUser = await newUser.save();
