@@ -31,14 +31,13 @@ const createChannel = async (userId) => {
 const subscribeChannel = async (userId, channelId) => {
   try {
 
-    const subscribe = Subscribe.create({userId: userId, channelId: channelId})
-
     const channel = await Channel.finOne({
       where: {
         userId: userId,
         id: channelId
       }
     })
+
     if(channel){
       return {
         status: 400,
@@ -46,6 +45,7 @@ const subscribeChannel = async (userId, channelId) => {
         message: "You can not subscribe your channel."
       }
     }
+
     const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
 
     if(!subscribe) {
