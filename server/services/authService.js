@@ -418,6 +418,73 @@ const editProfile = async (id, data) => {
   }
 }
 
+const changePassword = async (userId, oldPass, newPass, confirmPass) => {
+  try {
+    const user = User.findByPk(userId);
+
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+
+    const checkCorrectPassword = await bcrypt.compare(oldPass, user.password);
+
+    if (!checkCorrectPassword) {
+      return {
+        status: 400,
+        message: "Incorrect email or password",
+      };
+    }
+
+    const conditions = {
+      lowercase: /[a-z]/.test(newPass),
+      uppercase: /[A-Z]/.test(newPass),
+      number: /[0-9]/.test(newPass),
+      specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPass),
+      minLength: newPass.length >= 8,
+    };
+
+    if (
+      !conditions.lowercase ||
+      !conditions.uppercase ||
+      !conditions.number ||
+      !conditions.specialChar ||
+      !conditions.minLength
+    ) {
+      return {
+        status: 400,
+        message:
+          "Password must be at least 8 characters long, and include uppercase, lowercase, number, and special character",
+      };
+    }
+
+    if (newPass !== confirmPass) {
+      return {
+        status: 400,
+        message: "Check your confirm password",
+      };
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(newPass, salt);
+
+    user.password = hash;
+    await user.save();
+
+    return {
+      status: 200,
+      message: "Password updated successfully",
+    };
+  } catch (error) {
+    return {
+      status: 400,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   login,
   register,
@@ -428,5 +495,5 @@ module.exports = {
   verifyTokenRs,
   getProfile,
   editProfile,
+  changePassword
 };
-

@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       });
 
-      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)  
+      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
       this.hasMany(models.Video, {
         foreignKey: 'userId',
         as: 'userVideos', // Alias cho videos của người dùng
@@ -21,6 +21,12 @@ module.exports = (sequelize, DataTypes) => {
         through: models.CategoryFollow,
         foreignKey: 'userId',
         as: 'followedCategories', // Alias for the categories the user follows
+      });
+
+      this.belongsToMany(models.Channel, {
+        through: models.Subscribe,
+        foreignKey: 'userId',
+        as: 'userSubscribe', // Alias for the categories the user follows
       });
     }
   }

@@ -10,6 +10,7 @@ const {
   resetPasswordController,
   getProfileController,
   editProfileController,
+  changePasswordController,
   // getTestController,
 } = require("../controllers/authController");
 const { verifyUser } = require("../middlewares/verifyToken");
@@ -30,6 +31,8 @@ authRouter.post("/reset-password", resetPasswordController);
 
 authRouter.get("/getProfile", verifyUser, getProfileController)
 authRouter.put("/editProfile", verifyUser, editProfileController)
+
+authRouter.put("/changePassword", verifyUser, changePasswordController)
 
 // authRouter.get("/", getTestController);
 
