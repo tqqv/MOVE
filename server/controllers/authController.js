@@ -1,4 +1,7 @@
+const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
+var { login, register } = require("../services/authService");
+var jwt = require("jsonwebtoken");
 
 var {
   login,
@@ -42,6 +45,19 @@ const logoutController = async (req, res, next) => {
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
 
+const googleLogin = async(req, res, next) => {
+  if(!req.user) {
+    return responseHandler(401, null, "User was not authenticated")(req, res, next);
+  }
+  const {email} = req.user;
+  const user = await User.findOne({where: {email}})
+  const token = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: "15d" }
+  );
+  return res.status(200).send({token, user});
+}
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
@@ -107,6 +123,7 @@ module.exports = {
   loginController,
   registerController,
   logoutController,
+  googleLogin,
   sendMailVerifyController,
   verifyAccountController,
   sendMailForgotPass,
