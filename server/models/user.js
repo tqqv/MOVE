@@ -43,11 +43,11 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       googleId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       facebookId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       username: {
@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       fullName: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       isVerified: {
         type: DataTypes.BOOLEAN,
@@ -71,7 +71,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       password: {
         type: DataTypes.STRING(255),
-        allowNull: false,
+        allowNull: true,
       },
       phoneNumber: {
         type: DataTypes.STRING(20),

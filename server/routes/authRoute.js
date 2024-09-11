@@ -13,7 +13,10 @@ const {
   changePasswordController,
   requestChannelController,
   setStatusRqChannel,
-  // getTestController,
+  googleLogin,
+  googleCallback,
+  facebookCallback,
+  facebookLogin,
 } = require("../controllers/authController");
 const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
@@ -39,6 +42,13 @@ authRouter.put("/changePassword", verifyUser, changePasswordController)
 authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
 
 authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
-// authRouter.get("/", getTestController);
+
+// SSO google
+authRouter.get("/google", googleLogin);
+authRouter.get("/google/callback", googleCallback);
+
+// SSO facebook
+authRouter.get("/facebook", facebookLogin);
+authRouter.get("/facebook/callback", facebookCallback);
 
 module.exports = authRouter;

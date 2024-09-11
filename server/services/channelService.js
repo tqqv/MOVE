@@ -30,6 +30,9 @@ const createChannel = async (userId) => {
 
 const subscribeChannel = async (userId, channelId) => {
   try {
+
+    const subscribe = Subscribe.create({userId: userId, channelId: channelId})
+
     const channel = await Channel.finOne({
       where: {
         userId: userId,
@@ -44,6 +47,7 @@ const subscribeChannel = async (userId, channelId) => {
       }
     }
     const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
+
     if(!subscribe) {
       return {
           status: 400,
@@ -68,6 +72,7 @@ const subscribeChannel = async (userId, channelId) => {
 const unSubscribeChannel = async (userId, channelId) => {
   try {
     const subscribe = await Subscribe.destroy({
+
       where: {
         userId: userId,
         channelId: channelId

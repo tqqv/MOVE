@@ -5,6 +5,7 @@ import './style.css';
 import './custom.css';
 import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
+import ConfirmationService from 'primevue/confirmationservice';
 import App from './App.vue';
 import router from './router';
 import i18n from './i18n';
@@ -27,4 +28,6 @@ app.use(PrimeVue, {
     },
   },
 });
+app.use(ConfirmationService);
+
 app.mount('#app');

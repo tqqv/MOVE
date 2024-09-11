@@ -1,4 +1,13 @@
+const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
+var { login, register, generateJwtToken } = require("../services/authService");
+var { loginByGoogle } = require("../services/googleService.js");
+var { loginByFacebook } = require("../services/facebookService.js");
+var jwt = require("jsonwebtoken");
+const passport = require('passport');
+require('../utils/google/passport.js');
+require('../utils/facebook/passport.js');
+
 
 var {
   login,
@@ -44,7 +53,6 @@ const logoutController = async (req, res, next) => {
   res.clearCookie("accessToken");
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
-
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
@@ -128,6 +136,54 @@ const setStatusRqChannel = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 }
 
+const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
+
+
+const googleCallback = (req, res, next) => {
+  passport.authenticate(
+    'google',
+    { failureRedirect: '/login', failureMessage: true },
+    async (error, user) => {
+      const loginResult = await loginByGoogle(error, user);
+
+      if (loginResult.cookie) {
+        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          httpOnly: true,
+          expires: loginResult.cookie.expires,
+        })
+      }
+      return responseHandler(
+        loginResult.status,
+        loginResult.data,
+        loginResult.message
+      )(req, res, next);
+    }
+  )(req, res, next);
+};
+const facebookLogin = passport.authenticate('facebook');
+
+const facebookCallback = (req, res, next) => {
+  passport.authenticate(
+    'facebook',
+    { failureRedirect: '/login', failureMessage: true },
+    async (error, user) => {
+      const loginResult = await loginByFacebook(error, user);
+
+      if (loginResult.cookie) {
+        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          httpOnly: true,
+          expires: loginResult.cookie.expires,
+        })
+      }
+      return responseHandler(
+        loginResult.status,
+        loginResult.data,
+        loginResult.message
+      )(req, res, next);
+    }
+  )(req, res, next);
+};
+
 module.exports = {
   loginController,
   registerController,
@@ -141,5 +197,9 @@ module.exports = {
   editProfileController,
   changePasswordController,
   requestChannelController,
-  setStatusRqChannel
+  setStatusRqChannel,
+  googleLogin,
+  googleCallback,
+  facebookLogin,
+  facebookCallback
 };

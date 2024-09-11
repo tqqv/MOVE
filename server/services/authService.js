@@ -5,6 +5,21 @@ const { User, RequestChannel } = db;
 var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
 
+const generateJwtToken = (user) => {
+  return new Promise((resolve, reject) => {
+    try {
+      const token = jwt.sign(
+        { id: user._id, role: user.role },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: "15d" }
+      );
+      resolve(token);
+    } catch (error) {
+      reject(error);
+    }
+  });
+};
+
 const register = async (userData) => {
   try {
     const user = await User.findOne({
@@ -610,5 +625,6 @@ module.exports = {
   editProfile,
   changePassword,
   requestChannel,
-  statusRequestChannel
+  statusRequestChannel,
+  generateJwtToken,
 };

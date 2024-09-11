@@ -1,7 +1,9 @@
 <script setup>
   import { ref, computed, defineEmits } from 'vue';
   import Dialog from 'primevue/dialog';
-  const emit = defineEmits(['backToLogin']);
+  import { usePopupStore } from '@/stores';
+
+  const popupStore = usePopupStore();
   const data = {
     email: 'abc@gmail.com',
   };
@@ -33,19 +35,14 @@
       }
     }, 1000);
   };
-
-  const backToLogin = () => {
-    emit('backToLogin');
+  const backToLoginPopup = () => {
+    popupStore.closeForgotPasswordPopup();
+    popupStore.openLoginPopup();
   };
 </script>
 
 <template>
-  <Dialog
-    v-model:visible="localVisible"
-    header="Reset password"
-    :draggable="false"
-    class="w-[568px]"
-  >
+  <Dialog header="Reset password" :draggable="false" class="w-[568px]">
     <div class="space-y-4">
       <div class="space-y-2">
         <label for="email" class="text_para" :class="{ 'text-gray-500': isSubmitting }">
@@ -68,7 +65,7 @@
           <span v-else>Send password reset link</span>
         </button>
       </div>
-      <span @click="backToLogin" class="text-link text-sm cursor-pointer flex justify-center">
+      <span @click="backToLoginPopup" class="text-link text-sm cursor-pointer flex justify-center">
         Back to login page
       </span>
     </div>
