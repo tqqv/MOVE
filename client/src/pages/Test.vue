@@ -13,6 +13,9 @@
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
+  import UploadVideo from '@/components/uploadVideo/UploadVideo.vue';
+  import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
+  import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
 
   const store = useAuthStore();
   // get state, getter
@@ -20,6 +23,10 @@
 
   // get actions
   const { increment } = store;
+
+  import { ref } from 'vue';
+
+  const visible = ref(false);
 </script>
 
 <template>
@@ -65,5 +72,8 @@
     <div class="container mt-3 text-center">
       <button class="btn" @click="openLoginPopup">Sign up</button>
     </div>
+    <UploadVideo />
+    <VideoDetail />
+    <UploadVideoConfirm />
   </section>
 </template>

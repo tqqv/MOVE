@@ -15,6 +15,15 @@
   border-radius: 4px;
 }
 
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+/* Hide scrollbar for IE, Edge, and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
 .padding-nav {
   padding-top: 102px;
 }
@@ -49,3 +58,44 @@
 /* .p-tablist-tab-list {
   justify-content: center;
 } */
+
+/* dialog upload video */
+.p-fileupload-advanced .p-message {
+  margin-bottom: 36px;
+}
+.p-fileupload-advanced {
+  border-color: #13d0b4;
+}
+.p-fileupload-header {
+  display: none;
+}
+.p-fileupload-content {
+  padding: 0;
+}
+
+/* progress bar */
+.p-progressbar-value {
+  background-color: #3be0c8;
+}
+.hide-progress-value .p-progressbar-label {
+  display: none;
+}
+
+/* spinner */
+.custom-spinner {
+  padding: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #3be0c8;
+  --_m: conic-gradient(#0000 10%, #000), linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+  mask: var(--_m);
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  animation: l3 1s infinite linear;
+}
+@keyframes l3 {
+  to {
+    transform: rotate(1turn);
+  }
+}

@@ -59,13 +59,21 @@
   }
 
   .btnDisable {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px];
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-not-allowed leading-none;
   }
-  
+
   .tag {
-    @apply text-[10px] text-black font-bold px-[20px] py-[6px] rounded-xl;
+    @apply text-[11px] text-black font-bold px-[20px] py-[6px] rounded-xl bg-[#EEEEEE] cursor-pointer;
   }
-  
+
+  .tag_active {
+    @apply text-white bg-primary;
+  }
+
+  .input_custom {
+    @apply p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
+  }
+
   .input_custom {
     @apply p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
   }
