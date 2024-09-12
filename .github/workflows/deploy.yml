@@ -1,4 +1,4 @@
-name: MOVE
+name: MOVE CI/CD
 
 on:
   push:
@@ -18,9 +18,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Create config.json for Server
+      - name: Decode and Create config.json for Server
         run: |
-          printf '%s' "${{ secrets.CONFIG_JSON }}" > server/config/config.json
+          echo "${{ secrets.CONFIG_JSON }}" | base64 --decode > server/config/config.json
 
       - name: Create .env for Server
         run: |
