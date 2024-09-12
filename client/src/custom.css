@@ -33,19 +33,30 @@
   color: #13d0b4;
   border-width: 0 0 4px 0;
 }
-.p-dialog-content {
-  padding: 0 1rem 0rem 1rem;
-}
+
+/* CUSTOM DIALOG */
+
+
 .p-tabpanels {
   padding-bottom: 0;
 }
-.p-dialog-header {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
+
 .p-tablist {
   padding: 0 18px;
 }
 /* .p-tablist-tab-list {
   justify-content: center;
 } */
+
+.p-dialog-header{
+  padding: 20px 20px 5px 20px;
+}
+
+.p-dialog-title{
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.p-dialog{
+  margin: 0 12px;
+}

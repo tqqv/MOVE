@@ -1,21 +1,78 @@
 <script setup>
-  import { ref, computed, defineEmits } from 'vue';
+  import { ref, onMounted } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
+  import ChangePasswordPopup from '../changePassword/ChangePasswordPopup.vue';
+  import { usePopupStore } from '@/stores/popup.store';
+  import ChangePasswordSuccessPopup from '../changePassword/ChangePasswordSuccessPopup.vue';
+  import { fetchCountries, fetchStates } from '@/services/address';
+  import { useUserStore } from '@/stores/auth.store';
 
   const username = ref('npmh310');
   const email = ref('No found email');
   const fullname = ref('Minh Hieu');
   const gender = ref('Male');
-
+  const selectedDate = ref(new Date().toISOString().slice(0, 10));
   const setDisabledEmail = ref('true');
-  const handleSetDisabledEmail = () => {};
-
   const selectedGender = ref(gender);
 
+  const countries = ref([]);
+  const selectedCountry = ref('Vietnam');
+  const states = ref([]);
+  const selectedState = ref('');
+  const userStore = useUserStore();
+
+  // DISABLED EMAIL
+  const handleSetDisabledEmail = () => {};
+  // UPDATE GENDER
   function updateSelection(value) {
     selectedGender.value = value;
   }
+  // OPEN POPUP
+  const popupStore = usePopupStore();
+
+  const openPasswordDialog = () => {
+    popupStore.openChangePassword();
+  };
+
+  // const showDialog = ref(false);
+  // const openPasswordDialog = () => {
+  //   showDialog.value = true;
+  // };
+
+  // CALL API COUNTRY
+  const loadCountries = async () => {
+    try {
+      countries.value = await fetchCountries();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  // CALL API STATES
+  const loadStates = async (ios2) => {
+    try {
+      states.value = await fetchStates(ios2);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleCountryChange = () => {
+    if (selectedCountry.value.iso2) {
+      loadStates(selectedCountry.value.iso2);
+    }
+  };
+  onMounted(async () => {
+    await userStore.fetchUserProfile();
+    if (userStore.user) {
+      username.value = userStore.user.username || '';
+      email.value = userStore.user.email || 'No found email';
+      fullname.value = userStore.user.fullname || '';
+      gender.value = userStore.user.gender || 'Male';
+    }
+    loadCountries();
+  });
 </script>
 <template>
   <form class="my-2">
@@ -46,7 +103,7 @@
               type="email"
               :disabled="setDisabledEmail"
               class="input_custom"
-              :class="{ 'italic text-body text-[12px] md:text-[14px]': setDisabledEmail }"
+              :class="{ 'italic text-body ': setDisabledEmail }"
               required
             />
             <p
@@ -65,7 +122,11 @@
           <!--FORGOT PASSWORD  -->
           <div class="flex flex-col gap-y-1">
             <label for="password" class="text_para">Password</label>
-            <span class="text-primary cursor-pointer text-[14px] underline">Change password</span>
+            <span
+              class="text-primary cursor-pointer text-[14px] underline"
+              @click="openPasswordDialog"
+              >Change password</span
+            >
           </div>
           <!-- GENDER -->
           <div class="flex flex-col gap-y-2">
@@ -88,45 +149,31 @@
           <!-- DATE OF BIRTH -->
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
-            <div class="flex gap-x-4">
-              <select
-                name="date"
-                class="text-md flex-1 px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>31</option>
-              </select>
-              <select
-                name="month"
-                class="text-md flex-1 px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>Dec</option>
-              </select>
-              <select
-                name="year"
-                class="text-md flex-1 px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>2002</option>
-              </select>
+            <div class="flex">
+              <input
+                v-model="selectedDate"
+                class="w-full select_custom text-[14px]"
+                type="date"
+                name=""
+              />
             </div>
           </div>
           <!-- COUNTRY VS STATE -->
           <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
-            <div class="flex flex-col gap-y-2 flex-1">
-              <label for="gender" class="text_para">Country</label>
-              <select
-                name="country"
-                class="text-md px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>Vietnam</option>
+            <div class="flex flex-col gap-y-2 w-1/2">
+              <label for="gender" class="text_para">City</label>
+              <select v-model="selectedCountry" class="select_custom" @change="handleCountryChange">
+                <option v-for="country in countries" :key="country.code" :value="country">
+                  {{ country.name }}
+                </option>
               </select>
             </div>
-            <div class="flex flex-col gap-y-2 flex-1">
-              <label for="gender" class="text_para">State</label>
-              <select
-                name="country"
-                class="text-md px-1 py-1.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary"
-              >
-                <option>Quang Nam</option>
+            <div class="flex flex-col gap-y-2 w-1/2">
+              <label for="district" class="text_para">District</label>
+              <select v-model="selectedState" class="select_custom">
+                <option v-for="state in states" :key="state.code" :value="state">
+                  {{ state.name }}
+                </option>
               </select>
             </div>
           </div>
@@ -137,7 +184,9 @@
           </div>
         </div>
       </div>
-      <Button label="Save settings" class="btn w-full md:w-1/2 mt-8" />
+      <Button type="submit" label="Save settings" class="btn w-full md:w-1/2 mt-8" />
     </div>
+    <ChangePasswordPopup />
+    <ChangePasswordSuccessPopup />
   </form>
 </template>

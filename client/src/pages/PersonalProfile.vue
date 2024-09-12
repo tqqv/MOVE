@@ -1,7 +1,7 @@
 <script setup>
   import Navbar from '@/components/Navbar.vue';
   import SideBarFollow from '@/components/SideBarFollow.vue';
-  import ProfileContent from '@/components/PersonalProfile/ProfileContent.vue';
+  import ProfileContent from '@/components/personalProfile/ProfileContent.vue';
 
 </script>
 

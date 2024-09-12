@@ -61,13 +61,17 @@
   .btnDisable {
     @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px];
   }
-  
+
   .tag {
     @apply text-[10px] text-black font-bold px-[20px] py-[6px] rounded-xl;
   }
-  
+
   .input_custom {
-    @apply p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
+    @apply px-2 py-2.5 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
+  }
+
+  .select_custom {
+    @apply  flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
   }
 }
 
