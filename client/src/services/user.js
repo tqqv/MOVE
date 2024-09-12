@@ -4,4 +4,8 @@ const getProfile = () => {
   return axios.get('/auth/getProfile');
 };
 
-export { getProfile };
+const updateProfile = (data) => {
+  return axios.put('/auth/updateProfile', data);
+};
+
+export { getProfile, updateProfile };

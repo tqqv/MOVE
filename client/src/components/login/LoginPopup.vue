@@ -3,13 +3,18 @@
   import gmail from '@/components/icons/gmail.vue';
   import facebook from '@/components/icons/facebook.vue';
   import { usePopupStore } from '@/stores';
-
+  import { useAuthStore } from '@/stores';
+  import { toast } from 'vue3-toastify';
+  import axiosInstance from '@/services/axios';
+  // import { useRouter } from 'vue-router';
   const showLoginWithEmail = ref(false);
   const email = ref('');
   const password = ref('');
   const showPassword = ref(false);
 
+  const authStore = useAuthStore();
   const popupStore = usePopupStore();
+  // const router = useRouter();
   const buttonColor = computed(() => {
     return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
   });
@@ -21,8 +26,30 @@
     showLoginWithEmail.value = true;
   };
 
-  const submitLoginForm = () => {};
+  const submitLoginForm = async () => {
+    const data = {
+      email: email.value,
+      password: password.value,
+    };
 
+    try {
+      const response = await axiosInstance.post('/auth/login', data);
+      const { token, role } = response.data.data;
+
+      authStore.loginSuccess(token, role);
+      toast.success(response.data.message);
+
+      popupStore.closeLoginPopup();
+      // if (role === 'admin') {
+      //   router.push('/admin');
+      // } else {
+      //   router.push('/home');
+      // }
+    } catch (error) {
+      const message = error.response?.data?.message || error.message || 'Login failed';
+      toast.error(message);
+    }
+  };
   const openForgotPassword = () => {
     popupStore.closeLoginPopup();
     popupStore.openForgotPasswordPopup();
@@ -31,6 +58,8 @@
 
 <template>
   <div class="flex flex-col items-center space-y-4">
+    <!-- Login Google  -->
+
     <button
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
@@ -39,6 +68,8 @@
       </span>
       <span class="flex-grow text-center">Login with Google</span>
     </button>
+    <!-- Login Facebook  -->
+
     <button
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
@@ -52,7 +83,7 @@
       <span class="mx-2 text-gray-500">or</span>
       <hr class="flex-grow border-t border-[#CCCCCC]" />
     </div>
-
+    <!-- Login Email  -->
     <form v-if="showLoginWithEmail" @submit.prevent="submitLoginForm" class="w-full mt-4 space-y-4">
       <div>
         <div>
@@ -67,13 +98,13 @@
             class="p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full"
             required
           />
-          <button
+          <div
             @click="showPassword = !showPassword"
             type="button"
             class="absolute inset-y-1/2 end-0 z-20 px-3 cursor-pointer text-[#666666]"
           >
             <i :class="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-          </button>
+          </div>
         </div>
         <div>
           <span @click="openForgotPassword" class="text-link text-sm cursor-pointer"

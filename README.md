@@ -9,7 +9,7 @@
    CREATE DATABASE `move`;
 
 3. Chọn cơ sở dữ liệu:
-   USE `move`;
+   CREATE DATABASE `move`;
 
 4. Thoát mysql
 

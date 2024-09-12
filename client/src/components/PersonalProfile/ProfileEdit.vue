@@ -6,21 +6,27 @@
   import { usePopupStore } from '@/stores/popup.store';
   import ChangePasswordSuccessPopup from '../changePassword/ChangePasswordSuccessPopup.vue';
   import { fetchCountries, fetchStates } from '@/services/address';
-  import { useUserStore } from '@/stores/auth.store';
+  import { useUserStore } from '@/stores/user.store';
 
-  const username = ref('npmh310');
-  const email = ref('No found email');
-  const fullname = ref('Minh Hieu');
-  const gender = ref('Male');
+  const userStore = useUserStore();
+
+  const username = ref('');
+  const email = ref('');
+  const fullName = ref('');
+  const gender = ref('');
+  const country = ref('');
+  const state = ref('');
+  const city = ref('');
+  const avatar = ref('')
+
+
   const selectedDate = ref(new Date().toISOString().slice(0, 10));
-  const setDisabledEmail = ref('true');
   const selectedGender = ref(gender);
 
   const countries = ref([]);
-  const selectedCountry = ref('Vietnam');
+  const selectedCountry = ref(country);
   const states = ref([]);
-  const selectedState = ref('');
-  const userStore = useUserStore();
+  const selectedState = ref(state);
 
   // DISABLED EMAIL
   const handleSetDisabledEmail = () => {};
@@ -63,19 +69,25 @@
       loadStates(selectedCountry.value.iso2);
     }
   };
+
   onMounted(async () => {
     await userStore.fetchUserProfile();
+
     if (userStore.user) {
       username.value = userStore.user.username || '';
+      avatar.value = userStore.user.avatar
       email.value = userStore.user.email || 'No found email';
-      fullname.value = userStore.user.fullname || '';
+      fullName.value = userStore.user.fullName || '';
       gender.value = userStore.user.gender || 'Male';
+      country.value = userStore.user.country;
+      state.value = userStore.user.state;
+      city.value = userStore.user.city;
     }
     loadCountries();
   });
 </script>
 <template>
-  <form class="my-2">
+  <form @submit.prevent="" class="my-2">
     <div class="flex flex-col gap-y-5">
       <h1 class="font-bold">Profile picture</h1>
       <div>
@@ -101,12 +113,13 @@
             <input
               v-model="email"
               type="email"
-              :disabled="setDisabledEmail"
+              :disabled="!email"
               class="input_custom"
-              :class="{ 'italic text-body ': setDisabledEmail }"
+              :class="{ 'italic text-body ': !email }"
               required
             />
             <p
+              v-show="!email"
               @click="handleSetDisabledEmail"
               class="absolute text-[13px] right-3 top-2 mt-1 text-primary cursor-pointer"
             >
@@ -115,8 +128,8 @@
           </div>
         </div>
         <div class="flex flex-col gap-y-1">
-          <label for="fullname" class="text_para">Fullname</label>
-          <input v-model="fullname" value="" type="text" class="input_custom" required />
+          <label for="fullName" class="text_para">Full name</label>
+          <input v-model="fullName" value="" type="text" class="input_custom" required />
         </div>
         <div class="flex flex-col gap-y-6">
           <!--FORGOT PASSWORD  -->
@@ -160,7 +173,7 @@
           </div>
           <!-- COUNTRY VS STATE -->
           <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
-            <div class="flex flex-col gap-y-2 w-1/2">
+            <div class="flex flex-col gap-y-2 w-full md:w-1/2">
               <label for="gender" class="text_para">City</label>
               <select v-model="selectedCountry" class="select_custom" @change="handleCountryChange">
                 <option v-for="country in countries" :key="country.code" :value="country">
@@ -168,7 +181,7 @@
                 </option>
               </select>
             </div>
-            <div class="flex flex-col gap-y-2 w-1/2">
+            <div class="flex flex-col gap-y-2 w-full md:w-1/2">
               <label for="district" class="text_para">District</label>
               <select v-model="selectedState" class="select_custom">
                 <option v-for="state in states" :key="state.code" :value="state">

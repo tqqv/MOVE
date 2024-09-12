@@ -1,47 +1,36 @@
 import { defineStore } from 'pinia';
-import { getProfile } from '@/services/user';
+import { useUserStore } from './user.store';
 
-import { ref, computed } from 'vue';
-const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
+import Cookies from 'js-cookie';
 
-export const useAuthStore = defineStore('auth', () => {
-  // State
-  const count = ref(0);
-  const name = ref('Vit');
-
-  // Getter
-  const doubleCount = computed(() => count.value * 2);
-
-  // actions
-  function increment() {
-    count.value++;
-  }
-
-  return { count, name, doubleCount, increment };
-});
-
-export const useUserStore = defineStore('user', {
+export const useAuthStore = defineStore('auth', {
   state: () => ({
-    user: null,
-    isLogin: false,
-    loading: false,
-    error: null,
+    role: Cookies.get('role') || null,
+    token: Cookies.get('token') || null,
   }),
   actions: {
-    async fetchUserProfile() {
-      this.loading = true;
-      try {
-        const response = await getProfile();
-        if (response.data.success) {
-          this.user = response.data.data;
-        } else {
-          throw new Error('Invalid token');
-        }
-      } catch (error) {
-        this.error = error.message;
-      } finally {
-        this.loading = false;
-      }
+    loginStart() {
+      this.role = null;
+      this.token = null;
+    },
+    loginSuccess(token, role) {
+      this.token = token;
+      this.role = role;
+
+      Cookies.set('token', token, { expires: 7 });
+      Cookies.set('role', role, { expires: 7 });
+      const userStore = useUserStore();
+      userStore.fetchUserProfile();
+      console.log('token', token);
+    },
+    logout() {
+      this.role = null;
+      this.token = null;
+
+      Cookies.remove('token');
+      Cookies.remove('role');
+      const userStore = useUserStore();
+      userStore.clearUserData();
     },
   },
 });
