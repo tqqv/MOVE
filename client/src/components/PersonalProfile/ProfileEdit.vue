@@ -2,9 +2,9 @@
   import { ref, computed, defineEmits } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
-  import ChangePasswordPopup from '../ChangePassword/ChangePasswordPopup.vue';
+  import ChangePasswordPopup from '../changePassword/ChangePasswordPopup.vue';
   import { usePopupStore } from '@/stores/popup.store';
-  import ChangePasswordSuccessPopup from '../ChangePassword/ChangePasswordSuccessPopup.vue';
+  import ChangePasswordSuccessPopup from '../changePassword/ChangePasswordSuccessPopup.vue';
 
   const username = ref('npmh310');
   const email = ref('No found email');
