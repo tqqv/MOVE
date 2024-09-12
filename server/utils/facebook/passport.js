@@ -19,25 +19,20 @@ passport.use(
     callbackURL: '/api/auth/facebook/callback'
   },
   async (acceessToken, refreshToken, profile, done) => {
-    try {
+        const {...accountInfor} = getProfile(profile)
         const existingFacebookAccount = await User.findOne({
-            where: {facebookId: profile.id},
+          where: {facebookId: profile.id},
         })
-
-        if(!existingFacebookAccount) {
-          const existingFacebookAccount = await User.findOne({
-              where: {facebookId: getProfile(profile).facebookId}
-          })
-          if(!existingFacebookAccount) {
-              const newAccount = await User.create(getProfile(profile))
-              return done(null, newAccount)
+        if(existingFacebookAccount) {
+          return done(null, existingFacebookAccount)
+        } else {
+          if(!accountInfor.email) {
+            return done(null, accountInfor)
+          } else {
+            const newAccount = await User.create(getProfile(profile))
+            return done(null, newAccount)
           }
-          return done(null, existingEmailAccount)
-      }
-      return done(null, existingFacebookAccount)
-    } catch (error) {
-        throw new Error(error)
-    }
+        }
   })
 );
 

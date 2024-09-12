@@ -1,6 +1,6 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
-var { login, register, generateJwtToken } = require("../services/authService");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
@@ -139,7 +139,7 @@ const setStatusRqChannel = async (req, res, next) => {
 const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
 
 
-const googleCallback = (req, res, next) => {
+const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
     { failureRedirect: '/login', failureMessage: true },
@@ -160,6 +160,7 @@ const googleCallback = (req, res, next) => {
     }
   )(req, res, next);
 };
+// facebook
 const facebookLogin = passport.authenticate('facebook');
 
 const facebookCallback = (req, res, next) => {
@@ -167,22 +168,53 @@ const facebookCallback = (req, res, next) => {
     'facebook',
     { failureRedirect: '/login', failureMessage: true },
     async (error, user) => {
-      const loginResult = await loginByFacebook(error, user);
-
-      if (loginResult.cookie) {
-        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
-          httpOnly: true,
-          expires: loginResult.cookie.expires,
-        })
-      }
+      if(!user.email) {
+        return responseHandler(
+          401,
+          user,
+          "No email exist with the facebook account"
+        )(req, res, next);
+      } else {
+        const loginResult = await loginByFacebook(error, user);
+        if (loginResult.cookie) {
+          res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+            httpOnly: true,
+            expires: loginResult.cookie.expires,
+          })
+        }
       return responseHandler(
         loginResult.status,
         loginResult.data,
         loginResult.message
       )(req, res, next);
     }
-  )(req, res, next);
+  }
+)(req, res, next);
 };
+
+// facebook verify account
+const sendMailVerifyFacebookController = async (req, res, next) => {
+  const email = req.body.email;
+  const fullName = req.body.displayName;
+  const result = await sendMailVerifyFacebook(email, fullName );
+  if (result.cookie) {
+    res.cookie(result.cookie.cookieName, result.cookie.token);
+  }
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
+
+const verifyAccountFacebookController = async (req, res, next) => {
+  const { token } = req.params;
+  const accountInfor = req.body;
+  const result = await verifyAccountFacebook(accountInfor, token);
+  if (result.cookie) {
+    res.cookie(result.cookie.cookieName, result.cookie.token);
+  }
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
+
 
 module.exports = {
   loginController,
@@ -199,7 +231,9 @@ module.exports = {
   requestChannelController,
   setStatusRqChannel,
   googleLogin,
-  googleCallback,
+  googleCallbackController,
   facebookLogin,
-  facebookCallback
+  facebookCallback,
+  sendMailVerifyFacebookController,
+  verifyAccountFacebookController
 };

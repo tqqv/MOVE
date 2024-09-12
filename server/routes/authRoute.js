@@ -14,9 +14,11 @@ const {
   requestChannelController,
   setStatusRqChannel,
   googleLogin,
-  googleCallback,
+  googleCallbackController,
   facebookCallback,
   facebookLogin,
+  sendMailVerifyFacebookController,
+  verifyAccountFacebookController,
 } = require("../controllers/authController");
 const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
@@ -45,10 +47,12 @@ authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
 
 // SSO google
 authRouter.get("/google", googleLogin);
-authRouter.get("/google/callback", googleCallback);
+authRouter.get("/google/callback", googleCallbackController);
 
 // SSO facebook
 authRouter.get("/facebook", facebookLogin);
 authRouter.get("/facebook/callback", facebookCallback);
+authRouter.post("/facebook/mail-verify", sendMailVerifyFacebookController);
+authRouter.post("/facebook/verify-account/:token", verifyAccountFacebookController);
 
 module.exports = authRouter;

@@ -14,7 +14,6 @@ const loginByGoogle = async (error, user) => {
       message: "User not found",
     };
   }
-
   try {
     const token = await generateJwtToken(user);
     return {
