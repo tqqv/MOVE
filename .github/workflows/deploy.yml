@@ -30,7 +30,13 @@ jobs:
         run: |
           cd server
           npm install
+
+      - name: Run Migrations
+        run: |
+          cd server
           npx sequelize-cli db:migrate
+          npx sequelize-cli --help
+          npx sequelize-cli db:migrate --debug
           pm2 restart
 
       - name: Create .env for Client
