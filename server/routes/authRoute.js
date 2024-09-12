@@ -10,13 +10,17 @@ const {
   resetPasswordController,
   getProfileController,
   editProfileController,
+  changePasswordController,
+  requestChannelController,
+  setStatusRqChannel,
   googleLogin,
-  googleCallback,
+  googleCallbackController,
   facebookCallback,
-  facebookLogin
-  // getTestController,
+  facebookLogin,
+  sendMailVerifyFacebookController,
+  verifyAccountFacebookController,
 } = require("../controllers/authController");
-const { verifyUser } = require("../middlewares/verifyToken");
+const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
 const authRouter = express.Router();
 
@@ -35,14 +39,20 @@ authRouter.post("/reset-password", resetPasswordController);
 authRouter.get("/getProfile", verifyUser, getProfileController)
 authRouter.put("/editProfile", verifyUser, editProfileController)
 
-// authRouter.get("/", getTestController);
+authRouter.put("/changePassword", verifyUser, changePasswordController)
+
+authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
+
+authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
 
 // SSO google
 authRouter.get("/google", googleLogin);
-authRouter.get("/google/callback", googleCallback);
+authRouter.get("/google/callback", googleCallbackController);
 
 // SSO facebook
 authRouter.get("/facebook", facebookLogin);
 authRouter.get("/facebook/callback", facebookCallback);
+authRouter.post("/facebook/mail-verify", sendMailVerifyFacebookController);
+authRouter.post("/facebook/verify-account/:token", verifyAccountFacebookController);
 
 module.exports = authRouter;

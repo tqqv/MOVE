@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Channel, Subscribe } = db;
+const { Channel, Subscribe, User } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -28,10 +28,8 @@ const createChannel = async (userId) => {
   }
 }
 
-const followChannel = async (userId, channelId) => {
+const subscribeChannel = async (userId, channelId) => {
   try {
-
-    const subscribe = Subscribe.create({userId: userId, channelId: channelId})
 
     const channel = await Channel.finOne({
       where: {
@@ -39,37 +37,39 @@ const followChannel = async (userId, channelId) => {
         id: channelId
       }
     })
+
     if(channel){
       return {
         status: 400,
         data: null,
-        message: "You can not follow your channel."
+        message: "You can not subscribe your channel."
       }
     }
+
     const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
 
     if(!subscribe) {
       return {
           status: 400,
           data: subscribe,
-          message: "You follow failed."
+          message: "You subscribe failed."
       }
     }
     return {
       status: 200,
       data: null,
-      message: "Follow successful."
+      message: "Subscribe successful."
     }
   } catch (error) {
     return {
-      status: 200,
+      status: 400,
       data: null,
       message: error.message
     }
   }
 }
 
-const unFollowChannel = async (userId, channelId) => {
+const unSubscribeChannel = async (userId, channelId) => {
   try {
     const subscribe = await Subscribe.destroy({
 
@@ -81,56 +81,63 @@ const unFollowChannel = async (userId, channelId) => {
       return {
           status: 400,
           data: subscribe,
-          message: "You unfollow failed."
+          message: "You unsubscribe failed."
       }
     }
     return {
       status: 200,
       data: null,
-      message: "Unfollow successful."
+      message: "Unsubscribe successful."
     }
   } catch (error) {
     return {
-      status: 200,
+      status: 400,
       data: null,
       message: error.message
     }
   }
 }
 
-const listFollowed = async (channelId) => {
+const listSubscribeOfChannel = async (channelId) => {
   try {
-    const followed = await Subscribe.findAll({
+    const subscribeed = await Subscribe.findAll({
       where: {
         channelId: channelId,
       },
       include: [
         {
           model: User,
-          as: 'subscriber', // alias này phải đúng theo thiết kế quan hệ Sequelize
-          attributes: ['username', 'avatar'], // Lấy thông tin subscriber
-          required: true,
+          as: 'subscribeUser',
+          attributes: ['username', 'avatar', 'role'],
+          // required: true,
           include: [
             {
               model: Channel,
-              as: 'channel', // alias này phải đúng theo thiết kế quan hệ Sequelize
-              attributes: ['avatar', 'channelName'],
-              where: {
-                role: 'streamer',
-              },
-              required: false, // Sử dụng LEFT JOIN, chỉ lấy thông tin nếu user là streamer
-            },
-          ],
+              attributes: ['channelName', 'avatar'],
+              // required: false
+            }
+          ]
         },
       ],
     });
-  } catch (error) {
 
+    return {
+      status: 200,
+      data: subscribeed,
+      message: "Get list subscribeed successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
   }
 }
 
 module.exports = {
   createChannel,
-  followChannel,
-  unFollowChannel,
+  subscribeChannel,
+  unSubscribeChannel,
+  listSubscribeOfChannel
 }

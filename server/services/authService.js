@@ -1,8 +1,10 @@
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User } = db;
+const { User, RequestChannel } = db;
 var nodemailer = require("nodemailer");
+const { createChannel } = require("./channelService.js");
+const { randomFixedInteger } = require("../utils/generator.js");
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -70,6 +72,7 @@ const register = async (userData) => {
     const newUser = new User({
       email: userData.email,
       password: hash,
+      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png"
     });
 
     const savedUser = await newUser.save();
@@ -161,6 +164,12 @@ const transporter = nodemailer.createTransport({
 const generateVerificationToken = (userId, email) => {
   return jwt.sign({ userId, email }, process.env.JWT_SECRET_KEY, {
     expiresIn: "15m",
+  });
+};
+
+const generateDigitCodeToken = (code, email) => {
+  return jwt.sign({ code, email }, process.env.JWT_SECRET_KEY, {
+    expiresIn: "5m",
   });
 };
 // setup mail and generate token - END
@@ -432,6 +441,274 @@ const editProfile = async (id, data) => {
   }
 }
 
+const changePassword = async (userId, oldPass, newPass, confirmPass) => {
+  try {
+    const user = await User.findByPk(userId);
+
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+
+    const checkCorrectPassword = await bcrypt.compare(oldPass, user.password);
+
+    if (!checkCorrectPassword) {
+      return {
+        status: 400,
+        message: "Incorrect email or password",
+      };
+    }
+
+    const conditions = {
+      lowercase: /[a-z]/.test(newPass),
+      uppercase: /[A-Z]/.test(newPass),
+      number: /[0-9]/.test(newPass),
+      specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPass),
+      minLength: newPass.length >= 8,
+    };
+
+    if (
+      !conditions.lowercase ||
+      !conditions.uppercase ||
+      !conditions.number ||
+      !conditions.specialChar ||
+      !conditions.minLength
+    ) {
+      return {
+        status: 400,
+        message:
+          "Password must be at least 8 characters long, and include uppercase, lowercase, number, and special character",
+      };
+    }
+
+    if (newPass !== confirmPass) {
+      return {
+        status: 400,
+        message: "Check your confirm password",
+      };
+    }
+
+    const salt = bcrypt.genSaltSync(10);
+    const hash = bcrypt.hashSync(newPass, salt);
+
+    user.password = hash;
+    await user.save();
+
+    return {
+      status: 200,
+      message: "Password updated successfully",
+    };
+  } catch (error) {
+    return {
+      status: 400,
+      message: error.message
+    }
+  }
+}
+
+const requestChannel = async(userId) => {
+  try {
+    const user = await User.findByPk(userId)
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+
+    if(user.role !== "user") {
+      return {
+        status: 400,
+        message: "You are not a User"
+      }
+    }
+
+    const request = await RequestChannel.findOne({
+      where : {
+        userId: userId
+      }
+    })
+
+    if (request) {
+      const currentDate = new Date();
+      const createdAt = new Date(request.createdAt);
+      const daysDifference = Math.floor((currentDate.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
+
+      if (daysDifference >= 15) {
+        if (request.status === "rejected") {
+          request.status = "pending";
+          await request.save();
+
+          return {
+            status: 200,
+            message: "Create request channel successfully."
+          };
+        } else {
+          return {
+            status: 400,
+            message: "You can't send request."
+          };
+        }
+      } else {
+        return {
+          status: 400,
+          message: `Request must be older than 15 days. Please wait ${15 - daysDifference} days to send new request.`
+        };
+      }
+    }
+
+
+    await RequestChannel.create({userId: userId})
+
+    return {
+      status: 200,
+      message: "Create request channel successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
+
+const statusRequestChannel = async(userId, status) => {
+  // API của admin
+  try {
+    const request = await RequestChannel.findOne({
+      where: {
+        userId: userId
+      }
+    })
+    if(!request){
+      return {
+        status: 400,
+        message: "Request not found."
+      }
+    }
+
+    const user = await User.findByPk(userId);
+
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found"
+      }
+    }
+
+    request.status = status;
+    await request.save()
+
+    if(status === "approved") {
+      await createChannel(userId);
+      user.role = "streamer";
+      await user.save();
+    }
+
+    return {
+      status: 200,
+      message: "Update status successfully."
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
+
+// Facebook send mail and verify account - START
+const sendMailVerifyFacebook = async (email, fullName) => {
+  try {
+    // generate secret 6 digit - then store in token,
+    const sixDigitCode = randomFixedInteger(6)
+    const verificationToken =  generateDigitCodeToken(sixDigitCode, email);
+    console.log("6 - digit code: ", sixDigitCode)
+    // const verificationToken = generateVerificationTokenFacebook(facebookId, email, fullName);
+    const mailOptions = {
+      from: `"MOVE ADMIN" <duyan3k@gmail.com>`,
+      to: email,
+      subject: "Email Verification With MOVE Login By Facebook",
+      html: `
+        <h2 style="color: #04ddb2;">Confirmation code</h2>
+        <p>Dear ${fullName},</p>
+        <p>Here is your 6-digit code: ${sixDigitCode} </p>
+        <p>Thank you,<br> Move Team</p>
+      `,
+    };
+
+    // Gửi email
+    await transporter.sendMail(mailOptions);
+
+    return {
+      cookie: {
+        cookieName: "digitVerificationToken",
+        token: verificationToken,
+        expires: verificationToken.expiresIn,
+      },
+      status: 200,
+      message: "Verification email sent successfully",
+    };
+  } catch (error) {
+    console.error("Send verification email error:", error);
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+};
+
+const verifyAccountFacebook = async (accountInfor, token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const isValid = (accountInfor.code == decoded.code) && (accountInfor.email == decoded.email);
+    const existEmailAccount = await User.findOne({ where: { email: accountInfor.email } });
+    // Check if the email already exists
+    if (existEmailAccount) {
+      return {
+        status: 400,
+        message: "Email already exists",
+      };
+    } else if (isValid) {
+        const user = await User.create(accountInfor)
+        const token = jwt.sign(
+          { id: user.id, role: user.role },
+          process.env.JWT_SECRET_KEY,
+          { expiresIn: "15d" }
+        );
+        return {
+          cookie: {
+            cookieName: "accessToken",
+            token: token,
+            expires: token.expiresIn,
+          },
+          status: 200,
+          message: "Email verified successfully",
+        };
+    } else if (!isValid) {
+      return {
+        status: 400,
+        message: "Invalid 6-digit code or Email",
+      };
+    }
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return {
+        status: 400,
+        message: "Invalid or expired token",
+      };
+    }
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+};
+//// Send mail and verify account - END
+
 module.exports = {
   login,
   register,
@@ -442,5 +719,10 @@ module.exports = {
   verifyTokenRs,
   getProfile,
   editProfile,
-  generateJwtToken
+  changePassword,
+  requestChannel,
+  statusRequestChannel,
+  generateJwtToken,
+  sendMailVerifyFacebook,
+  verifyAccountFacebook
 };
