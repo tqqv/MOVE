@@ -20,8 +20,6 @@
     tabStore.setActiveTab(event.value);
   };
   const activeTab = computed(() => tabStore.activeTab);
-
-  console.log(tabStore.activeTab);
 </script>
 
 <template>

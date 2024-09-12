@@ -8,10 +8,13 @@
   import Divider from '@/components/Divider.vue';
   import Navbar from '@/components/Navbar.vue';
   import { usePopupStore } from '@/stores';
+  import { toast } from 'vue3-toastify';
+
   const popupStore = usePopupStore();
 
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
+    toast.success('Wow so easy!');
   };
   import UploadVideo from '@/components/uploadVideo/UploadVideo.vue';
   import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';

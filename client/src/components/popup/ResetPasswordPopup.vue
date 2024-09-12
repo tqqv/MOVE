@@ -63,13 +63,13 @@
                 class="input_custom"
                 required
               />
-              <button
+              <div
                 @click="togglePasswordVisibility('password')"
                 type="button"
                 class="absolute inset-y-1/2 end-0 z-20 px-3 cursor-pointer text-[#666666]"
               >
                 <i :class="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-              </button>
+              </div>
             </div>
 
             <div class="relative">
@@ -80,13 +80,13 @@
                 class="input_custom"
                 required
               />
-              <button
+              <div
                 @click="togglePasswordVisibility('confirmPassword')"
                 type="button"
                 class="absolute inset-y-1/2 end-0 z-20 px-3 cursor-pointer text-[#666666]"
               >
                 <i :class="showConfirmPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-              </button>
+              </div>
             </div>
           </div>
           <div class="flex justify-center">

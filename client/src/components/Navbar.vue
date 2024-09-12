@@ -1,11 +1,14 @@
 <script setup>
+  import { ref, onMounted, onBeforeUnmount } from 'vue';
+
   import logo from '@assets/logo.svg';
 
   import verified from '@icons/verified.vue';
   import notification from '@icons/notification.vue';
   import upload from '@icons/upload.vue';
   import rep from '@icons/rep.vue';
-
+  import { toast } from 'vue3-toastify';
+  import axiosInstance from '@/services/axios';
   import InputGroup from 'primevue/inputgroup';
   import InputText from 'primevue/inputtext';
   import Button from 'primevue/button';
@@ -15,16 +18,16 @@
   import PopupAccount from '@components/PopupAccount.vue';
   import Notification from '@/components/notification/Notification.vue';
   import Login from '@/pages/Login.vue';
-  import { ref } from 'vue';
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
+  import { useAuthStore } from '@/stores';
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const popupStore = usePopupStore();
-
-  console.log(popupStore.showForgotPasswordPopup);
+  const authStore = useAuthStore();
+  const user = ref(null);
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -32,12 +35,47 @@
   const toggleUserMenu = () => {
     isUserMenuOpen.value = !isUserMenuOpen.value;
   };
+
   const toogleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
+  const handleClickOutside = (event) => {
+    const userMenuButton = document.getElementById('user-menu-button');
+    const userNotiButton = document.getElementById('noti-menu-button');
+
+    if (userMenuButton && !userMenuButton.contains(event.target)) {
+      isUserMenuOpen.value = false;
+    }
+    if (userNotiButton && !userNotiButton.contains(event.target)) {
+      isNotiMenuOpen.value = false;
+    }
+  };
+  const fetchUserProfile = async () => {
+    if (!authStore.token) return;
+    try {
+      const response = await axiosInstance.get('/auth/getProfile');
+      user.value = response.data.data;
+    } catch (error) {
+      toast.error('Failed to load profile');
+    }
+  };
+  onMounted(() => {
+    if (authStore.token) {
+      fetchUserProfile();
+    }
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
 </script>
 <template>
   <nav class="bg-black text-white fixed w-full z-[100]">
@@ -87,10 +125,15 @@
         <div class="flex items-center justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
-              <a href="#" class="rounded-md bg-gray-900 px-3 py-2 text_nav" aria-current="page"
+              <a
+                href="#"
+                class="rounded-md bg-gray-900 px-3 py-2 text_nav font-bold"
+                aria-current="page"
                 >Following</a
               >
-              <a href="#" class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-gray-700"
+              <a
+                href="#"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-gray-700 font-bold"
                 >Browse</a
               >
             </div>
@@ -108,60 +151,65 @@
             <Button icon="pi pi-search" class="btn rounded-s-none" />
           </InputGroup>
           <!-- Guest -->
-          <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
-          <!-- <h2 class="text-nowrap text_nav">Get REP$</h2>
+          <template v-if="!authStore.token">
+            <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
+          </template>
 
-          <div class="relative">
-            <OverlayBadge
-              value="4"
-              severity="danger"
-              class="inline-flex cursor-pointer"
-              size="small"
-              id="noti-menu-button"
-              @click="toogleNotiMenu"
-            >
-              <notification fill="fill-white" class="scale-110" />
-            </OverlayBadge>
-            <div
-              v-if="isNotiMenuOpen"
-              class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="noti-menu-button"
-              tabindex="-1"
-            >
-              <Notification @toogleNotiMenu="toogleNotiMenu" />
-            </div>
-          </div>
-          <div class="relative">
-            <div>
-              <button
-                @click="toggleUserMenu"
-                type="button"
-                class="relative size-[40px] flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-                id="user-menu-button"
-                aria-expanded="false"
-                aria-haspopup="true"
+          <!-- User -->
+          <template v-else
+            ><h2 class="text-nowrap text_nav font-bold">Get REP$</h2>
+
+            <div class="relative">
+              <OverlayBadge
+                value="4"
+                severity="danger"
+                class="inline-flex cursor-pointer"
+                size="small"
+                id="noti-menu-button"
+                @click="toogleNotiMenu"
               >
-                <span class="sr-only">Open user menu</span>
-                <img
-                  class="size-[40px] rounded-full"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
-              </button>
+                <notification fill="fill-white" class="scale-110" />
+              </OverlayBadge>
+              <div
+                v-if="isNotiMenuOpen"
+                class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="noti-menu-button"
+                tabindex="-1"
+              >
+                <Notification @toogleNotiMenu="toogleNotiMenu" />
+              </div>
             </div>
-            <div
-              v-if="isUserMenuOpen"
-              class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
-              role="menu"
-              aria-orientation="vertical"
-              aria-labelledby="user-menu-button"
-              tabindex="-1"
-            >
-              <PopupAccount />
-            </div>
-          </div> -->
+            <div class="relative">
+              <div>
+                <button
+                  @click="toggleUserMenu"
+                  type="button"
+                  class="relative size-[40px] flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+                  id="user-menu-button"
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                >
+                  <span class="sr-only">Open user menu</span>
+                  <img
+                    class="size-[40px] rounded-full"
+                    :src="user?.avatar"
+                    :alt="user?.username || 'User'"
+                  />
+                </button>
+              </div>
+              <div
+                v-if="isUserMenuOpen"
+                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="user-menu-button"
+                tabindex="-1"
+              >
+                <PopupAccount :user="user" />
+              </div></div
+          ></template>
         </div>
       </div>
     </div>

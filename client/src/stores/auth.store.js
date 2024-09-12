@@ -1,19 +1,30 @@
 import { defineStore } from 'pinia';
-import { ref, computed } from 'vue';
-const baseUrl = `${import.meta.env.VITE_API_URL}/users`;
+import Cookies from 'js-cookie';
 
-export const useAuthStore = defineStore('auth', () => {
-  // State
-  const count = ref(0);
-  const name = ref('Vit');
+export const useAuthStore = defineStore('auth', {
+  state: () => ({
+    role: Cookies.get('role') || null,
+    token: Cookies.get('token') || null,
+  }),
+  actions: {
+    loginStart() {
+      this.role = null;
+      this.token = null;
+    },
+    loginSuccess(token, role) {
+      this.token = token;
+      this.role = role;
 
-  // Getter
-  const doubleCount = computed(() => count.value * 2);
+      Cookies.set('token', token, { expires: 7 });
+      Cookies.set('role', role, { expires: 7 });
+      console.log('token', token);
+    },
+    logout() {
+      this.role = null;
+      this.token = null;
 
-  // actions
-  function increment() {
-    count.value++;
-  }
-
-  return { count, name, doubleCount, increment };
+      Cookies.remove('token');
+      Cookies.remove('role');
+    },
+  },
 });
