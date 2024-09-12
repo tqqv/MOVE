@@ -12,17 +12,37 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: |
+
+      - name: Create config.json for Server
+        run: |
+          echo "${{ secrets.CONFIG_JSON }}" > server/config/config.json
+
+      - name: Create .env for Server
+        run: |
+          echo "${{ secrets.SERVER_ENV }}" > server/.env
+
+      - name: Install Server dependencies and run migrations
+        run: |
           cd server
-          npm i
+          npm install
           npx sequelize-cli db:migrate
           pm2 restart
-          cd ..
+
+      - name: Create .env for Client
+        run: |
+          echo "${{ secrets.CLIENT_ENV }}" > client/.env
+
+      - name: Install Client dependencies and build
+        run: |
           cd client
-          npm i
+          npm install
           npm run build
+
+      - name: Reload Nginx
+        run: |
           sudo service nginx reload
