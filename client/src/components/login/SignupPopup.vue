@@ -2,9 +2,12 @@
   import { ref, computed } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
   import facebook from '@/components/icons/facebook.vue';
+  import axiosInstance from '@/services/axios';
+  import { toast } from 'vue3-toastify';
 
   const email = ref('');
   const password = ref('');
+  const referralCode = ref('');
   const confirmPassword = ref('');
   const showPassword = ref(false);
   const showConfirmPassword = ref(false);
@@ -17,7 +20,25 @@
     return !(email.value.trim() && password.value.trim());
   });
 
-  const submitSignupForm = () => {};
+  const submitSignupForm = async () => {
+    if (password.value !== confirmPassword.value) {
+      toast.error('Passwords do not match!');
+
+      return;
+    }
+    const data = {
+      email: email.value,
+      password: password.value,
+      referralCode: referralCode.value,
+    };
+    try {
+      const response = await axiosInstance.post('/auth/register', data);
+      console.log('Signup success:', response.data);
+      toast.success(response.data.message || 'Signup successful!');
+    } catch (error) {
+      toast.error(error.response?.data.message || 'Signup failed');
+    }
+  };
 </script>
 <template>
   <div class="items-center space-y-4">
@@ -56,13 +77,13 @@
             class="p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full"
             required
           />
-          <button
+          <div
             @click="showPassword = !showPassword"
             type="button"
             class="absolute inset-y-1/2 end-0 z-20 px-3 cursor-pointer text-[#666666]"
           >
             <i :class="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-          </button>
+          </div>
         </div>
         <div class="relative">
           <label for="confirmPassword" class="text_para">Confirm Password</label>
@@ -72,17 +93,17 @@
             class="p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full"
             required
           />
-          <button
+          <div
             @click="showConfirmPassword = !showConfirmPassword"
             type="button"
             class="absolute inset-y-1/2 end-0 z-20 px-3 cursor-pointer text-[#666666]"
           >
             <i :class="showConfirmPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-          </button>
+          </div>
         </div>
         <div>
           <label for="code" class="text_para">Referral code (<em>Optional</em>)</label>
-          <input v-model="email" type="number" class="input_custom" />
+          <input v-model="referralCode" type="number" class="input_custom" />
         </div>
         <div>
           <span class="text-sm text-[#777777]"

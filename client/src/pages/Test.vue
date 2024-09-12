@@ -8,10 +8,13 @@
   import Divider from '@/components/Divider.vue';
   import Navbar from '@/components/Navbar.vue';
   import { usePopupStore } from '@/stores';
+  import { toast } from 'vue3-toastify';
+
   const popupStore = usePopupStore();
 
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
+    toast.success('Wow so easy!');
   };
 
   const store = useAuthStore();
