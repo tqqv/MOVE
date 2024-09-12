@@ -1,0 +1,33 @@
+name: MOVE CI/CD
+
+on:
+  push:
+    branches: ["test"]
+  pull_request:
+    branches: ["test"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: "npm"
+      - run: |
+          cd server
+          npm i
+          npx sequelize-cli db:migrate
+          pm2 restart
+          cd ..
+          cd client
+          npm i
+          npm run build
+          sudo service nginx reload
