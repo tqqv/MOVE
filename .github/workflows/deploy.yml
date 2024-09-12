@@ -1,4 +1,4 @@
-name: MOVE CI/CD
+name: MOVE
 
 on:
   push:
