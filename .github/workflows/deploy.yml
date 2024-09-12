@@ -20,7 +20,7 @@ jobs:
 
       - name: Create config.json for Server
         run: |
-          echo "${{ secrets.CONFIG_JSON }}" > server/config/config.json
+          printf '%s' "${{ secrets.CONFIG_JSON }}" > server/config/config.json
 
       - name: Create .env for Server
         run: |
