@@ -4,6 +4,7 @@ const db = require("../models/index.js");
 const { User, RequestChannel } = db;
 var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
+const { randomFixedInteger } = require("../utils/generator.js");
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -163,6 +164,12 @@ const transporter = nodemailer.createTransport({
 const generateVerificationToken = (userId, email) => {
   return jwt.sign({ userId, email }, process.env.JWT_SECRET_KEY, {
     expiresIn: "15m",
+  });
+};
+
+const generateDigitCodeToken = (code, email) => {
+  return jwt.sign({ code, email }, process.env.JWT_SECRET_KEY, {
+    expiresIn: "5m",
   });
 };
 // setup mail and generate token - END
@@ -613,6 +620,85 @@ const statusRequestChannel = async(userId, status) => {
   }
 }
 
+// Facebook send mail and verify account - START
+const sendMailVerifyFacebook = async (email, fullName) => {
+  try {
+    // generate secret 6 digit - then store in token,
+    const sixDigitCode = randomFixedInteger(6)
+    const verificationToken =  generateDigitCodeToken(sixDigitCode, email);
+    console.log("6 - digit code: ", sixDigitCode)
+    // const verificationToken = generateVerificationTokenFacebook(facebookId, email, fullName);
+    const mailOptions = {
+      from: `"MOVE ADMIN" <duyan3k@gmail.com>`,
+      to: email,
+      subject: "Email Verification With MOVE Login By Facebook",
+      html: `
+        <h2 style="color: #04ddb2;">Confirmation code</h2>
+        <p>Dear ${fullName},</p>
+        <p>Here is your 6-digit code: ${sixDigitCode} </p>
+        <p>Thank you,<br> Move Team</p>
+      `,
+    };
+
+    // Gửi email
+    await transporter.sendMail(mailOptions);
+
+    return {
+      cookie: {
+        cookieName: "digitVerificationToken",
+        token: verificationToken,
+        expires: verificationToken.expiresIn,
+      },
+      status: 200,
+      message: "Verification email sent successfully",
+    };
+  } catch (error) {
+    console.error("Send verification email error:", error);
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+};
+
+const verifyAccountFacebook = async (accountInfor, token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    const isValid = (accountInfor.code == decoded.code) && (accountInfor.email == decoded.email);
+    const existEmailAccount = await User.findOne({ where: { email: accountInfor.email } });
+    // Check if the email already exists
+    if (existEmailAccount) {
+      return {
+        status: 400,
+        message: "Email already exists",
+      };
+    } else if (isValid) {
+        await User.create(accountInfor)
+        return {
+          status: 200,
+          message: "Email verified successfully",
+        };
+    } else if (!isValid) {
+      return {
+        status: 400,
+        message: "Invalid 6-digit code or Email",
+      };
+    }
+  } catch (error) {
+    if (error instanceof jwt.JsonWebTokenError) {
+      return {
+        status: 400,
+        message: "Invalid or expired token",
+      };
+    }
+    return {
+      status: 500,
+      message: "Internal server error",
+    };
+  }
+};
+//// Send mail and verify account - END
+
 module.exports = {
   login,
   register,
@@ -627,4 +713,6 @@ module.exports = {
   requestChannel,
   statusRequestChannel,
   generateJwtToken,
+  sendMailVerifyFacebook,
+  verifyAccountFacebook
 };
