@@ -206,9 +206,11 @@ const sendMailVerifyFacebookController = async (req, res, next) => {
 
 const verifyAccountFacebookController = async (req, res, next) => {
   const { token } = req.params;
-  console.log("token: ", token)
   const accountInfor = req.body;
   const result = await verifyAccountFacebook(accountInfor, token);
+  if (result.cookie) {
+    res.cookie(result.cookie.cookieName, result.cookie.token);
+  }
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 

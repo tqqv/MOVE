@@ -673,8 +673,18 @@ const verifyAccountFacebook = async (accountInfor, token) => {
         message: "Email already exists",
       };
     } else if (isValid) {
-        await User.create(accountInfor)
+        const user = await User.create(accountInfor)
+        const token = jwt.sign(
+          { id: user.id, role: user.role },
+          process.env.JWT_SECRET_KEY,
+          { expiresIn: "15d" }
+        );
         return {
+          cookie: {
+            cookieName: "accessToken",
+            token: token,
+            expires: token.expiresIn,
+          },
           status: 200,
           message: "Email verified successfully",
         };
