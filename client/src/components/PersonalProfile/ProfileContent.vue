@@ -20,7 +20,7 @@
 </script>
 
 <template>
-  <section class="px-10 flex-grow">
+  <section class="px-2 flex-grow">
     <!-- EMAIL EMPTY -->
     <div
       v-show="!userStore.user?.email"

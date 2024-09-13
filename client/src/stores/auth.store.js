@@ -16,9 +16,6 @@ export const useAuthStore = defineStore('auth', {
     loginSuccess(token, role) {
       this.token = token;
       this.role = role;
-
-      Cookies.set('token', token, { expires: 7 });
-      Cookies.set('role', role, { expires: 7 });
       const userStore = useUserStore();
       userStore.fetchUserProfile();
       console.log('token', token);

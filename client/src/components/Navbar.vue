@@ -20,16 +20,14 @@
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
-  import { useAuthStore } from '@/stores';
   import { useUserStore } from '@/stores/user.store';
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const popupStore = usePopupStore();
-  const authStore = useAuthStore();
-
   const userStore = useUserStore();
+
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
   };
@@ -141,7 +139,7 @@
             <Button icon="pi pi-search" class="btn rounded-s-none" />
           </InputGroup>
           <!-- Guest -->
-          <template v-if="!authStore.token">
+          <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
           </template>
 

@@ -7,7 +7,7 @@
 
 <template>
   <Navbar />
-  <div class="flex w-full pt-[72px]">
+  <div class="flex w-full pt-[72px] overflow-x-hidden">
     <SideBarFollow/>
     <ProfileContent/>
   </div>

@@ -7,6 +7,7 @@
         :name="groupName"
         :value="label"
         v-model="modelValue"
+        @change="emitValue"
         :checked="checked"
       />
       <span
@@ -19,7 +20,7 @@
 </template>
 
 <script setup>
-  import { defineProps, ref, watch } from 'vue';
+  import { defineProps, ref, watch, defineEmits } from 'vue';
 
   const props = defineProps({
     label: {
@@ -36,6 +37,7 @@
     },
   });
 
+  const emits = defineEmits(['update:modelValue']);
   const modelValue = ref(props.checked);
 
   watch(
@@ -44,4 +46,8 @@
       modelValue.value = newVal;
     },
   );
+
+  const emitValue = () => {
+    emits('update:modelValue', modelValue.value);
+  };
 </script>
