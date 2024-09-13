@@ -19,28 +19,32 @@ module.exports = (sequelize, DataTypes) => {
   }
   Subscribe.init(
     {
-        userId: {
-            type: DataTypes.INTEGER,
-            primaryKey: true, // Part of composite primary key
-            allowNull: false,
-            references: {
-              model: 'users', // Reference to the users table
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      userId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'users', // Reference to the users table
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+      },
+      channelId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'channels', // Reference to the categories table
               key: 'id',
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
-        channelId: {
-            type: DataTypes.INTEGER,
-            primaryKey: true, // Part of composite primary key
-            allowNull: false,
-            references: {
-                model: 'channels', // Reference to the categories table
-                key: 'id',
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+      },
     },
     {
       sequelize,

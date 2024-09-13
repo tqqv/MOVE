@@ -411,6 +411,14 @@ const editProfile = async (id, data) => {
       }
     }
 
+    if(user.email && user.isVerified) {
+      return {
+        status: 400,
+        data: null,
+        message: "You can't change your verified email"
+      }
+    }
+
     const updateUser = await user.update(data)
     if(!updateUser) {
       return {
