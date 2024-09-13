@@ -7,45 +7,49 @@ module.exports = (sequelize, DataTypes) => {
         // Define relationships if necessary
         this.belongsTo(models.User, {
             foreignKey: 'userId',
-            as: 'user',
+            as: 'subscribeUser',
             onDelete: 'CASCADE',
         });
         this.belongsTo(models.Channel, {
             foreignKey: 'channelId',
-            as: 'category',
+            as: 'subscribeChannel',
             onDelete: 'CASCADE',
         });
     }
   }
   Subscribe.init(
     {
-        userId: {
-            type: DataTypes.INTEGER,
-            primaryKey: true, // Part of composite primary key
-            allowNull: false,
-            references: {
-              model: 'users', // Reference to the users table
+      id: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+        autoIncrement: true,
+        allowNull: false,
+      },
+      userId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+            model: 'users', // Reference to the users table
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+      },
+      channelId: {
+          type: DataTypes.INTEGER,
+          allowNull: false,
+          references: {
+              model: 'channels', // Reference to the categories table
               key: 'id',
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
-        channelId: {
-            type: DataTypes.INTEGER,
-            primaryKey: true, // Part of composite primary key
-            allowNull: false,
-            references: {
-                model: 'channels', // Reference to the categories table
-                key: 'id',
-            },
-            onDelete: 'CASCADE',
-            onUpdate: 'CASCADE',
-        },
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+      },
     },
     {
       sequelize,
       modelName: "Subscribe",
-      tableName: "categories",
+      tableName: "subscribes",
       timestamps: true,
   });
   return Subscribe;

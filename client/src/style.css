@@ -59,11 +59,15 @@
   }
 
   .btnDisable {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px];
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-not-allowed leading-none;
   }
 
   .tag {
-    @apply text-[10px] text-black font-bold px-[20px] py-[6px] rounded-xl;
+    @apply text-[11px] text-black font-bold px-[20px] py-[6px] rounded-xl bg-[#EEEEEE] cursor-pointer;
+  }
+
+  .tag_active {
+    @apply text-white bg-primary;
   }
 
   .input_custom {
@@ -71,7 +75,11 @@
   }
 
   .select_custom {
-    @apply  flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
+    @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
+  }
+
+  .select_custom {
+    @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
   }
 }
 

@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Channel, Subscribe } = db;
+const { Channel, Subscribe, User } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -28,109 +28,128 @@ const createChannel = async (userId) => {
   }
 }
 
-const followChannel = async (userId, channelId) => {
+const subscribeChannel = async (userId, channelId) => {
   try {
+    console.log(channelId);
+    const checkSubscribe = await Subscribe.destroy({
+      where: {
+        userId: userId,
+        channelId: channelId
+      }})
+      if(checkSubscribe) {
+        return {
+          status: 200,
+          data: null,
+          message: "Unsubscribe successful."
+        }
+      }
 
-    const subscribe = Subscribe.create({userId: userId, channelId: channelId})
 
-    const channel = await Channel.finOne({
+    const channel = await Channel.findOne({
       where: {
         userId: userId,
         id: channelId
       }
     })
+
     if(channel){
       return {
         status: 400,
         data: null,
-        message: "You can not follow your channel."
+        message: "You can not subscribe your channel."
       }
     }
+
     const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
 
     if(!subscribe) {
       return {
           status: 400,
           data: subscribe,
-          message: "You follow failed."
+          message: "You subscribe failed."
       }
     }
     return {
       status: 200,
       data: null,
-      message: "Follow successful."
+      message: "Subscribe successful."
     }
   } catch (error) {
     return {
-      status: 200,
+      status: 400,
       data: null,
       message: error.message
     }
   }
 }
 
-const unFollowChannel = async (userId, channelId) => {
+const listSubscribeOfChannel = async (channelId) => {
   try {
-    const subscribe = await Subscribe.destroy({
-
-      where: {
-        userId: userId,
-        channelId: channelId
-      }})
-    if(!subscribe) {
-      return {
-          status: 400,
-          data: subscribe,
-          message: "You unfollow failed."
-      }
-    }
-    return {
-      status: 200,
-      data: null,
-      message: "Unfollow successful."
-    }
-  } catch (error) {
-    return {
-      status: 200,
-      data: null,
-      message: error.message
-    }
-  }
-}
-
-const listFollowed = async (channelId) => {
-  try {
-    const followed = await Subscribe.findAll({
+    const subscriber = await Subscribe.findAll({
       where: {
         channelId: channelId,
       },
       include: [
         {
           model: User,
-          as: 'subscriber', // alias này phải đúng theo thiết kế quan hệ Sequelize
-          attributes: ['username', 'avatar'], // Lấy thông tin subscriber
-          required: true,
+          as: 'subscribeUser',
+          attributes: ['username', 'avatar', 'role'],
           include: [
             {
               model: Channel,
-              as: 'channel', // alias này phải đúng theo thiết kế quan hệ Sequelize
-              attributes: ['avatar', 'channelName'],
-              where: {
-                role: 'streamer',
-              },
-              required: false, // Sử dụng LEFT JOIN, chỉ lấy thông tin nếu user là streamer
-            },
-          ],
+              attributes: ['channelName', 'avatar'],
+            }
+          ]
         },
       ],
     });
-  } catch (error) {
 
+    return {
+      status: 200,
+      data: subscriber,
+      message: "Get list subscriber of channel successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
   }
+}
+
+const listSubscribeOfUser = async(userId) => {
+  try {
+    // console.log(userId);
+
+    const listSubscribe = await Subscribe.findAll({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: Channel,
+        as: "subscribeChannel",
+        attributes: ['channelName', 'avatar']
+      }]
+    })
+    return {
+      status: 200,
+      data: listSubscribe,
+      message: "Get list channel you follow successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+
 }
 
 module.exports = {
   createChannel,
-  followChannel,
-  unFollowChannel,
+  subscribeChannel,
+  listSubscribeOfChannel,
+  listSubscribeOfUser
 }

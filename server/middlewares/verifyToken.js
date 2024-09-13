@@ -22,13 +22,24 @@ const verifyToken = (req, res, next) => {
 
 const verifyUser = (req, res, next) => {
   verifyToken(req, res, () => {
-    if (req.user.role === "admin" || req.user.role === "user") {
+    if (req.user.role === "admin" || req.user.role === "user" || req.user.role === "streamer") {
       next();
     } else {
       return responseHandler(403, null, "You're not authorize")(req, res, next);
     }
   });
 };
+
+const verifyStreamer = (req, res, next) => {
+  verifyToken(req, res, () => {
+    if (req.user.role === "admin" || req.user.role === "streamer") {
+      next();
+    } else {
+      return responseHandler(403, null, "You're not authorize")(req, res, next);
+    }
+  });
+};
+
 
 const verifyAdmin = (req, res, next) => {
   verifyToken(req, res, () => {
@@ -45,5 +56,6 @@ const verifyAdmin = (req, res, next) => {
 module.exports = {
   verifyToken,
   verifyUser,
+  verifyStreamer,
   verifyAdmin,
 };

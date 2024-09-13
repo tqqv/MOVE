@@ -25,14 +25,12 @@
       default: () => ({}),
     },
   });
- 
-  
 </script>
 
 <template>
   <div class="shadow-lg rounded-md w-[260px]" v-if="props.user">
     <div class="px-4 py-5">
-      <div class="flex flex-row gap-x-3 items-center pb-3">
+      <RouterLink to="/personal-profile" class="flex flex-row gap-x-3 items-center pb-3">
         <img
           :src="props.user.avatar"
           :alt="props.user.username"
@@ -40,7 +38,7 @@
         />
         <h1 class="text_subTitle whitespace-nowrap">{{ props.user.username }}</h1>
         <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
-      </div>
+      </RouterLink>
       <hr class="h-px bg-gray-dark border-0 mb-4" />
       <div class="flex flex-col justify-start text-[13px]">
         <div class="flex flex-col gap-y-4 px-1">

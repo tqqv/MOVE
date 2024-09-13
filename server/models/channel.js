@@ -5,6 +5,12 @@ module.exports = (sequelize, DataTypes) => {
     class Channel extends Model {
         static associate(models) {
             this.belongsTo(models.User, { foreignKey: "userId" });
+
+            this.belongsToMany(models.User, {
+                through: models.Subscribe,
+                foreignKey: 'userId',
+                as: 'channelUser', // Alias for the users that follow this category
+              });
         }
     }
     Channel.init(
