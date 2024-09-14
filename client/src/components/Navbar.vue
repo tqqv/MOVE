@@ -37,14 +37,25 @@
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
+  const isElementOutside = (element, target) => {
+    return element && !element.contains(target);
+  };
   const handleClickOutside = (event) => {
+    const userMenu = document.getElementById('user-menu');
     const userMenuButton = document.getElementById('user-menu-button');
-    const userNotiButton = document.getElementById('noti-menu-button');
+    const notiMenu = document.getElementById('noti-menu');
+    const notiMenuButton = document.getElementById('noti-menu-button');
 
-    if (userMenuButton && !userMenuButton.contains(event.target)) {
+    const clickOutsideUserMenu =
+      isElementOutside(userMenu, event.target) && isElementOutside(userMenuButton, event.target);
+    const clickOutsideNotiMenu =
+      isElementOutside(notiMenu, event.target) && isElementOutside(notiMenuButton, event.target);
+
+    if (clickOutsideUserMenu) {
       isUserMenuOpen.value = false;
     }
-    if (userNotiButton && !userNotiButton.contains(event.target)) {
+
+    if (clickOutsideNotiMenu) {
       isNotiMenuOpen.value = false;
     }
   };
@@ -152,6 +163,7 @@
               </OverlayBadge>
               <div
                 v-if="isNotiMenuOpen"
+                id="noti-menu"
                 class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
@@ -181,6 +193,7 @@
               </div>
               <div
                 v-if="isUserMenuOpen"
+                id="user-menu"
                 class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
                 role="menu"
                 aria-orientation="vertical"
