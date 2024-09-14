@@ -153,7 +153,7 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
-        // .redirect(process.env.CLIENT_HOST)
+        .redirect(process.env.CLIENT_HOST)
       }
     }
   )(req, res, next);

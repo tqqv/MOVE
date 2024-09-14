@@ -51,15 +51,6 @@
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.location.href = url;
   };
-  // const isLogin = localStorage.getItem('isLogin');
-
-  // onMounted(() => {
-  //   console.log(isLogin);
-
-  //   if (isLogin === 'true') {
-  //     userStore.fetchUserProfile();
-  //   }
-  // });
 </script>
 
 <template>
