@@ -1,7 +1,4 @@
 <script setup>
-  import { useAuthStore } from '@/stores';
-  import { storeToRefs } from 'pinia';
-
   import logo from '@assets/logo.svg';
   import wallet from '@icons/wallet.vue';
   import Button from 'primevue/button';
@@ -20,16 +17,7 @@
   import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
   import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
 
-  const store = useAuthStore();
-  // get state, getter
-  const { name, doubleCount, count } = storeToRefs(store);
-
   // get actions
-  const { increment } = store;
-
-  import { ref } from 'vue';
-
-  const visible = ref(false);
 </script>
 
 <template>
@@ -55,10 +43,6 @@
       </div>
     </div>
     <div class="container mt-3 text-center">
-      <h1>Auth Page</h1>
-      <p>Name: {{ name }}</p>
-      <p>Count: {{ count }}</p>
-      <p>Double Count: {{ doubleCount }}</p>
       <Button @click="increment">Increment</Button>
     </div>
     <div class="container mt-3 text-center">

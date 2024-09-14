@@ -2,9 +2,11 @@
   import { ref, computed } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
   import facebook from '@/components/icons/facebook.vue';
-  import axiosInstance from '@/services/axios';
   import { toast } from 'vue3-toastify';
+  import { postSignup } from '@/services/auth';
+  import { usePopupStore } from '@/stores';
 
+  const popupStore = usePopupStore();
   const email = ref('');
   const password = ref('');
   const referralCode = ref('');
@@ -32,8 +34,11 @@
       referralCode: referralCode.value,
     };
     try {
-      const response = await axiosInstance.post('/auth/register', data);
-      console.log('Signup success:', response.data);
+      const response = await postSignup(data);
+      // console.log('Signup success:', response.data);
+      // tabStore.setActiveTab('0');
+      // console.log(tabStore.activeTab);
+      popupStore.closeLoginPopup();
       toast.success(response.data.message || 'Signup successful!');
     } catch (error) {
       toast.error(error.response?.data.message || 'Signup failed');

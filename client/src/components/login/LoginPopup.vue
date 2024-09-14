@@ -1,27 +1,26 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
   import facebook from '@/components/icons/facebook.vue';
   import { usePopupStore } from '@/stores';
-  import { useAuthStore } from '@/stores';
   import { toast } from 'vue3-toastify';
-  import axiosInstance from '@/services/axios';
-  // import { useRouter } from 'vue-router';
+  import { postLogin } from '@/services/auth';
+  import { useUserStore } from '@/stores';
+
+  const userStore = useUserStore();
+
   const showLoginWithEmail = ref(false);
   const email = ref('');
   const password = ref('');
   const showPassword = ref(false);
-
-  const authStore = useAuthStore();
   const popupStore = usePopupStore();
-  // const router = useRouter();
+
   const buttonColor = computed(() => {
     return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
   });
   const isButtonDisabled = computed(() => {
     return !(email.value.trim() && password.value.trim());
   });
-
   const handleLoginWithEmail = () => {
     showLoginWithEmail.value = true;
   };
@@ -33,18 +32,11 @@
     };
 
     try {
-      const response = await axiosInstance.post('/auth/login', data);
-      const { token, role } = response.data.data;
-
-      authStore.loginSuccess(token, role);
+      const response = await postLogin(data);
+      localStorage.setItem('isLogin', 'true');
+      userStore.fetchUserProfile();
       toast.success(response.data.message);
-
       popupStore.closeLoginPopup();
-      // if (role === 'admin') {
-      //   router.push('/admin');
-      // } else {
-      //   router.push('/home');
-      // }
     } catch (error) {
       const message = error.response?.data?.message || error.message || 'Login failed';
       toast.error(message);
@@ -54,6 +46,20 @@
     popupStore.closeLoginPopup();
     popupStore.openForgotPasswordPopup();
   };
+
+  const handleGoogleLogin = () => {
+    const url = `${import.meta.env.VITE_API_URL}auth/google`;
+    window.location.href = url;
+  };
+  // const isLogin = localStorage.getItem('isLogin');
+
+  // onMounted(() => {
+  //   console.log(isLogin);
+
+  //   if (isLogin === 'true') {
+  //     userStore.fetchUserProfile();
+  //   }
+  // });
 </script>
 
 <template>
@@ -61,6 +67,7 @@
     <!-- Login Google  -->
 
     <button
+      @click="handleGoogleLogin"
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
       <span class="flex-shrink-0">

@@ -1,14 +1,10 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
-
   import logo from '@assets/logo.svg';
-
   import verified from '@icons/verified.vue';
   import notification from '@icons/notification.vue';
   import upload from '@icons/upload.vue';
   import rep from '@icons/rep.vue';
-  import { toast } from 'vue3-toastify';
-  import axiosInstance from '@/services/axios';
   import InputGroup from 'primevue/inputgroup';
   import InputText from 'primevue/inputtext';
   import Button from 'primevue/button';
@@ -20,14 +16,13 @@
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
-  import { useAuthStore } from '@/stores';
+  import { useUserStore } from '@/stores';
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const popupStore = usePopupStore();
-  const authStore = useAuthStore();
-  const user = ref(null);
+  const userStore = useUserStore();
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -53,24 +48,9 @@
       isNotiMenuOpen.value = false;
     }
   };
-  const fetchUserProfile = async () => {
-    if (!authStore.token) return;
-    try {
-      const response = await axiosInstance.get('/auth/getProfile');
-      user.value = response.data.data;
-    } catch (error) {
-      toast.error('Failed to load profile');
-    }
-  };
-  onMounted(() => {
-    if (authStore.token) {
-      fetchUserProfile();
-    }
-    document.addEventListener('click', handleClickOutside);
-  });
 
-  onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
   });
 
   onBeforeUnmount(() => {
@@ -151,7 +131,7 @@
             <Button icon="pi pi-search" class="btn rounded-s-none" />
           </InputGroup>
           <!-- Guest -->
-          <template v-if="!authStore.token">
+          <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
           </template>
 
@@ -194,8 +174,8 @@
                   <span class="sr-only">Open user menu</span>
                   <img
                     class="size-[40px] rounded-full"
-                    :src="user?.avatar"
-                    :alt="user?.username || 'User'"
+                    :src="userStore.user?.avatar"
+                    :alt="userStore.user?.username || 'User'"
                   />
                 </button>
               </div>
@@ -207,7 +187,7 @@
                 aria-labelledby="user-menu-button"
                 tabindex="-1"
               >
-                <PopupAccount :user="user" />
+                <PopupAccount :user="userStore.user" />
               </div></div
           ></template>
         </div>
