@@ -13,7 +13,7 @@ const getProfile = (profile) => {
             googleId: id,
             fullName: displayName,
             email,
-            provider
+            avatar: profile.photos[0].value,
         }
     }
     return null

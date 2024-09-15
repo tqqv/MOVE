@@ -141,8 +141,10 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
-    'google',
-    { failureRedirect: '/login', failureMessage: true },
+    'google', 
+    { 
+      // successRedirect: process.env.CLIENT_HOST, 
+      failureRedirect: '/login', failureMessage: true },
     async (error, user) => {
       const loginResult = await loginByGoogle(error, user);
 
@@ -151,12 +153,8 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
+        .redirect(process.env.CLIENT_HOST)
       }
-      return responseHandler(
-        loginResult.status,
-        loginResult.data,
-        loginResult.message
-      )(req, res, next);
     }
   )(req, res, next);
 };
