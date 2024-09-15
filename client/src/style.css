@@ -71,7 +71,7 @@
   }
 
   .input_custom {
-    @apply px-2 py-2.5 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
+    @apply px-2 py-3 pr-12 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full;
   }
 
   .select_custom {

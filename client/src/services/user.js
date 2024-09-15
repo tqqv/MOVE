@@ -14,4 +14,13 @@ const updateProfile = async (data) => {
   }
 };
 
-export { getProfile, updateProfile };
+const changePassword = async (data) => {
+  try {
+    const response = await axios.put('/auth/changePassword', data);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export { getProfile, updateProfile, changePassword };
