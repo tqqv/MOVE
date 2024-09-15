@@ -28,10 +28,11 @@ var {
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
+  console.log(loginResult);
+
+
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
-      expires: loginResult.cookie.expires
-    });
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires);
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
