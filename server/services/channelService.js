@@ -85,28 +85,43 @@ const subscribeChannel = async (userId, channelId) => {
 
 const listSubscribeOfChannel = async (channelId) => {
   try {
-    const subscriber = await Subscribe.findAll({
-      where: {
-        channelId: channelId,
-      },
-      include: [
-        {
-          model: User,
-          as: 'subscribeUser',
-          attributes: ['username', 'avatar', 'role'],
-          include: [
-            {
-              model: Channel,
-              attributes: ['channelName', 'avatar'],
-            }
-          ]
-        },
-      ],
-    });
+    const channel = await Channel.findByPk(channelId)
+
+    if(!channel){
+      return {
+        status: 400,
+        data: null,
+        message: "Channel not found"
+      }
+    }
+
+    const listFollow = await listSubscribeOfUser(channel.userId)
+
+    console.log(listFollow);
+
+
+    // const subscriber = await Subscribe.findAll({
+    //   where: {
+    //     channelId: channelId,
+    //   },
+    //   include: [
+    //     {
+    //       model: User,
+    //       as: 'subscribeUser',
+    //       attributes: ['username', 'avatar', 'role'],
+    //       include: [
+    //         {
+    //           model: Channel,
+    //           attributes: ['channelName', 'avatar'],
+    //         }
+    //       ]
+    //     },
+    //   ],
+    // });
 
     return {
-      status: 200,
-      data: subscriber,
+      status: listFollow.status,
+      data: listFollow.data,
       message: "Get list subscriber of channel successfully."
     }
   } catch (error) {

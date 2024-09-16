@@ -11,5 +11,15 @@ const postLogin = (data) => {
 const getLogout = () => {
   return axios.get('/auth/logout');
 };
+//Forgot
+const getVerifyToken = (token) => {
+  return axios.get(`/auth/verify-token/${token}`);
+};
 
-export { postSignup, postLogin, getLogout };
+const postForgotPassword = (data) => {
+  return axios.post('/auth/forgot-password', data);
+};
+const postResetPassword = (data) => {
+  return axios.post('/auth/reset-password', data);
+};
+export { postSignup, postLogin, getLogout, getVerifyToken, postForgotPassword, postResetPassword };
