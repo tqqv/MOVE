@@ -3,8 +3,6 @@ name: MOVE CI/CD
 on:
   push:
     branches: ["test"]
-  pull_request:
-    branches: ["test"]
 
 jobs:
   build:
