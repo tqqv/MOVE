@@ -1,6 +1,10 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import verified from '@icons/verified.vue';
+  import { useUserStore } from '@/stores/user.store';
+
+  const userStore = useUserStore();
+
   const userFollowers = [
     {
       id: 1,
@@ -41,20 +45,16 @@
     isShow.value = !isShow.value;
   };
 
-  //  TRUYENP PROPS
-  // const props = defineProps({
-  //   userFollowers: {
-  //     type: Array,
-  //     required: true,
-  //   },
-  // });
+  onMounted(async () => {
+    await userStore.loadFollowers();
+  });
 </script>
 
 <template>
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="w-[251px] h-[703px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block w-[251px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-4 py-4">
       <div class="flex items-center justify-between">
@@ -67,7 +67,7 @@
       </div>
       <div class="flex flex-col gap-y-4 my-5">
         <div
-          v-for="userFollower in sortedUserFollowers"
+          v-for="userFollower in userStore.followers"
           :key="userFollower.id"
           class="flex items-center gap-x-3 cursor-pointer"
         >
@@ -78,14 +78,14 @@
             ]"
           >
             <img
-              :src="userFollower.avatar"
+              :src="userFollower.subscribeChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
               class="w-full h-full rounded-full object-cover"
             />
           </div>
           <div class="flex flex-col gap-y-1">
             <div class="flex flex-row gap-x-3">
-              <p class="text_para">{{ userFollower.username }}</p>
+              <p class="text_para">{{ userFollower.subscribeChannel?.channelName }}</p>
               <verified v-if="userFollower.verified" class="ml-1 mb-1 fill-blue" />
             </div>
             <div
@@ -108,7 +108,7 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="w-[89px] h-[703px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block w-[89px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-4 py-4">
       <div class="flex items-center justify-center">

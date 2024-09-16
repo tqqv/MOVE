@@ -1,37 +1,32 @@
 const express = require("express");
-const { Sequelize } = require("sequelize");
 var dotenv = require("dotenv");
-var cors = require("cors");
-
 dotenv.config();
+var cors = require("cors");
+var cookieParser = require("cookie-parser");
+const { connection } = require("./config/connectDB");
+const authRouter = require("./routes/authRoute.js");
+const channelRouter = require("./routes/channelRoute.js");
+
 const app = express();
 const port = process.env.PORT || 8000;
 const corsOptions = {
-  origin: true,
+  origin: process.env.CLIENT_HOST ,
   credentials: true,
 };
 
-const sequelize = new Sequelize(
-  process.env.DB_NAME,
-  process.env.DB_USER,
-  process.env.DB_PASS,
-  {
-    host: process.env.DB_HOST,
-    dialect: "mysql",
-  }
-);
-
 app.use(express.json());
 app.use(cors(corsOptions));
+app.use(cookieParser());
 
 app.get("/", (req, res) => {
   res.send("Hello World from the backend!");
 });
 
-sequelize
-  .authenticate()
-  .then(() => console.log("Database connected..."))
-  .catch((err) => console.log("Error: " + err));
+app.use("/api/auth", authRouter);
+app.use("/api/channel", channelRouter);
+
+// connect DB
+connection();
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

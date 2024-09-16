@@ -15,9 +15,11 @@
     font-optical-sizing: auto;
     font-style: normal;
   }
+
   section {
     @apply py-[30px];
   }
+
   button span {
     @apply font-bold !important;
   }
@@ -25,28 +27,59 @@
 
 @layer components {
   .container {
-    @apply max-w-full  px-[25px];
+    @apply max-w-full px-[25px];
   }
+
   .text_title {
     @apply py-[15px] text-[24px] text-title font-bold;
   }
+
   .text_subTitle {
     @apply text-[18px] text-title font-bold;
   }
+
   .text_para {
     @apply text-[14px] text-black font-normal;
   }
+
   .text_secondary {
     @apply text-[14px] text-footer font-normal;
   }
+
   .text_link {
     @apply text-[12px] text-link font-bold;
   }
+
   .btn {
     @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px];
   }
+
+  .notification_custom {
+    @apply border-2 border-yellow-dark bg-yellow-light rounded-lg p-4;
+  }
+
+  .btnDisable {
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-not-allowed leading-none;
+  }
+
   .tag {
-    @apply text-[10px] text-black font-bold px-[20px] py-[6px] rounded-xl;
+    @apply text-[11px] text-black font-bold px-[20px] py-[6px] rounded-xl bg-[#EEEEEE] cursor-pointer;
+  }
+
+  .tag_active {
+    @apply text-white bg-primary;
+  }
+
+  .input_custom {
+    @apply px-2 py-3 pr-12 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full;
+  }
+
+  .select_custom {
+    @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
+  }
+
+  .select_custom {
+    @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
   }
 }
 
@@ -54,6 +87,7 @@
   .container {
     @apply w-full px-[20px];
   }
+
   section {
     @apply py-[20px];
   }
