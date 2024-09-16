@@ -36,13 +36,13 @@
   const isAgeValid = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();
-    const age = today.getFullYear() - birthDate.getFullYear();
+    const userAge = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
+      userAge--;
     }
-    return age >= 12;
+    return userAge >= 12;
   };
 
   // DISABLED EMAIL
