@@ -1,25 +1,27 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
   import wallet from '@icons/wallet.vue';
   import verified from '@icons/verified.vue';
   import logout from '@icons/logout.vue';
   import dashboard from '@icons/dashboard.vue';
   import setting from '@icons/setting.vue';
-  import { useAuthStore } from '@/stores';
-  import axiosInstance from '@/services/axios';
+  import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
+  import { getLogout } from '@/services/auth';
 
-  const authStore = useAuthStore();
+  const userStore = useUserStore();
   const handleLogout = async () => {
     try {
-      const response = await axiosInstance.get('/auth/logout');
-      authStore.logout();
+      const response = await getLogout();
+      localStorage.removeItem('isLogin');
+      userStore.clearUserData();
+
       toast.success(response.data.message || 'Logout successful!');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
     }
   };
   const props = defineProps({
+    isUserMenuOpen: { type: Boolean },
     user: {
       type: Object,
       default: () => ({}),
