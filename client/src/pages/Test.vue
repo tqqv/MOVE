@@ -3,10 +3,26 @@
   import wallet from '@icons/wallet.vue';
   import Button from 'primevue/button';
   import Divider from '@/components/Divider.vue';
+  import Navbar from '@/components/Navbar.vue';
+  import { usePopupStore } from '@/stores';
+  import { toast } from 'vue3-toastify';
+
+  const popupStore = usePopupStore();
+
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+    toast.success('Wow so easy!');
+  };
+  import UploadVideo from '@/components/uploadVideo/UploadVideo.vue';
+  import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
+  import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
+
+  // get actions
 </script>
 
 <template>
-  <section>
+  <Navbar />
+  <section class="padding-nav">
     <div class="bg-black flex justify-center"><img :src="logo" alt="" width="200px" /></div>
     <div class="container">
       <!-- Icon Custom -->
@@ -26,5 +42,25 @@
         <div class="p-5"><Button label="Choose your interest" class="btn" /></div>
       </div>
     </div>
+    <div class="container mt-3 text-center">
+      <Button @click="increment">Increment</Button>
+    </div>
+    <div class="container mt-3 text-center">
+      <div class="flex gap-x-3 justify-center">
+        <h1>I18n</h1>
+        <select v-model="$i18n.locale">
+          <option v-for="locale in $i18n.availableLocales" :key="locale" :value="locale">
+            {{ locale }}
+          </option>
+        </select>
+      </div>
+      <p>{{ $t('heading', { msg: 'Viet' }) }}</p>
+    </div>
+    <div class="container mt-3 text-center">
+      <button class="btn" @click="openLoginPopup">Sign up</button>
+    </div>
+    <UploadVideo />
+    <VideoDetail />
+    <UploadVideoConfirm />
   </section>
 </template>
