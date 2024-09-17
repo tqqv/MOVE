@@ -195,6 +195,14 @@ const getProfileChannel = async(channelId) =>{
 const editProfileChannel = async(userId, data, username) => {
   try {
 
+    if(username === "" || data.channelName === ""){
+      return {
+        status: 400,
+        data: null,
+        message: "Username or channel name cannot be empty."
+      }
+    }
+
     if(username) {
       const user = await User.findByPk(userId)
 
@@ -212,7 +220,7 @@ const editProfileChannel = async(userId, data, username) => {
 
       if(checkExist) {
         return {
-          status: 404,
+          status: 400,
           data: null,
           message: "Username already exists."
         }
