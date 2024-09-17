@@ -2,7 +2,7 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class VideoView extends Model {
+  class ViewVideo extends Model {
     static associate(models) {
         // Define relationships if necessary
         this.belongsTo(models.User, {
@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         });
     }
   }
-  VideoView.init(
+  ViewVideo.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -46,9 +46,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "videoView",
+      modelName: "ViewVideo",
       tableName: "VideoViews",
       timestamps: true,
   });
-  return VideoView;
+  return ViewVideo;
 };
