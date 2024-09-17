@@ -31,5 +31,5 @@ const viewFollowChannel = async () => {
   }
 };
 
-
 export { getProfile, updateProfile, changePassword, viewFollowChannel };
+
