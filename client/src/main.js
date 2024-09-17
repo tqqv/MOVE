@@ -10,7 +10,7 @@ import App from './App.vue';
 import router from './router';
 import i18n from './i18n';
 import 'vue3-toastify/dist/index.css';
-import Vue3Toastify from 'vue3-toastify';
+import Vue3Toastify, { toast } from 'vue3-toastify';
 
 const pinia = createPinia();
 const app = createApp(App);
@@ -32,6 +32,7 @@ app.use(PrimeVue, {
 });
 app.use(Vue3Toastify, {
   autoClose: 3000,
+  position: toast.POSITION.BOTTOM_LEFT,
 });
 app.use(ConfirmationService);
 

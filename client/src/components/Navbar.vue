@@ -16,7 +16,7 @@
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
-  import { useUserStore } from '@/stores';
+  import { useUserStore } from '@/stores/user.store';
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
@@ -59,6 +59,10 @@
       isNotiMenuOpen.value = false;
     }
   };
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
 
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
