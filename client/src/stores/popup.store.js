@@ -1,3 +1,4 @@
+// stores/popupStore.js
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -21,6 +22,7 @@ export const usePopupStore = defineStore('popup', () => {
   const closeForgotPasswordPopup = () => {
     showForgotPasswordPopup.value = false;
   };
+
   return {
     showLoginPopup,
     showForgotPasswordPopup,

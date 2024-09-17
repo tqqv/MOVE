@@ -54,9 +54,9 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden md:block w-[251px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block border-r-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
-    <div class="flex flex-col px-4 py-4">
+    <div class="flex flex-col w-[241px] px-4 py-4">
       <div class="flex items-center justify-between">
         <h2 class="uppercase text_subTitle text-[13px]">follow channels</h2>
         <i
@@ -73,14 +73,14 @@
         >
           <div
             :class="[
-              'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
+              'flex items-center justify-center  w-12 h-12 rounded-full',
               userFollower.isStreaming ? 'border-[3px] border-red' : '',
             ]"
           >
             <img
               :src="userFollower.avatar"
               alt="Avatar"
-              class="w-full h-full rounded-full object-cover"
+              class="w-full h-full rounded-full object-cover p-[1.5px]"
             />
           </div>
           <div class="flex flex-col gap-y-1">

@@ -143,7 +143,7 @@ const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google', 
     { 
-      // successRedirect: process.env.CLIENT_HOST, 
+      successRedirect: '/', successMessage:true,
       failureRedirect: '/login', failureMessage: true },
     async (error, user) => {
       const loginResult = await loginByGoogle(error, user);
@@ -153,7 +153,7 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
-        .redirect(process.env.CLIENT_HOST)
+        // .redirect(process.env.CLIENT_HOST)
       }
     }
   )(req, res, next);

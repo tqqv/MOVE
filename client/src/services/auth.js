@@ -11,5 +11,7 @@ const postLogin = (data) => {
 const getLogout = () => {
   return axios.get('/auth/logout');
 };
-
-export { postSignup, postLogin, getLogout };
+const getLoginGoogle = () => {
+  return axios.get('/auth/google');
+};
+export { postSignup, postLogin, getLogout, getLoginGoogle };
