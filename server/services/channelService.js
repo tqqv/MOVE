@@ -177,11 +177,11 @@ const getProfileChannel = async(channelId) =>{
       }
     }
 
-    const followerCount = Subscribe.count({
+    const followerCount = await Subscribe.count({
       where: {
         channelId: channelId
       }
-    })
+    });
 
     return {
       status: 200,
