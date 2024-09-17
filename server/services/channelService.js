@@ -257,11 +257,48 @@ const editProfileChannel = async(userId, data, username) => {
   }
 }
 
+const viewChannel = async(channelId) => {
+ try {
+  const profile = await getProfileChannel(channelId)
+  if (!profile) {
+    return {
+      status: 404,
+      data: null,
+      message: "Channel not found"
+    }
+  }
+
+  // API list video code here
+
+  const followerCount = await Subscribe.count({
+    where: {
+      channelId: channelId
+    }
+  });
+
+  return {
+    status: 200,
+    data: {
+      profile: profile.data,
+      totalFollower: followerCount,
+    },
+    message: "Get information channel successfully."
+  }
+ } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+ }
+}
+
 module.exports = {
   createChannel,
   subscribeChannel,
   listSubscribeOfChannel,
   listSubscribeOfUser,
   getProfileChannel,
-  editProfileChannel
+  editProfileChannel,
+  viewChannel
 }
