@@ -177,18 +177,9 @@ const getProfileChannel = async(channelId) =>{
       }
     }
 
-    const followerCount = await Subscribe.count({
-      where: {
-        channelId: channelId
-      }
-    });
-
     return {
       status: 200,
-      data: {
-        channel: channel,
-        totalFollow: followerCount
-      },
+      data: channel,
       message: "Get profile channel successfully."
     }
 
@@ -266,6 +257,61 @@ const editProfileChannel = async(userId, data, username) => {
   }
 }
 
+const viewChannel = async(username) => {
+  try {
+    const channel = await Channel.findOne({
+      include: [{
+        model: User,
+        attributes: ["username"],
+        where: {
+          username: username
+        }
+      }]
+    });
+
+    if (!channel) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found."
+      };
+    }
+
+
+    const profile = await getProfileChannel(channel.id)
+    if (!profile) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found"
+      }
+    }
+
+    // API list video code here
+
+    const followerCount = await Subscribe.count({
+      where: {
+        channelId: channel.id
+      }
+    });
+
+    return {
+      status: profile.status,
+      data: {
+        profile: profile.data,
+        totalFollower: followerCount,
+      },
+      message: profile.message
+    }
+  } catch (error) {
+     return {
+       status: 500,
+       data: null,
+       message: error.message
+     }
+  }
+ }
+
 
 module.exports = {
   createChannel,
@@ -273,5 +319,6 @@ module.exports = {
   listSubscribeOfChannel,
   listSubscribeOfUser,
   getProfileChannel,
-  editProfileChannel
+  editProfileChannel,
+  viewChannel
 }
