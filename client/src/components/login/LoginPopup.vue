@@ -6,42 +6,44 @@
   import { toast } from 'vue3-toastify';
   import { postLogin } from '@/services/auth';
   import { useUserStore } from '@/stores';
+  import { Form, Field } from 'vee-validate';
+  import { loginSchema } from '@/functions/vadilation';
 
   const userStore = useUserStore();
-
   const showLoginWithEmail = ref(false);
-  const email = ref('');
-  const password = ref('');
   const showPassword = ref(false);
   const popupStore = usePopupStore();
 
-  const buttonColor = computed(() => {
-    return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
-  });
-  const isButtonDisabled = computed(() => {
-    return !(email.value.trim() && password.value.trim());
-  });
+  
+  // const buttonColor = computed(() => {
+  //   return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
+  // });
+  // const isButtonDisabled = computed(() => {
+  //   return !(email.value.trim() && password.value.trim());
+  // });
   const handleLoginWithEmail = () => {
     showLoginWithEmail.value = true;
   };
 
-  const submitLoginForm = async () => {
-    const data = {
-      email: email.value,
-      password: password.value,
-    };
-
+// HANDLE LOGIN
+  const submitLoginForm = async (values) => {
+    const { email, password } = values;
+    const data = { email, password };
     try {
       const response = await postLogin(data);
-      localStorage.setItem('isLogin', 'true');
-      userStore.fetchUserProfile();
-      toast.success(response.data.message);
-      popupStore.closeLoginPopup();
+      if (response.error) {
+        toast.error(response.message || 'Login failed');
+      } else {
+        localStorage.setItem('isLogin', 'true');
+        userStore.fetchUserProfile();
+        popupStore.closeLoginPopup();
+        toast.success(response.message || 'Login successful!');
+      }
     } catch (error) {
-      const message = error.response?.data?.message || error.message || 'Login failed';
-      toast.error(message);
+      toast.error(error.response?.data.message || 'Login failed');
     }
   };
+
   const openForgotPassword = () => {
     popupStore.closeLoginPopup();
     popupStore.openForgotPasswordPopup();
@@ -93,27 +95,47 @@
       <hr class="flex-grow border-t border-[#CCCCCC]" />
     </div>
     <!-- Login Email  -->
-    <form v-if="showLoginWithEmail" @submit.prevent="submitLoginForm" class="w-full mt-4 space-y-4">
-      <div>
-        <div>
-          <label for="email" class="text_para">Email</label>
-          <input v-model="email" type="email" class="input_custom" required />
+    <Form
+      v-if="showLoginWithEmail"
+      @submit="submitLoginForm"
+      :validation-schema="loginSchema"
+      class="w-full mt-4 space-y-4"
+    >
+      <div class="flex flex-col gap-y-4">
+        <div class="flex flex-col gap-y-1">
+          <Field name="email" v-slot="{ field, errors }">
+            <label for="email" class="text_para">Email</label>
+            <input
+              v-bind="field"
+              type="email"
+              class="input_custom"
+              :class="{
+                'focus:outline-red text-red focus:caret-red border-red': errors.length,
+              }"
+              required
+            />
+            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+          </Field>
         </div>
-        <div class="relative">
-          <label for="password" class="text_para">Password</label>
-          <input
-            v-model="password"
-            :type="showPassword ? 'text' : 'password'"
-            class="p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full"
-            required
-          />
-          <div
-            @click="showPassword = !showPassword"
-            type="button"
-            class="absolute inset-y-1/2 end-0 z-20 px-3 cursor-pointer text-[#666666]"
-          >
-            <i :class="showPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
-          </div>
+        <div class="flex flex-col gap-y-1">
+          <Field name="password" v-slot="{ field, errors }">
+            <label for="password" class="text_para">Password</label>
+            <div class="relative">
+              <input
+                v-bind="field"
+                :type="showPassword ? 'text' : 'password'"
+                class="input_custom"
+                :class="{
+                  'focus:outline-red text-red focus:caret-red border-red': errors.length,
+                }"
+                required
+              />
+              <button @click="showPassword = !showPassword" type="button" class="btn_eyes">
+                <i :class="[showPassword ? 'pi pi-eye' : 'pi pi-eye-slash']"></i>
+              </button>
+            </div>
+            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+          </Field>
         </div>
         <div>
           <span @click="openForgotPassword" class="text-link text-sm cursor-pointer"
@@ -121,14 +143,10 @@
           >
         </div>
       </div>
-      <button
-        type="submit"
-        :class="['w-full p-2 text-white font-bold rounded', buttonColor]"
-        :disabled="isButtonDisabled"
-      >
-        Log in
-      </button>
-    </form>
+      <div class="flex justify-center mt-4">
+        <button type="submit" class="btn w-full">Log in</button>
+      </div>
+    </Form>
 
     <button @click="handleLoginWithEmail" v-else class="text-link font-bold uppercase text-sm">
       Log in with Email
