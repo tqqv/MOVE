@@ -15,3 +15,15 @@ const getLoginGoogle = () => {
   return axios.get('/auth/google');
 };
 export { postSignup, postLogin, getLogout, getLoginGoogle };
+//Forgot
+const getVerifyToken = (token) => {
+  return axios.get(`/auth/verify-token/${token}`);
+};
+
+const postForgotPassword = (data) => {
+  return axios.post('/auth/forgot-password', data);
+};
+const postResetPassword = (data) => {
+  return axios.post('/auth/reset-password', data);
+};
+export { postSignup, postLogin, getLogout, getVerifyToken, postForgotPassword, postResetPassword };

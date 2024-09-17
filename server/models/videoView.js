@@ -2,22 +2,20 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Subscribe extends Model {
+  class ViewVideo extends Model {
     static associate(models) {
         // Define relationships if necessary
         this.belongsTo(models.User, {
-            foreignKey: 'userId',
-            as: 'subscribeUser',
+            as: 'videoViewUser',
             onDelete: 'CASCADE',
         });
-        this.belongsTo(models.Channel, {
-            foreignKey: 'channelId',
-            as: 'subscribeChannel',
+        this.belongsTo(models.Video, {
+            as: 'videoViewVideo',
             onDelete: 'CASCADE',
         });
     }
   }
-  Subscribe.init(
+  ViewVideo.init(
     {
       id: {
         type: DataTypes.INTEGER,
@@ -25,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         autoIncrement: true,
         allowNull: false,
       },
-      userId: {
+      viewerId: {
           type: DataTypes.INTEGER,
           allowNull: false,
           references: {
@@ -35,11 +33,11 @@ module.exports = (sequelize, DataTypes) => {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
       },
-      channelId: {
+      videoId: {
           type: DataTypes.INTEGER,
           allowNull: false,
           references: {
-              model: 'channels', // Reference to the categories table
+              model: 'videos', // Reference to the categories table
               key: 'id',
           },
           onDelete: 'CASCADE',
@@ -48,9 +46,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "Subscribe",
-      tableName: "subscribes",
+      modelName: "ViewVideo",
+      tableName: "VideoViews",
       timestamps: true,
   });
-  return Subscribe;
+  return ViewVideo;
 };

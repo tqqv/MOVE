@@ -30,8 +30,22 @@ const createChannel = async (userId) => {
 
 const subscribeChannel = async (userId, channelId) => {
   try {
+    console.log(channelId);
+    const checkSubscribe = await Subscribe.destroy({
+      where: {
+        userId: userId,
+        channelId: channelId
+      }})
+      if(checkSubscribe) {
+        return {
+          status: 200,
+          data: null,
+          message: "Unsubscribe successful."
+        }
+      }
 
-    const channel = await Channel.finOne({
+
+    const channel = await Channel.findOne({
       where: {
         userId: userId,
         id: channelId
@@ -69,25 +83,46 @@ const subscribeChannel = async (userId, channelId) => {
   }
 }
 
-const unSubscribeChannel = async (userId, channelId) => {
+const listSubscribeOfChannel = async (channelId) => {
   try {
-    const subscribe = await Subscribe.destroy({
+    const channel = await Channel.findByPk(channelId)
 
-      where: {
-        userId: userId,
-        channelId: channelId
-      }})
-    if(!subscribe) {
+    if(!channel){
       return {
-          status: 400,
-          data: subscribe,
-          message: "You unsubscribe failed."
+        status: 400,
+        data: null,
+        message: "Channel not found"
       }
     }
+
+    const listFollow = await listSubscribeOfUser(channel.userId)
+
+    console.log(listFollow);
+
+
+    // const subscriber = await Subscribe.findAll({
+    //   where: {
+    //     channelId: channelId,
+    //   },
+    //   include: [
+    //     {
+    //       model: User,
+    //       as: 'subscribeUser',
+    //       attributes: ['username', 'avatar', 'role'],
+    //       include: [
+    //         {
+    //           model: Channel,
+    //           attributes: ['channelName', 'avatar'],
+    //         }
+    //       ]
+    //     },
+    //   ],
+    // });
+
     return {
-      status: 200,
-      data: null,
-      message: "Unsubscribe successful."
+      status: listFollow.status,
+      data: listFollow.data,
+      message: "Get list subscriber of channel successfully."
     }
   } catch (error) {
     return {
@@ -98,33 +133,24 @@ const unSubscribeChannel = async (userId, channelId) => {
   }
 }
 
-const listSubscribeOfChannel = async (channelId) => {
+const listSubscribeOfUser = async(userId) => {
   try {
-    const subscribeed = await Subscribe.findAll({
-      where: {
-        channelId: channelId,
-      },
-      include: [
-        {
-          model: User,
-          as: 'subscribeUser',
-          attributes: ['username', 'avatar', 'role'],
-          // required: true,
-          include: [
-            {
-              model: Channel,
-              attributes: ['channelName', 'avatar'],
-              // required: false
-            }
-          ]
-        },
-      ],
-    });
+    // console.log(userId);
 
+    const listSubscribe = await Subscribe.findAll({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: Channel,
+        as: "subscribeChannel",
+        attributes: ['channelName', 'avatar']
+      }]
+    })
     return {
       status: 200,
-      data: subscribeed,
-      message: "Get list subscribeed successfully."
+      data: listSubscribe,
+      message: "Get list channel you follow successfully."
     }
   } catch (error) {
     return {
@@ -133,11 +159,12 @@ const listSubscribeOfChannel = async (channelId) => {
       message: error.message
     }
   }
+
 }
 
 module.exports = {
   createChannel,
   subscribeChannel,
-  unSubscribeChannel,
-  listSubscribeOfChannel
+  listSubscribeOfChannel,
+  listSubscribeOfUser
 }

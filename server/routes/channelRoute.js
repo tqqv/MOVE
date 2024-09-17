@@ -1,13 +1,13 @@
-const { get, getListSubscribe, subChannelController, unSubChannelController } = require("../controllers/channelController");
+const { getListSubscribeOfChannel, subChannelController, getListSubscribeOfUser } = require("../controllers/channelController");
 
 const express = require("express");
 const { verifyUser } = require("../middlewares/verifyToken");
 const channelRouter = express.Router();
 
-channelRouter.get("/getListFollowed/:channelId", getListSubscribe)
+channelRouter.get("/getListFollowed/:channelId", getListSubscribeOfChannel)
+channelRouter.get("/getListFollower/", verifyUser, getListSubscribeOfUser)
 
 // unsub/sub
-channelRouter.post("/subcribe", verifyUser, subChannelController)
-channelRouter.post("/unSubcribe", verifyUser, unSubChannelController)
+channelRouter.post("/subscribe", verifyUser, subChannelController)
 
 module.exports = channelRouter;

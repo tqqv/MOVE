@@ -7,19 +7,31 @@
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
-  import ProfileEdit from '@components/PersonalProfile/ProfileEdit.vue';
-  import NotificationEdit from '@components/PersonalProfile/NotificationEdit.vue';
+  import ProfileEdit from '@components/personalProfile/ProfileEdit.vue';
+  import NotificationEdit from '@components/personalProfile/NotificationEdit.vue';
+  import { useUserStore } from '@/stores/user.store';
 
   const tabs = ref([
     { title: 'Profile', component: markRaw(ProfileEdit), value: '0' },
     { title: 'Notification', component: markRaw(NotificationEdit), value: '1' },
   ]);
+
+  const userStore = useUserStore();
 </script>
 
 <template>
+<<<<<<< HEAD:client/src/components/PersonalProfile/ProfileContent.vue
   <section class="px-10 pb-0 flex-grow">
     <!-- EMAIL EMPTY -->
     <div class="flex gap-y-4 gap-x-2 items-start justify-between notification_custom relative">
+=======
+  <section class="px-2 flex-grow">
+    <!-- EMAIL EMPTY -->
+    <div
+      v-show="!userStore.user?.email"
+      class="flex gap-y-4 gap-x-2 items-start justify-between notification_custom relative"
+    >
+>>>>>>> 25d78442dfa9360f8b50599a49218046f5b09047:client/src/components/personalProfile/ProfileContent.vue
       <h1 class="text_para text-left">
         Your email is not setup yet. You may not be able to receive any
         <span class="font-bold">billing information</span> or

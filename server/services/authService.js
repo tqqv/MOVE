@@ -99,7 +99,6 @@ const register = async (userData) => {
 };
 
 const login = async (userData) => {
-  // console.log(userData);
   const user = await User.findOne({
     where: { email: userData.email },
   });
@@ -123,23 +122,18 @@ const login = async (userData) => {
     };
   }
 
-  // console.log(user.dataValues);
-
-  // const { password, role, ...rest } = user.dataValues;
-
   const token = jwt.sign(
     { id: user.id, role: user.role },
     process.env.JWT_SECRET_KEY,
-    { expiresIn: "15d" }
+    { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
   );
 
   // set token in cookies
-  console.log("token: " + token);
   return {
     cookie: {
       cookieName: "accessToken",
       token: token,
-      expires: token.expiresIn,
+      expires: process.env.TOKEN_EXPIRES_LOGIN,
     },
     status: 200,
     message: "Successfully login",
@@ -154,12 +148,13 @@ const login = async (userData) => {
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    // user: process.env.EMAIL_USER,
-    // pass: process.env.EMAIL_PASSWORD,
-    user: "duyan3k@gmail.com",
-    pass: "weifwabvmsbynnxl",
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+    // user: "duyan3k@gmail.com",
+    // pass: "weifwabvmsbynnxl",
   },
 });
+
 
 const generateVerificationToken = (userId, email) => {
   return jwt.sign({ userId, email }, process.env.JWT_SECRET_KEY, {
@@ -178,7 +173,6 @@ const generateDigitCodeToken = (code, email) => {
 const sendMailVerify = async (email, id) => {
   try {
     const emailCheck = await User.findOne({ where: { email: email } });
-    // console.log(emailCheck);
     if (emailCheck && emailCheck.id !== id) {
       return {
         status: 400,
@@ -186,13 +180,12 @@ const sendMailVerify = async (email, id) => {
       };
     }
 
-    // console.log(user);
     const verificationToken = generateVerificationToken(id, email);
 
     const verificationUrl = `${process.env.CLIENT_HOST}/verify-email?token=${verificationToken}`;
 
     const mailOptions = {
-      from: `"MOVE ADMIN" <duyan3k@gmail.com>`,
+      from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Email Verification With MOVE",
       html: `
@@ -262,20 +255,25 @@ const verifyAccount = async (token) => {
 
 // logic Forgot password - START
 const forgotPassword = async (email) => {
-  console.log(email);
   try {
     const user = await User.findOne({ where: { email: email } });
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found",
+      }
+    }
     const token = generateVerificationToken(user.id, email);
     var mailOptions = {
-      from: `"MOVE ADMIN" <duyan3k@gmail.com>`,
+      from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
       to: user.email,
       subject: "Reset Password - Move",
       html: `
         <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
             <h2 style="color: #04ddb2;">Reset Your Password</h2>
-            <p>Dear ${user.name},</p>
+            <p>Dear ${user.username},</p>
             <p>We received a request to reset your password. Click the button below to reset it:</p>
-            <a href="${process.env.CLIENT_HOST}/reset_password/${token}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">Reset Password</a>
+            <a href="${process.env.CLIENT_HOST}/reset-password/${token}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">Reset Password</a>
             <p>If you didn't request a password reset, please ignore this email.</p>
             <p>Thank you,<br> Move Team</p>
         </div>
@@ -360,7 +358,6 @@ const resetPassword = async (email, userId, newPassword, confirmPassword) => {
     if (newPassword === confirmPassword) {
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(newPassword, salt);
-      // console.log("new mk ", hash);
       user.password = hash;
       await user.save();
     } else {
@@ -415,6 +412,14 @@ const editProfile = async (id, data) => {
         status: 400,
         data: null,
         message: "User not found"
+      }
+    }
+
+    if(user.email && user.isVerified) {
+      return {
+        status: 400,
+        data: null,
+        message: "You can't change your verified email"
       }
     }
 
@@ -626,10 +631,9 @@ const sendMailVerifyFacebook = async (email, fullName) => {
     // generate secret 6 digit - then store in token,
     const sixDigitCode = randomFixedInteger(6)
     const verificationToken =  generateDigitCodeToken(sixDigitCode, email);
-    console.log("6 - digit code: ", sixDigitCode)
     // const verificationToken = generateVerificationTokenFacebook(facebookId, email, fullName);
     const mailOptions = {
-      from: `"MOVE ADMIN" <duyan3k@gmail.com>`,
+      from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: "Email Verification With MOVE Login By Facebook",
       html: `
