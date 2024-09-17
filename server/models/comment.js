@@ -45,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
       },
-      commentContent: {
+      content: {
         type: DataTypes.TEXT,
         allowNull: false
       },
@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: 0,
         allowNull: false
       },
-      parentCommentId: {
+      parentId: {
         type: DataTypes.INTEGER,
         allowNull: true,
         references: {
