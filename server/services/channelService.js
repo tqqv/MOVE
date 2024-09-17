@@ -159,12 +159,174 @@ const listSubscribeOfUser = async(userId) => {
       message: error.message
     }
   }
-
 }
+
+const getProfileChannel = async(channelId) =>{
+  try {
+    const channel = await Channel.findByPk(channelId, {
+      include: [{
+        model: User,
+        attributes: ['username']
+      }]
+    });
+    if(!channel) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found."
+      }
+    }
+
+    return {
+      status: 200,
+      data: channel,
+      message: "Get profile channel successfully."
+    }
+
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const editProfileChannel = async(userId, data, username) => {
+  try {
+
+    if(username === "" || data.channelName === ""){
+      return {
+        status: 400,
+        data: null,
+        message: "Username or channel name cannot be empty."
+      }
+    }
+
+    if(username) {
+      const user = await User.findByPk(userId)
+
+      if(!user) {
+        return {
+          status: 404,
+          data: null,
+          message: "User not found."
+        }
+      }
+
+      const checkExist = await User.findOne({where: {
+        username: username
+      }})
+
+      if(checkExist) {
+        return {
+          status: 400,
+          data: null,
+          message: "Username already exists."
+        }
+      }
+
+      await user.update({
+        username: username
+      })
+    }
+
+    const channel = await Channel.findOne({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: User,
+        attributes: ['username']
+      }]
+    })
+
+    if(!channel) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found."
+      }
+    }
+
+    const updateChannel = await channel.update(data);
+
+    return {
+      status: 200,
+      data: updateChannel,
+      message: "Update profile channel successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const viewChannel = async(username) => {
+  try {
+    const channel = await Channel.findOne({
+      include: [{
+        model: User,
+        attributes: ["username"],
+        where: {
+          username: username
+        }
+      }]
+    });
+
+    if (!channel) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found."
+      };
+    }
+
+
+    const profile = await getProfileChannel(channel.id)
+    if (!profile) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found"
+      }
+    }
+
+    // API list video code here
+
+    const followerCount = await Subscribe.count({
+      where: {
+        channelId: channel.id
+      }
+    });
+
+    return {
+      status: profile.status,
+      data: {
+        profile: profile.data,
+        totalFollower: followerCount,
+      },
+      message: profile.message
+    }
+  } catch (error) {
+     return {
+       status: 500,
+       data: null,
+       message: error.message
+     }
+  }
+ }
+
 
 module.exports = {
   createChannel,
   subscribeChannel,
   listSubscribeOfChannel,
-  listSubscribeOfUser
+  listSubscribeOfUser,
+  getProfileChannel,
+  editProfileChannel,
+  viewChannel
 }
