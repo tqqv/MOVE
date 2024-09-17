@@ -14,7 +14,6 @@ const getLogout = () => {
 const getLoginGoogle = () => {
   return axios.get('/auth/google');
 };
-export { postSignup, postLogin, getLogout, getLoginGoogle };
 //Forgot
 const getVerifyToken = (token) => {
   return axios.get(`/auth/verify-token/${token}`);
