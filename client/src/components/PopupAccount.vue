@@ -14,12 +14,14 @@
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       userStore.clearUserData();
+
       toast.success(response.data.message || 'Logout successful!');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
     }
   };
   const props = defineProps({
+    isUserMenuOpen: { type: Boolean },
     user: {
       type: Object,
       default: () => ({}),

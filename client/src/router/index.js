@@ -1,10 +1,12 @@
 import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
 import Test from '@pages/Test.vue';
 import PersonalProfile from '@pages/PersonalProfile.vue';
+import ResetPassword from '@/pages/ResetPassword.vue';
 
 const routes = [
   { path: '/', component: Test },
   { path: '/personal-profile', component: PersonalProfile },
+  { path: '/reset-password/:token', component: ResetPassword },
 ];
 
 const router = createRouter({

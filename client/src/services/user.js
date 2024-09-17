@@ -9,8 +9,7 @@ const updateProfile = async (data) => {
     const response = await axios.put('/auth/editprofile', data);
     return response.data;
   } catch (error) {
-    console.log(error);
-    throw error;
+    return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
 
@@ -23,4 +22,14 @@ const changePassword = async (data) => {
   }
 };
 
-export { getProfile, updateProfile, changePassword };
+const viewFollowChannel = async () => {
+  try {
+    const response = await axios.get('/channel/getListFollower');
+    return response.data; 
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+
+export { getProfile, updateProfile, changePassword, viewFollowChannel };
