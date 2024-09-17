@@ -1,8 +1,7 @@
-const { getListSubscribeOfChannel, subChannelController, getListSubscribeOfUser, getProfileChannelController, updateProfileChannelController } = require("../controllers/channelController");
-
 const express = require("express");
-const { verifyUser } = require("../middlewares/verifyToken");
 const channelRouter = express.Router();
+const { getListSubscribeOfChannel, subChannelController, getListSubscribeOfUser, getProfileChannelController, updateProfileChannelController } = require("../controllers/channelController");
+const { verifyUser } = require("../middlewares/verifyToken");
 
 channelRouter.get("/getListFollowed/:channelId", getListSubscribeOfChannel)
 channelRouter.get("/getListFollower/", verifyUser, getListSubscribeOfUser)
