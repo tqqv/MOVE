@@ -61,38 +61,34 @@
   <div class="space-y-8">
     <div class="grid grid-cols-10 gap-6 pt-2">
       <div class="col-span-7 bg-black text-white p-3 rounded-lg space-y-2">
-        <span class="font-bold text-[17px]">About {{ props.videoDetails.name }}</span>
-        <p v-if="props.videoDetails.description.length > 0" class="text-sm break-words">
-          {{ props.videoDetails.description }}
+        <span class="font-bold text-[17px]">About {{ videoDetails.name }}</span>
+        <p v-if="videoDetails.description.length > 0" class="text-sm break-words">
+          {{ videoDetails.description }}
         </p>
         <p v-else class="text-sm break-words italic">No information found.</p>
       </div>
       <div class="col-span-3 space-y-2">
         <span class="font-bold text-[17px] text-black">Social network</span>
         <div
-          v-if="
-            props.videoDetails.isFacebook &&
-            props.videoDetails.isYoutube &&
-            props.videoDetails.isInstagram
-          "
+          v-if="videoDetails.isFacebook && videoDetails.isYoutube && videoDetails.isInstagram"
           class="flex gap-4"
         >
           <a
-            v-if="props.videoDetails.isFacebook"
+            v-if="videoDetails.isFacebook"
             href="https://www.facebook.com"
             target="_blank"
             rel="noopener noreferrer"
           >
             <FacebookIcon class="cursor-pointer" /> </a
           ><a
-            v-if="props.videoDetails.isYoutube"
+            v-if="videoDetails.isYoutube"
             href="https://www.facebook.com"
             target="_blank"
             rel="noopener noreferrer"
           >
             <YoutubeIcon class="cursor-pointer" /> </a
           ><a
-            v-if="props.videoDetails.isInstagram"
+            v-if="videoDetails.isInstagram"
             href="https://www.facebook.com"
             target="_blank"
             rel="noopener noreferrer"
@@ -104,7 +100,7 @@
       </div>
     </div>
     <div class="space-y-8">
-      <div class="text-2xl font-bold text-black">{{ props.videoDetails.name }} is following</div>
+      <div class="text-2xl font-bold text-black">{{ videoDetails.name }} is following</div>
       <div class="grid grid-cols-4 gap-4">
         <div
           v-for="(item, index) in dataFollowing"

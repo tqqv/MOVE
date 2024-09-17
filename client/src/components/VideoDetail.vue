@@ -52,27 +52,27 @@
         <div
           :class="[
             'flex items-center justify-center  w-16 h-16 rounded-full',
-            props.videoDetails.isLive ? 'border-[3px] border-red' : '',
+            videoDetails.isLive ? 'border-[3px] border-red' : '',
           ]"
         >
           <img
-            :src="props.videoDetails.avatar"
+            :src="videoDetails.avatar"
             alt="Avatar"
             class="w-full h-full rounded-full object-cover p-[1.5px]"
           />
           <Live
-            v-if="props.videoDetails.isLive"
+            v-if="videoDetails.isLive"
             class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
           />
         </div>
       </div>
       <div>
         <p class="text-[20px] flex items-center">
-          {{ props.videoDetails.name }}
-          <Verified v-if="props.videoDetails.isVerified" class="ml-2 mb-1 mr-2 fill-blue" />
-          is now {{ props.videoDetails.status }}
+          {{ videoDetails.name }}
+          <Verified v-if="videoDetails.isVerified" class="ml-2 mb-1 mr-2 fill-blue" />
+          is now {{ videoDetails.status }}
         </p>
-        <p class="text-[14px] text-body">{{ props.videoDetails.followers }} followers</p>
+        <p class="text-[14px] text-body">{{ videoDetails.followers }} followers</p>
       </div>
     </div>
     <div
@@ -93,7 +93,7 @@
     >
       <share class="mr-1" /> Share
     </div>
-    <button v-if="props.isButtonGiftREPsVisible" class="btn">
+    <button v-if="isButtonGiftREPsVisible" class="btn">
       Gift REPs <i class="pi pi-angle-right text-white" />
     </button>
     <div class="relative">
