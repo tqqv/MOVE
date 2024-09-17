@@ -23,6 +23,9 @@ const postLogin = async (data) => {
 const getLogout = () => {
   return axios.get('/auth/logout');
 };
+const getLoginGoogle = () => {
+  return axios.get('/auth/google');
+};
 //Forgot
 const getVerifyToken = (token) => {
   return axios.get(`/auth/verify-token/${token}`);

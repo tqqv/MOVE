@@ -20,12 +20,9 @@
 </script>
 
 <template>
-  <section class="px-2 flex-grow">
+  <section class="px-10 pb-0 flex-grow">
     <!-- EMAIL EMPTY -->
-    <div
-      v-show="!userStore.user?.email"
-      class="flex gap-y-4 gap-x-2 items-start justify-between notification_custom relative"
-    >
+    <div class="flex gap-y-4 gap-x-2 items-start justify-between notification_custom relative">
       <h1 class="text_para text-left">
         Your email is not setup yet. You may not be able to receive any
         <span class="font-bold">billing information</span> or

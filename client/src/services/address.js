@@ -1,6 +1,4 @@
 import axios from 'axios';
-
-
 const apiBaseUrl = 'https://api.countrystatecity.in/v1/countries';
 
 const axiosCountryInstance = axios.create({

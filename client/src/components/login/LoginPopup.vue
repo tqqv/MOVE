@@ -1,7 +1,7 @@
 <script setup>
   import { ref, computed, onMounted, watch } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
-  import facebook from '@/components/icons/facebook.vue';
+  import facebook from '@/components/icons/facebookLogin.vue';
   import { usePopupStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { postLogin } from '@/services/auth';
@@ -51,8 +51,19 @@
 
   const handleGoogleLogin = () => {
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
-    window.location.href = url;
+    window.open(url, '_self');
   };
+
+  // onMounted(async () => {
+  //   try {
+  //     await userStore.fetchUserProfile();
+  //     if (!userStore.user) {
+  //       toast.error('Failed to fetch user profile');
+  //     }
+  //   } catch (error) {
+  //     toast.error('Failed to fetch user profile');
+  //   }
+  // });
 </script>
 
 <template>
