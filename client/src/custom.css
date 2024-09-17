@@ -6,10 +6,12 @@
 .scrollbar-custom::-webkit-scrollbar {
   width: 8px;
 }
+
 .scrollbar-custom::-webkit-scrollbar-thumb {
   background-color: rgba(19, 208, 180, 0.8);
   border-radius: 4px;
 }
+
 .scrollbar-custom::-webkit-scrollbar-track {
   background-color: rgb(19, 208, 180, 0.2);
   border-radius: 4px;
@@ -18,15 +20,19 @@
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
 /* Hide scrollbar for IE, Edge, and Firefox */
 .scrollbar-hide {
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
 }
 
 .padding-nav {
   padding-top: 102px;
 }
+
 .active-nav {
   width: 4px;
   height: 20px;
@@ -34,27 +40,28 @@
   background-color: white;
   left: 0;
 }
+
 .p-tablist-active-bar {
   display: none;
 }
+
 .p-tab-active {
   border-color: #13d0b4;
   color: #13d0b4;
   border-width: 0 0 4px 0;
 }
-.p-dialog-content {
-  padding: 0 1rem 0rem 1rem;
-}
+
+/* CUSTOM DIALOG */
+
+
 .p-tabpanels {
   padding-bottom: 0;
 }
-.p-dialog-header {
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
+
 .p-tablist {
   padding: 0 18px;
 }
+
 /* .p-tablist-tab-list {
   justify-content: center;
 } */
@@ -63,12 +70,15 @@
 .p-fileupload-advanced .p-message {
   margin-bottom: 36px;
 }
+
 .p-fileupload-advanced {
   border-color: #13d0b4;
 }
+
 .p-fileupload-header {
   display: none;
 }
+
 .p-fileupload-content {
   padding: 0;
 }
@@ -77,6 +87,7 @@
 .p-progressbar-value {
   background-color: #3be0c8;
 }
+
 .hide-progress-value .p-progressbar-label {
   display: none;
 }
@@ -94,6 +105,7 @@
   mask-composite: subtract;
   animation: l3 1s infinite linear;
 }
+
 @keyframes l3 {
   to {
     transform: rotate(1turn);
@@ -101,15 +113,15 @@
 }
 
 /* CUSTOM DIALOG */
-.p-dialog-header{
+.p-dialog-header {
   padding: 20px 20px 5px 20px;
 }
 
-.p-dialog-title{
+.p-dialog-title {
   font-weight: 700;
   font-size: 20px;
 }
 
-.p-dialog{
+.p-dialog {
   margin: 0 12px;
 }
