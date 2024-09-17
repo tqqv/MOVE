@@ -39,7 +39,7 @@ module.exports = {
         defaultValue: 0,
         allowNull: false
       },
-      parentCommentId: {
+      parentId: {
         type: Sequelize.INTEGER,
         allowNull: true,
         references: {

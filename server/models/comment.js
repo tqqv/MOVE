@@ -8,11 +8,11 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsTo(models.User, {});
       this.belongsTo(models.Video, {});
       this.belongsTo(models.Comment, {
-        foreignKey: 'parentCommentId',
+        foreignKey: 'parentId',
         as: 'parent',
       });
       this.hasMany(models.Comment, {
-        foreignKey: 'parentCommentId',
+        foreignKey: 'parentId',
         as: 'replies',
       });
     }
