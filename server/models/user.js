@@ -20,18 +20,40 @@ module.exports = (sequelize, DataTypes) => {
         as: 'userVideos', // Alias cho videos của người dùng
       });
 
-      // Many-to-many relationship through CategoryFollow
+      // one to many comment
+      this.hasMany(models.Comment, {
+        foreignKey: 'userId',
+        as: 'userComments', // Alias cho rating của người dùng
+      });
+
+      // Many-to-many Category - CategoryFollow
       this.belongsToMany(models.Category, {
         through: models.CategoryFollow,
         foreignKey: 'userId',
         as: 'followedCategories', // Alias for the categories the user follows
       });
 
+      // many to many channel - subcribe
       this.belongsToMany(models.Channel, {
         through: models.Subscribe,
         foreignKey: 'userId',
-        as: 'userSubscribe', // Alias for the categories the user follows
+        as: 'userSubscribe',
       });
+
+      // many to many video - video view
+      this.belongsToMany(models.Video, {
+        through: models.ViewVideo,
+        foreignKey: 'viewerId',
+        as: 'userViewVideo',
+      });
+
+      // many to many video - rating
+      this.belongsToMany(models.Video, {
+      through: models.Rating,
+      foreignKey: 'userId',
+      as: 'userRating',
+      });
+
     }
   }
   User.init(
