@@ -1,6 +1,23 @@
 const db = require("../models/index.js");
 const { Comment, Video, User } = db;
 
+const checkLevelAndGetParentId = async (parentId) => {
+  // Tìm cha của comment được reply
+  const parentCommentLevel1 = await Comment.findOne({ where: { id: parentId } });
+  // Nếu không có cha thì trả về chính parentId input param
+  if (!parentCommentLevel1.parentId) {
+    return parentId;
+  } else {
+    // Nếu parent comment cũng có parentId, tức là level = 2 ( trong level 1 2 3 ), return parentId này
+    const grandParentComment = await Comment.findOne({ where: { id: parentCommentLevel1.parentId } });
+    if (grandParentComment && grandParentComment.parentId) {
+      return grandParentComment.id;
+    } else if(!grandParentComment.parentId) {
+      return parentId
+    }
+  }
+};
+
 const createComment = async (videoId, userId, commentInfor) => {
   try {
     // check exist video or not
@@ -36,6 +53,9 @@ const createComment = async (videoId, userId, commentInfor) => {
         message: "Parent comment's video does not match with input video id."
       }
     }
+
+    // rechoice parent if exceed 2 level.
+    commentInfor.parentId = await checkLevelAndGetParentId(commentInfor.parentId)
 
     const comment = await Comment.create({videoId, userId, ...commentInfor})
     if(!comment) {
