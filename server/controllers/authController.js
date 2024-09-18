@@ -28,9 +28,6 @@ var {
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
-  console.log(loginResult);
-
-
   if (loginResult.cookie) {
     res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires);
   }
@@ -143,8 +140,8 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
-    'google', 
-    { 
+    'google',
+    {
       successRedirect: '/', successMessage:true,
       failureRedirect: '/login', failureMessage: true },
     async (error, user) => {
