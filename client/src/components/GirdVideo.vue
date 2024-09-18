@@ -28,14 +28,14 @@
 </script>
 <template>
   <div class="w-full py-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <div
         v-for="(card, index) in paginatedCards"
         :key="index"
-        class="max-w-sm bg-white rounded-sm shadow overflow-hidden"
+        class="max-w-sm bg-white overflow-hidden"
       >
         <div class="relative">
-          <img :src="card.image" class="object-cover w-full h-[171px]" />
+          <img :src="card.image" class="rounded-lg object-cover w-full h-[171px]" />
           <div
             class="text-xs absolute bottom-2 left-4 flex items-center font-bold text-white bg-black bg-opacity-70 p-1 rounded"
           >
@@ -49,7 +49,7 @@
           </div>
         </div>
 
-        <div class="flex p-3">
+        <div class="flex py-3">
           <div
             :class="[card.isStreaming ? 'border-[3px] border-red' : '']"
             class="flex items-center justify-center size-12 rounded-full"
@@ -75,10 +75,6 @@
             </div>
             <div class="flex items-center text_secondary mb-2">
               {{ card.category }} <span class="font-bold text-xl pl-1 pr-1">•</span> {{ card.date }}
-            </div>
-            <div class="flex gap-2 items-center text-[10px] font-bold mb-2">
-              <span class="bg-[#EEEEEE] rounded-full text-black p-2">{{ card.level }}</span>
-              <span class="bg-[#EEEEEE] rounded-full text-black p-2">{{ card.time }}</span>
             </div>
           </div>
         </div>
