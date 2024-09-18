@@ -15,7 +15,6 @@
   const userStore = useUserStore();
 
   const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dg9imqwrd/image/upload';
-  const CLOUDINARY_KEY = 'euoejrty';
 
   const username = ref('');
   const email = ref('');
@@ -98,7 +97,7 @@
     isLoadingAvatar.value = true;
     const formData = new FormData();
     formData.append('file', selectedFile);
-    formData.append('upload_preset', CLOUDINARY_KEY);
+    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_KEY);
     try {
       const response = await axios.post(CLOUDINARY_URL, formData);
       const data = response.data;
@@ -135,6 +134,7 @@
     };
     try {
       const response = await updateProfile(updatedData);
+      await userStore.fetchUserProfile();
       toast.success(response.message);
     } catch (error) {
       toast.error('Failed to update profile');
@@ -163,14 +163,12 @@
       <h1 class="font-bold">Profile picture</h1>
       <div class="flex">
         <div class="relative">
-          <ProgressSpinner
+          <div
             v-show="isLoadingAvatar"
-            class="size-6 absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
-            strokeWidth="8"
-            fill="transparent"
-            animationDuration=".5s"
-            aria-label="Custom ProgressSpinner"
-          />
+            class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+          >
+            <div class="custom-spinner w-8"></div>
+          </div>
           <img
             :src="avatar"
             :alt="username"
