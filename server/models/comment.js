@@ -6,7 +6,8 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // Define relationships if necessary
       this.belongsTo(models.User, {});
-      this.belongsTo(models.Video, {});
+      // models/Comment.js
+      this.belongsTo(models.Video, { foreignKey: 'videoId' });
       this.belongsTo(models.Comment, {
         foreignKey: 'parentId',
         as: 'parent',

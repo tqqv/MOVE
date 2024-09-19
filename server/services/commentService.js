@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Comment, Video, User } = db;
+const { Comment, Video, Category, User, Sequelize } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -37,12 +37,12 @@ const createComment = async (videoId, userId, commentInfor) => {
       }
     }
 
-    const parentCommentChecker = await Comment.findOne({ where: { id: commentInfor.parentId }});
-    // check parent comment is not null but also not a comment id.
+    const parentCommentChecker = await Comment.findOne({ where: { id: commentInfor.parentId || null }});
+    // check parent comment is not null but also not a comment id. + check cả trường hợp fake parentId cmt
     if(commentInfor.parentId && !parentCommentChecker) {
       return {
         status: 404,
-        message: "Parent comment id is not valid. Not null but also not a comment."
+        message: "Parent comment id is not valid. Not null but also not a comment id."
       }
     }
 
@@ -54,9 +54,8 @@ const createComment = async (videoId, userId, commentInfor) => {
       }
     }
 
-    // rechoice parent if exceed 2 level.
-    commentInfor.parentId = await checkLevelAndGetParentId(commentInfor.parentId)
-
+    // Nếu parentId != null, thì phải kiểm tra để xem parent của nó là comment nào.
+    commentInfor.parentId = !commentInfor.parentId  ? null : await checkLevelAndGetParentId(commentInfor.parentId)
     const comment = await Comment.create({videoId, userId, ...commentInfor})
     if(!comment) {
         return {
@@ -80,12 +79,137 @@ const createComment = async (videoId, userId, commentInfor) => {
   }
 }
 
-const getVideoComments = async () => {
+const getCommentsByVideo = async (videoId, page, pageSize) => {
+
+  const comments = await Comment.findAll({
+    where: {
+      parentId: null,
+      videoId: videoId,
+    },
+    attributes: {
+      include: [
+        // Subquery để đếm số lượng bình luận con và cháu
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM move.comments AS replies
+            WHERE replies.parentId = Comment.id
+            OR replies.parentId IN (
+              SELECT grandchild.id
+              FROM move.comments AS grandchild
+              WHERE grandchild.parentId = Comment.id
+            )
+          )`),
+          'totalRepliesCount'
+        ]
+      ]
+    },
+    order: [
+      ['updatedAt', 'ASC']
+    ],
+    offset: (page - 1) * pageSize,
+    limit: pageSize * 1,
+  })
+
+  return {
+    status: 200,
+    data: comments,
+    message: "Get comments success"
+  }
 }
 
-const getChildCommentByCommentId = async () => {
+const getCommentsByChannelId = async (userId, page, pageSize) => {
+  const commentsWithVideo = await Video.findAll({
+    where: {
+      userId: userId, // Lọc Video theo userId
+    },
+    attributes: ['thumbnailUrl', 'title', 'updatedAt'], // Lấy các thuộc tính từ Video
+    include: [
+      {
+        model: Comment, // Join với Comment
+        attributes: {
+          include: [
+            // Subquery để đếm số lượng bình luận con và cháu
+            [
+              Sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM move.comments AS replies
+                WHERE replies.parentId = Comments.id
+                OR replies.parentId IN (
+                  SELECT grandchild.id
+                  FROM move.comments AS grandchild
+                  WHERE grandchild.parentId = Comments.id
+                )
+              )`),
+              'totalRepliesCount'
+            ]
+          ]
+        },
+        required: true, // Chỉ lấy Video có comment
+        include: [
+          {
+            model: Comment, // Join tiếp với các bình luận con (có thể không cần thiết nếu chỉ cần đếm)
+            as: 'replies',
+            attributes: [],
+          }
+        ]
+      },
+      {
+        model: Category, // Join với Category để lấy tên danh mục
+        attributes: ['id', 'title'],
+        as: 'category',
+      }
+    ],
+    order: [
+      ['updatedAt', 'ASC']
+    ],
+    offset: (page - 1) * pageSize,
+    limit: pageSize * 1,
+  });
+
+
+  return {
+    status: 200,
+    data: commentsWithVideo,
+    message: "Get comments by parent id success"
+  }
 }
+
+const getChildCommentsByParentId = async (parentId, page, pageSize) => {
+  const comments = await Comment.findAll({
+    where: {
+      parentId: parentId,
+    },
+    attributes: {
+      include: [
+        // Subquery để đếm số lượng bình luận con và cháu
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM move.comments AS replies
+            WHERE replies.parentId = Comment.id
+          )`),
+          'totalRepliesCount'
+        ]
+      ]
+    },
+    order: [
+      ['updatedAt', 'ASC']
+    ],
+    offset: (page - 1) * pageSize,
+    limit: pageSize * 1,
+  })
+
+  return {
+    status: 200,
+    data: comments,
+    message: "Get comments by parent id success"
+  }
+}
+
 module.exports = {
     createComment,
-    getVideoComments
+    getCommentsByVideo,
+    getChildCommentsByParentId,
+    getCommentsByChannelId
 }
