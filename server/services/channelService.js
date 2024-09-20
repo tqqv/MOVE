@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { Channel, Subscribe, User, Video, Category } = db;
+const { Channel, Subscribe, User, Video, Category, CategoryFollow } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -324,7 +324,7 @@ const viewChannel = async(username) => {
        message: error.message
      }
   }
- }
+}
 
 const searchVideoChannel = async(data, limit, offset) => {
   try {
@@ -400,6 +400,76 @@ const searchVideoChannel = async(data, limit, offset) => {
   }
 };
 
+const getAllInforFollow = async(userId) => {
+  try {
+    const listSubscribe = await Subscribe.findAll({
+      where: {
+        userId: userId
+      },
+      attributes: ['channelId'],
+      include: [{
+        model: Channel,
+        as: "subscribeChannel",
+        attributes: ['userId']
+      }]
+    })
+
+    const listUserIdOfChannel = listSubscribe.map(follow => follow.subscribeChannel.userId);
+
+    const videos = await Video.findAll({
+      where: {
+        userId: {
+          [Op.in]: listUserIdOfChannel
+        }
+      },
+      include: [{
+        model: User,
+        as: 'user',
+        attributes: ['username'],
+        include: [{ model: Channel, attributes: ['channelName', 'avatar'] }]
+      }],
+      limit: 6,
+      order: [['createdAt', 'DESC']]
+    });
+
+    const cate = await CategoryFollow.findAll({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: Category,
+        as: 'category',
+        attributes: ['title', 'imgUrl'],
+      }],
+      limit: 4,
+      order: [['createdAt', 'DESC']]
+    })
+
+    if(!videos && !cate) {
+      return {
+        status: 200,
+        data: null,
+        message: "No channels, categories have been followed."
+      }
+    }
+
+    return {
+      status: 200,
+      data: {
+        categories: cate,
+        videos: videos
+      },
+      message: "Get all infor successfully"
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
 
 module.exports = {
   createChannel,
@@ -409,5 +479,6 @@ module.exports = {
   getProfileChannel,
   editProfileChannel,
   viewChannel,
-  searchVideoChannel
+  searchVideoChannel,
+  getAllInforFollow
 }
