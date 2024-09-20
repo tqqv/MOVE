@@ -1,24 +1,40 @@
 <script setup>
-  import axios from 'axios';
-  import { ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import FacebookIcon from '@/components/icons/facebookIcon.vue';
   import YoutubeIcon from '@/components/icons/youtubeIcon.vue';
   import InstagramIcon from '@/components/icons/instagramIcon.vue';
   import Button from 'primevue/button';
+  import { useStreamerStore } from '@/stores/streamer.store';
+  import { updateChannelProfile } from '@/services/streamer';
+  import { toast } from 'vue3-toastify';
+  import { checkDataChanged, getChangedFields } from '@/functions/compareData';
+  import { uploadAvatar } from '@/services/cloudinary';
 
-    
-
-  const streamKey = ref('12345678');
+  const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
-  const avatar = ref('');
-  const username = ref('');
-  const bio = ref('');
-  const facebookLink = ref('');
-  const instagramLink = ref('');
-  const youtubeLink = ref('');
+  const profileData = ref({
+    streamKey: '',
+    avatar: '',
+    username: '',
+    channelName: '',
+    bio: '',
+    facebookUrl: '',
+    instaUrl: '',
+    youtubeUrl: '',
+  });
+  const initialProfileData = ref({ ...profileData.value });
+
+  // COPY STREAMKEY
+  const copyToClipboard = () => {
+    if (profileData.value.streamKey) {
+      navigator.clipboard.writeText(profileData.value.streamKey);
+      toast.success('Copy stream key successfully');
+    } else {
+      toast.error('No Stream Key to copy!');
+    }
+  };
 
   //   UPDATE AVATAR
-  const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dg9imqwrd/image/upload';
   const isLoadingAvatar = ref(false);
   const fileInputRef = ref(null);
 
@@ -31,14 +47,11 @@
     if (!selectedFile) return;
 
     isLoadingAvatar.value = true;
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_KEY);
+
     try {
-      const response = await axios.post(CLOUDINARY_URL, formData);
-      const data = response.data;
+      const data = await uploadAvatar(selectedFile);
       if (data.secure_url) {
-        avatar.value = data.secure_url;
+        profileData.value.avatar = data.secure_url;
       } else {
         isLoadingAvatar.value = false;
         console.error(error);
@@ -50,33 +63,82 @@
       isLoadingAvatar.value = false;
     }
   };
+
+  // CHECK THE CHANGE OF VALUE
+  const isProfileChanged = computed(() =>
+    checkDataChanged(profileData.value, initialProfileData.value),
+  );
+
+  //UPDATE PROFILE CHANNEL
+  const handleUpdateProfileChannel = async () => {
+    const changedFields = getChangedFields(profileData.value, initialProfileData.value);
+    if (Object.keys(changedFields).length > 0) {
+      try {
+        const response = await updateChannelProfile(changedFields);
+        if (!response.error) {
+          initialProfileData.value = { ...profileData.value };
+          toast.success(response.message);
+        } else {
+          toast.error(response.message);
+        }
+      } catch (error) {
+        toast.error('Failed to update profile');
+      } finally {
+        await streamerStore.fetchProfileChannel();
+      }
+    }
+  };
+
+  onMounted(async () => {
+    await streamerStore.fetchProfileChannel();
+    if (streamerStore.streamerChannel) {
+      profileData.value = {
+        avatar: streamerStore.streamerChannel.avatar,
+        username: streamerStore.streamerChannel.User.username,
+        streamKey: streamerStore.streamerChannel.streamKey,
+        channelName: streamerStore.streamerChannel.channelName,
+        bio: streamerStore.streamerChannel.bio,
+        facebookUrl: streamerStore.streamerChannel.facebookUrl,
+        instaUrl: streamerStore.streamerChannel.instaUrl,
+        youtubeUrl: streamerStore.streamerChannel.youtubeUrl,
+      };
+      initialProfileData.value = { ...profileData.value };
+    }
+  });
 </script>
 <template>
-  <div class="py-4 mb-6 w-full md:w-1/2">
+  <form
+    @submit.prevent="handleUpdateProfileChannel"
+    autocomplete="off"
+    class="py-4 mb-6 w-full md:w-2/3 lg:w-1/2"
+  >
     <!-- STREAM KEY -->
     <div class="">
       <h1 class="text_subTitle text-[20px] mb-2">Stream key</h1>
-      <p class="text_para">
+      <p class="text_subLabel">
         Your stream key connects your stream to MOVE. Never share your stream key with anyone or
         show it on stream!
       </p>
       <div class="flex justify-center mt-6 mb-2 gap-x-8">
         <input
-          v-model="streamKey"
+          v-model="profileData.streamKey"
           :type="showStreamKey ? 'text' : 'password'"
           class="input_custom"
+          autocomplete="false"
         />
         <div
-          class="flex justify-center items-center text-white p-3 rounded-full bg-primary cursor-pointer"
+          v-tooltip.top="'copy stream key'"
+          class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
+          @click="copyToClipboard"
         >
           <i class="pi pi-link text-2xl"></i>
         </div>
       </div>
-      <button @click="showStreamKey = !showStreamKey" class="text_link">Show</button>
+      <div @click="showStreamKey = !showStreamKey" class="text_link cursor-pointer">Show</div>
     </div>
     <hr class="h-px my-4 bg-gray-dark border-0" />
     <!-- UPDATE PROFILE  -->
-    <form class="flex flex-col gap-y-3 pt-3">
+    <div class="flex flex-col gap-y-3 pt-3">
       <!-- AVATAR -->
       <div class="flex flex-col gap-y-5">
         <h1 class="font-bold">Profile picture</h1>
@@ -89,9 +151,9 @@
               <div class="custom-spinner w-8"></div>
             </div>
             <img
-              :src="avatar"
-              :alt="username"
-              class="size-20 rounded-full"
+              :src="profileData.avatar"
+              :alt="profileData.channelName"
+              class="size-20 rounded-full object-cover"
               :class="{ 'opacity-20': isLoadingAvatar }"
             />
           </div>
@@ -117,10 +179,25 @@
         <!-- USERNAME -->
         <div class="flex flex-col gap-y-3">
           <div class="flex flex-col gap-y-1">
-            <label for="username" class="text_subTitle">Username</label>
-            <p class="text_subLabel">Name that wIll display on your channel & MOVE</p>
+            <label for="" class="text_subTitle">Username</label>
+            <p class="text_subLabel">Name that will display on your username & MOVE</p>
           </div>
-          <input v-model="username" value="" type="text" class="input_custom" required />
+          <input
+            v-model="profileData.username"
+            type="text"
+            class="input_custom"
+            autocomplete="false"
+            required
+          />
+         
+        </div>
+        <!-- CHANNEL NAEM -->
+        <div class="flex flex-col gap-y-3">
+          <div class="flex flex-col gap-y-1">
+            <label for="channelName" class="text_subTitle">Channel name</label>
+            <p class="text_subLabel">Name that will display on your channel & MOVE</p>
+          </div>
+          <input v-model="profileData.channelName" type="text" class="input_custom" required />
         </div>
         <!-- BIO -->
         <div class="flex flex-col gap-y-3">
@@ -131,14 +208,14 @@
             <p class="text_subLabel">Tell us a little bit about yourself</p>
           </div>
           <textarea
-            v-model="bio"
+            v-model="profileData.bio"
             type="text"
             class="input_custom h-32 resize-none"
             placeholder="Write something about yourself"
           ></textarea>
         </div>
         <!-- SOCIAL MEDIA -->
-        <div class="flex flex-col gap-y-3">
+        <div class="flex flex-col gap-y-4">
           <div class="flex flex-col gap-y-1">
             <label for="bio"
               ><span class="text_subTitle">Social links </span
@@ -146,11 +223,11 @@
             >
             <p class="text_subLabel">Add social links to display on your channel</p>
           </div>
-          <div class="flex flex-col gap-y-4">
+          <div class="flex flex-col gap-y-6">
             <div class="flex items-center gap-x-3">
               <FacebookIcon class="cursor-pointer" />
               <input
-                v-model="facebookLink"
+                v-model="profileData.facebookUrl"
                 placeholder="www.facebook.com/facebook"
                 type="text"
                 class="input_custom"
@@ -159,7 +236,7 @@
             <div class="flex items-center gap-x-3">
               <InstagramIcon class="cursor-pointer" />
               <input
-                v-model="instagramLink"
+                v-model="profileData.instaUrl"
                 placeholder="www.instagram.com/instagram"
                 type="text"
                 class="input_custom"
@@ -168,7 +245,7 @@
             <div class="flex items-center gap-x-3">
               <YoutubeIcon class="cursor-pointer" />
               <input
-                v-model="youtubeLink"
+                v-model="profileData.youtubeUrl"
                 placeholder="www.youtube.com/youtube"
                 type="text"
                 class="input_custom"
@@ -179,11 +256,12 @@
       </div>
       <!-- BUTTON -->
       <Button
+        :disabled="!isProfileChanged"
         type="submit"
         label="Save settings"
-        class="btn w-full md:w-1/2  mt-8 whitespace-nowrap"
+        class="btn w-full lg:w-1/3 mt-8 whitespace-nowrap"
+        :class="{ 'bg-footer': !isProfileChanged }"
       />
-      
-    </form>
-  </div>
+    </div>
+  </form>
 </template>

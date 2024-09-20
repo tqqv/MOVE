@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, computed } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
   import ChangePasswordPopup from '../changePassword/ChangePasswordPopup.vue';
@@ -9,22 +9,25 @@
   import { useUserStore } from '@/stores/user.store';
   import { updateProfile } from '@/services/user';
   import { toast } from 'vue3-toastify';
-  import ProgressSpinner from 'primevue/progressspinner';
-  import axios from 'axios';
+  import { uploadAvatar } from '@/services/cloudinary';
+  import { checkDataChanged, getChangedFields } from '@/functions/compareData';
 
   const userStore = useUserStore();
 
-  const CLOUDINARY_URL = 'https://api.cloudinary.com/v1_1/dg9imqwrd/image/upload';
 
-  const username = ref('');
-  const email = ref('');
-  const fullName = ref('');
-  const gender = ref('');
-  const country = ref('');
-  const state = ref('');
-  const city = ref('');
-  const avatar = ref('');
-  const dob = ref('');
+  const profileData = ref({
+    username: '',
+    email: '',
+    fullName: '',
+    gender: '',
+    country: '',
+    state: '',
+    city: '',
+    avatar: '',
+    dob: '',
+  });
+
+  const initialProfileData = ref({ ...profileData.value });
 
   const countries = ref([]);
   const states = ref([]);
@@ -49,8 +52,7 @@
 
   // UPDATE GENDER
   function updateSelection(value) {
-    gender.value = value;
-    console.log(gender.value);
+    profileData.value.gender = value;
   }
   // OPEN POPUP
   const popupStore = usePopupStore();
@@ -78,8 +80,9 @@
   };
 
   const handleCountryChange = () => {
-    if (country.value.iso2) {
-      loadStates(country.value.iso2);
+    if (profileData.value.country) {
+      loadStates(profileData.value.country.iso2);
+      profileData.value.country = profileData.value.country.name;
     }
   };
 
@@ -95,14 +98,11 @@
     if (!selectedFile) return;
 
     isLoadingAvatar.value = true;
-    const formData = new FormData();
-    formData.append('file', selectedFile);
-    formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_KEY);
+
     try {
-      const response = await axios.post(CLOUDINARY_URL, formData);
-      const data = response.data;
+      const data = await uploadAvatar(selectedFile);
       if (data.secure_url) {
-        avatar.value = data.secure_url;
+        profileData.value.avatar = data.secure_url;
       } else {
         isLoadingAvatar.value = false;
         console.error(error);
@@ -114,45 +114,51 @@
       isLoadingAvatar.value = false;
     }
   };
-  // UPDATE PROFILE
 
+  // CHECK THE CHANGE VALUES
+  const isProfileChanged = computed(() =>
+    checkDataChanged(profileData.value, initialProfileData.value),
+  );
+
+  // UPDATE PROFILE
   const handleUpdate = async () => {
-    if (!isAgeValid(dob.value)) {
+    if (!isAgeValid(profileData.value.dob)) {
       toast.error('Use must enough 12 years old ');
       return;
     }
-    const updatedData = {
-      username: username.value,
-      email: email.value,
-      fullName: fullName.value,
-      gender: gender.value,
-      country: country.value.name,
-      state: state.value.name,
-      city: city.value,
-      avatar: avatar.value,
-      dob: dob.value,
-    };
-    try {
-      const response = await updateProfile(updatedData);
-      await userStore.fetchUserProfile();
-      toast.success(response.message);
-    } catch (error) {
-      toast.error('Failed to update profile');
+
+    const changedFields = getChangedFields(profileData.value, initialProfileData.value);
+    if (Object.keys(changedFields).length > 0) {
+      try {
+        const response = await updateProfile(changedFields);
+        if (!response.error) {
+          initialProfileData.value = { ...profileData.value };
+          await userStore.fetchUserProfile();
+          toast.success(response.message);
+        } else {
+          toast.error(response.message);
+        }
+      } catch (error) {
+        toast.error('Failed to update profile');
+      }
     }
   };
 
   onMounted(async () => {
     await userStore.fetchUserProfile();
     if (userStore.user) {
-      username.value = userStore.user.username;
-      avatar.value = userStore.user.avatar;
-      email.value = userStore.user.email || 'No found email';
-      fullName.value = userStore.user.fullName;
-      gender.value = userStore.user.gender;
-      country.value = userStore.user.country || 'Select country';
-      state.value = userStore.user.state || 'Select state';
-      city.value = userStore.user.city;
-      dob.value = userStore.user.dob || new Date().toISOString().split('T')[0];
+      profileData.value = {
+        username: userStore.user.username,
+        avatar: userStore.user.avatar,
+        email: userStore.user.email || 'No found email',
+        fullName: userStore.user.fullName,
+        gender: userStore.user.gender,
+        country: userStore.user.country,
+        state: userStore.user.state,
+        city: userStore.user.city,
+        dob: userStore.user.dob,
+      };
+      initialProfileData.value = { ...profileData.value };
     }
     loadCountries();
   });
@@ -170,9 +176,9 @@
             <div class="custom-spinner w-8"></div>
           </div>
           <img
-            :src="avatar"
-            :alt="username"
-            class="size-20 rounded-full"
+            :src="profileData.avatar"
+            :alt="profileData.username"
+            class="size-20 rounded-full object-cover"
             :class="{ 'opacity-20': isLoadingAvatar }"
           />
         </div>
@@ -197,21 +203,27 @@
       <div class="flex flex-col gap-y-4">
         <div class="flex flex-col gap-y-1">
           <label for="username" class="text_para">Username</label>
-          <input v-model="username" value="" type="text" class="input_custom" required />
+          <input
+            v-model="profileData.username"
+            value=""
+            type="text"
+            class="input_custom"
+            required
+          />
         </div>
         <div class="flex flex-col gap-y-1">
           <label for="email" class="text_para">Email</label>
           <div class="relative">
             <input
-              v-model="email"
+              v-model="profileData.email"
               type="email"
               disabled
               class="input_custom"
-              :class="{ 'italic text-body ': !email }"
+              :class="{ 'italic text-body ': !profileData.email }"
               required
             />
             <p
-              v-show="!email"
+              v-show="!profileData.email"
               @click="handleSetDisabledEmail"
               class="absolute text-[13px] right-3 top-2 mt-1 text-primary cursor-pointer"
             >
@@ -221,7 +233,13 @@
         </div>
         <div class="flex flex-col gap-y-1">
           <label for="fullName" class="text_para">Full name</label>
-          <input v-model="fullName" value="" type="text" class="input_custom" required />
+          <input
+            v-model="profileData.fullName"
+            value=""
+            type="text"
+            class="input_custom"
+            required
+          />
         </div>
         <div class="flex flex-col gap-y-6">
           <!--FORGOT PASSWORD  -->
@@ -240,13 +258,13 @@
               <CheckboxCustom
                 label="Male"
                 groupName="gender"
-                :checked="gender === 'Male'"
+                :checked="profileData.gender === 'Male'"
                 @update:modelValue="updateSelection('Male')"
               />
               <CheckboxCustom
                 label="Female"
                 groupName="gender"
-                :checked="gender === 'Female'"
+                :checked="profileData.gender === 'Female'"
                 @update:modelValue="updateSelection('Female')"
               />
             </div>
@@ -255,15 +273,25 @@
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
             <div class="flex">
-              <input v-model="dob" class="w-full select_custom text-[14px]" type="date" name="" />
+              <input
+                v-model="profileData.dob"
+                class="w-full select_custom text-[14px]"
+                type="date"
+                name=""
+              />
             </div>
           </div>
           <!-- COUNTRY VS STATE -->
           <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
             <div class="flex flex-col gap-y-2 w-full md:w-1/2">
-              <label for="gender" class="text_para">City</label>
-              <select v-model="country" class="select_custom" @change="handleCountryChange">
-                <option selected>{{ country }}</option>
+              <label for="gender" class="text_para">Country</label>
+              <select
+                v-model="profileData.country"
+                class="select_custom"
+                @change="handleCountryChange"
+              >
+                <option v-if="!profileData.country" disabled value="null">Select country</option>
+                <option v-else selected>{{ profileData.country }}</option>
                 <option v-for="country in countries" :key="country.code" :value="country">
                   {{ country.name }}
                 </option>
@@ -271,9 +299,10 @@
             </div>
             <div class="flex flex-col gap-y-2 w-full md:w-1/2">
               <label for="district" class="text_para">State</label>
-              <select v-model="state" class="select_custom">
-                <option selected>{{ state }}</option>
-                <option v-for="state in states" :key="state.code" :value="state">
+              <select v-model="profileData.state" class="select_custom">
+                <option v-if="!profileData.state" disabled value="null">Select country</option>
+                <option v-else selected>{{ profileData.state }}</option>
+                <option v-for="state in states" :key="state.code" :value="state.name">
                   {{ state.name }}
                 </option>
               </select>
@@ -282,11 +311,16 @@
           <!-- CITY -->
           <div class="flex flex-col w-full md:w-1/2 gap-y-2">
             <label for="gender" class="text_para">City</label>
-            <input v-model="city" value="" type="text" class="input_custom" />
+            <input v-model="profileData.city" value="" type="text" class="input_custom" />
           </div>
         </div>
       </div>
-      <Button type="submit" label="Save settings" class="btn w-full md:w-1/2 mt-8" />
+      <Button
+        :disabled="!isProfileChanged"
+        type="submit"
+        label="Save settings"
+        class="btn w-full md:w-1/2 mt-8"
+      />
     </div>
     <ChangePasswordPopup />
     <ChangePasswordSuccessPopup />

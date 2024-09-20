@@ -85,6 +85,9 @@
   .btn_eyes {
     @apply flex justify-center items-center absolute top-1/2 right-2 transform -translate-y-1/2 z-20 px-3 cursor-pointer text-[#666666];
   }
+  .text_subLabel{
+    @apply text-[13px] text-[#777777]
+  }
 }
 
 @media only screen and (max-width: 1024px) {
