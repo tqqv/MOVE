@@ -6,6 +6,7 @@ var cookieParser = require("cookie-parser");
 const { connection } = require("./config/connectDB");
 const authRouter = require("./routes/authRoute.js");
 const channelRouter = require("./routes/channelRoute.js");
+const commentRouter = require("./routes/commentRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -24,6 +25,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/auth", authRouter);
 app.use("/api/channel", channelRouter);
+app.use("/api/comment", commentRouter);
 
 // connect DB
 connection();
