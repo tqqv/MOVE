@@ -48,9 +48,13 @@
 </script>
 
 <template>
-  <div class="grid gap-4 p-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-6">
+  <div class="flex flex-wrap gap-6 pt-2">
     <div v-for="category in categories" :key="category.id" class="flex flex-col items-start">
-      <img :src="category.image" :alt="category.name" class="rounded-sm w-full h-auto" />
+      <img
+        :src="category.image"
+        :alt="category.name"
+        class="rounded-lg w-full h-auto cursor-pointer"
+      />
       <h3 class="mt-2 text_subTitle">{{ category.name }}</h3>
       <p class="text_secondary">{{ category.views }} views</p>
     </div>

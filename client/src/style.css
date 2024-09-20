@@ -33,7 +33,9 @@
   .text_title {
     @apply py-[15px] text-[24px] text-title font-bold;
   }
-
+  .text_nav {
+    @apply text-base font-bold;
+  }
   .text_subTitle {
     @apply text-[18px] text-title font-bold;
   }
