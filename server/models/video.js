@@ -23,6 +23,9 @@ module.exports = (sequelize, DataTypes) => {
           as: 'category',
       });
 
+      // models/Video.js
+      this.hasMany(models.Comment, { foreignKey: 'videoId' });
+
       // many to many video to User - view video
       this.belongsToMany(models.User, {
         through: models.ViewVideo,
@@ -90,14 +93,6 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
           allowNull: false,
           defaultValue: 'public',
-        },
-        createdAt: {
-          type: DataTypes.DATE,
-          defaultValue: DataTypes.NOW,
-        },
-        updatedAt: {
-          type: DataTypes.DATE,
-          defaultValue: DataTypes.NOW,
         },
       },
       {
