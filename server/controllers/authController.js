@@ -32,7 +32,9 @@ const loginController = async (req, res, next) => {
 
 
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires);
+    // console.log("hiiiiiiiiiii");
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires)
+    .cookie('isLogin','true', loginResult.cookie.expires)
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
@@ -53,6 +55,8 @@ const registerController = async (req, res, next) => {
 
 const logoutController = async (req, res, next) => {
   res.clearCookie("accessToken");
+  res.clearCookie("isLogin", { httpOnly: true, secure: true });
+
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
 
@@ -155,6 +159,7 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
+        .cookie('isLogin','true')
         .redirect(process.env.CLIENT_HOST)
       }
     }
