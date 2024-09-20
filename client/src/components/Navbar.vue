@@ -17,7 +17,7 @@
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import { useUserStore } from '@/stores/user.store';
-
+  import { RouterLink } from 'vue-router';
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
@@ -120,16 +120,16 @@
         <div class="flex items-center justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
-              <a
-                href="#"
-                class="rounded-md bg-gray-900 px-3 py-2 text_nav font-bold"
+              <RouterLink
+                to="#"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 aria-current="page"
-                >Following</a
+                >Following</RouterLink
               >
-              <a
-                href="#"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-gray-700 font-bold"
-                >Browse</a
+              <RouterLink
+                to="/browse"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                >Browse</RouterLink
               >
             </div>
           </div>
@@ -137,7 +137,7 @@
         <div
           class="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-auto"
         >
-          <a href="#"><img class="h-8 w-auto" :src="logo" alt="Madison" /></a>
+          <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
         <div class="items-center gap-x-6 hidden md:flex">
           <!-- User -->
@@ -152,7 +152,11 @@
 
           <!-- User -->
           <template v-else
-            ><h2 class="text-nowrap text_nav font-bold">Get REP$</h2>
+            ><RouterLink
+              class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
+            >
+              Get REP$
+            </RouterLink>
 
             <div class="relative">
               <OverlayBadge
