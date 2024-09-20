@@ -1,11 +1,12 @@
+const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { Channel, Subscribe, User } = db;
+const { Channel, Subscribe, User, Video, Category } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
-const createChannel = async (userId) => {
+const createChannel = async (userId, username, avatar) => {
   try {
-    const channel = await Channel.create({ userId: userId })
+    const channel = await Channel.create({ userId: userId, channelName: username, avatar: avatar })
 
     if(!channel) {
         return {
@@ -161,20 +162,25 @@ const listSubscribeOfUser = async(userId) => {
   }
 }
 
-const getProfileChannel = async(channelId) =>{
+
+const getProfileChannel = async(userId) =>{
   try {
-    const channel = await Channel.findByPk(channelId, {
+    const channel = await Channel.findOne({
       include: [{
         model: User,
-        attributes: ['username']
+        attributes: ["username"],
+        where: {
+          id: userId
+        }
       }]
     });
-    if(!channel) {
+
+    if (!channel) {
       return {
         status: 404,
         data: null,
         message: "Channel not found."
-      }
+      };
     }
 
     return {
@@ -286,14 +292,14 @@ const viewChannel = async(username) => {
     }
 
 
-    const profile = await getProfileChannel(channel.id)
-    if (!profile) {
-      return {
-        status: 404,
-        data: null,
-        message: "Channel not found"
-      }
-    }
+    // const profile = await getInfoChannel(channel.id)
+    // if (!profile) {
+    //   return {
+    //     status: 404,
+    //     data: null,
+    //     message: "Channel not found"
+    //   }
+    // }
 
     // API list video code here
 
@@ -304,12 +310,12 @@ const viewChannel = async(username) => {
     });
 
     return {
-      status: profile.status,
+      status: 200,
       data: {
-        profile: profile.data,
+        profile: channel,
         totalFollower: followerCount,
       },
-      message: profile.message
+      message: "Get profile channel successfully"
     }
   } catch (error) {
      return {
@@ -320,6 +326,80 @@ const viewChannel = async(username) => {
   }
  }
 
+const searchVideoChannel = async(data, limit, offset) => {
+  try {
+    if(!data) {
+      return {
+        status: 400,
+        data: null,
+        message: "Data cannot be empty"
+      }
+    }
+
+    const normalData = data.trim().toLowerCase();
+    // if(!limit)
+    const limitInt = parseInt(limit)
+    const offsetInt = parseInt(offset)
+
+    const cates = await Category.findAll({
+      where: {
+        [Op.or]: [
+          { title: { [Op.like]: `%${normalData}%` } }
+        ]
+      },
+      limit: limitInt,
+      offset: offsetInt,
+    })
+
+    const videos = await Video.findAll({
+      where: {
+        [Op.or]: [
+          { title: { [Op.like]: `%${normalData}%` } }
+        ]
+      },
+      include: [{
+        model: User,
+        as: 'user',
+        attributes: ['username'],
+        include: [{ model: Channel, attributes: ['channelName'] }]
+      }],
+      limit: limitInt,
+      offset: offsetInt,
+      order: [['createdAt', 'DESC']]
+    });
+
+    const user = await User.findAll({
+      where: {
+        [Op.or]: [
+          { username: { [Op.like]: `%${normalData}%` } },
+        ]
+      },
+      attributes: ['username', 'avatar'],
+      include: [{ model: Channel, attributes: ['channelName', 'avatar'], where: { channelName: { [Op.like]: `%${normalData}%` }}}],
+      limit: limitInt,
+      offset: offsetInt,
+      order: [['createdAt', 'DESC']]
+    });
+
+    return {
+      status: 200,
+      data: {
+        categories: cates,
+        videos: videos,
+        users: user
+      },
+      message: "Successfully"
+    };
+
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+};
+
 
 module.exports = {
   createChannel,
@@ -328,5 +408,6 @@ module.exports = {
   listSubscribeOfUser,
   getProfileChannel,
   editProfileChannel,
-  viewChannel
+  viewChannel,
+  searchVideoChannel
 }

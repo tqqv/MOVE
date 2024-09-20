@@ -607,7 +607,7 @@ const statusRequestChannel = async(userId, status) => {
     await request.save()
 
     if(status === "approved") {
-      await createChannel(userId);
+      await createChannel(userId, user.username, user.avatar);
       user.role = "streamer";
       await user.save();
     }
