@@ -47,12 +47,12 @@ const createComment = async (videoId, userId, commentInfor) => {
     }
 
     // exist parent && parent is not belong to post
-    if(parentCommentChecker && commentInfor.parentId && parentCommentChecker.videoId != videoId) {
-      return {
-        status: 400,
-        message: "Parent comment's video does not match with input video id."
-      }
-    }
+    // if(parentCommentChecker && commentInfor.parentId && parentCommentChecker.videoId != videoId) {
+    //   return {
+    //     status: 400,
+    //     message: "Parent comment's video does not match with input video id."
+    //   }
+    // }
 
     // Nếu parentId != null, thì phải kiểm tra để xem parent của nó là comment nào.
     commentInfor.parentId = !commentInfor.parentId  ? null : await checkLevelAndGetParentId(commentInfor.parentId)

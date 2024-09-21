@@ -59,9 +59,9 @@ module.exports = (sequelize, DataTypes) => {
   User.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       googleId: {
@@ -134,7 +134,7 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "user",
       },
       referralCode: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(6),
         unique: true,
       },
       isLive: {

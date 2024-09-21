@@ -10,13 +10,13 @@ module.exports = (sequelize, DataTypes) => {
   RequestChannel.init(
     {
         id: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             primaryKey: true,
-            autoIncrement: true,
+            defaultValue: DataTypes.UUID,
             allowNull: false,
         },
         userId: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.UUID,
             primaryKey: true, // Part of composite primary key
             allowNull: false,
             unique: true,

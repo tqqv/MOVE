@@ -1,17 +1,19 @@
 "use strict";
 
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("videos", {
       id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false, // Đã định nghĩa là NOT NULL
         references: {
           model: 'users', // Tên bảng trong cơ sở dữ liệu
@@ -20,7 +22,7 @@ module.exports = {
         onDelete: 'CASCADE', // Xóa video khi người dùng bị xóa
       },
       categoryId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'categories', // Tên bảng trong cơ sở dữ liệu
@@ -57,7 +59,7 @@ module.exports = {
         allowNull: false,
       },
       levelWorkoutsId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'levelWorkouts', // Tên bảng trong cơ sở dữ liệu

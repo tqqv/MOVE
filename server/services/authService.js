@@ -5,6 +5,7 @@ const { User, RequestChannel } = db;
 var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
+const { v4: uuidv4 } = require('uuid');
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -20,6 +21,24 @@ const generateJwtToken = (user) => {
     }
   });
 };
+
+async function generateUniqueReferralCode() {
+  let referralCode;
+  let isUnique = false;
+
+  // Keep generating a new code until a unique one is found
+  while (!isUnique) {
+    referralCode = uuidv4().slice(0, 6);
+    const existingUser = await User.findOne({ where: { referralCode } });
+
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return referralCode;
+}
+
 
 const register = async (userData) => {
   try {
@@ -72,14 +91,12 @@ const register = async (userData) => {
     const newUser = new User({
       email: userData.email,
       password: hash,
-      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png"
+      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
+      referralCode : await generateUniqueReferralCode()
     });
 
     const savedUser = await newUser.save();
 
-    const referralCode = 1000 + savedUser.dataValues.id;
-
-    savedUser.referralCode = referralCode;
 
     await savedUser.save();
     //

@@ -16,13 +16,16 @@ module.exports = (sequelize, DataTypes) => {
     Channel.init(
         {
             id: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.UUID,
                 primaryKey: true,
-                autoIncrement: true,
+                defaultValue: DataTypes.UUID,
                 allowNull: false,
+                validate: {
+                    isUUID: true
+                }
             },
             userId: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.UUID,
                 allowNull: true,
                 unique: true,
                 references: {

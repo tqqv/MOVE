@@ -10,13 +10,13 @@ module.exports = (sequelize, DataTypes) => {
   Rating.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users', // Tên bảng users
@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       videoId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'videos', // Tên bảng users
@@ -40,7 +40,7 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
       // livestreamId: {
-      //   type: DataTypes.INTEGER,
+      //   type: DataTypes.UUID,
       //   allowNull: true,
       //   references: {
       //     model: 'livestreams', // Tên bảng users
