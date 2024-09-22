@@ -2,8 +2,8 @@
   import { ref, watch } from 'vue';
   import VideoUpload from '@icons/videoUpload.vue';
   import { useVideoStore } from '@stores';
-  import * as tus from 'tus-js-client';
   import axios from '@/services/axios';
+  import { toast } from 'vue3-toastify';
   const videoStore = useVideoStore();
   const { setIsNext, setUploadTitle, setUploadDescription, setUploadThumbnail } = videoStore;
   const previewUrl = ref('');
@@ -12,8 +12,6 @@
   const title = ref('');
   const description = ref('');
   const uploadProgress = ref(0);
-  const uploadError = ref(null);
-  const uploadSuccess = ref(false);
 
   const checkNextStatus = () => {
     setIsNext(
@@ -45,23 +43,16 @@
     checkNextStatus();
   });
   const startUpload = async () => {
-    console.log(thumbnail.value);
     if (!thumbnail.value) return;
-    uploadError.value = null;
-    uploadSuccess.value = false;
     uploadProgress.value = 0;
 
     try {
       const formData = new FormData();
-      console.log(videoStore.uri);
       if (videoStore.uri && thumbnail.value) {
         formData.append('videoUri', videoStore.uri);
         formData.append('thumbnailPath', thumbnail.value);
-        for (let pair of formData.entries()) {
-          console.log(pair[0] + ': ' + pair[1]);
-        }
       }
-      const response = await axios.post('vimeo/thumbnail-upload', formData, {
+      const response = await axios.post('video/upload-thumbnail', formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -70,12 +61,9 @@
           uploadProgress.value = percentCompleted;
         },
       });
-
-      console.log('Upload successful:', response.data);
-      uploadSuccess.value = true;
+      toast.success('Upload thumbnail successful');
     } catch (error) {
-      console.error('Upload failed:', error);
-      uploadError.value = error.message;
+      toast.error('Upload thumbnail failed');
     }
   };
 </script>
