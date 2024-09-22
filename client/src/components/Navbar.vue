@@ -1,14 +1,10 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount } from 'vue';
-
   import logo from '@assets/logo.svg';
-
   import verified from '@icons/verified.vue';
   import notification from '@icons/notification.vue';
   import upload from '@icons/upload.vue';
   import rep from '@icons/rep.vue';
-  import { toast } from 'vue3-toastify';
-  import axiosInstance from '@/services/axios';
   import InputGroup from 'primevue/inputgroup';
   import InputText from 'primevue/inputtext';
   import Button from 'primevue/button';
@@ -20,14 +16,13 @@
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
-  import { useAuthStore } from '@/stores';
-
+  import { useUserStore } from '@/stores/user.store';
+  import { RouterLink } from 'vue-router';
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const popupStore = usePopupStore();
-  const authStore = useAuthStore();
-  const user = ref(null);
+  const userStore = useUserStore();
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -42,35 +37,35 @@
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
+  const isElementOutside = (element, target) => {
+    return element && !element.contains(target);
+  };
   const handleClickOutside = (event) => {
+    const userMenu = document.getElementById('user-menu');
     const userMenuButton = document.getElementById('user-menu-button');
-    const userNotiButton = document.getElementById('noti-menu-button');
+    const notiMenu = document.getElementById('noti-menu');
+    const notiMenuButton = document.getElementById('noti-menu-button');
 
-    if (userMenuButton && !userMenuButton.contains(event.target)) {
+    const clickOutsideUserMenu =
+      isElementOutside(userMenu, event.target) && isElementOutside(userMenuButton, event.target);
+    const clickOutsideNotiMenu =
+      isElementOutside(notiMenu, event.target) && isElementOutside(notiMenuButton, event.target);
+
+    if (clickOutsideUserMenu) {
       isUserMenuOpen.value = false;
     }
-    if (userNotiButton && !userNotiButton.contains(event.target)) {
+
+    if (clickOutsideNotiMenu) {
       isNotiMenuOpen.value = false;
     }
   };
-  const fetchUserProfile = async () => {
-    if (!authStore.token) return;
-    try {
-      const response = await axiosInstance.get('/auth/getProfile');
-      user.value = response.data.data;
-    } catch (error) {
-      toast.error('Failed to load profile');
-    }
-  };
+
   onMounted(() => {
-    if (authStore.token) {
-      fetchUserProfile();
-    }
     document.addEventListener('click', handleClickOutside);
   });
 
-  onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
   });
 
   onBeforeUnmount(() => {
@@ -125,16 +120,16 @@
         <div class="flex items-center justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
-              <a
-                href="#"
-                class="rounded-md bg-gray-900 px-3 py-2 text_nav font-bold"
+              <RouterLink
+                to="#"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 aria-current="page"
-                >Following</a
+                >Following</RouterLink
               >
-              <a
-                href="#"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-gray-700 font-bold"
-                >Browse</a
+              <RouterLink
+                to="/browse"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                >Browse</RouterLink
               >
             </div>
           </div>
@@ -142,7 +137,7 @@
         <div
           class="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-auto"
         >
-          <a href="#"><img class="h-8 w-auto" :src="logo" alt="Madison" /></a>
+          <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
         <div class="items-center gap-x-6 hidden md:flex">
           <!-- User -->
@@ -151,13 +146,17 @@
             <Button icon="pi pi-search" class="btn rounded-s-none" />
           </InputGroup>
           <!-- Guest -->
-          <template v-if="!authStore.token">
+          <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
           </template>
 
           <!-- User -->
           <template v-else
-            ><h2 class="text-nowrap text_nav font-bold">Get REP$</h2>
+            ><RouterLink
+              class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
+            >
+              Get REP$
+            </RouterLink>
 
             <div class="relative">
               <OverlayBadge
@@ -172,6 +171,7 @@
               </OverlayBadge>
               <div
                 v-if="isNotiMenuOpen"
+                id="noti-menu"
                 class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
@@ -194,20 +194,21 @@
                   <span class="sr-only">Open user menu</span>
                   <img
                     class="size-[40px] rounded-full"
-                    :src="user?.avatar"
-                    :alt="user?.username || 'User'"
+                    :src="userStore.user?.avatar"
+                    :alt="userStore.user?.username || 'User'"
                   />
                 </button>
               </div>
               <div
                 v-if="isUserMenuOpen"
+                id="user-menu"
                 class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="user-menu-button"
                 tabindex="-1"
               >
-                <PopupAccount :user="user" />
+                <PopupAccount :user="userStore.user" />
               </div></div
           ></template>
         </div>

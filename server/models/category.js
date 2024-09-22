@@ -5,19 +5,19 @@ module.exports = (sequelize, DataTypes) => {
   class Category extends Model {
     static associate(models) {
 
-        // Many-to-many relationship through CategoryFollow
+        // One-to-many  - video
         this.hasMany(models.Video, {
-          foreignKey: 'videoId',
-          as: 'categoryVideos', // Alias for the users that follow this category
+          foreignKey: 'categoryId',
+          as: 'categoryVideos',
         });
-          
+
         // Many-to-many relationship through CategoryFollow
         this.belongsToMany(models.User, {
           through: models.CategoryFollow,
           foreignKey: 'categoryId',
           as: 'followers', // Alias for the users that follow this category
         });
-        
+
       }
   }
   Category.init(

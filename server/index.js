@@ -1,13 +1,14 @@
 const express = require("express");
 var dotenv = require("dotenv");
+dotenv.config();
 var cors = require("cors");
 var cookieParser = require("cookie-parser");
 const { connection } = require("./config/connectDB");
 const authRouter = require("./routes/authRoute.js");
 const channelRouter = require("./routes/channelRoute.js");
 const videoRouter = require("./routes/videoRoute.js");
+const commentRouter = require("./routes/commentRoute.js");
 
-dotenv.config();
 const app = express();
 const port = process.env.PORT || 8000;
 const corsOptions = {
@@ -26,6 +27,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", authRouter);
 app.use("/api/channel", channelRouter);
 app.use("/api/video", videoRouter);
+app.use("/api/comment", commentRouter);
+
 // connect DB
 connection();
 
