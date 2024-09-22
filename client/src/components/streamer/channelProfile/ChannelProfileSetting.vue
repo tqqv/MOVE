@@ -134,13 +134,13 @@
           <i class="pi pi-link text-2xl"></i>
         </div>
       </div>
-      <div @click="showStreamKey = !showStreamKey" class="text_link cursor-pointer">Show</div>
+      <div @click="showStreamKey = !showStreamKey" class="text_link cursor-pointer w-fit">Show</div>
     </div>
     <hr class="h-px my-4 bg-gray-dark border-0" />
     <!-- UPDATE PROFILE  -->
     <div class="flex flex-col gap-y-3 pt-3">
       <!-- AVATAR -->
-      <div class="flex flex-col gap-y-5">
+      <div class="flex flex-col gap-y-5 w-fit">
         <h1 class="font-bold">Profile picture</h1>
         <div class="flex">
           <div class="relative">
@@ -189,7 +189,6 @@
             autocomplete="false"
             required
           />
-         
         </div>
         <!-- CHANNEL NAEM -->
         <div class="flex flex-col gap-y-3">
