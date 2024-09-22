@@ -104,6 +104,13 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
         ]
       ]
     },
+    include: [
+      {
+        model: User, // Include bảng User
+        as: 'userComments',
+        attributes: ['avatar', 'REPs', 'username'], // Chỉ lấy các field cần thiết
+      }
+    ],
     order: [
       ['updatedAt', 'ASC']
     ],
@@ -117,7 +124,6 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     message: "Get comments success"
   }
 }
-
 const getCommentsByChannelId = async (userId, page, pageSize) => {
   const commentsWithVideo = await Video.findAll({
     where: {
@@ -151,6 +157,11 @@ const getCommentsByChannelId = async (userId, page, pageSize) => {
             model: Comment, // Join tiếp với các bình luận con (có thể không cần thiết nếu chỉ cần đếm)
             as: 'replies',
             attributes: [],
+          },
+          {
+            model: User, // Include bảng User cho người comment
+            as: 'userComments', // Alias cho mối quan hệ qua Comment
+            attributes: ['avatar', 'REPs', 'username'], // Chỉ lấy các field cần thiết
           }
         ]
       },
@@ -158,7 +169,7 @@ const getCommentsByChannelId = async (userId, page, pageSize) => {
         model: Category, // Join với Category để lấy tên danh mục
         attributes: ['id', 'title'],
         as: 'category',
-      }
+      },
     ],
     order: [
       ['updatedAt', 'ASC']
@@ -167,13 +178,12 @@ const getCommentsByChannelId = async (userId, page, pageSize) => {
     limit: pageSize * 1,
   });
 
-
   return {
     status: 200,
     data: commentsWithVideo,
-    message: "Get comments by parent id success"
-  }
-}
+    message: "Get comments by channel ID success"
+  };
+};
 
 const getChildCommentsByParentId = async (parentId, page, pageSize) => {
   const comments = await Comment.findAll({
@@ -193,6 +203,13 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
         ]
       ]
     },
+    include: [
+      {
+        model: User, // Include bảng User
+        as: 'userComments',
+        attributes: ['avatar', 'REPs', 'username'], // Chỉ lấy các field cần thiết
+      }
+    ],
     order: [
       ['updatedAt', 'ASC']
     ],
