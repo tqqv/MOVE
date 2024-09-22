@@ -9,6 +9,7 @@
   import Navbar from '@/components/Navbar.vue';
   import { usePopupStore } from '@/stores';
   import { toast } from 'vue3-toastify';
+  import Dashboard from '@icons/dashboard.vue';
 
   const popupStore = usePopupStore();
 

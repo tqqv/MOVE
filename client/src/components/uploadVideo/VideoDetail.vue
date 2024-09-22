@@ -7,18 +7,24 @@
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
   import Divider from 'primevue/divider';
-
+  import ProgressBar from 'primevue/progressbar';
   import Detail from './stepper/Detail.vue';
   import Setting from './stepper/Setting.vue';
   import Tag from './stepper/Tag.vue';
+  import { usePopupStore, useVideoStore } from '@/stores';
+  import { storeToRefs } from 'pinia';
 
-  const visible = ref(false);
+  const popupStore = usePopupStore();
+  const videoStore = useVideoStore();
+  const { uploadProgress, isNext } = storeToRefs(videoStore);
+  const { showVideoDetailPopup } = storeToRefs(popupStore);
+  const { openVideoDetailPopup } = popupStore;
   const value = ref('1');
 </script>
 <template>
-  <Button label="Video details" @click="visible = true" />
+  <Button label="Video details" @click="openVideoDetailPopup" />
   <Dialog
-    v-model:visible="visible"
+    v-model:visible="showVideoDetailPopup"
     modal
     header="Video details"
     :draggable="false"
@@ -65,12 +71,14 @@
     <Divider />
     <div class="flex justify-between items-center mb-2">
       <!-- Loading when uploading video -->
-      <!-- <div class="w-[200px]" v-if="value === '1'">
-        <ProgressBar :value="50" class="hide-progress-value"></ProgressBar>
-        <h3 class="mt-1 text-nowrap text-link text-[14px]">Uploading video (50%)</h3>
-      </div> -->
+      <div class="w-[200px]" v-if="value === '1' && uploadProgress !== 100">
+        <ProgressBar :value="uploadProgress" class="hide-progress-value"></ProgressBar>
+        <h3 class="mt-1 text-nowrap text-link text-[14px]">
+          Uploading video ({{ uploadProgress }}%)
+        </h3>
+      </div>
       <!-- Loading when gen thumbnail -->
-      <!-- <div class="flex gap-x-10 items-center" v-if="value === '1'">
+      <div class="flex gap-x-10 items-center" v-if="value === '1' && uploadProgress === 100">
         <div class="flex justify-center items-center flex-col gap-y-3">
           <div class="custom-spinner w-10"></div>
           <h3 class="text-link">Processing ...</h3>
@@ -78,14 +86,14 @@
         <h3 class="w-[350px] text-link">
           Feel free to add your video details, tags and settings in the meantime!
         </h3>
-      </div> -->
+      </div>
       <!-- Gen completed -->
-      <div class="flex justify-center items-center flex-col">
+      <!-- <div class="flex justify-center items-center flex-col">
         <div class="size-9 rounded-full bg-primary flex justify-center items-center">
           <i class="pi pi-check text-white text-[20px]"></i>
         </div>
         <h3 class="text-link">Upload complete</h3>
-      </div>
+      </div> -->
       <div class="flex gap-x-10">
         <button
           v-if="value !== '1'"
@@ -93,7 +101,12 @@
         >
           Back
         </button>
-        <button class="btnDisable px-14" v-if="value !== '3'">Next</button>
+        <button
+          :class="[isNext && uploadProgress === 100 ? 'btn' : 'btnDisable', 'px-14']"
+          v-if="value !== '3'"
+        >
+          Next
+        </button>
         <button class="btnDisable px-14" v-if="value === '3'">Pushlish</button>
       </div>
     </div>
