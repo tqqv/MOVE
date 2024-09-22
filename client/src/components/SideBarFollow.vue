@@ -1,6 +1,10 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import verified from '@icons/verified.vue';
+  import { useUserStore } from '@/stores/user.store';
+
+  const userStore = useUserStore();
+
   const userFollowers = [
     {
       id: 1,
@@ -41,22 +45,18 @@
     isShow.value = !isShow.value;
   };
 
-  //  TRUYENP PROPS
-  // const props = defineProps({
-  //   userFollowers: {
-  //     type: Array,
-  //     required: true,
-  //   },
-  // });
+  onMounted(async () => {
+    await userStore.loadFollowers();
+  });
 </script>
 
 <template>
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden md:block w-[251px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block border-r-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
-    <div class="flex flex-col px-4 py-4">
+    <div class="flex flex-col w-[241px] px-4 py-4">
       <div class="flex items-center justify-between">
         <h2 class="uppercase text_subTitle text-[13px]">follow channels</h2>
         <i
@@ -67,25 +67,25 @@
       </div>
       <div class="flex flex-col gap-y-4 my-5">
         <div
-          v-for="userFollower in sortedUserFollowers"
+          v-for="userFollower in userStore.followers"
           :key="userFollower.id"
           class="flex items-center gap-x-3 cursor-pointer"
         >
           <div
             :class="[
-              'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
+              'flex items-center justify-center  w-12 h-12 rounded-full',
               userFollower.isStreaming ? 'border-[3px] border-red' : '',
             ]"
           >
             <img
-              :src="userFollower.avatar"
+              :src="userFollower.subscribeChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="w-full h-full rounded-full object-cover"
+              class="w-full h-full rounded-full object-cover p-[1.5px]"
             />
           </div>
           <div class="flex flex-col gap-y-1">
             <div class="flex flex-row gap-x-3">
-              <p class="text_para">{{ userFollower.username }}</p>
+              <p class="text_para">{{ userFollower.subscribeChannel?.channelName }}</p>
               <verified v-if="userFollower.verified" class="ml-1 mb-1 fill-blue" />
             </div>
             <div

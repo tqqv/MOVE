@@ -13,7 +13,7 @@ const getProfile = (profile) => {
             googleId: id,
             fullName: displayName,
             email,
-            provider
+            avatar: profile.photos[0].value,
         }
     }
     return null
@@ -26,6 +26,8 @@ passport.use(
     callbackURL: '/api/auth/google/callback'
   },
   async (acceessToken, refreshToken, profile, done) => {
+    console.log(profile);
+    
     try {
         const existingGoogleAccount = await User.findOne({
             where: {googleId: profile.id},

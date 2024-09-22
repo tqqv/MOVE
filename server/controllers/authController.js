@@ -27,11 +27,11 @@ var {
 // authenticate
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
-  // console.log(loginResult);
+
   if (loginResult.cookie) {
-    // console.log("hiiiiiiiiiii");
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token);
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires);
   }
+
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
     req,
     res,
@@ -41,7 +41,6 @@ const loginController = async (req, res, next) => {
 
 const registerController = async (req, res, next) => {
   const registerResult = await register(req.body);
-  // console.log(registerResult);
   responseHandler(registerResult.status, null, registerResult.message)(
     req,
     res,
@@ -57,7 +56,6 @@ const logoutController = async (req, res, next) => {
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
   const email = req.body.email;
-  // console.log("controller:", email);
   const id = req.user.id;
   const result = await sendMailVerify(email, id);
 
@@ -66,7 +64,6 @@ const sendMailVerifyController = async (req, res, next) => {
 
 const verifyAccountController = async (req, res, next) => {
   const token = req.params.token;
-  // console.log("test: ", token);
   const result = await verifyAccount(token);
 
   responseHandler(result.status, null, result.message)(req, res, next);
@@ -96,6 +93,8 @@ const resetPasswordController = async (req, res, next) => {
     data.newPassword,
     data.confirmPassword
   );
+
+  res.
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
@@ -142,7 +141,9 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
-    { failureRedirect: '/login', failureMessage: true },
+    {
+      successRedirect: '/', successMessage:true,
+      failureRedirect: '/login', failureMessage: true },
     async (error, user) => {
       const loginResult = await loginByGoogle(error, user);
 
@@ -151,12 +152,8 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
+        // .redirect(process.env.CLIENT_HOST)
       }
-      return responseHandler(
-        loginResult.status,
-        loginResult.data,
-        loginResult.message
-      )(req, res, next);
     }
   )(req, res, next);
 };
