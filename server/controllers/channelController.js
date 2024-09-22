@@ -1,11 +1,11 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { subscribeChannel, unSubscribeChannel, listSubscribeOfChannel } = require("../services/channelService");
+const { subscribeChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel, getAllInforFollow } = require("../services/channelService");
 
 
 
-const getListSubscribe = async(req, res, next) => {
+const getListSubscribeOfChannel = async(req, res, next) => {
     const channelId = req.params.channelId;
-    console.log(channelId);
+    // console.log(channelId);
 
     const result = await listSubscribeOfChannel(channelId);
 
@@ -13,23 +13,65 @@ const getListSubscribe = async(req, res, next) => {
 }
 
 const subChannelController = async(req, res, next) => {
-    const userId = req.user.userId;
-    const channelId = req.body;
+    const userId = req.user.id;
+    const channelId = req.body.channelId;
     const result = await subscribeChannel(userId, channelId);
 
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const unSubChannelController = async(req, res, next) => {
-    const userId = req.user.userId;
-    const channelId = req.body;
-    const result = await unSubscribeChannel(userId, channelId);
+const getListSubscribeOfUser = async(req, res, next) => {
+    const userId = req.user.id;
+    const result = await listSubscribeOfUser(userId);
+
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getProfileChannelController = async(req, res, next) => {
+    const userId = req.user.id;
+    const result = await getProfileChannel(userId);
+
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const updateProfileChannelController = async(req, res, next) => {
+    const userId = req.user.id;
+    const { username, ...data } = req.body;
+    const result = await editProfileChannel(userId, data, username);
+
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const viewChannelController = async(req, res, next) => {
+    const username = req.params.username;
+    const result = await viewChannel(username);
+
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const searchVideoChannelController = async(req, res, next) => {
+    const data = req.query.data
+    const limit = req.query.limit || 5
+    const offset = req.query.offset || 0
+    const result = await searchVideoChannel(data, limit, offset)
+
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getAllInforFollowController = async(req, res, next) => {
+    const userId = req.user.id;
+    const result = await getAllInforFollow(userId);
 
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
 module.exports = {
-    getListSubscribe,
+    getListSubscribeOfChannel,
     subChannelController,
-    unSubChannelController
+    getListSubscribeOfUser,
+    getProfileChannelController,
+    updateProfileChannelController,
+    viewChannelController,
+    searchVideoChannelController,
+    getAllInforFollowController,
 }
