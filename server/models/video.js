@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       // Mối quan hệ 1-n với User (Người tạo video)
       this.belongsTo(models.User, {
           foreignKey: 'userId',
-          as: 'user',
+          as: 'userVideos',
       });
 
       // Mối quan hệ n-1 với Category (Video thuộc nhiều danh mục)
@@ -22,6 +22,9 @@ module.exports = (sequelize, DataTypes) => {
           foreignKey: 'categoryId',
           as: 'category',
       });
+
+      // models/Video.js
+      this.hasMany(models.Comment, { foreignKey: 'videoId' });
 
       // many to many video to User - view video
       this.belongsToMany(models.User, {
@@ -90,14 +93,6 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
           allowNull: false,
           defaultValue: 'public',
-        },
-        createdAt: {
-          type: DataTypes.DATE,
-          defaultValue: DataTypes.NOW,
-        },
-        updatedAt: {
-          type: DataTypes.DATE,
-          defaultValue: DataTypes.NOW,
         },
       },
       {

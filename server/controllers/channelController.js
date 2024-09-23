@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { subscribeChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel } = require("../services/channelService");
+const { subscribeChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel, getAllInforFollow } = require("../services/channelService");
 
 
 
@@ -58,6 +58,13 @@ const searchVideoChannelController = async(req, res, next) => {
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getAllInforFollowController = async(req, res, next) => {
+    const userId = req.user.id;
+    const result = await getAllInforFollow(userId);
+
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
     getListSubscribeOfChannel,
     subChannelController,
@@ -65,5 +72,6 @@ module.exports = {
     getProfileChannelController,
     updateProfileChannelController,
     viewChannelController,
-    searchVideoChannelController
+    searchVideoChannelController,
+    getAllInforFollowController,
 }

@@ -5,14 +5,18 @@ module.exports = (sequelize, DataTypes) => {
   class Comment extends Model {
     static associate(models) {
       // Define relationships if necessary
-      this.belongsTo(models.User, {});
-      this.belongsTo(models.Video, {});
+      this.belongsTo(models.User, {
+        foreignKey: 'userId',
+        as: 'userComments'
+      });
+      // models/Comment.js
+      this.belongsTo(models.Video, { foreignKey: 'videoId' });
       this.belongsTo(models.Comment, {
-        foreignKey: 'parentCommentId',
+        foreignKey: 'parentId',
         as: 'parent',
       });
       this.hasMany(models.Comment, {
-        foreignKey: 'parentCommentId',
+        foreignKey: 'parentId',
         as: 'replies',
       });
     }
