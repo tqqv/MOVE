@@ -133,6 +133,9 @@ const getCommentsByChannelId = async (userId, page, pageSize) => {
     include: [
       {
         model: Comment, // Join với Comment
+        where: {
+          parentId: null,
+        },
         attributes: {
           include: [
             // Subquery để đếm số lượng bình luận con và cháu
