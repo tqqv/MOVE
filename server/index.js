@@ -12,7 +12,7 @@ const commentRouter = require("./routes/commentRoute.js");
 const app = express();
 const port = process.env.PORT || 8000;
 const corsOptions = {
-  origin: true ,
+  origin: process.env.CLIENT_HOST,
   credentials: true,
 };
 
