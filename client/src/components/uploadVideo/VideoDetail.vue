@@ -13,13 +13,34 @@
   import Tag from './stepper/Tag.vue';
   import { usePopupStore, useVideoStore } from '@/stores';
   import { storeToRefs } from 'pinia';
+  import axios from '@/services/axios';
+  import { toast } from 'vue3-toastify';
 
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
-  const { uploadProgress, isNext } = storeToRefs(videoStore);
+  const { uploadProgress, isNext, uploadTitle, uploadDescription, uri } = storeToRefs(videoStore);
   const { showVideoDetailPopup } = storeToRefs(popupStore);
   const { openVideoDetailPopup } = popupStore;
   const value = ref('1');
+
+  const handleNextClick = async () => {
+    if (value.value === '1') {
+      try {
+        const response = await axios.post('video/upload-metadata', {
+          videoUri: uri.value,
+          title: uploadTitle.value,
+          description: uploadDescription.value,
+        });
+        if (response.status === 200) {
+          value.value = '2';
+        }
+      } catch (error) {
+        toast.error('Error uploading metadata');
+      }
+    } else if (value.value === '2') {
+      value.value = '3';
+    }
+  };
 </script>
 <template>
   <Button label="Video details" @click="openVideoDetailPopup" />
@@ -104,6 +125,7 @@
         <button
           :class="[isNext && uploadProgress === 100 ? 'btn' : 'btnDisable', 'px-14']"
           v-if="value !== '3'"
+          @click="handleNextClick"
         >
           Next
         </button>
