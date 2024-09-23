@@ -7,4 +7,5 @@ const router = express.Router();
 router.post('/upload-video', getUploadLink);
 router.post('/upload-thumbnail',upload.single('thumbnailPath'), uploadThumbnail);
 router.post('/upload-metadata', uploadMetadata);
+
 module.exports = router;

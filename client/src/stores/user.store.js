@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { getProfile } from '@/services/user';
+import { getProfile, viewFollowChannel } from '@/services/user';
 import { ref } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
   const user = ref(null);
   const loading = ref(false);
   const error = ref(null);
-
+  const followers = ref([]);
   const fetchUserProfile = async () => {
     loading.value = true;
     try {
@@ -23,9 +23,25 @@ export const useUserStore = defineStore('user', () => {
     }
   };
 
+  const loadFollowers = async () => {
+    loading.value = true;
+    try {
+      const response = await viewFollowChannel();
+      if (!response.error) {
+        followers.value = response.data;        
+      } else {
+        error.value = response.message;
+      }
+    } catch (error) {
+      error.value = 'Failed to load followers';
+    } finally {
+      loading.value = false;
+    }
+  };
+
   const clearUserData = () => {
     user.value = null;
   };
 
-  return { user, loading, error, fetchUserProfile, clearUserData };
+  return { user, loading, error, followers, loadFollowers, fetchUserProfile, clearUserData };
 });
