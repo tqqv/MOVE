@@ -143,7 +143,27 @@ const setThumbnailActive = (picturesUri) => {
   });
 };
 
+const uploadMetadataService = async (videoUri, title, description) => {
+  return new Promise((resolve, reject) => {
+    client.request({
+      method: 'PATCH',
+      path: videoUri,
+      query: {
+        name: title,
+        description: description
+      }
+    }, (error, body) => {
+      if (error) {
+        reject({ status: 500, message: error.message });
+      } else {
+        resolve({ status: 200, message: 'Video metadata updated successfully', data: body });
+      }
+    });
+  });
+};
+
 module.exports = {
   generateUploadLink,
-  uploadThumbnailService
+  uploadThumbnailService,
+  uploadMetadataService
 };
