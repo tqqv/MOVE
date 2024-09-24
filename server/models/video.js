@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       // Mối quan hệ 1-n với User (Người tạo video)
       this.belongsTo(models.User, {
           foreignKey: 'userId',
-          as: 'user',
+          as: 'userVideos',
       });
 
       // Mối quan hệ n-1 với Category (Video thuộc nhiều danh mục)
