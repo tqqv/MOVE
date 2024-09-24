@@ -27,6 +27,10 @@
       type: Object,
       required: true,
     },
+    totalFollower: {
+      type: Number,
+      required: true,
+    },
   });
 
   const isMenuVisible = ref(false);
@@ -68,11 +72,11 @@
       </div>
       <div>
         <p class="text-[20px] flex items-center">
-          {{ videoDetails.name }}
+          {{ videoDetails.channelName }}
           <Verified v-if="videoDetails.isVerified" class="ml-2 mb-1 mr-2 fill-blue" />
           is now {{ videoDetails.status }}
         </p>
-        <p class="text-[14px] text-body">{{ videoDetails.followers }} followers</p>
+        <p class="text-[14px] text-body">{{ totalFollower }} followers</p>
       </div>
     </div>
     <div
