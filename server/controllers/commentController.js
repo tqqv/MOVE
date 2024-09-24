@@ -44,8 +44,14 @@ const getCommentsByChannelIdController = async (req, res, next) => {
   const userId = req.user.id;
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
+  const sortCondition = req.query.sortBy;
+  // let order;
+  // if (sortCondition === "Received reps") {
+  //   sortCondition.order = [['rep', 'DESC']];
+  // } else {
+  //   sortCondition.order = [['updatedAt', 'ASC']];
+  // }
   const comments = await getCommentsByChannelId(userId, page, pageSize);
-
   responseHandler(comments.status, comments.data, comments.message)(
     req,
     res,

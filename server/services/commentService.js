@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize } = db;
+const { Comment, Video, Category, User, Sequelize, LevelWorkout } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -26,6 +26,14 @@ const createComment = async (videoId, userId, commentInfor) => {
       return {
         status: 404,
         message: "The video not found",
+      };
+    }
+
+    // video not commentable
+    if (!videoChecker.isCommentable) {
+      return {
+        status: 400,
+        message: "The video is not commentable",
       };
     }
 
@@ -106,10 +114,10 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     },
     include: [
       {
-        model: User, // Include bảng User
+        model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',
-        attributes: ['avatar', 'REPs', 'username'], // Chỉ lấy các field cần thiết
-      }
+        attributes: ['avatar', 'username', 'email']
+      },
     ],
     order: [
       ['updatedAt', 'ASC']
@@ -124,55 +132,77 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     message: "Get comments success"
   }
 }
+
 const getCommentsByChannelId = async (userId, page, pageSize) => {
-  const commentsWithVideo = await Video.findAll({
-    where: {
-      userId: userId, // Lọc Video theo userId
+  // const getCommentsByChannelId = async (userId, page, pageSize, repCondition, responseCondition) => {
+  // Default condition
+  // let responseCondition = {isResponse: true}
+  // if(responseCondition.isResponse) {
+  //   responseCondition.subQuery =
+  //   `EXISTS (
+  //       SELECT 1
+  //       FROM move.comments AS replies
+  //       WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
+  //     )`;
+  // } else if (!responseCondition.isResponse) {
+  //   `NOT EXISTS (
+  //     SELECT 1
+  //     FROM move.comments AS replies
+  //     WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
+  //   )`;
+  // }
+  let whereCondition = {
+    parentId: null,
+  }
+  const commentsWithVideo = await Comment.findAll({
+    where: whereCondition,
+    attributes: {
+      include: [
+        // Subquery to count total replies (children and grandchildren comments)
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM move.comments AS replies
+            WHERE replies.parentId = Comment.id
+            OR replies.parentId IN (
+              SELECT grandchild.id
+              FROM move.comments AS grandchild
+              WHERE grandchild.parentId = Comment.id
+            )
+          )`),
+          'totalRepliesCount'
+        ]
+      ]
     },
-    attributes: ['thumbnailUrl', 'title', 'updatedAt'], // Lấy các thuộc tính từ Video
+
     include: [
       {
-        model: Comment, // Join với Comment
-        attributes: {
-          include: [
-            // Subquery để đếm số lượng bình luận con và cháu
-            [
-              Sequelize.literal(`(
-                SELECT COUNT(*)
-                FROM move.comments AS replies
-                WHERE replies.parentId = Comments.id
-                OR replies.parentId IN (
-                  SELECT grandchild.id
-                  FROM move.comments AS grandchild
-                  WHERE grandchild.parentId = Comments.id
-                )
-              )`),
-              'totalRepliesCount'
-            ]
-          ]
-        },
-        required: true, // Chỉ lấy Video có comment
-        include: [
-          {
-            model: Comment, // Join tiếp với các bình luận con (có thể không cần thiết nếu chỉ cần đếm)
-            as: 'replies',
-            attributes: [],
-          },
-          {
-            model: User, // Include bảng User cho người comment
-            as: 'userComments', // Alias cho mối quan hệ qua Comment
-            attributes: ['avatar', 'REPs', 'username'], // Chỉ lấy các field cần thiết
-          }
-        ]
+        model: User,
+        as: 'userComments',
+        attributes: ['avatar', 'username', 'email']
       },
       {
-        model: Category, // Join với Category để lấy tên danh mục
-        attributes: ['id', 'title'],
-        as: 'category',
-      },
+        model: Video,
+        attributes: ['thumbnailUrl', 'title', 'duration', 'updatedAt'],
+        where: {
+          userId: userId,
+        },
+        include: [
+          {
+            model: Category,
+            as: 'category',
+            attributes: ['id', 'title']
+          },
+          {
+            model: LevelWorkout,
+            as: 'levelWorkout',
+            attributes: ['id', 'levelWorkout']
+          }
+        ]
+      }
     ],
     order: [
-      ['updatedAt', 'ASC']
+      ['updatedAt', 'DESC']
     ],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
@@ -181,9 +211,9 @@ const getCommentsByChannelId = async (userId, page, pageSize) => {
   return {
     status: 200,
     data: commentsWithVideo,
-    message: "Get comments by channel ID success"
-  };
-};
+    message: "Channel get comments by parent id success"
+  }
+}
 
 const getChildCommentsByParentId = async (parentId, page, pageSize) => {
   const comments = await Comment.findAll({
@@ -205,10 +235,10 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
     },
     include: [
       {
-        model: User, // Include bảng User
+        model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',
-        attributes: ['avatar', 'REPs', 'username'], // Chỉ lấy các field cần thiết
-      }
+        attributes: ['avatar', 'username', 'email']
+      },
     ],
     order: [
       ['updatedAt', 'ASC']
