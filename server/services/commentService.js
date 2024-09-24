@@ -133,27 +133,34 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
   }
 }
 
-const getCommentsByChannelId = async (userId, page, pageSize) => {
-  // const getCommentsByChannelId = async (userId, page, pageSize, repCondition, responseCondition) => {
-  // Default condition
-  // let responseCondition = {isResponse: true}
-  // if(responseCondition.isResponse) {
-  //   responseCondition.subQuery =
-  //   `EXISTS (
-  //       SELECT 1
-  //       FROM move.comments AS replies
-  //       WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
-  //     )`;
-  // } else if (!responseCondition.isResponse) {
-  //   `NOT EXISTS (
-  //     SELECT 1
-  //     FROM move.comments AS replies
-  //     WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
-  //   )`;
-  // }
-  let whereCondition = {
-    parentId: null,
-  }
+const getCommentsByChannelId = async (userId, page, pageSize, responseCondition, sortCondition) => {
+    let whereCondition = {
+      parentId: null
+    };
+    if (responseCondition.isResponsed == "true") {
+      whereCondition = {
+        parentId: null,
+        [Sequelize.Op.and]: Sequelize.literal(`
+          EXISTS (
+            SELECT 1
+            FROM move.comments AS replies
+            WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
+          )
+        `),
+      };
+    } else if (responseCondition.isResponsed == "false") {
+    // Trả về các comment chưa được reply bởi userId
+      whereCondition = {
+        parentId: null,
+        [Sequelize.Op.and]: Sequelize.literal(`
+          NOT EXISTS (
+            SELECT 1
+            FROM move.comments AS replies
+            WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
+          )
+        `),
+      };
+    }
   const commentsWithVideo = await Comment.findAll({
     where: whereCondition,
     attributes: {
@@ -201,9 +208,7 @@ const getCommentsByChannelId = async (userId, page, pageSize) => {
         ]
       }
     ],
-    order: [
-      ['updatedAt', 'DESC']
-    ],
+    order: [[sortCondition.sortBy, sortCondition.order]],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
   });
