@@ -14,12 +14,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       });
 
-      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
-      this.hasMany(models.Video, {
-        foreignKey: 'userId',
-        as: 'userVideos', // Alias cho videos của người dùng
-      });
-
       // one to many comment
       this.hasMany(models.Comment, {
         foreignKey: 'userId',
@@ -136,10 +130,6 @@ module.exports = (sequelize, DataTypes) => {
       referralCode: {
         type: DataTypes.STRING(6),
         unique: true,
-      },
-      isLive: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
       }
     },
     {

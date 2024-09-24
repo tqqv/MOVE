@@ -11,9 +11,9 @@ module.exports = (sequelize, DataTypes) => {
           as: 'levelWorkout',
       });
 
-      // Mối quan hệ 1-n với User (Người tạo video)
-      this.belongsTo(models.User, {
-          foreignKey: 'userId',
+      // Mối quan hệ 1-n với Channel (Người tạo video)
+      this.belongsTo(models.Channel, {
+          foreignKey: 'channelId',
           as: 'user',
       });
 
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
             isUUID: true
          }
         },
-        userId: {
+        channelId: {
           type: DataTypes.UUID,
           allowNull: false,
         },

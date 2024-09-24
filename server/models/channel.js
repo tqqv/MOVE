@@ -6,6 +6,12 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             this.belongsTo(models.User, { foreignKey: "userId" });
 
+            // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
+            this.hasMany(models.Video, {
+                foreignKey: 'userId',
+                as: 'userVideos', // Alias cho videos của người dùng
+            });
+
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
                 foreignKey: 'userId',
@@ -44,6 +50,10 @@ module.exports = (sequelize, DataTypes) => {
             avatar: {
                 type: DataTypes.STRING(255),
                 allowNull: true,
+            },
+            isLive: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
             },
             streamKey: {
                 type: DataTypes.STRING(255),
