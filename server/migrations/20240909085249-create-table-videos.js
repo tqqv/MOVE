@@ -12,11 +12,11 @@ module.exports = {
         defaultValue: DataTypes.UUID,
         allowNull: false,
       },
-      userId: {
+      channelId: {
         type: DataTypes.UUID,
         allowNull: false, // Đã định nghĩa là NOT NULL
         references: {
-          model: 'users', // Tên bảng trong cơ sở dữ liệu
+          model: 'channels', // Tên bảng trong cơ sở dữ liệu
           key: 'id',      // Tên cột bạn muốn tham chiếu đến
         },
         onDelete: 'CASCADE', // Xóa video khi người dùng bị xóa

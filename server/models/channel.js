@@ -8,8 +8,8 @@ module.exports = (sequelize, DataTypes) => {
 
             // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
             this.hasMany(models.Video, {
-                foreignKey: 'userId',
-                as: 'userVideos', // Alias cho videos của người dùng
+                foreignKey: 'channelId',
+                as: 'channelVideos', // Alias cho videos của người dùng
             });
 
             this.belongsToMany(models.User, {

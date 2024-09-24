@@ -26,11 +26,11 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
-        validate: {
-          isUUID: true
-        }
+        // validate: {
+        //   isUUID: true
+        // }
       },
       userId: {
           type: DataTypes.UUID,
@@ -68,9 +68,9 @@ module.exports = (sequelize, DataTypes) => {
           model: 'comments',
           key: 'id',
         },
-        validate: {
-          isUUID: true
-        },
+        // validate: {
+        //   isUUID: true
+        // },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       }

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
       // Mối quan hệ 1-n với Channel (Người tạo video)
       this.belongsTo(models.Channel, {
           foreignKey: 'channelId',
-          as: 'user',
+          as: 'channel',
       });
 
       // Mối quan hệ n-1 với Category (Video thuộc nhiều danh mục)
@@ -24,12 +24,13 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // models/Video.js
-      this.hasMany(models.Comment, { foreignKey: 'videoId' });
+      this.hasMany(models.Comment, { foreignKey: 'videoId' , as: "videoComment"});
 
       // many to many video to User - view video
       this.belongsToMany(models.User, {
         through: models.ViewVideo,
         foreignKey: 'videoId',
+        otherKey: 'viewerId',
         as: 'videoViewVideo',
       });
 
@@ -37,6 +38,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsToMany(models.User, {
         through: models.Rating,
         foreignKey: 'videoId',
+        otherKey: 'userId',
         as: 'videoRating',
       });
     }

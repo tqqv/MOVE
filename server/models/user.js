@@ -34,19 +34,19 @@ module.exports = (sequelize, DataTypes) => {
         as: 'userSubscribe',
       });
 
-      // many to many video - video view
-      this.belongsToMany(models.Video, {
-        through: models.ViewVideo,
-        foreignKey: 'viewerId',
-        as: 'userViewVideo',
-      });
+      // // many to many video - video view
+      // this.belongsToMany(models.Video, {
+      //   through: models.ViewVideo,
+      //   foreignKey: 'viewerId',
+      //   as: 'userViewVideo',
+      // });
 
-      // many to many video - rating
-      this.belongsToMany(models.Video, {
-      through: models.Rating,
-      foreignKey: 'userId',
-      as: 'userRating',
-      });
+      // // many to many video - rating
+      // this.belongsToMany(models.Video, {
+      // through: models.Rating,
+      // foreignKey: 'userId',
+      // as: 'userRating',
+      // });
 
     }
   }

@@ -82,7 +82,7 @@ module.exports = {
         defaultValue: "user",
       },
       referralCode: {
-        type: Sequelize.STRING(6),        defaultValue: DataTypes.UUID,
+        type: Sequelize.STRING(6),
         unique: true,
         allowNull: false,
       },
