@@ -1,51 +1,95 @@
 <script setup>
-  import { ref, computed } from 'vue';
-
+  import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+  import EmojiPicker from 'vue3-emoji-picker';
   import MMAImage from '@/assets/category/MMA.png';
+  import { postComments } from '@/services/comment';
 
+  const isPickerVisible = ref(false);
+  const commentText = ref('');
+  const emit = defineEmits(['sendComment']);
+  const props = defineProps({
+    commentId: {
+      type: Number,
+      required: true,
+    },
+    fetchChildComments: Function,
+  });
+  const parentId = ref(props.commentId || null);
   const data = {
     avatar: MMAImage,
-    username: 'thehoang17',
-    viewers: 30,
-    isVerified: true,
-    isStreaming: true,
-    totalVideos: 10,
-    time: '20 mins ago',
-    REPs: 2000,
-    like: 200,
-    dislike: 1000,
-    message:
-      'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores.',
   };
 
   const showActions = ref(false);
-  const commentText = ref('');
+  const handleCommentInput = (event) => {
+    commentText.value = event.target.value;
+  };
 
-  function handleFocus() {
+  const addEmoji = (emoji) => {
+    commentText.value += emoji.i;
+  };
+  const handleFocus = () => {
     showActions.value = true;
-  }
+  };
+  const handleSend = async () => {
+    const data = { content: commentText.value, parentId: parentId.value };
+    console.log(data);
+    console.log(commentText.value);
 
-  function handleCancel() {
+    //  data test videoID
+    const videoId = 1;
+    try {
+      const response = await postComments(videoId, data);
+
+      if (response.data.success) {
+        console.log('Comment created successfully:', response.data.data);
+        commentText.value = '';
+        showActions.value = false;
+        emit('sendComment');
+
+        props.fetchChildComments(props.commentId);
+      } else {
+        console.error('Failed to create comment');
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+    }
+  };
+  const handleCancel = () => {
     commentText.value = '';
     showActions.value = false;
-  }
+  };
 
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
 
-  function handleCommentInput(event) {
-    commentText.value = event.target.value;
-  }
+  const handleClickOutside = (event) => {
+    const emojiPicker = document.querySelector('.emoji-picker');
+    const button = document.querySelector('.pi-face-smile');
+    if (
+      emojiPicker &&
+      !emojiPicker.contains(event.target) &&
+      button &&
+      !button.contains(event.target)
+    ) {
+      isPickerVisible.value = false;
+    }
+  };
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
 </script>
 
 <template>
   <div class="space-y-6">
     <!-- WRITE COMMENTS -->
     <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full">
-      <img
-        :src="data.avatar"
-        alt="Avatar"
-        class="w-10 h-10 rounded-full object-cover border-[1.5px] border-white"
-      />
+      <div class="flex-shrink-0">
+        <img :src="data.avatar" alt="Avatar" class="size-10 rounded-full object-cover" />
+      </div>
       <div class="flex flex-col w-full">
         <input
           type="text"
@@ -56,19 +100,36 @@
           v-model="commentText"
         />
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
-          <button class="pi pi-face-smile text-xl" />
+          <div class="relative">
+            <button
+              @click="isPickerVisible = !isPickerVisible"
+              class="pi pi-face-smile text-xl cursor-pointer"
+              aria-label="Toggle Emoji Picker"
+            />
+            <EmojiPicker
+              :native="true"
+              v-bind:disable-skin-tones="true"
+              v-if="isPickerVisible"
+              @select="addEmoji"
+              class="absolute z-10 -mt-2 emoji-picker"
+            />
+          </div>
           <div class="flex gap-2">
-            <button @click="handleCancel" class="rounded-full text-xs text-black font-semibold p-2">
+            <button
+              @click="handleCancel"
+              class="rounded-full text-xs text-primary font-semibold p-2"
+            >
               Cancel
             </button>
             <button
+              @click="handleSend"
               :class="{
-                'rounded-full text-xs font-semibold p-2': true,
+                'rounded-lg text-xs font-semibold px-4': true,
                 'bg-primary text-white': isCommentNotEmpty,
                 'bg-[rgba(0,0,0,0.05)] text-[#909090]': !isCommentNotEmpty,
               }"
             >
-              Comment
+              Send
             </button>
           </div>
         </div>

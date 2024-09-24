@@ -61,7 +61,7 @@
   }
 
   .btnDisable {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-not-allowed leading-none;
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-default leading-none;
   }
 
   .tag {

@@ -18,6 +18,8 @@
   import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
   import Comments from '@/components/comments/Comments.vue';
   import WriteComments from '@/components/comments/WriteComments.vue';
+  import TestComment from '@/components/comments/TestComment.vue';
+  import CommentPage from '@/components/comments/CommentPage.vue';
 
   // get actions
 </script>
@@ -25,7 +27,8 @@
 <template>
   <Navbar />
   <section class="padding-nav">
-    <div class="p-20 space-y-20 w-2/3"><WriteComments /><Comments /></div>
+    <!-- <div class="p-20 space-y-20 w-2/3"><TestComment /></div> -->
+    <div class="p-20 space-y-20 w-2/3"><WriteComments /><CommentPage /></div>
     <div class="bg-black flex justify-center"><img :src="logo" alt="" width="200px" /></div>
     <div class="container">
       <!-- Icon Custom -->
