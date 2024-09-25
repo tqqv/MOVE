@@ -6,6 +6,12 @@ module.exports = (sequelize, DataTypes) => {
         static associate(models) {
             this.belongsTo(models.User, { foreignKey: "userId" });
 
+            // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
+            this.hasMany(models.Video, {
+                foreignKey: 'channelId',
+                as: 'channelVideos', // Alias cho videos của người dùng
+            });
+
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
                 foreignKey: 'userId',
@@ -16,13 +22,16 @@ module.exports = (sequelize, DataTypes) => {
     Channel.init(
         {
             id: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.UUID,
                 primaryKey: true,
-                autoIncrement: true,
+                defaultValue: DataTypes.UUID,
                 allowNull: false,
+                validate: {
+                    isUUID: true
+                }
             },
             userId: {
-                type: DataTypes.INTEGER,
+                type: DataTypes.UUID,
                 allowNull: true,
                 unique: true,
                 references: {
@@ -41,6 +50,15 @@ module.exports = (sequelize, DataTypes) => {
             avatar: {
                 type: DataTypes.STRING(255),
                 allowNull: true,
+            },
+            isLive: {
+                type: DataTypes.BOOLEAN,
+                defaultValue: false
+            },
+            popularCheck: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true, // hoặc false nếu bạn muốn bắt buộc
+                defaultValue: 0,
             },
             streamKey: {
                 type: DataTypes.STRING(255),

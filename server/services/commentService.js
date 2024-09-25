@@ -55,12 +55,12 @@ const createComment = async (videoId, userId, commentInfor) => {
     }
 
     // exist parent && parent is not belong to post
-    if(parentCommentChecker && commentInfor.parentId && parentCommentChecker.videoId != videoId) {
-      return {
-        status: 400,
-        message: "Parent comment's video does not match with input video id."
-      }
-    }
+    // if(parentCommentChecker && commentInfor.parentId && parentCommentChecker.videoId != videoId) {
+    //   return {
+    //     status: 400,
+    //     message: "Parent comment's video does not match with input video id."
+    //   }
+    // }
 
     // Nếu parentId != null, thì phải kiểm tra để xem parent của nó là comment nào.
     commentInfor.parentId = !commentInfor.parentId  ? null : await checkLevelAndGetParentId(commentInfor.parentId)
@@ -133,7 +133,7 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
   }
 }
 
-const getCommentsByChannelId = async (userId, page, pageSize, responseCondition, sortCondition) => {
+const getCommentsByChannelId = async (userId, channelId, page, pageSize, responseCondition, sortCondition) => {
     let whereCondition = {
       parentId: null
     };
@@ -144,7 +144,7 @@ const getCommentsByChannelId = async (userId, page, pageSize, responseCondition,
           EXISTS (
             SELECT 1
             FROM move.comments AS replies
-            WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
+            WHERE replies.parentId = Comment.id AND replies.userId = '${userId}'
           )
         `),
       };
@@ -156,7 +156,7 @@ const getCommentsByChannelId = async (userId, page, pageSize, responseCondition,
           NOT EXISTS (
             SELECT 1
             FROM move.comments AS replies
-            WHERE replies.parentId = Comment.id AND replies.userId = ${userId}
+            WHERE replies.parentId = Comment.id AND replies.userId = '${userId}'
           )
         `),
       };
@@ -192,7 +192,7 @@ const getCommentsByChannelId = async (userId, page, pageSize, responseCondition,
         model: Video,
         attributes: ['thumbnailUrl', 'title', 'duration', 'updatedAt'],
         where: {
-          userId: userId,
+          channelId: channelId,
         },
         include: [
           {

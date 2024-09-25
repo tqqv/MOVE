@@ -18,13 +18,13 @@ module.exports = (sequelize, DataTypes) => {
   ViewVideo.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       viewerId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
             model: 'users', // Reference to the users table
@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
           onUpdate: 'CASCADE',
       },
       videoId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
               model: 'videos', // Reference to the categories table

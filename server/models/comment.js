@@ -24,13 +24,16 @@ module.exports = (sequelize, DataTypes) => {
   Comment.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
+        // validate: {
+        //   isUUID: true
+        // }
       },
       userId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
             model: 'users',
@@ -40,7 +43,7 @@ module.exports = (sequelize, DataTypes) => {
           onUpdate: 'CASCADE',
       },
       videoId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
               model: 'videos',
@@ -59,12 +62,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       parentId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'comments',
           key: 'id',
         },
+        // validate: {
+        //   isUUID: true
+        // },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       }

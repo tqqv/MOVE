@@ -42,6 +42,7 @@ const getChildCommentsByParentIdController = async (req, res, next) => {
 
 const getCommentsByChannelIdController = async (req, res, next) => {
   const userId = req.user.id;
+  const channelId = req.params.channelId;
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
   const sortCondition = {
@@ -52,7 +53,7 @@ const getCommentsByChannelIdController = async (req, res, next) => {
     isResponsed: req.query.isResponsed,
   };
 
-  const comments = await getCommentsByChannelId(userId, page, pageSize, responseCondition, sortCondition);
+  const comments = await getCommentsByChannelId(userId, channelId, page, pageSize, responseCondition, sortCondition);
   responseHandler(comments.status, comments.data, comments.message)(
     req,
     res,
