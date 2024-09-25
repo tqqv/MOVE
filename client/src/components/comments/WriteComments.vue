@@ -8,24 +8,12 @@
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
   const props = defineProps({
-    commentId: {
-      type: Number,
-      required: true,
-    },
-    fetchChildComments: {
-      type: Function,
-      required: true,
-    },
     fetchComments: {
       type: Function,
       required: true,
     },
   });
-  const callFetchComments = () => {
-    if (props.fetchComments) {
-      props.fetchComments();
-    }
-  };
+
   const parentId = ref(props.commentId || null);
   const data = {
     avatar: MMAImage,
@@ -61,7 +49,6 @@
 
         emit('sendComment', parentID);
         props.fetchComments();
-        props.fetchChildComments(props.commentId);
       } else {
         console.error('Failed to create comment');
       }
@@ -86,6 +73,11 @@
       !button.contains(event.target)
     ) {
       isPickerVisible.value = false;
+    }
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && isCommentNotEmpty.value) {
+      handleSend();
     }
   };
 
@@ -113,6 +105,7 @@
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"
+          @keydown="handleKeyDown"
         />
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
           <div class="relative">

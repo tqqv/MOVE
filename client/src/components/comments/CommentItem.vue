@@ -16,14 +16,6 @@
     childComments: Object,
   });
 
-  if (props.fetchComments) {
-    console.log('co ham ne');
-
-    props.fetchComments();
-  } else {
-    console.log('k co ham');
-  }
-
   const isShowMoreChild = ref(false);
   const isReplyChild = ref(false);
 
@@ -101,8 +93,6 @@
       <WriteComments
         v-if="isReplyChild"
         :commentId="comment.id"
-        :fetchChildComments="fetchChildComments"
-        :fetchComments="fetchComments"
         @sendComment="
           (parentId) => {
             isReplyChild = false;

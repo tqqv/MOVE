@@ -2,6 +2,7 @@
   import { ref, onMounted } from 'vue';
   import CommentItem from './CommentItem.vue';
   import { getAllComments, getAllChildComments } from '@/services/comment';
+  import WriteComments from './WriteComments.vue';
 
   const comments = ref([]);
   const childComments = ref({});
@@ -55,7 +56,9 @@
 </script>
 
 <template>
-  <div>
+  <div class="space-y-8">
+    <WriteComments :fetchComments="fetchComments" />
+
     <!-- Hiển thị bình luận với nút Show More -->
     <CommentItem
       v-for="(comment, index) in isShowMore ? comments : comments.slice(0, 3)"
