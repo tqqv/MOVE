@@ -147,11 +147,13 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
-    'google', 
-    { 
-      // successRedirect: process.env.CLIENT_HOST, 
-      failureRedirect: '/login', failureMessage: true },
+    'google',
+    { failureMessage: true }, 
     async (error, user) => {
+      if (error || !user) {
+        return res.redirect(process.env.CLIENT_HOST); 
+      }
+
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {
@@ -159,12 +161,13 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
-        .cookie('isLogin','true')
-        .redirect(process.env.CLIENT_HOST)
+        .cookie('isLogin', 'true')
+        .redirect(process.env.CLIENT_HOST);
       }
     }
   )(req, res, next);
 };
+
 // facebook
 const facebookLogin = passport.authenticate('facebook');
 
