@@ -1,12 +1,10 @@
 import axios from 'axios';
-
-const keyApiCountry = 'U0lhckxGNGZIRFFGOVg5U2tKZ0RsbjZ4bWxCZkJMdTNSVmFrcEtIMg==';
 const apiBaseUrl = 'https://api.countrystatecity.in/v1/countries';
 
 const axiosCountryInstance = axios.create({
   baseURL: apiBaseUrl,
   headers: {
-    'X-CSCAPI-KEY': keyApiCountry,
+    'X-CSCAPI-KEY': import.meta.env.VITE_KEYAPICOUNTRY,
   },
 });
 

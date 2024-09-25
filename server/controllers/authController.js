@@ -28,11 +28,7 @@ var {
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
-  console.log(loginResult);
-
-
   if (loginResult.cookie) {
-    // console.log("hiiiiiiiiiii");
     res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires)
     .cookie('isLogin','true', loginResult.cookie.expires)
   }

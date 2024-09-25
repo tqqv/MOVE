@@ -1,52 +1,76 @@
 <script setup>
-  import { ref } from 'vue';
-  import { usePrimeVue } from 'primevue/config';
-  import FileUpload from 'primevue/fileupload';
+  import { ref, watch } from 'vue';
   import VideoUpload from '@icons/videoUpload.vue';
-  const $primevue = usePrimeVue();
+  import { useVideoStore } from '@stores';
+  import { storeToRefs } from 'pinia';
+  import axios from '@/services/axios';
+  import { toast } from 'vue3-toastify';
+  const videoStore = useVideoStore();
+  const { thumbnailPreview } = storeToRefs(videoStore);
+  const { setIsNext, setUploadTitle, setUploadDescription, setUploadThumbnail } = videoStore;
+  const previewUrl = ref('');
+  const isLoading = ref(false);
+  const thumbnail = ref(null);
+  const title = ref('');
+  const description = ref('');
+  const uploadProgress = ref(0);
 
-  const totalSize = ref(0);
-  const totalSizePercent = ref(0);
-  const files = ref([]);
-
-  const onSelectedFiles = (event) => {
-    files.value = event.files;
-    files.value.forEach((file) => {
-      totalSize.value += parseInt(formatSize(file.size));
-    });
+  const checkNextStatus = () => {
+    setIsNext(
+      title.value.trim() !== '' &&
+        thumbnailPreview.value !== null &&
+        description.value.trim() !== '',
+    );
   };
-
-  const onTemplatedUpload = () => {
-    console.log({ severity: 'info', summary: 'Success', detail: 'File Uploaded', life: 3000 });
-  };
-
-  const formatSize = (bytes) => {
-    const k = 1024;
-    const dm = 3;
-    const sizes = $primevue.config.locale.fileSizeTypes;
-
-    if (bytes === 0) {
-      return `0 ${sizes[0]}`;
+  const onFileSelected = (event) => {
+    thumbnail.value = event.target.files[0];
+    isLoading.value = true;
+    if (thumbnail.value) {
+      setUploadThumbnail(thumbnail.value);
+      previewUrl.value = URL.createObjectURL(thumbnail.value);
+      isLoading.value = false;
+      startUpload();
     }
-
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    const formattedSize = parseFloat((bytes / Math.pow(k, i)).toFixed(dm));
-
-    return `${formattedSize} ${sizes[i]}`;
   };
+  const deletePreview = () => {
+    previewUrl.value = '';
+    setUploadThumbnail(null);
+    checkNextStatus();
+  };
+  watch(thumbnailPreview, () => {
+    checkNextStatus();
+  });
+  watch(title, () => {
+    setUploadTitle(title.value);
+    checkNextStatus();
+  });
+  watch(description, () => {
+    setUploadDescription(description.value);
+    checkNextStatus();
+  });
+  const startUpload = async () => {
+    if (!thumbnail.value) return;
+    uploadProgress.value = 0;
 
-  const chooseCallback = ref(null);
-  const uploadCallback = ref(null);
-  const clearCallback = ref(null);
-
-  const setCallbacks = ({
-    chooseCallback: choose,
-    uploadCallback: upload,
-    clearCallback: clear,
-  }) => {
-    chooseCallback.value = choose;
-    uploadCallback.value = upload;
-    clearCallback.value = clear;
+    try {
+      const formData = new FormData();
+      if (videoStore.uri && thumbnail.value) {
+        formData.append('videoUri', videoStore.uri);
+        formData.append('thumbnailPath', thumbnail.value);
+      }
+      const response = await axios.post('video/upload-thumbnail', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+          uploadProgress.value = percentCompleted;
+        },
+      });
+      toast.success('Upload thumbnail successful');
+    } catch (error) {
+      toast.error('Upload thumbnail failed');
+    }
   };
 </script>
 <template>
@@ -57,39 +81,65 @@
       name="title"
       type="text"
       placeholder="Add a title"
+      class="input_custom mt-2 mb-3"
+      v-model="title"
+    />
+    <label for="description" class="text-[16px] font-medium">Video description</label>
+    <textarea
+      id="description"
+      name="description"
+      type="text"
+      placeholder="Add a description"
       class="input_custom mt-2"
+      v-model="description"
     />
   </div>
   <div>
     <h3 class="text-[16px] font-medium mt-3">Video thumbnail</h3>
     <div class="mt-2 grid grid-flow-col auto-cols-[220px] overflow-x-auto gap-4 scrollbar-hide">
-      <FileUpload
-        name="demo[]"
-        url="/api/upload"
-        @upload="onTemplatedUpload($event)"
-        :multiple="false"
-        accept="image/*"
-        :maxFileSize="10000000"
-        @select="onSelectedFiles"
+      <div
+        class="relative border-2 border-dashed border-primary w-[220px] h-[121px]"
+        :class="{ 'border-none': previewUrl }"
+        v-if="thumbnailPreview"
       >
-        <template v-slot:header="slotProps">
-          <div v-if="slotProps.chooseCallback">
-            <div v-once>
-              {{ setCallbacks(slotProps) }}
-            </div>
-          </div>
-        </template>
-        <template #empty>
-          <div class="flex items-center justify-center flex-col py-5 text-center">
-            <VideoUpload @click="chooseCallback()" class="cursor-pointer fill-primary" />
-            <p class="mt-6 mb-0 text-[12px]">Upload thumbnail</p>
-          </div>
-        </template>
-      </FileUpload>
-      <div class="h-full bg-red">1</div>
-      <div class="h-full bg-primary">2</div>
-      <div class="h-full bg-blue">3</div>
-      <div class="h-full bg-gray-dark">4</div>
+        <div
+          v-if="!previewUrl && !isLoading"
+          class="flex items-center justify-center flex-col py-5 text-center"
+        >
+          <input
+            type="file"
+            @change="onFileSelected"
+            accept="image/*"
+            class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          />
+          <VideoUpload class="cursor-pointer fill-primary" />
+          <p class="mt-6 mb-0 text-[12px]">Upload thumbnail</p>
+        </div>
+        <div v-else-if="isLoading" class="flex items-center justify-center h-full">
+          <div class="custom-spinner w-10"></div>
+        </div>
+        <div v-else class="relative">
+          <img :src="previewUrl" alt="Thumbnail preview" class="object-cover w-[220px] h-[121px]" />
+          <button
+            @click="deletePreview"
+            class="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
+          >
+            <i class="pi pi-times"></i>
+          </button>
+        </div>
+      </div>
+      <div v-else class="w-[220px] h-[121px] bg-gray-dark flex items-center justify-center">
+        <div class="custom-spinner w-10"></div>
+      </div>
+      <div class="w-[220px] h-[121px] relative" v-if="thumbnailPreview">
+        <img :src="thumbnailPreview" alt="Thumbnail preview" class="w-full h-full object-cover" />
+        <span class="bg-primary text-white absolute top-0 right-0 px-1 py-1 text-[12px] font-bold"
+          >Default</span
+        >
+      </div>
+      <div class="w-[220px] h-[121px] bg-gray-dark flex items-center justify-center" v-else>
+        <div class="custom-spinner w-10"></div>
+      </div>
     </div>
   </div>
 </template>

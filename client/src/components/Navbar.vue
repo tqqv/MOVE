@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
   import logo from '@assets/logo.svg';
   import verified from '@icons/verified.vue';
   import notification from '@icons/notification.vue';
@@ -17,23 +17,46 @@
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import { useUserStore } from '@/stores/user.store';
+  import { RouterLink } from 'vue-router';
+  import SearchPopup from './search/SearchPopup.vue';
+  import { debounce } from '@/functions/debounce';
+  import { searchInformation } from '@/services/search';
+
+  const popupStore = usePopupStore();
+  const userStore = useUserStore();
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
-  const popupStore = usePopupStore();
-  const userStore = useUserStore();
+
+  // SEARCH
+  const isSearchPopupOpen = ref(false);
+  const onFocused = ref(false);
+  const searchData = ref('');
+  const categories = ref([]);
+  const videos = ref([]);
+  const users = ref([]);
+  // SEARCH
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
   };
   const toggleUserMenu = () => {
+    closeAllPopups();
     isUserMenuOpen.value = !isUserMenuOpen.value;
   };
 
   const toogleNotiMenu = () => {
+    closeAllPopups();
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
+
+  const closeAllPopups = () => {
+    isUserMenuOpen.value = false;
+    isNotiMenuOpen.value = false;
+    isSearchPopupOpen.value = false;
+  };
+
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
@@ -45,11 +68,16 @@
     const userMenuButton = document.getElementById('user-menu-button');
     const notiMenu = document.getElementById('noti-menu');
     const notiMenuButton = document.getElementById('noti-menu-button');
+    const searchMenu = document.getElementById('search-menu');
+    const searchMenuButton = document.getElementById('search-menu-button');
 
     const clickOutsideUserMenu =
       isElementOutside(userMenu, event.target) && isElementOutside(userMenuButton, event.target);
     const clickOutsideNotiMenu =
       isElementOutside(notiMenu, event.target) && isElementOutside(notiMenuButton, event.target);
+    const clickOutsideSearchMenu =
+      isElementOutside(searchMenu, event.target) &&
+      isElementOutside(searchMenuButton, event.target);
 
     if (clickOutsideUserMenu) {
       isUserMenuOpen.value = false;
@@ -58,7 +86,62 @@
     if (clickOutsideNotiMenu) {
       isNotiMenuOpen.value = false;
     }
+
+    if (clickOutsideSearchMenu) {
+      isSearchPopupOpen.value = false;
+    }
   };
+
+  // SEARCH
+
+  const handleSearch = debounce((e) => {
+    searchData.value = e.target.value;
+    if (searchData.value.trim() === '' && onFocused.value) {
+      isSearchPopupOpen.value = false;
+    } else {
+      isSearchPopupOpen.value = true;
+    }
+  }, 500);
+
+  const handleFocus = () => {
+    onFocused.value = true;
+    if (searchData.value.trim()) {
+      isSearchPopupOpen.value = true;
+    }
+  };
+
+  const handleBlur = () => {
+    onFocused.value = false;
+  };
+
+  watch(
+    () => searchData.value,
+    async (newSearchData) => {
+      if (newSearchData) {
+        try {
+          const response = await searchInformation(newSearchData);
+          const data = response.data.data;
+          categories.value = data.categories;
+          videos.value = data.videos;
+          users.value = data.users;
+        } catch (error) {
+          console.error('Error fetching search results:', error);
+        }
+      } else {
+        categories.value = [];
+        videos.value = [];
+        users.value = [];
+      }
+    },
+  );
+
+  const performSearch = () => {
+    if (searchData.value.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+    }
+  };
+
+  // SEARCH
 
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
@@ -120,16 +203,16 @@
         <div class="flex items-center justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
-              <a
-                href="#"
-                class="rounded-md bg-gray-900 px-3 py-2 text_nav font-bold"
+              <RouterLink
+                to="#"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 aria-current="page"
-                >Following</a
+                >Following</RouterLink
               >
-              <a
-                href="#"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-gray-700 font-bold"
-                >Browse</a
+              <RouterLink
+                to="/browse"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                >Browse</RouterLink
               >
             </div>
           </div>
@@ -137,14 +220,41 @@
         <div
           class="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-auto"
         >
-          <a href="#"><img class="h-8 w-auto" :src="logo" alt="Madison" /></a>
+          <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
         <div class="items-center gap-x-6 hidden md:flex">
           <!-- User -->
-          <InputGroup class="h-[40px] hidden xl:flex">
-            <InputText placeholder="Search" />
-            <Button icon="pi pi-search" class="btn rounded-s-none" />
-          </InputGroup>
+          <div class="relative">
+            <InputGroup class="h-[40px] min-w-[292px] hidden xl:flex">
+              <InputText
+                class="text-sm"
+                id="search-menu-button"
+                placeholder="Search"
+                v-model="searchData"
+                @input="handleSearch"
+                @keyup.enter="performSearch"
+                @focus="handleFocus"
+                @blur="handleBlur"
+              />
+              <Button icon="pi pi-search" class="btn rounded-s-none" @click="performSearch" />
+            </InputGroup>
+            <div
+              v-if="isSearchPopupOpen"
+              id="search-menu"
+              class="absolute w-full bot z-10 mt-2"
+              role="menu"
+              aria-orientation="vertical"
+              aria-labelledby="search-menu-button"
+              tabindex="-1"
+            >
+              <SearchPopup
+                :categories="categories"
+                :videos="videos"
+                :users="users"
+                :searchData="searchData"
+              />
+            </div>
+          </div>
           <!-- Guest -->
           <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
@@ -152,7 +262,11 @@
 
           <!-- User -->
           <template v-else
-            ><h2 class="text-nowrap text_nav font-bold">Get REP$</h2>
+            ><RouterLink
+              class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
+            >
+              Get REP$
+            </RouterLink>
 
             <div class="relative">
               <OverlayBadge

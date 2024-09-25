@@ -1,47 +1,47 @@
-// useUserStore.js
 import { defineStore } from 'pinia';
 import { getProfile, viewFollowChannel } from '@/services/user';
+import { ref } from 'vue';
 
-export const useUserStore = defineStore('user', {
-  state: () => ({
-    user: null,
-    loading: false,
-    error: null,
-    followers: [],
-  }),
-  actions: {
-    async fetchUserProfile() {
-      this.loading = true;
-      try {
-        const response = await getProfile();
-        if (response.data.success) {
-          this.user = response.data.data;
-        } else {
-          this.error = response.message;
-        }
-      } catch (error) {
-        this.error = error.message;
-      } finally {
-        this.loading = false;
+export const useUserStore = defineStore('user', () => {
+  const user = ref(null);
+  const loading = ref(false);
+  const error = ref(null);
+  const followers = ref([]);
+  const fetchUserProfile = async () => {
+    loading.value = true;
+    try {
+      const response = await getProfile();
+      if (response.data.success) {
+        user.value = response.data.data;
+      } else {
+        throw new Error('Invalid token');
       }
-    },
-    async loadFollowers() {
-      this.loading = true;
-      try {
-        const response = await viewFollowChannel();
-        if (!response.error) {
-          this.followers = response.data;
-        } else {
-          this.error = response.message;
-        }
-      } catch (error) {
-        this.error = 'Failed to load followers';
-      } finally {
-        this.loading = false;
+    } catch (err) {
+      error.value = err.message;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const loadFollowers = async () => {
+    loading.value = true;
+    try {
+      const response = await viewFollowChannel();
+      if (!response.error) {
+        followers.value = response.data;        
+      } else {
+        error.value = response.message;
       }
-    },
-    clearUserData() {
-      this.user = null;
-    },
-  },
+    } catch (error) {
+      error.value = 'Failed to load followers';
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const clearUserData = () => {
+    user.value = null;
+  };
+
+  return { user, loading, error, followers, loadFollowers, fetchUserProfile, clearUserData };
 });

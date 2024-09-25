@@ -6,6 +6,7 @@
   import Navbar from '@/components/Navbar.vue';
   import { usePopupStore } from '@/stores';
   import { toast } from 'vue3-toastify';
+  import Dashboard from '@icons/dashboard.vue';
 
   const popupStore = usePopupStore();
 
@@ -16,6 +17,7 @@
   import UploadVideo from '@/components/uploadVideo/UploadVideo.vue';
   import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
   import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
+  import CommentPage from '@/components/comments/CommentPage.vue';
 
   // get actions
 </script>
@@ -23,6 +25,8 @@
 <template>
   <Navbar />
   <section class="padding-nav">
+    <!-- <div class="p-20 space-y-20 w-2/3"><TestComment /></div> -->
+    <div class="p-20 space-y-20 w-2/3"><CommentPage /></div>
     <div class="bg-black flex justify-center"><img :src="logo" alt="" width="200px" /></div>
     <div class="container">
       <!-- Icon Custom -->

@@ -11,10 +11,13 @@ import router from './router';
 import i18n from './i18n';
 import 'vue3-toastify/dist/index.css';
 import Vue3Toastify, { toast } from 'vue3-toastify';
+import '../node_modules/vue3-emoji-picker/dist/style.css';
+import Tooltip from 'primevue/tooltip';
 
 const pinia = createPinia();
 const app = createApp(App);
 
+app.directive('tooltip', Tooltip);
 app.use(pinia);
 app.use(router);
 app.use(i18n);

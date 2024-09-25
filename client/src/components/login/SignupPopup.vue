@@ -1,7 +1,7 @@
 <script setup>
   import { ref, computed } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
-  import facebook from '@/components/icons/facebook.vue';
+  import facebook from '@/components/icons/facebookLogin.vue';
   import { toast } from 'vue3-toastify';
   import { postSignup } from '@/services/auth';
   import { usePopupStore } from '@/stores';
