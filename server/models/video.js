@@ -46,7 +46,6 @@ module.exports = (sequelize, DataTypes) => {
         id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
-          autoIncrement: true,
           allowNull: false,
         },
         userId: {
@@ -59,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         title: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         description: {
           type: DataTypes.TEXT,
@@ -67,7 +66,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         videoUrl: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         thumbnailUrl: {
           type: DataTypes.STRING(255),
@@ -83,11 +82,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         duration: {
           type: DataTypes.STRING(20),
-          allowNull: false,
+          allowNull: true,
         },
         levelWorkoutsId: {
           type: DataTypes.INTEGER,
-          allowNull: false,
+          allowNull: true,
         },
         status: {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
