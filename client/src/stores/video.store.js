@@ -9,6 +9,9 @@ export const useVideoStore = defineStore('video', () => {
   const uploadDescription = ref('');
   const uploadCategory = ref('');
   const uploadThumbnail = ref(null);
+  const thumbnailPreview = ref('');
+  const duration = ref(0);
+  const commentSetting = ref(true);
 
   const setUploadProgress = (value) => {
     uploadProgress.value = value;
@@ -31,6 +34,15 @@ export const useVideoStore = defineStore('video', () => {
   const setUploadThumbnail = (value) => {
     uploadThumbnail.value = value;
   };
+  const setThumbnailPreview = (value) => {
+    thumbnailPreview.value = value;
+  };
+  const setDuration = (value) => {
+    duration.value = value;
+  };
+  const setCommentSetting = (value) => {
+    commentSetting.value = value;
+  };
 
   return {
     uploadProgress,
@@ -40,6 +52,9 @@ export const useVideoStore = defineStore('video', () => {
     uploadDescription,
     uploadCategory,
     uploadThumbnail,
+    thumbnailPreview,
+    duration,
+    commentSetting,
     setUploadProgress,
     setUri,
     setIsNext,
@@ -47,5 +62,8 @@ export const useVideoStore = defineStore('video', () => {
     setUploadDescription,
     setUploadCategory,
     setUploadThumbnail,
+    setThumbnailPreview,
+    setDuration,
+    setCommentSetting,
   };
 });

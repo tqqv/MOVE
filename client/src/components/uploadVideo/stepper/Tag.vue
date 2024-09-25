@@ -1,5 +1,14 @@
 <script setup>
   import Dropdown from 'primevue/dropdown';
+  import { useVideoStore } from '@/stores';
+  import { storeToRefs } from 'pinia';
+  import { ref, watch } from 'vue';
+  const videoStore = useVideoStore();
+  const { duration } = storeToRefs(videoStore);
+  const durationInMinutes = ref(0);
+  watch(duration, () => {
+    durationInMinutes.value = Math.floor(duration.value / 60);
+  });
 </script>
 <template>
   <div class="flex flex-col">
@@ -22,9 +31,18 @@
     <div>
       <label class="text-[16px] font-medium">Duration</label>
       <div class="flex gap-x-3 text-nowrap mt-1">
-        <span class="tag mt-1 tag_active">< 30 mins</span>
-        <span class="tag mt-1">< 1 hour</span>
-        <span class="tag mt-1">> 1 hour</span>
+        <span class="tag mt-1 cursor-default" :class="{ tag_active: durationInMinutes < 30 }">
+          < 30 mins
+        </span>
+        <span
+          class="tag mt-1 cursor-default"
+          :class="{ tag_active: durationInMinutes >= 30 && durationInMinutes <= 60 }"
+        >
+          < 1 hour
+        </span>
+        <span class="tag mt-1 cursor-default" :class="{ tag_active: durationInMinutes > 60 }">
+          > 1 hour
+        </span>
       </div>
     </div>
   </div>
