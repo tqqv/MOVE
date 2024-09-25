@@ -5,8 +5,13 @@ const postComments = (videoId, data) => {
 };
 
 // GetAll comment 1 video
-const getAllComments = (videoId) => {
-  return axios.get(`/comment/${videoId}`);
+const getAllComments = (videoId, pageInfo) => {
+  return axios.get(`/comment/${videoId}`, {
+    params: {
+      page: pageInfo.page,
+      pageSize: pageInfo.pageSize,
+    },
+  });
 };
 // GetAll comment của 1 parent
 const getAllChildComments = (parentId) => {

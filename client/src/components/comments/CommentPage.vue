@@ -6,17 +6,17 @@
 
   const comments = ref([]);
   const childComments = ref({});
-  const isShowMore = ref(false);
+  const currentPage = ref(1);
+  const commentsPerPage = ref(5);
 
   const fetchComments = async () => {
     const videoId = 1;
     try {
-      const response = await getAllComments(videoId);
+      const response = await getAllComments(videoId, currentPage.value);
       if (response.data.success) {
         comments.value = response.data.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
-
         await Promise.all(
           comments.value.map((comment) => {
             return fetchChildComments(comment.id);
@@ -31,7 +31,6 @@
   const fetchChildComments = async (parentId) => {
     try {
       const response = await getAllChildComments(parentId);
-
       if (response.data.success && response.data.data) {
         if (!childComments.value[parentId]) {
           childComments.value[parentId] = [];
@@ -50,6 +49,11 @@
     }
   };
 
+  const loadMoreComments = () => {
+    currentPage.value++;
+    fetchComments(); // Gọi lại để lấy bình luận cho trang mới
+  };
+
   onMounted(() => {
     fetchComments();
   });
@@ -59,9 +63,9 @@
   <div class="space-y-8">
     <WriteComments :fetchComments="fetchComments" />
 
-    <!-- Hiển thị bình luận với nút Show More -->
+    <!-- Hiển thị bình luận -->
     <CommentItem
-      v-for="(comment, index) in isShowMore ? comments : comments.slice(0, 3)"
+      v-for="(comment, index) in comments.slice(0, currentPage * commentsPerPage)"
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
@@ -69,15 +73,13 @@
       :childComments="childComments"
     />
 
-    <!-- Nút Show More / Show Less -->
+    <!-- Nút Load More -->
     <div
-      v-if="comments.length > 3"
+      v-if="comments.length > currentPage * commentsPerPage"
       class="font-bold text-[13px] text-primary cursor-pointer pt-2"
-      @click="isShowMore = !isShowMore"
+      @click="loadMoreComments"
     >
-      <span>
-        {{ isShowMore ? 'Show less comments' : `Show ${comments.length - 3} more comments` }}
-      </span>
+      <span>Show more comments</span>
     </div>
   </div>
 </template>

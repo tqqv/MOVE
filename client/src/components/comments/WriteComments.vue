@@ -3,7 +3,6 @@
   import EmojiPicker from 'vue3-emoji-picker';
   import MMAImage from '@/assets/category/MMA.png';
   import { postComments } from '@/services/comment';
-
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
@@ -12,18 +11,19 @@
       type: Function,
       required: true,
     },
+    commentId: {
+      type: Number,
+      required: true,
+    },
   });
-
   const parentId = ref(props.commentId || null);
   const data = {
     avatar: MMAImage,
   };
-
   const showActions = ref(false);
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
   };
-
   const addEmoji = (emoji) => {
     commentText.value += emoji.i;
   };
@@ -34,18 +34,17 @@
     const data = { content: commentText.value, parentId: parentId.value };
     console.log(data);
     console.log(commentText.value);
-
     //  data test videoID
     const videoId = 1;
     try {
       const response = await postComments(videoId, data);
-
       if (response.data.success) {
         console.log('Comment created successfully:', response.data.data);
         commentText.value = '';
         showActions.value = false;
         const parentID = response.data.data.parentId;
         console.log(parentID);
+        console.log(response.data.data);
 
         emit('sendComment', parentID);
         props.fetchComments();
@@ -60,9 +59,7 @@
     commentText.value = '';
     showActions.value = false;
   };
-
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
-
   const handleClickOutside = (event) => {
     const emojiPicker = document.querySelector('.emoji-picker');
     const button = document.querySelector('.pi-face-smile');
@@ -80,11 +77,9 @@
       handleSend();
     }
   };
-
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
   });
-
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
   });

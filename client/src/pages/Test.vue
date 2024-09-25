@@ -17,9 +17,6 @@
   import UploadVideo from '@/components/uploadVideo/UploadVideo.vue';
   import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
   import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
-  import Comments from '@/components/comments/Comments.vue';
-  import WriteComments from '@/components/comments/WriteComments.vue';
-  import TestComment from '@/components/comments/TestComment.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
 
   // get actions

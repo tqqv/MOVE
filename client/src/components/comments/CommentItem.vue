@@ -16,8 +16,11 @@
     childComments: Object,
   });
 
-  const isShowMoreChild = ref(false);
+  // State quản lý bình luận con
+  const isShowMoreChild = ref(false); // Trạng thái để ẩn/hiển thị bình luận con
   const isReplyChild = ref(false);
+  const currentPageChild = ref(1);
+  const commentsPerPageChild = ref(5);
 
   const toggleLike = () => {
     props.comment.isLike = !props.comment.isLike;
@@ -29,10 +32,6 @@
     if (props.comment.isDisLike) props.comment.isLike = false;
   };
 
-  const toggleShowMoreChild = () => {
-    isShowMoreChild.value = !isShowMoreChild.value;
-  };
-
   const toggleReply = () => {
     isReplyChild.value = !isReplyChild.value;
   };
@@ -40,18 +39,33 @@
   const timeFromNow = (createAt) => {
     return dayjs(createAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
   };
-</script>
 
+  const loadMoreChildComments = () => {
+    currentPageChild.value++;
+  };
+
+  // Hàm để ẩn/hiển thị bình luận con
+  const toggleShowMoreChild = () => {
+    isShowMoreChild.value = !isShowMoreChild.value;
+    if (isShowMoreChild.value) {
+      fetchChildComments(props.comment.id); // Gọi API lấy bình luận con nếu chưa có
+    }
+  };
+</script>
 <template>
   <div class="flex gap-x-4">
     <div class="flex-shrink-0">
-      <img :src="comment.avatar" alt="Avatar" class="size-10 object-cover rounded-full" />
+      <img
+        :src="comment.userComments.avatar"
+        alt="Avatar"
+        class="size-10 object-cover rounded-full"
+      />
     </div>
     <div class="space-y-2">
       <!-- USERNAME -->
       <div class="flex justify-between items-center gap-x-4 w-fit">
-        <h1 class="font-bold">{{ comment.username }}</h1>
-        <span v-if="comment.isVerified">
+        <h1 class="font-bold">{{ comment.userComments.username }}</h1>
+        <span v-if="comment.userComments.isVerified">
           <Verified class="fill-blue" />
         </span>
         <div v-if="comment.rep > 0" class="flex items-center whitespace-nowrap">
@@ -101,34 +115,37 @@
         "
       />
 
-      <!-- Show more/Show less child comments -->
-      <div
-        v-if="childComments[comment.id]?.length > 0"
-        class="font-bold text-[13px] text-primary flex gap-2 cursor-pointer pt-2"
-        @click="toggleShowMoreChild"
-      >
-        <i class="pi" :class="isShowMoreChild ? 'pi-angle-up' : 'pi-angle-down'" />
-        <span>
-          {{
-            isShowMoreChild
-              ? 'Show less replies'
-              : `Show ${childComments[comment.id]?.length} replies`
-          }}
-        </span>
-      </div>
+      <!-- Nút Show/Hide bình luận con -->
+      <div v-if="childComments[comment.id]?.length > 0" class="pt-2">
+        <div class="font-bold text-[13px] text-primary cursor-pointer" @click="toggleShowMoreChild">
+          <span v-if="!isShowMoreChild">
+            Show replies ({{ childComments[comment.id].length }})
+          </span>
+          <span v-else> Hide replies </span>
+        </div>
 
-      <!-- Show child comments recursively -->
-      <div v-if="isShowMoreChild">
-        <CommentItem
-          v-for="(child, index) in childComments[comment.id].slice(
-            0,
-            isShowMoreChild ? childComments[comment.id].length : 3,
-          )"
-          :key="child.id"
-          :comment="child"
-          :fetchChildComments="props.fetchChildComments"
-          :childComments="childComments"
-        />
+        <!-- Hiển thị bình luận con khi nút Show replies được nhấn -->
+        <div v-if="isShowMoreChild">
+          <CommentItem
+            v-for="(child, index) in childComments[comment.id].slice(
+              0,
+              currentPageChild * commentsPerPageChild,
+            )"
+            :key="child.id"
+            :comment="child"
+            :fetchChildComments="props.fetchChildComments"
+            :childComments="childComments"
+          />
+
+          <!-- Nút Load More cho bình luận con -->
+          <div
+            v-if="childComments[comment.id].length > currentPageChild * commentsPerPageChild"
+            class="font-bold text-[13px] text-primary cursor-pointer"
+            @click="loadMoreChildComments"
+          >
+            <span>Show more replies</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
