@@ -1,4 +1,3 @@
-// stores/popupStore.js
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -8,6 +7,24 @@ export const usePopupStore = defineStore('popup', () => {
   const showForgotPasswordPopup = ref(false);
   const showChangePassword = ref(false);
   const showChangePasswordSuccess = ref(false);
+  const showVideoDetailPopup = ref(false);
+  const showUploadVideoPopup = ref(false);
+
+  const openVideoDetailPopup = () => {
+    showVideoDetailPopup.value = true;
+  };
+
+  const closeVideoDetailPopup = () => {
+    showVideoDetailPopup.value = false;
+  };
+
+  const openUploadVideoPopup = () => {
+    showUploadVideoPopup.value = true;
+  };
+
+  const closeUploadVideoPopup = () => {
+    showUploadVideoPopup.value = false;
+  };
 
   const openLoginPopup = () => {
     showLoginPopup.value = true;
@@ -45,6 +62,8 @@ export const usePopupStore = defineStore('popup', () => {
     showForgotPasswordPopup,
     showChangePassword,
     showChangePasswordSuccess,
+    showVideoDetailPopup,
+    showUploadVideoPopup,
     openLoginPopup,
     closeLoginPopup,
     openForgotPasswordPopup,
@@ -53,5 +72,9 @@ export const usePopupStore = defineStore('popup', () => {
     closeChangePassword,
     openChangePasswordSuccess,
     closeChangePasswordSuccess,
+    openVideoDetailPopup,
+    closeVideoDetailPopup,
+    openUploadVideoPopup,
+    closeUploadVideoPopup,
   };
 });
