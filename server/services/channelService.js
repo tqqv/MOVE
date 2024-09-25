@@ -256,7 +256,7 @@ const editProfileChannel = async(userId, data, username) => {
     }
 
     const updateChannel = await channel.update(data);
-
+    
     return {
       status: 200,
       data: updateChannel,
