@@ -7,15 +7,16 @@
   import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
-
+  import { useRouter } from 'vue-router';
   const userStore = useUserStore();
+  const router = useRouter();
   const handleLogout = async () => {
     try {
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       userStore.clearUserData();
-
       toast.success(response.data.message || 'Logout successful!');
+      router.push('/');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
     }

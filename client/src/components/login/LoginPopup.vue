@@ -14,7 +14,6 @@
   const showPassword = ref(false);
   const popupStore = usePopupStore();
 
-  
   // const buttonColor = computed(() => {
   //   return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
   // });
@@ -25,7 +24,7 @@
     showLoginWithEmail.value = true;
   };
 
-// HANDLE LOGIN
+  // HANDLE LOGIN
   const submitLoginForm = async (values) => {
     const { email, password } = values;
     const data = { email, password };
@@ -36,6 +35,7 @@
       } else {
         localStorage.setItem('isLogin', 'true');
         userStore.fetchUserProfile();
+        userStore.loadFollowers();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
       }

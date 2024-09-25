@@ -70,7 +70,7 @@
     class="flex flex-col justify-center items-center w-full h-[382px] mt-32"
   >
     <notFound class="scale-75" />
-    <div class="flex items-center flex-col text-center gap-y-5">
+    <div class="flex items-center flex-col text-center gap-y-3">
       <h1 class="font-semibold text-xl">No results found</h1>
       <p class="text-sm">Try different keywords or remove search filters</p>
     </div>

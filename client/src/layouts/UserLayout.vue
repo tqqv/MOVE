@@ -1,13 +1,14 @@
 <script setup>
   import Navbar from '@/components/Navbar.vue';
-  import SideBarChannel from '@/components/streamer/SideBarStreamer.vue';
+  import SideBarFollow from '@/components/SideBarFollow.vue';
+
 </script>
 
 <template>
   <Navbar />
   <div class="flex w-full pt-[72px] overflow-x-hidden">
-    <SideBarChannel />
-    <div class="flex-1 h-[calc(100vh-72px)] overflow-y-auto">
+    <SideBarFollow />
+    <div class="flex-1  overflow-y-auto">
       <router-view />
     </div>
   </div>

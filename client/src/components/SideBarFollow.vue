@@ -21,7 +21,7 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden min-h-[calc(100vh-72px)] md:block border-r-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden min-h-[calc(100vh-72px)] md:block border-r-2 border-gray-dark transition-all duration-300 ease-in-out sticky top-[72px]"
   >
     <div class="flex flex-col w-[241px] px-4 py-4">
       <div class="flex items-center justify-between">

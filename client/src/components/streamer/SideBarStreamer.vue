@@ -21,7 +21,7 @@
 </script>
 <template>
   <div
-    class="hidden h-[calc(100vh-72px)] md:block border-r-2 border-gray-dark sticky top-[72px] transition-all duration-300 ease-in-out"
+    class="hidden md:block h-[calc(100vh-72px)] top-[72px] border-r-2 border-gray-dark sticky transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col w-[261px] py-3">
       <ul>
