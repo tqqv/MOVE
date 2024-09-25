@@ -1,11 +1,13 @@
 "use strict";
 
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("subscribes", {
       userId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users', // Tên bảng users
@@ -16,7 +18,7 @@ module.exports = {
         primaryKey: true,    // Phần của khóa chính tổng hợp
       },
       channelId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'channels', // Tên bảng categories

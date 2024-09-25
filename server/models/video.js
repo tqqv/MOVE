@@ -11,10 +11,10 @@ module.exports = (sequelize, DataTypes) => {
           as: 'levelWorkout',
       });
 
-      // Mối quan hệ 1-n với User (Người tạo video)
-      this.belongsTo(models.User, {
-          foreignKey: 'userId',
-          as: 'userVideos',
+      // Mối quan hệ 1-n với Channel (Người tạo video)
+      this.belongsTo(models.Channel, {
+          foreignKey: 'channelId',
+          as: 'channel',
       });
 
       // Mối quan hệ n-1 với Category (Video thuộc nhiều danh mục)
@@ -24,12 +24,15 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // models/Video.js
-      this.hasMany(models.Comment, { foreignKey: 'videoId' });
+      this.hasMany(models.Comment, { foreignKey: 'videoId' , as: "videoComment"});
+
+      this.hasMany(models.Rating, { foreignKey: 'videoId', as: 'ratings' });
 
       // many to many video to User - view video
       this.belongsToMany(models.User, {
         through: models.ViewVideo,
         foreignKey: 'videoId',
+        otherKey: 'viewerId',
         as: 'videoViewVideo',
       });
 
@@ -37,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsToMany(models.User, {
         through: models.Rating,
         foreignKey: 'videoId',
+        otherKey: 'userId',
         as: 'videoRating',
       });
     }
@@ -44,17 +48,20 @@ module.exports = (sequelize, DataTypes) => {
   Video.init(
     {
         id: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           primaryKey: true,
-          autoIncrement: true,
+          defaultValue: DataTypes.UUID,
           allowNull: false,
+          validate: {
+            isUUID: true
+         }
         },
-        userId: {
-          type: DataTypes.INTEGER,
+        channelId: {
+          type: DataTypes.UUID,
           allowNull: false,
         },
         categoryId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: true,
         },
         title: {
@@ -86,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false,
         },
         levelWorkoutsId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
         },
         status: {

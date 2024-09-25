@@ -10,7 +10,7 @@ channelRouter.get("/getListFollower/", verifyUser, getListSubscribeOfUser)
 // unsub/sub
 channelRouter.post("/subscribe", verifyUser, subChannelController)
 
-channelRouter.get("/comments",  verifyStreamer, getCommentsByChannelIdController)
+channelRouter.get("/comments/:channelId",  verifyStreamer, getCommentsByChannelIdController)
 channelRouter.get("/getProfileChannel/", verifyUser, getProfileChannelController)
 channelRouter.put("/editChannel", verifyUser, updateProfileChannelController)
 channelRouter.get("/viewChannel/:username", viewChannelController)

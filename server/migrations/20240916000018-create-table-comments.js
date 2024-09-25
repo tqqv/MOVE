@@ -1,17 +1,19 @@
 "use strict";
 
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("comments", {
      id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       userId: {
-          type: Sequelize.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
             model: 'users',
@@ -21,7 +23,7 @@ module.exports = {
           onUpdate: 'CASCADE',
       },
       videoId: {
-          type: Sequelize.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
               model: 'videos',
@@ -30,7 +32,7 @@ module.exports = {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
       },
-      commentContent: {
+      content: {
         type: Sequelize.TEXT,
         allowNull: false
       },
@@ -39,8 +41,8 @@ module.exports = {
         defaultValue: 0,
         allowNull: false
       },
-      parentCommentId: {
-        type: Sequelize.INTEGER,
+      parentId: {
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'comments',

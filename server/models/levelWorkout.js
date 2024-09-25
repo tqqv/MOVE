@@ -14,9 +14,9 @@ module.exports = (sequelize, DataTypes) => {
   LevelWorkout.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       levelWorkout: {

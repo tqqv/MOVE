@@ -5,18 +5,23 @@ module.exports = (sequelize, DataTypes) => {
   class Rating extends Model {
     static associate(models) {
         this.belongsTo(models.User);
+
+        this.belongsTo(models.Video, {
+          foreignKey: 'videoId',
+          as: 'video'
+        });
     }
   }
   Rating.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users', // Tên bảng users
@@ -30,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
       },
       videoId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'videos', // Tên bảng users
@@ -40,7 +45,7 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
       // livestreamId: {
-      //   type: DataTypes.INTEGER,
+      //   type: DataTypes.UUID,
       //   allowNull: true,
       //   references: {
       //     model: 'livestreams', // Tên bảng users
@@ -53,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Rating",
-      tableName: "ratingss",
+      tableName: "ratings",
       timestamps: true,
   });
   return Rating;
