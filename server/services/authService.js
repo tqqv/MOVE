@@ -11,7 +11,7 @@ const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
     try {
       const token = jwt.sign(
-        { id: user._id, role: user.role },
+        { id: user.id, role: user.role },
         process.env.JWT_SECRET_KEY,
         { expiresIn: "15d" }
       );
@@ -413,7 +413,7 @@ const getProfile = async (id) => {
     const user = await User.findByPk(id);
     if(!user){
       return {
-        status: 200,
+        status: 400,
         message: "User not found"
       }
     }

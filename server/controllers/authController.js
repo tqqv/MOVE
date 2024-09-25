@@ -29,7 +29,8 @@ const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires);
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires)
+    .cookie('isLogin','true', loginResult.cookie.expires)
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
@@ -50,6 +51,8 @@ const registerController = async (req, res, next) => {
 
 const logoutController = async (req, res, next) => {
   res.clearCookie("accessToken");
+  res.clearCookie("isLogin", { httpOnly: true, secure: true });
+
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
 
@@ -141,10 +144,12 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
-    {
-      successRedirect: '/', successMessage:true,
-      failureRedirect: '/login', failureMessage: true },
+    { failureMessage: true }, 
     async (error, user) => {
+      if (error || !user) {
+        return res.redirect(process.env.CLIENT_HOST); 
+      }
+
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {
@@ -152,11 +157,13 @@ const googleCallbackController = (req, res, next) => {
           httpOnly: true,
           expires: loginResult.cookie.expires,
         })
-        // .redirect(process.env.CLIENT_HOST)
+        .cookie('isLogin', 'true')
+        .redirect(process.env.CLIENT_HOST);
       }
     }
   )(req, res, next);
 };
+
 // facebook
 const facebookLogin = passport.authenticate('facebook');
 
