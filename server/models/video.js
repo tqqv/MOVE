@@ -48,13 +48,9 @@ module.exports = (sequelize, DataTypes) => {
   Video.init(
     {
         id: {
-          type: DataTypes.UUID,
+          type: DataTypes.INTEGER,
           primaryKey: true,
-          defaultValue: DataTypes.UUID,
           allowNull: false,
-          validate: {
-            isUUID: true
-         }
         },
         channelId: {
           type: DataTypes.UUID,
@@ -66,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         title: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         description: {
           type: DataTypes.TEXT,
@@ -74,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         videoUrl: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         thumbnailUrl: {
           type: DataTypes.STRING(255),
@@ -90,11 +86,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         duration: {
           type: DataTypes.STRING(20),
-          allowNull: false,
+          allowNull: true,
         },
         levelWorkoutsId: {
           type: DataTypes.UUID,
-          allowNull: false,
+          allowNull: true,
         },
         status: {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
