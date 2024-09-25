@@ -15,10 +15,13 @@
         comments.value = response.data.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
+
+        await Promise.all(
+          comments.value.map((comment) => {
+            return fetchChildComments(comment.id);
+          }),
+        );
       }
-      comments.value.forEach((comment) => {
-        fetchChildComments(comment.id);
-      });
     } catch (error) {
       console.error('Error fetching comments:', error);
     }
@@ -28,21 +31,16 @@
     try {
       const response = await getAllChildComments(parentId);
 
-      if (response.data.success) {
+      if (response.data.success && response.data.data) {
         if (!childComments.value[parentId]) {
           childComments.value[parentId] = [];
         }
-
-        // Sắp xếp các bình luận con theo thời gian tạo (mới nhất -> cũ nhất)
         childComments.value[parentId] = response.data.data.sort(
           (a, b) => new Date(b.createdAt) - new Date(a.createdAt),
         );
-
-        // // Đệ quy để lấy các bình luận con của tầng tiếp theo theo `parentId` ban đầu
-        // for (const childComment of childComments.value[parentId]) {
-        //   // Gọi lại hàm với cùng `parentId` để lấy bình luận con ở tầng tiếp theo
-        //   await fetchChildComments(childComment.id);
-        // }
+        for (const childComment of childComments.value[parentId]) {
+          await fetchChildComments(childComment.id);
+        }
       } else {
         console.warn(`No child comments found for parent ID ${parentId}`);
       }
@@ -64,6 +62,7 @@
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
+      :fetchComments="fetchComments"
       :childComments="childComments"
     />
 

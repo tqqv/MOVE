@@ -12,8 +12,20 @@
       type: Number,
       required: true,
     },
-    fetchChildComments: Function,
+    fetchChildComments: {
+      type: Function,
+      required: true,
+    },
+    fetchComments: {
+      type: Function,
+      required: true,
+    },
   });
+  const callFetchComments = () => {
+    if (props.fetchComments) {
+      props.fetchComments();
+    }
+  };
   const parentId = ref(props.commentId || null);
   const data = {
     avatar: MMAImage,
@@ -44,8 +56,11 @@
         console.log('Comment created successfully:', response.data.data);
         commentText.value = '';
         showActions.value = false;
-        emit('sendComment');
+        const parentID = response.data.data.parentId;
+        console.log(parentID);
 
+        emit('sendComment', parentID);
+        props.fetchComments();
         props.fetchChildComments(props.commentId);
       } else {
         console.error('Failed to create comment');

@@ -12,8 +12,17 @@
   const props = defineProps({
     comment: Object,
     fetchChildComments: Function,
+    fetchComments: Function,
     childComments: Object,
   });
+
+  if (props.fetchComments) {
+    console.log('co ham ne');
+
+    props.fetchComments();
+  } else {
+    console.log('k co ham');
+  }
 
   const isShowMoreChild = ref(false);
   const isReplyChild = ref(false);
@@ -93,7 +102,13 @@
         v-if="isReplyChild"
         :commentId="comment.id"
         :fetchChildComments="fetchChildComments"
-        @sendComment="isReplyChild = false"
+        :fetchComments="fetchComments"
+        @sendComment="
+          (parentId) => {
+            isReplyChild = false;
+            fetchChildComments(parentId);
+          }
+        "
       />
 
       <!-- Show more/Show less child comments -->
@@ -115,10 +130,13 @@
       <!-- Show child comments recursively -->
       <div v-if="isShowMoreChild">
         <CommentItem
-          v-for="child in childComments[comment.id]"
+          v-for="(child, index) in childComments[comment.id].slice(
+            0,
+            isShowMoreChild ? childComments[comment.id].length : 3,
+          )"
           :key="child.id"
           :comment="child"
-          :fetchChildComments="fetchChildComments"
+          :fetchChildComments="props.fetchChildComments"
           :childComments="childComments"
         />
       </div>
