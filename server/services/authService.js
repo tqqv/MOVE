@@ -756,5 +756,6 @@ module.exports = {
   statusRequestChannel,
   generateJwtToken,
   sendMailVerifyFacebook,
-  verifyAccountFacebook
+  verifyAccountFacebook,
+  generateUniqueReferralCode
 };
