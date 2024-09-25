@@ -32,14 +32,14 @@ const loginController = async (req, res, next) => {
     res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
       httpOnly: true,
-      secure: true, 
+      secure: true,
       sameSite: 'None',
       domain: '.training-move-capstone.madlab.tech',
       path: '/',
     })
     .cookie('isLogin', 'true', {
       expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-      secure: true, 
+      secure: true,
       sameSite: 'None',
       domain: '.training-move-capstone.madlab.tech',
       path: '/',
@@ -157,20 +157,30 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
-    { failureMessage: true }, 
+    { failureMessage: true },
     async (error, user) => {
       if (error || !user) {
-        return res.redirect(process.env.CLIENT_HOST); 
+        return res.redirect(process.env.CLIENT_HOST);
       }
 
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {
         res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
+          expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
           httpOnly: true,
-          expires: loginResult.cookie.expires,
+          secure: true,
+          sameSite: 'None',
+          domain: '.training-move-capstone.madlab.tech',
+          path: '/',
         })
-        .cookie('isLogin', 'true')
+        .cookie('isLogin', 'true', {
+          expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
+          secure: true,
+          sameSite: 'None',
+          domain: '.training-move-capstone.madlab.tech',
+          path: '/',
+        })
         .redirect(process.env.CLIENT_HOST);
       }
     }
