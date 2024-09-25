@@ -29,17 +29,8 @@ const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
-      expires: loginResult.cookie.expires,
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none'
-    })
-    .cookie('isLogin','true', {
-      expires: loginResult.cookie.expires,
-      secure: true,
-      sameSite: 'none'
-    })
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires)
+    .cookie('isLogin','true', loginResult.cookie.expires)
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
