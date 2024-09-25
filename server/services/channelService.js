@@ -359,7 +359,7 @@ const searchVideoChannel = async(data, limit, offset) => {
       },
       include: [{
         model: User,
-        as: 'user',
+        as: 'userVideos',
         attributes: ['username'],
         include: [{ model: Channel, attributes: ['channelName'] }]
       }],
