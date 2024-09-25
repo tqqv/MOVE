@@ -17,11 +17,20 @@ module.exports = (sequelize, DataTypes) => {
       });
     }
   }
-  
+
   CategoryFollow.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUID,
+        allowNull: false,
+        validate: {
+            isUUID: true
+        }
+      },
       userId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true, // Part of composite primary key
         allowNull: false,
         references: {
@@ -32,7 +41,7 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE',
       },
       categoryId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true, // Part of composite primary key
         allowNull: false,
         references: {

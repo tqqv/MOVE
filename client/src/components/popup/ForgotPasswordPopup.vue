@@ -2,11 +2,10 @@
   import { ref, computed, defineEmits } from 'vue';
   import Dialog from 'primevue/dialog';
   import { usePopupStore } from '@/stores';
+  import { postForgotPassword } from '@/services/auth';
 
   const popupStore = usePopupStore();
-  const data = {
-    email: 'abc@gmail.com',
-  };
+
   const email = ref('');
   const isSubmitting = ref(false);
   const countdown = ref(0);
@@ -20,7 +19,9 @@
     return !email.value.trim() || countdown.value > 0 || isSubmitting.value;
   });
 
-  const sendResetLink = () => {
+  const sendResetLink = async () => {
+    const response = await postForgotPassword({ email: email.value });
+
     isSubmitting.value = true;
     if (!email.value.trim()) return;
 
@@ -55,7 +56,7 @@
         class="border border-[#13D0B4] bg-[#E6FFFB] p-2 rounded-lg text-sm items-center text-center"
       >
         <span>
-          We've sent an email to <span class="font-bold">{{ data.email }}</span
+          We've sent an email to <span class="font-bold">{{ email }}</span
           >. Click the link in the email to reset your password.
         </span>
       </div>

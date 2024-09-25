@@ -33,7 +33,9 @@
   .text_title {
     @apply py-[15px] text-[24px] text-title font-bold;
   }
-
+  .text_nav {
+    @apply text-base font-bold;
+  }
   .text_subTitle {
     @apply text-[18px] text-title font-bold;
   }
@@ -59,7 +61,7 @@
   }
 
   .btnDisable {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-not-allowed leading-none;
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-default leading-none;
   }
 
   .tag {
@@ -70,13 +72,19 @@
     @apply text-white bg-primary;
   }
 
-
   .input_custom {
-    @apply p-2 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary mb-2 w-full;
+    @apply px-2 py-3 pr-12 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full;
   }
 
   .select_custom {
-    @apply  flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
+    @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
+  }
+
+  .btn_eyes {
+    @apply flex justify-center items-center absolute top-1/2 right-2 transform -translate-y-1/2 z-20 px-3 cursor-pointer text-[#666666];
+  }
+  .text_subLabel{
+    @apply text-[13px] text-[#777777]
   }
 }
 
