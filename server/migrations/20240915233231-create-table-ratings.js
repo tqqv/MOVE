@@ -15,7 +15,6 @@ module.exports = {
       userId: {
         type: DataTypes.UUID,
         allowNull: true,
-        unique: true,
         references: {
           model: 'users', // Tên bảng trong cơ sở dữ liệu
           key: 'id'       // Tên cột bạn muốn tham chiếu đến

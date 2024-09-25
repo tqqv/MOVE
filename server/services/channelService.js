@@ -1,6 +1,6 @@
-const { Op, where } = require("sequelize");
+const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { Channel, Subscribe, User, Video, Category, CategoryFollow } = db;
+const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -349,25 +349,57 @@ const searchVideoChannel = async(data, limit, offset) => {
 
     const videos = await Video.findAll({
       where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${normalData}%` } }
+        title: { [Op.like]: `%${normalData}%` }
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['title']
+        },
+        {
+          model: LevelWorkout,
+          as: 'levelWorkout',
+          attributes: ['levelWorkout']
+        }
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating'
+          ]
         ]
       },
-      include: [{
-        model: Channel,
-        as: 'channel',
-        attributes: ['channelName', 'avatar']
-      }],
+      order: [['createdAt', 'DESC']],
       limit: limitInt,
-      offset: offsetInt,
-      order: [['createdAt', 'DESC']]
+      offset: offsetInt
     });
+
+
 
     const user = await User.findAll({
       include: [
         {
           model: Channel,
-          attributes: ['channelName', 'avatar', 'isLive']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM subscribes
+                WHERE subscribes.channelId = Channel.id
+              )`),
+              'followCount' // Alias to store the result as followCount
+            ]]
         }
       ],
       attributes: ['username', 'avatar'],
@@ -418,7 +450,7 @@ const getAllInforFollow = async(userId) => {
       include: [{
         model: Channel,
         as: 'channel',
-        attributes: ['channelName', 'avatar'],
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
       }],
       limit: 6,
       order: [['createdAt', 'DESC']]

@@ -5,6 +5,11 @@ module.exports = (sequelize, DataTypes) => {
   class Rating extends Model {
     static associate(models) {
         this.belongsTo(models.User);
+
+        this.belongsTo(models.Video, {
+          foreignKey: 'videoId',
+          as: 'video'
+        });
     }
   }
   Rating.init(
@@ -53,7 +58,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Rating",
-      tableName: "ratingss",
+      tableName: "ratings",
       timestamps: true,
   });
   return Rating;

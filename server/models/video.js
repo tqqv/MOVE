@@ -26,6 +26,8 @@ module.exports = (sequelize, DataTypes) => {
       // models/Video.js
       this.hasMany(models.Comment, { foreignKey: 'videoId' , as: "videoComment"});
 
+      this.hasMany(models.Rating, { foreignKey: 'videoId', as: 'ratings' });
+
       // many to many video to User - view video
       this.belongsToMany(models.User, {
         through: models.ViewVideo,

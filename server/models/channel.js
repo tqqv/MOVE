@@ -55,6 +55,11 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
             },
+            popularCheck: {
+                type: DataTypes.BOOLEAN,
+                allowNull: true, // hoặc false nếu bạn muốn bắt buộc
+                defaultValue: 0,
+            },
             streamKey: {
                 type: DataTypes.STRING(255),
                 allowNull: true,
