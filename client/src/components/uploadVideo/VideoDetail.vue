@@ -15,6 +15,7 @@
   import axios from '@/services/axios';
   import { useConfirm } from 'primevue/useconfirm';
   import { toast } from 'vue3-toastify';
+  import ConfirmDialog from 'primevue/confirmdialog';
 
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
@@ -32,6 +33,7 @@
   const value = ref('1');
 
   const confirm = useConfirm();
+  const showConfirmDialog = ref(false);
 
   const confirmModal = () => {
     confirm.require({
@@ -50,9 +52,11 @@
       },
       accept: () => {
         closeVideoDetailPopup();
+        showConfirmDialog.value = false;
       },
       reject: () => {
         openVideoDetailPopup();
+        showConfirmDialog.value = false;
       },
     });
   };
@@ -89,6 +93,7 @@
       if (response.status === 200) {
         toast.success('Video published successfully');
         closeVideoDetailPopup();
+        showConfirmDialog.value = false;
       }
     } catch (error) {
       toast.error('Error updating video comment setting');
@@ -225,4 +230,5 @@
       </div>
     </div>
   </Dialog>
+  <ConfirmDialog v-model:visible="showConfirmDialog" :style="{ width: '604px' }"></ConfirmDialog>
 </template>

@@ -33,7 +33,6 @@ const uploadMetadata = async (req, res, next) => {
 
 const saveVideo = async (req, res, next) => {
   const userId = req.user.channelId;
-  console.log(userId);
   const { videoId, title, description, thumbnailUrl, videoUrl, duration, status } = req.body;
   const result = await saveVideoService(videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status);
   responseHandler(result.status, result.data, result.message)(req, res, next);
@@ -75,8 +74,8 @@ const getAllVideos = async (req, res, next) => {
 };
 
 const getVideoByUserId = async (req, res, next) => {
-  const { userId } = req.params;
-  const result = await getVideoByUserIdService(userId);
+  const { channelId } = req.params;
+  const result = await getVideoByUserIdService(channelId);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 

@@ -41,7 +41,7 @@ const saveVideoService = async (videoId, userId, title, description, thumbnailUr
   try {
     const video = await Video.create({
         id: videoId,
-        userId: userId,
+        channelId: userId,
         title: title,
         description: description,
         thumbnailUrl: thumbnailUrl,
@@ -295,7 +295,7 @@ const getAllVideosService = async () => {
 
 const getVideoByUserIdService = async (userId) => {
   const videos = await Video.findAll({
-    where: { userId: userId }
+    where: { channelId: userId }
   });
   if (!videos) {
     return {
