@@ -1,7 +1,7 @@
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User, RequestChannel } = db;
+const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
@@ -139,11 +139,22 @@ const login = async (userData) => {
     };
   }
 
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET_KEY,
-    { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
-  );
+  let token = null
+
+  if (user.role === "streamer") {
+    const channel = await Channel.findOne({ where: { userId: user.id }})
+    token = jwt.sign(
+      { id: user.id, role: user.role, channelId: channel.id },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+    );
+  } else {
+    token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+    );
+  }
 
   // set token in cookies
   return {

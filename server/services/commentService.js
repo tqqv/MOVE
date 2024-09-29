@@ -116,7 +116,7 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
       {
         model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',
-        attributes: ['avatar', 'username', 'email']
+        attributes: ['avatar', 'username', 'email', 'isVerified']
       },
     ],
     order: [
