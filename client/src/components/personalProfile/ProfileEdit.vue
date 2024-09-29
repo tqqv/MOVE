@@ -13,7 +13,6 @@
   import { checkDataChanged, getChangedFields } from '@/functions/compareData';
 
   const userStore = useUserStore();
-
   const profileData = ref({
     username: '',
     email: '',

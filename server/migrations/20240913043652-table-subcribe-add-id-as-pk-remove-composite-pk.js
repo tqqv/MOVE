@@ -28,6 +28,7 @@ module.exports = {
     await queryInterface.addColumn('subscribes', 'userId', {
       type: DataTypes.UUID,
       allowNull: false,
+      unique: false,
       references: {
         model: 'users', // Table 'users'
         key: 'id',      // Primary key from 'users'
@@ -39,6 +40,7 @@ module.exports = {
     await queryInterface.addColumn('subscribes', 'channelId', {
       type: DataTypes.UUID,
       allowNull: false,
+      unique: false,
       references: {
         model: 'channels', // Table 'channels'
         key: 'id',         // Primary key from 'channels'

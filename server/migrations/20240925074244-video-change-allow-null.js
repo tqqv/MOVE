@@ -19,7 +19,7 @@ module.exports = {
     });
 
     await queryInterface.changeColumn('videos', 'levelWorkoutsId', {
-      type: Sequelize.INTEGER,
+      type: Sequelize.UUID,
       allowNull: true,
     });
   },
