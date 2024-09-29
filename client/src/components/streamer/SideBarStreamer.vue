@@ -20,10 +20,8 @@
   ];
 </script>
 <template>
-  <div
-    class="hidden md:block h-[calc(100vh-72px)] top-[72px] border-r-2 border-gray-dark sticky transition-all duration-300 ease-in-out"
-  >
-    <div class="flex flex-col w-[261px] py-3">
+  <div class="sticky top-[72px] h-[calc(100vh-72px)] w-[261px] border-r-2 border-gray-dark bg-white">
+    <div class="flex flex-col py-3">
       <ul>
         <router-link
           v-for="item in menuItems"

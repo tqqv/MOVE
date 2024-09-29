@@ -6,9 +6,9 @@
 
 <template>
   <Navbar />
-  <div class="flex w-full pt-[72px] overflow-x-hidden">
+  <div class="flex pt-[72px]">
     <SideBarFollow />
-    <div class="flex-1  overflow-y-auto">
+    <div class="flex-1 overflow-y-auto">
       <router-view />
     </div>
   </div>
