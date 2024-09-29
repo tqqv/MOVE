@@ -23,6 +23,7 @@ const postLogin = async (data) => {
 const getLogout = () => {
   return axios.get('/auth/logout');
 };
+
 const getLoginGoogle = () => {
   return axios.get('/auth/google');
 };

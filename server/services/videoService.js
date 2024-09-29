@@ -1,6 +1,8 @@
 let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
+const db = require("../models/index.js");
+const { Video } = db;
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -31,6 +33,112 @@ const generateUploadLink = async (fileName, fileSize) => {
           }
         });
       }
+    });
+  });
+};
+
+const saveVideoService = async (videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status) => {
+  try {
+    const video = await Video.create({
+        id: videoId,
+        channelId: userId,
+        title: title,
+        description: description,
+        thumbnailUrl: thumbnailUrl,
+        videoUrl: videoUrl,
+        duration: duration,
+        status: status,
+    });
+    if (!video) {
+      return {
+        status: 404,
+        message: 'Video created failed',
+        data: null
+      };
+    }
+    return {
+      status: 200,
+      message: 'Video saved successfully',
+      data: video
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message, 
+      data: null
+    };
+  }
+};
+
+const updateVideoService = async (videoId, updateData) => {
+  try {
+    const video = await Video.update(updateData, {
+      where: { id: videoId }
+    });
+    if (!video) {
+      return {
+        status: 404,
+        message: 'Video updated failed',
+        data: null
+      };
+    }
+    return {
+      status: 200,
+      message: 'Video updated successfully',
+      data: video
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message, 
+      data: null
+    };
+  }
+};
+
+const getVideoService = async (videoUri) => {
+  return new Promise((resolve, reject) => {
+    client.request({
+      method: 'GET',
+      path: videoUri,
+    }, (error, body, statusCode) => {
+      if (error) {
+        reject({
+          status: statusCode || 500,
+          message: error.message,
+          data: null
+        });
+      } else {
+        resolve({
+          status: 200,
+          message: 'Upload link generated successfully.',
+          data: {
+            title: body.name,
+            description: body.description,
+            videoUrl: body.player_embed_url,
+            duration: body.duration,
+            thumbnailUrl: body.pictures.base_link,
+          }
+        });
+      }
+    });
+  });
+}
+
+const checkVideoStatusService = async (videoUri) => {
+  return new Promise((resolve, reject) => {
+    client.request({
+      method: 'GET',
+      path: `${videoUri}?fields=uri,upload.status,transcode.status`,
+    }, (error, body) => {
+      if (error) {
+        reject({ status: 500, message: error.message });
+      }
+      resolve({
+        status: 200,
+        message: 'Video status fetched successfully.',
+        data: body 
+      });
     });
   });
 };
@@ -144,6 +252,13 @@ const setThumbnailActive = (picturesUri) => {
 };
 
 const uploadMetadataService = async (videoUri, title, description) => {
+  const videoId = videoUri.split('/').pop();
+  const video = await Video.update({
+    title: title,
+    description: description
+  }, {
+    where: { id: videoId }
+  });
   return new Promise((resolve, reject) => {
     client.request({
       method: 'PATCH',
@@ -162,8 +277,67 @@ const uploadMetadataService = async (videoUri, title, description) => {
   });
 };
 
+const getAllVideosService = async () => {
+  const videos = await Video.findAll();
+  if (!videos) {
+    return {
+      status: 404,
+      message: 'Videos not found',
+      data: null
+    };
+  }
+  return {
+    status: 200,
+    message: 'Videos fetched successfully',
+    data: videos
+  };
+};
+
+const getVideoByUserIdService = async (userId) => {
+  const videos = await Video.findAll({
+    where: { channelId: userId }
+  });
+  if (!videos) {
+    return {
+      status: 404,
+      message: 'Videos not found',
+      data: null
+    };
+  }
+  return {
+    status: 200,
+    message: 'Videos fetched successfully',
+    data: videos
+  };
+};
+
+const getVideoByVideoIdService = async (videoId) => {
+  const video = await Video.findOne({
+    where: { id: videoId }
+  });
+  if (!video) {
+    return {
+      status: 404,
+      message: 'Video not found',
+      data: null
+    };
+  }
+  return {
+    status: 200,
+    message: 'Video fetched successfully',
+    data: video
+  };
+};
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
-  uploadMetadataService
+  uploadMetadataService,
+  saveVideoService,
+  getVideoService,
+  checkVideoStatusService,
+  updateVideoService,
+  getAllVideosService,
+  getVideoByUserIdService,
+  getVideoByVideoIdService
 };

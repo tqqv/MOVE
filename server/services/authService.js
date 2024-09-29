@@ -1,16 +1,17 @@
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User, RequestChannel } = db;
+const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
+const { v4: uuidv4 } = require('uuid');
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
     try {
       const token = jwt.sign(
-        { id: user._id, role: user.role },
+        { id: user.id, role: user.role },
         process.env.JWT_SECRET_KEY,
         { expiresIn: "15d" }
       );
@@ -20,6 +21,24 @@ const generateJwtToken = (user) => {
     }
   });
 };
+
+async function generateUniqueReferralCode() {
+  let referralCode;
+  let isUnique = false;
+
+  // Keep generating a new code until a unique one is found
+  while (!isUnique) {
+    referralCode = uuidv4().slice(0, 6);
+    const existingUser = await User.findOne({ where: { referralCode } });
+
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return referralCode;
+}
+
 
 const register = async (userData) => {
   try {
@@ -72,14 +91,12 @@ const register = async (userData) => {
     const newUser = new User({
       email: userData.email,
       password: hash,
-      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png"
+      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
+      referralCode : await generateUniqueReferralCode()
     });
 
     const savedUser = await newUser.save();
 
-    const referralCode = 1000 + savedUser.dataValues.id;
-
-    savedUser.referralCode = referralCode;
 
     await savedUser.save();
     //
@@ -122,11 +139,22 @@ const login = async (userData) => {
     };
   }
 
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET_KEY,
-    { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
-  );
+  let token = null
+
+  if (user.role === "streamer") {
+    const channel = await Channel.findOne({ where: { userId: user.id }})
+    token = jwt.sign(
+      { id: user.id, role: user.role, channelId: channel.id },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+    );
+  } else {
+    token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+    );
+  }
 
   // set token in cookies
   return {
@@ -385,7 +413,7 @@ const getProfile = async (id) => {
     const user = await User.findByPk(id);
     if(!user){
       return {
-        status: 200,
+        status: 400,
         message: "User not found"
       }
     }
@@ -728,5 +756,6 @@ module.exports = {
   statusRequestChannel,
   generateJwtToken,
   sendMailVerifyFacebook,
-  verifyAccountFacebook
+  verifyAccountFacebook,
+  generateUniqueReferralCode
 };

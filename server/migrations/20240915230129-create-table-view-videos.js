@@ -1,17 +1,19 @@
 "use strict";
 
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.createTable("viewVideos", {
       id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       viewerId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'users',
@@ -21,7 +23,7 @@ module.exports = {
         onUpdate: 'CASCADE',
       },
       videoId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'videos',

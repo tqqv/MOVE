@@ -11,10 +11,10 @@ module.exports = (sequelize, DataTypes) => {
           as: 'levelWorkout',
       });
 
-      // Mối quan hệ 1-n với User (Người tạo video)
-      this.belongsTo(models.User, {
-          foreignKey: 'userId',
-          as: 'userVideos',
+      // Mối quan hệ 1-n với Channel (Người tạo video)
+      this.belongsTo(models.Channel, {
+          foreignKey: 'channelId',
+          as: 'channel',
       });
 
       // Mối quan hệ n-1 với Category (Video thuộc nhiều danh mục)
@@ -24,12 +24,15 @@ module.exports = (sequelize, DataTypes) => {
       });
 
       // models/Video.js
-      this.hasMany(models.Comment, { foreignKey: 'videoId' });
+      this.hasMany(models.Comment, { foreignKey: 'videoId' , as: "videoComment"});
+
+      this.hasMany(models.Rating, { foreignKey: 'videoId', as: 'ratings' });
 
       // many to many video to User - view video
       this.belongsToMany(models.User, {
         through: models.ViewVideo,
         foreignKey: 'videoId',
+        otherKey: 'viewerId',
         as: 'videoViewVideo',
       });
 
@@ -37,6 +40,7 @@ module.exports = (sequelize, DataTypes) => {
       this.belongsToMany(models.User, {
         through: models.Rating,
         foreignKey: 'videoId',
+        otherKey: 'userId',
         as: 'videoRating',
       });
     }
@@ -46,20 +50,19 @@ module.exports = (sequelize, DataTypes) => {
         id: {
           type: DataTypes.INTEGER,
           primaryKey: true,
-          autoIncrement: true,
           allowNull: false,
         },
-        userId: {
-          type: DataTypes.INTEGER,
+        channelId: {
+          type: DataTypes.UUID,
           allowNull: false,
         },
         categoryId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: true,
         },
         title: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         description: {
           type: DataTypes.TEXT,
@@ -67,7 +70,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         videoUrl: {
           type: DataTypes.STRING(255),
-          allowNull: false,
+          allowNull: true,
         },
         thumbnailUrl: {
           type: DataTypes.STRING(255),
@@ -83,11 +86,11 @@ module.exports = (sequelize, DataTypes) => {
         },
         duration: {
           type: DataTypes.STRING(20),
-          allowNull: false,
+          allowNull: true,
         },
         levelWorkoutsId: {
-          type: DataTypes.INTEGER,
-          allowNull: false,
+          type: DataTypes.UUID,
+          allowNull: true,
         },
         status: {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
