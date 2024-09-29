@@ -408,7 +408,11 @@ const searchVideoChannel = async(data, limit, offset) => {
           { username: { [Op.like]: `%${normalData}%` } }, // Truy vấn LIKE trên username
           { '$Channel.channelName$': { [Op.like]: `%${normalData}%` } } // Truy vấn LIKE trên channelName của bảng Channel
         ]
-      }
+      },
+      order: [
+        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
+        ["username", "ASC"], 
+      ],
     });
 
     return {

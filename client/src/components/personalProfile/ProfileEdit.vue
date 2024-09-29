@@ -14,7 +14,6 @@
 
   const userStore = useUserStore();
 
-
   const profileData = ref({
     username: '',
     email: '',
@@ -38,7 +37,7 @@
   const isAgeValid = (dob) => {
     const birthDate = new Date(dob);
     const today = new Date();
-    const userAge = today.getFullYear() - birthDate.getFullYear();
+    let userAge = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
 
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
