@@ -240,7 +240,7 @@
         </div>
         <div class="items-center gap-x-6 hidden md:flex">
           <!-- User -->
-          <div class="relative" v-if="userStore.user?.role != 'streamer'">
+          <div class="relative">
             <InputGroup class="h-[40px] min-w-[292px] hidden xl:flex">
               <InputText
                 class="text-sm"
