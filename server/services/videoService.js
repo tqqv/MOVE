@@ -329,6 +329,32 @@ const getVideoByVideoIdService = async (videoId) => {
   };
 };
 
+const deleteVideoService = async (videoId) => {
+  const video = await Video.findOne({
+    where: { id: videoId }
+  });
+  return new Promise((resolve, reject) => {
+    client.request({
+      method: 'DELETE',
+      path: `videos/${videoId}`,
+    }, async (error) => {
+      if (error) {
+        reject({ status: 500, message: error.message });
+      } else {
+        if(!video) {
+          return {
+            status: 404,
+            message: 'Video not found',
+            data: null
+          };
+        }
+        await video.destroy();
+        resolve({ status: 200, message: 'Video deleted successfully', data: null });
+      }
+    });
+  });
+}
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -339,5 +365,6 @@ module.exports = {
   updateVideoService,
   getAllVideosService,
   getVideoByUserIdService,
-  getVideoByVideoIdService
+  getVideoByVideoIdService,
+  deleteVideoService
 };

@@ -1,6 +1,16 @@
 const express = require('express');
-const { getUploadLink, uploadThumbnail, uploadMetadata, saveVideo, getVideo, checkVideoStatus, updateVideo, getAllVideos, getVideoByUserId, getVideoByVideoId } = require('../controllers/videoController');
-const { verifyStreamer, verifyUser } = require("../middlewares/verifyToken");
+const { getUploadLink,
+  uploadThumbnail,
+  uploadMetadata,
+  saveVideo,
+  getVideo,
+  checkVideoStatus,
+  updateVideo,
+  getAllVideos,
+  getVideoByUserId,
+  getVideoByVideoId,
+  deleteVideo } = require('../controllers/videoController');
+const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
@@ -15,4 +25,5 @@ router.patch('/update-video', verifyStreamer, updateVideo);
 router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
 router.get('/channel/:channelId', verifyUser, verifyStreamer, getVideoByUserId);
+router.delete('/', verifyStreamer, deleteVideo);
 module.exports = router;
