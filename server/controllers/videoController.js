@@ -8,7 +8,8 @@ const {
   updateVideoService,
   getAllVideosService,
   getVideoByUserIdService,
-  getVideoByVideoIdService
+  getVideoByVideoIdService,
+  deleteVideoService
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -85,6 +86,16 @@ const getVideoByVideoId = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
+const deleteVideo = async (req, res, next) => {
+  const { videoId } = req.body;
+  try {
+    const result = await deleteVideoService(videoId);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res, next);
+  }
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -95,5 +106,6 @@ module.exports = {
   updateVideo,
   getAllVideos,
   getVideoByUserId,
-  getVideoByVideoId
+  getVideoByVideoId,
+  deleteVideo
 };
