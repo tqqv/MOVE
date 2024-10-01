@@ -1,19 +1,20 @@
 'use strict';
 
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up (queryInterface, Sequelize) {
     await queryInterface.createTable('ratings', {
       id: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       userId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
-        unique: true,
         references: {
           model: 'users', // Tên bảng trong cơ sở dữ liệu
           key: 'id'       // Tên cột bạn muốn tham chiếu đến
@@ -24,7 +25,7 @@ module.exports = {
         allowNull: true,
       },
       videoId: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'videos', // Tên bảng users

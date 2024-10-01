@@ -9,6 +9,7 @@ import DashboardStreamer from '@/components/streamer/dashboard/DashboardStreamer
 import CommentStreamer from '@/components/streamer/comment/CommentStreamer.vue';
 import CategoryDetails from '@/pages/CategoryDetails.vue';
 import Browse from '@/pages/Browse.vue';
+import SearchPage from '@/pages/SearchPage.vue';
 
 const routes = [
   { path: '/', component: Test },
@@ -19,6 +20,8 @@ const routes = [
   // { path: '/browse/:category', component: CategoryDetails },
   //Có api thì fix lại
   { path: '/browse/category', component: CategoryDetails },
+  { path: '/search', component: SearchPage },
+
   // Streamer router
   {
     path: '/streamer',

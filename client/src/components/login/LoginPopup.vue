@@ -14,7 +14,6 @@
   const showPassword = ref(false);
   const popupStore = usePopupStore();
 
-  
   // const buttonColor = computed(() => {
   //   return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
   // });
@@ -25,7 +24,7 @@
     showLoginWithEmail.value = true;
   };
 
-// HANDLE LOGIN
+  // HANDLE LOGIN
   const submitLoginForm = async (values) => {
     const { email, password } = values;
     const data = { email, password };
@@ -34,7 +33,6 @@
       if (response.error) {
         toast.error(response.message || 'Login failed');
       } else {
-        localStorage.setItem('isLogin', 'true');
         userStore.fetchUserProfile();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
@@ -52,6 +50,10 @@
   const handleGoogleLogin = () => {
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.open(url, '_self');
+  };
+  const handleFacebookLogin = () => {
+    const url = `${import.meta.env.VITE_API_URL}auth/facebook`;
+    window.location.href = url;
   };
 
   // onMounted(async () => {
@@ -82,6 +84,7 @@
     <!-- Login Facebook  -->
 
     <button
+      @click="handleFacebookLogin"
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
       <span class="flex-shrink-0">

@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { Channel, Subscribe, User, Video, Category, CategoryFollow } = db;
+const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
 
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -31,7 +31,6 @@ const createChannel = async (userId, username, avatar) => {
 
 const subscribeChannel = async (userId, channelId) => {
   try {
-    console.log(channelId);
     const checkSubscribe = await Subscribe.destroy({
       where: {
         userId: userId,
@@ -98,8 +97,6 @@ const listSubscribeOfChannel = async (channelId) => {
 
     const listFollow = await listSubscribeOfUser(channel.userId)
 
-    console.log(listFollow);
-
 
     // const subscriber = await Subscribe.findAll({
     //   where: {
@@ -136,7 +133,6 @@ const listSubscribeOfChannel = async (channelId) => {
 
 const listSubscribeOfUser = async(userId) => {
   try {
-    // console.log(userId);
 
     const listSubscribe = await Subscribe.findAll({
       where: {
@@ -256,7 +252,7 @@ const editProfileChannel = async(userId, data, username) => {
     }
 
     const updateChannel = await channel.update(data);
-    
+
     return {
       status: 200,
       data: updateChannel,
@@ -353,32 +349,70 @@ const searchVideoChannel = async(data, limit, offset) => {
 
     const videos = await Video.findAll({
       where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${normalData}%` } }
+        title: { [Op.like]: `%${normalData}%` }
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['title']
+        },
+        {
+          model: LevelWorkout,
+          as: 'levelWorkout',
+          attributes: ['levelWorkout']
+        }
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating'
+          ]
         ]
       },
-      include: [{
-        model: User,
-        as: 'user',
-        attributes: ['username'],
-        include: [{ model: Channel, attributes: ['channelName'] }]
-      }],
+      order: [['createdAt', 'DESC']],
       limit: limitInt,
-      offset: offsetInt,
-      order: [['createdAt', 'DESC']]
+      offset: offsetInt
     });
 
+
+
     const user = await User.findAll({
+      include: [
+        {
+          model: Channel,
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM subscribes
+                WHERE subscribes.channelId = Channel.id
+              )`),
+              'followCount' // Alias to store the result as followCount
+            ]]
+        }
+      ],
+      attributes: ['username', 'avatar'],
       where: {
         [Op.or]: [
-          { username: { [Op.like]: `%${normalData}%` } },
+          { username: { [Op.like]: `%${normalData}%` } }, // Truy vấn LIKE trên username
+          { '$Channel.channelName$': { [Op.like]: `%${normalData}%` } } // Truy vấn LIKE trên channelName của bảng Channel
         ]
       },
-      attributes: ['username', 'avatar'],
-      include: [{ model: Channel, attributes: ['channelName', 'avatar'], where: { channelName: { [Op.like]: `%${normalData}%` }}}],
-      limit: limitInt,
-      offset: offsetInt,
-      order: [['createdAt', 'DESC']]
+      order: [
+        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
+        ["username", "ASC"], 
+      ],
     });
 
     return {
@@ -407,26 +441,20 @@ const getAllInforFollow = async(userId) => {
         userId: userId
       },
       attributes: ['channelId'],
-      include: [{
-        model: Channel,
-        as: "subscribeChannel",
-        attributes: ['userId']
-      }]
     })
 
-    const listUserIdOfChannel = listSubscribe.map(follow => follow.subscribeChannel.userId);
+    const listChannelId = listSubscribe.map(follow => follow.channelId);
 
     const videos = await Video.findAll({
       where: {
-        userId: {
-          [Op.in]: listUserIdOfChannel
+        channelId: {
+          [Op.in]: listChannelId
         }
       },
       include: [{
-        model: User,
-        as: 'user',
-        attributes: ['username'],
-        include: [{ model: Channel, attributes: ['channelName', 'avatar'] }]
+        model: Channel,
+        as: 'channel',
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
       }],
       limit: 6,
       order: [['createdAt', 'DESC']]
@@ -452,6 +480,8 @@ const getAllInforFollow = async(userId) => {
         message: "No channels, categories have been followed."
       }
     }
+
+    // thieu live stream ...
 
     return {
       status: 200,

@@ -16,7 +16,6 @@
   };
   import UploadVideo from '@/components/uploadVideo/UploadVideo.vue';
   import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
-  import UploadVideoConfirm from '@/components/uploadVideo/UploadVideoConfirm.vue';
 
   // get actions
 </script>
@@ -62,6 +61,5 @@
     </div>
     <UploadVideo />
     <VideoDetail />
-    <UploadVideoConfirm />
   </section>
 </template>

@@ -2,18 +2,19 @@ const passport = require('passport');
 const GoogleStrategy = require('passport-google-oauth20').Strategy;
 require('dotenv').config();
 const db = require("../../models/index.js");
+const { generateUniqueReferralCode } = require("../../services/authService.js");
 const { User } = db;
 
-const getProfile = (profile) => {
+const getProfile = async (profile) => {
     const {id, displayName, emails, provider} = profile;
     if(emails && emails.length) {
         const email = emails[0].value;
-        console.log(profile)
         return {
             googleId: id,
             fullName: displayName,
-            email,
+            email: email,
             avatar: profile.photos[0].value,
+            referralCode : await generateUniqueReferralCode()
         }
     }
     return null
@@ -27,7 +28,7 @@ passport.use(
   },
   async (acceessToken, refreshToken, profile, done) => {
     console.log(profile);
-    
+
     try {
         const existingGoogleAccount = await User.findOne({
             where: {googleId: profile.id},
@@ -35,10 +36,11 @@ passport.use(
 
         if(!existingGoogleAccount) {
             const existingEmailAccount = await User.findOne({
-                where: {email: getProfile(profile).email}
+                where: {email: (await getProfile(profile)).email}
             })
             if(!existingEmailAccount) {
-                const newAccount = await User.create(getProfile(profile))
+                console.log("come")
+                const newAccount = await User.create(await getProfile(profile))
                 return done(null, newAccount)
             }
             return done(null, existingEmailAccount)

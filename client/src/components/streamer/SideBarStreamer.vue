@@ -36,7 +36,7 @@
             :class="{ 'bg-primary/85 font-bold hover:bg-primary/85': route.path === item.link }"
           >
             <component :is="item.icon" />
-            <p>{{ item.name }}</p>
+            <p class="text-sm">{{ item.name }}</p>
           </li>
         </router-link>
       </ul>
