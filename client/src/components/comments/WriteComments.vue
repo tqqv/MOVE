@@ -1,8 +1,9 @@
 <script setup>
   import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
   import EmojiPicker from 'vue3-emoji-picker';
-  import MMAImage from '@/assets/category/MMA.png';
   import { postComments } from '@/services/comment';
+  import { getProfile } from '@/services/user';
+  const avatar = ref('');
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
@@ -15,11 +16,24 @@
       type: Number,
       required: true,
     },
+    fetchChildComments: {
+      type: Function,
+      required: true,
+    },
   });
-  const parentId = ref(props.commentId || null);
-  const data = {
-    avatar: MMAImage,
+  //ghép page bỏ cái này dùng prop
+  const fetchUserProfile = async () => {
+    try {
+      const response = await getProfile();
+      if (response.data.success) {
+        avatar.value = response.data.data.avatar || '';
+      }
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
   };
+  const parentId = ref(props.commentId || null);
+
   const showActions = ref(false);
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
@@ -30,24 +44,30 @@
   const handleFocus = () => {
     showActions.value = true;
   };
+  const togglePicker = () => {
+    isPickerVisible.value = !isPickerVisible.value;
+  };
   const handleSend = async () => {
     const data = { content: commentText.value, parentId: parentId.value };
     console.log(data);
     console.log(commentText.value);
-    //  data test videoID
+
     const videoId = 1;
+
     try {
       const response = await postComments(videoId, data);
-      if (response.data.success) {
+      console.log(response.data.success);
+
+      if (response.data.success && response.data.data) {
         console.log('Comment created successfully:', response.data.data);
+
         commentText.value = '';
         showActions.value = false;
-        const parentID = response.data.data.parentId;
-        console.log(parentID);
-        console.log(response.data.data);
 
+        const parentID = response.data.data.parentId || null;
         emit('sendComment', parentID);
-        props.fetchComments();
+        console.log(parentID);
+        console.log('ĐANG FETCHHHH');
       } else {
         console.error('Failed to create comment');
       }
@@ -55,6 +75,7 @@
       console.error('Error posting comment:', error);
     }
   };
+
   const handleCancel = () => {
     commentText.value = '';
     showActions.value = false;
@@ -79,6 +100,7 @@
   };
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    fetchUserProfile();
   });
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
@@ -90,7 +112,7 @@
     <!-- WRITE COMMENTS -->
     <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full">
       <div class="flex-shrink-0">
-        <img :src="data.avatar" alt="Avatar" class="size-10 rounded-full object-cover" />
+        <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
       <div class="flex flex-col w-full">
         <input
@@ -105,7 +127,7 @@
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
           <div class="relative">
             <button
-              @click="isPickerVisible = !isPickerVisible"
+              @click="togglePicker"
               class="pi pi-face-smile text-xl cursor-pointer"
               aria-label="Toggle Emoji Picker"
             />
