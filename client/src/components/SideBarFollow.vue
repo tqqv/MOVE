@@ -110,7 +110,7 @@
     class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[89px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-4 py-4">
-      <div class="flex items-center justify-center">
+      <div class="flex items-center justify-center my-2">
         <i
           class="pi pi-align-right cursor-pointer text-[19.5px]"
           style="font-weight: 800"
@@ -129,9 +129,9 @@
       </div>
       <!-- NOTE FOLLOWING CHANNEL -->
       <RouterLink
-        v-if="userStore.followers.length === 0 && useUserStore.user"
+        v-if="userStore.followers.length === 0 && userStore.user"
         v-tooltip="'browse'"
-        class="flex justify-center items-center py-[18px] px-6 rounded-full cursor-pointer hover:bg-primary text-center"
+        class="flex justify-center items-center py-[18px] px-6 mt-4 rounded-full cursor-pointer hover:bg-primary text-center"
         to="/browse"
       >
         <i class="pi pi-th-large"></i>

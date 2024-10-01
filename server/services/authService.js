@@ -161,7 +161,7 @@ const login = async (userData) => {
     cookie: {
       cookieName: "accessToken",
       token: token,
-      expires: process.env.TOKEN_EXPIRES_LOGIN,
+     expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000)
     },
     status: 200,
     message: "Successfully login",
