@@ -1,6 +1,6 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
-var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, getRequestStatusById } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
@@ -55,6 +55,8 @@ const logoutController = async (req, res, next) => {
 
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
+
+
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
@@ -144,10 +146,10 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
-    { failureMessage: true }, 
+    { failureMessage: true },
     async (error, user) => {
       if (error || !user) {
-        return res.redirect(process.env.CLIENT_HOST); 
+        return res.redirect(process.env.CLIENT_HOST);
       }
 
       const loginResult = await loginByGoogle(error, user);
@@ -218,6 +220,13 @@ const verifyAccountFacebookController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
+const getRequestChannelController = async (req, res, next) => {
+  const userId = req.user.id
+  const result = await getRequestStatusById(userId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 
 
 module.exports = {
@@ -239,5 +248,6 @@ module.exports = {
   facebookLogin,
   facebookCallback,
   sendMailVerifyFacebookController,
-  verifyAccountFacebookController
+  verifyAccountFacebookController,
+  getRequestChannelController
 };
