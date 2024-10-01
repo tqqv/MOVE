@@ -2,17 +2,17 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Rating extends Model {
+  class Donation extends Model {
     static associate(models) {
         this.belongsTo(models.User);
 
-        this.belongsTo(models.Video, {
-          foreignKey: 'videoId',
-          as: 'video'
+        this.belongsTo(models.Livestream, {
+          foreignKey: 'livestreamId',
+          as: 'livestream'
         });
     }
   }
-  Rating.init(
+  Donation.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -30,20 +30,6 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE', // Xóa follow khi user bị xóa
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
-      rating: {
-        type: DataTypes.INTEGER,
-        allowNull: true,
-      },
-      videoId: {
-        type: DataTypes.UUID,
-        allowNull: true,
-        references: {
-          model: 'videos', // Tên bảng users
-          key: 'id',      // Khóa chính từ bảng users
-        },
-        onDelete: 'CASCADE', // Xóa follow khi user bị xóa
-        onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
-      },
       livestreamId: {
         type: DataTypes.UUID,
         allowNull: true,
@@ -54,12 +40,24 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE', // Xóa follow khi user bị xóa
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
+      itemName: {
+        type: DataTypes.STRING(255),
+        allowNull: false
+      },
+      REPs: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false
+      }
     },
     {
       sequelize,
-      modelName: "Rating",
-      tableName: "ratings",
+      modelName: "Donation",
+      tableName: "donations",
       timestamps: true,
   });
-  return Rating;
+  return Donation;
 };

@@ -11,6 +11,12 @@ module.exports = (sequelize, DataTypes) => {
           as: 'categoryVideos',
         });
 
+        // One-to-many  - livestream
+        this.hasMany(models.Livestream, {
+          foreignKey: 'categoryId',
+          as: 'categoryLivestreams',
+        });
+
         // Many-to-many relationship through CategoryFollow
         this.belongsToMany(models.User, {
           through: models.CategoryFollow,

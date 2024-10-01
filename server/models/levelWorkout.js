@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'levelWorkoutsId',
             as: 'levelWorkoutVideos',
         });
+
+        this.hasMany(models.Livestream, {
+          foreignKey: 'levelWorkoutsId',
+          as: 'levelWorkoutLivestreams',
+        });
     }
   }
   LevelWorkout.init(
