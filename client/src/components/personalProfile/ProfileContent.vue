@@ -35,7 +35,6 @@
   const handleRequestToStreamer = async () => {
     try {
       const response = await requestToStreamer();
-      console.log(response);
       if (response.success) {
         toast.success('Request to streamer was successfully');
         sendRequestToStreamer.value = true;
@@ -51,16 +50,9 @@
   const fetchStatusRequestToStreamer = async () => {
     try {
       const response = await getRequestStreamer();
-      console.log(response);
       if (response.success && response.data) {
         sendRequestToStreamer.value = true;
-        if (response.data.status === 'pending') {
-          statusRequest.value = 'pending';
-        } else if (response.data.status === 'rejected') {
-          statusRequest.value = 'rejected';
-        } else {
-          statusRequest.value = '';
-        }
+        statusRequest.value = response.data.status;
       } else {
         sendRequestToStreamer.value = false;
       }
@@ -70,9 +62,7 @@
     }
   };
 
-  onMounted(async () => {
-    await fetchStatusRequestToStreamer();
-  });
+  onMounted(fetchStatusRequestToStreamer);
 </script>
 
 <template>
