@@ -208,19 +208,22 @@ const editProfileChannel = async(userId, data, username) => {
     if(username) {
       const user = await User.findByPk(userId)
 
-      if(!user) {
+      if (username.length < 3 || username.length > 32) {
         return {
-          status: 404,
+          status: 400,
           data: null,
-          message: "User not found."
+          message: "Must be between 3 and 32 in length."
+        }
+      } else if (!validateUsername(username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Please only use numbers, letters, underscores or periods."
         }
       }
 
-      const checkExist = await User.findOne({where: {
-        username: username
-      }})
-
-      if(checkExist) {
+      const usernameCheck = await User.findOne({where: {username: username}})
+      if(usernameCheck) {
         return {
           status: 400,
           data: null,
@@ -411,7 +414,7 @@ const searchVideoChannel = async(data, limit, offset) => {
       },
       order: [
         [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
-        ["username", "ASC"], 
+        ["username", "ASC"],
       ],
     });
 

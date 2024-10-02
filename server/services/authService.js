@@ -6,6 +6,7 @@ var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
+const validateUsername = require("../middlewares/validateUsername.js");
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -97,11 +98,13 @@ const register = async (userData) => {
     if(userData.password === userData.confirmPassword){
       const salt = bcrypt.genSaltSync(10);
       const hash = bcrypt.hashSync(userData.password, salt);
+      const referralCode = await generateUniqueReferralCode()
       const newUser = new User({
         email: userData.email,
         password: hash,
         avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
-        referralCode : await generateUniqueReferralCode()
+        referralCode : referralCode,
+        username: "user-" + referralCode
       });
 
       await newUser.save();
@@ -463,6 +466,31 @@ const editProfile = async (id, data) => {
         status: 400,
         data: null,
         message: "You can't change your verified email"
+      }
+    }
+
+    if(data.username){
+      if (data.username.length < 3 || data.username.length > 32) {
+        return {
+          status: 400,
+          data: null,
+          message: "Must be between 3 and 32 in length."
+        }
+      } else if (!validateUsername(data.username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Please only use numbers, letters, underscores or periods."
+        }
+      }
+
+      const user = await User.findOne({where: {username: data.username}})
+      if(user) {
+        return {
+          status: 400,
+          data: null,
+          message: "Username already exists."
+        }
       }
     }
 
