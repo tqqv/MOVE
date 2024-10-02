@@ -40,4 +40,20 @@ const requestToStreamer = async () => {
   }
 };
 
-export { getProfile, updateProfile, changePassword, viewFollowChannel, requestToStreamer };
+const getRequestStreamer = async () => {
+  try {
+    const response = await axios.get('/auth/getRequestChannelById');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  getProfile,
+  updateProfile,
+  changePassword,
+  viewFollowChannel,
+  requestToStreamer,
+  getRequestStreamer,
+};

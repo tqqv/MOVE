@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, markRaw, computed } from 'vue';
+  import { ref, markRaw, computed, onMounted } from 'vue';
   import Divider from '@/components/Divider.vue';
   import Button from 'primevue/button';
   import Tabs from 'primevue/tabs';
@@ -10,7 +10,8 @@
   import ProfileEdit from '@components/personalProfile/ProfileEdit.vue';
   import NotificationEdit from '@components/personalProfile/NotificationEdit.vue';
   import { useUserStore } from '@/stores/user.store';
-  import { requestToStreamer } from '@/services/user';
+  import { getRequestStreamer, requestToStreamer } from '@/services/user';
+  import { toast } from 'vue3-toastify';
 
   const tabs = ref([
     { title: 'Profile', component: markRaw(ProfileEdit), value: '0' },
@@ -19,21 +20,59 @@
 
   const userStore = useUserStore();
   const user = computed(() => userStore.user || {});
+  const sendRequestToStreamer = ref(false);
+  const statusRequest = ref('');
   const fieldsToCheck = ['username', 'fullName', 'gender', 'dob', 'country', 'state', 'city'];
 
   const showRequestToStreamer = computed(() => {
     const areAllFieldsFilled = fieldsToCheck.every((field) => user.value[field]);
-    return areAllFieldsFilled && user.value.role === 'user';
+    return (
+      areAllFieldsFilled && user.value.role === 'user' && sendRequestToStreamer.value === false
+    );
   });
 
   // HANDLE REQUEST TO STREAMER
   const handleRequestToStreamer = async () => {
     try {
       const response = await requestToStreamer();
-      if (response.data.success) {
+      console.log(response);
+      if (response.success) {
+        toast.success('Request to streamer was successfully');
+        sendRequestToStreamer.value = true;
+        statusRequest.value = 'pending';
+      } else {
+        toast.error(response.message);
       }
-    } catch (error) {}
+    } catch (error) {
+      toast.error('Failed to request to streamer');
+    }
   };
+
+  const fetchStatusRequestToStreamer = async () => {
+    try {
+      const response = await getRequestStreamer();
+      console.log(response);
+      if (response.success && response.data) {
+        sendRequestToStreamer.value = true;
+        if (response.data.status === 'pending') {
+          statusRequest.value = 'pending';
+        } else if (response.data.status === 'rejected') {
+          statusRequest.value = 'rejected';
+        } else {
+          statusRequest.value = '';
+        }
+      } else {
+        sendRequestToStreamer.value = false;
+      }
+    } catch (error) {
+      console.error('Error fetching request status:', error);
+      sendRequestToStreamer.value = false;
+    }
+  };
+
+  onMounted(async () => {
+    await fetchStatusRequestToStreamer();
+  });
 </script>
 
 <template>
@@ -65,10 +104,22 @@
       </div>
       <!-- PENDING -->
       <div
+        v-if="statusRequest === 'pending' && sendRequestToStreamer"
         class="flex items-center gap-y-4 gap-x-2 justify-between border-2 border-blue/35 bg-blue/20 rounded-lg p-4 relative h-[76px]"
       >
         <h1 class="text_para text-left">
           Waiting for admin <span class="font-bold">MOVE</span> approval. Please wait...
+        </h1>
+      </div>
+      <!-- Reject -->
+      <div
+        v-if="statusRequest === 'rejected' && sendRequestToStreamer"
+        class="flex items-center gap-y-4 gap-x-2 justify-between border-2 border-red/35 bg-red/20 rounded-lg p-4 relative h-[76px]"
+      >
+        <h1 class="text_para text-left">
+          You have been rejected by admin
+          <span class="font-bold">MOVE</span> to become a streamer because of some of the following
+          issues
         </h1>
       </div>
       <!-- CONTENT -->
