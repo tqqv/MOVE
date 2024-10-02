@@ -11,6 +11,8 @@
   import { toast } from 'vue3-toastify';
   import { uploadAvatar } from '@/services/cloudinary';
   import { checkDataChanged, getChangedFields } from '@/functions/compareData';
+  import { capitalize, updateProfileSchema } from '@/functions/vadilation';
+  import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();
   const profileData = ref({
@@ -26,11 +28,26 @@
   });
 
   const initialProfileData = ref({ ...profileData.value });
-
   const countries = ref([]);
   const states = ref([]);
-
   const isLoadingAvatar = ref(false);
+  const errors = ref({});
+
+  // VALIDATION
+  const validateProfileData = async () => {
+    try {
+      await updateProfileSchema.validate(profileData.value, { abortEarly: false }); // abortEarly choose all false not choose first false
+      errors.value = {};
+      return true;
+    } catch (validationErrors) {
+      const validationResult = {};
+      validationErrors.inner.forEach((error) => {
+        validationResult[error.path] = error.message;
+      });
+      errors.value = validationResult;
+      return false;
+    }
+  };
 
   // VALIDATE AGE
   const isAgeValid = (dob) => {
@@ -124,6 +141,11 @@
       toast.error('Use must enough 12 years old ');
       return;
     }
+    const isValid = await validateProfileData();
+    if (!isValid) {
+      toast.error('Please check the information again');
+      return;
+    }
 
     const changedFields = getChangedFields(profileData.value, initialProfileData.value);
     if (Object.keys(changedFields).length > 0) {
@@ -165,6 +187,19 @@
     };
     initialProfileData.value = { ...profileData.value };
   };
+
+  // CAPITALIZE
+  const fieldsToCapitalize = ['fullName', 'city'];
+  fieldsToCapitalize.forEach((field) => {
+    watch(
+      () => profileData.value[field],
+      (newValue) => {
+        if (newValue) {
+          profileData.value[field] = capitalize(newValue);
+        }
+      },
+    );
+  });
 
   watch(
     () => userStore.user,
@@ -214,16 +249,29 @@
     </div>
     <div class="flex flex-col w-full md:w-1/2 my-3">
       <div class="flex flex-col gap-y-4">
-        <div class="flex flex-col gap-y-1">
+        <!-- USERNAME -->
+        <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <input
-            v-model="profileData.username"
-            value=""
-            type="text"
-            class="input_custom"
-            required
-          />
+          <div class="relative">
+            <input
+              v-model="profileData.username"
+              type="text"
+              class="input_custom"
+              placeholder="Enter username"
+              :class="{
+                error_input: errors.username,
+              }"
+              required
+            />
+            <Warning
+              v-if="errors.username"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+            />
+          </div>
+          <span v-if="errors.username" class="error_message">{{ errors.username }}</span>
         </div>
+
+        <!-- EMAIL -->
         <div class="flex flex-col gap-y-1">
           <label for="email" class="text_para">Email</label>
           <div class="relative">
@@ -244,16 +292,28 @@
             </p>
           </div>
         </div>
-        <div class="flex flex-col gap-y-1">
-          <label for="fullName" class="text_para">Full name</label>
-          <input
-            v-model="profileData.fullName"
-            value=""
-            type="text"
-            class="input_custom"
-            required
-          />
+        <!-- FULLNAME -->
+        <div class="flex flex-col gap-y-2">
+          <label for="username" class="text_para">Username</label>
+          <div class="relative">
+            <input
+              v-model="profileData.fullName"
+              type="text"
+              class="input_custom"
+              placeholder="Enter username"
+              :class="{
+                error_input: errors.fullName,
+              }"
+              required
+            />
+            <Warning
+              v-if="errors.fullName"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+            />
+          </div>
+          <span v-if="errors.fullName" class="error_message">{{ errors.fullName }}</span>
         </div>
+
         <div class="flex flex-col gap-y-6">
           <!--FORGOT PASSWORD  -->
           <div class="flex flex-col gap-y-1">
@@ -323,8 +383,24 @@
           </div>
           <!-- CITY -->
           <div class="flex flex-col w-full md:w-1/2 gap-y-2">
-            <label for="gender" class="text_para">City</label>
-            <input v-model="profileData.city" value="" type="text" class="input_custom" />
+            <label for="city" class="text_para">City</label>
+            <div class="relative">
+              <input
+                v-model="profileData.city"
+                type="text"
+                class="input_custom"
+                placeholder="Enter city"
+                :class="{
+                  error_input: errors.city,
+                }"
+                required
+              />
+              <Warning
+                v-if="errors.city"
+                class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+              />
+            </div>
+            <span v-if="errors.city" class="error_message">{{ errors.city }}</span>
           </div>
         </div>
       </div>

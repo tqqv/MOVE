@@ -37,3 +37,25 @@ export const loginSchema = yup.object({
   email: yup.string().email('Invalid email format').required('Email is required'),
   password: yup.string().required('Password is required'),
 });
+
+export const updateProfileSchema = yup.object({
+  username: yup
+    .string()
+    .required('Username is required')
+    .min(6, 'Username must be at least 6 characters')
+    .matches(/^[a-zA-Z0-9]*$/, 'Username cannot contain spaces or special characters'),
+  fullName: yup
+    .string()
+    .required('Username is required')
+    .matches(/.*\s+.*/, 'Full name must contain at least one space')
+    .matches(/^[^\d]*$/, 'Full name cannot contain numbers')
+    .matches(/^[a-zA-Z\s]*$/, 'Full name cannot contain numbers or special characters'),
+  city: yup
+    .string()
+    .required('City is required')
+    .matches(/^[a-zA-Z\s]*$/, 'City cannot contain numbers or special characters'),
+});
+
+export const capitalize = (value) => {
+  return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
+};
