@@ -1,10 +1,14 @@
 <script setup>
+  import { ref, onMounted } from 'vue';
+
   import Filter from '@components/Filter.vue';
   import facebook from '@/components/icons/facebookLogin.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
   import MMAImage from '@/assets/category/MMA.png';
   import HIITImage from '@/assets/category/HIIT.png';
   import JustMoveImage from '@/assets/category/JustMove.png';
+  import { getVideobyChannel } from '@/services/video';
+
   const levelOptions = [
     { id: 1, name: 'Beginner' },
     { id: 2, name: 'Intermediate' },
@@ -24,201 +28,46 @@
     { id: 5, name: 'Ratings (High to Low)', icon: facebook },
     { id: 6, name: 'Ratings (Low to High)', icon: facebook },
   ];
+  const videos = ref([]);
+
   const props = defineProps({
-    videoDetails: {
+    channelDetails: {
       type: Object,
       required: true,
     },
+    channelId: {
+      type: Number,
+      required: true,
+    },
   });
-  const cards = [
-    {
-      image: MMAImage,
-      title: 'Leg days',
-      author: 'dianeTV',
-      category: 'Just Move',
-      date: 'Posted a day ago',
-      rating: 4.5,
-      views: '1.34k',
-      duration: '15:30',
-      level: 'Beginner',
-      time: '< 30 mins',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isLive: true,
-    },
-    {
-      image: HIITImage,
-      title: 'No sugar & excuses',
-      author: 'iamtherock',
-      category: 'Strength',
-      date: 'Posted a day ago',
-      rating: 4.9,
-      views: '1.34k',
-      duration: '2:15:30',
-      level: 'Advanced',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isLive: false,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    {
-      image: JustMoveImage,
-      title: 'Rooftop yoga',
-      author: 'missyjoe',
-      category: 'Yoga',
-      date: 'Posted a day ago',
-      rating: 3.1,
-      views: '1.34k',
-      duration: '1:15:30',
-      level: 'Beginner',
-      time: '> 1 hour',
-      avatar: 'https://randomuser.me/api/portraits/women/1.jpg',
-      isStreaming: true,
-    },
-    // Add more cards as needed
-  ];
+  const getVideo = async (channelId) => {
+    try {
+      const result = await getVideobyChannel(channelId);
+      videos.value = result.data.data;
+      console.log(videos);
+    } catch (error) {
+      console.error('Error fetching video:', error);
+    }
+  };
 
-  //Check null
-  // const cards = [];
+  onMounted(() => {
+    getVideo(props.channelId);
+  });
 </script>
 
 <template>
-  <div v-if="cards.length > 0" class="pt-2">
+  <div v-if="videos.length > 0" class="pt-2">
     <div class="flex flex-grow items-center justify-between">
-      <div class="text-2xl font-bold text-black">All videos</div>
+      <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
       <div class="flex gap-x-6">
         <Filter :title="'LEVEL'" :options="levelOptions" />
         <Filter :title="'CATEGORY'" :options="categoryOptions" />
         <Filter :title="'SORT BY'" :options="sortByOptions" />
       </div>
     </div>
-    <GirdVideo :cards="cards" />
+    <GirdVideo :videos="videos" :channelDetails="props.channelDetails" />
   </div>
   <div v-else class="text-base text-black italic">
-    {{ videoDetails.name }} has not uploaded any videos yet.
+    {{ channelDetails.channelName }} has not uploaded any videos yet.
   </div>
 </template>

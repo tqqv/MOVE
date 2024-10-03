@@ -5,14 +5,6 @@
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
-  // const videoDetails = {
-  //   nameChannel: 'dianeTV',
-  //   avatar: MMAImage,
-  //   followers: 2222,
-  //   status: 'Online',
-  //   isLive: true,
-  //   isVerified: true,
-  // };
 
   const props = defineProps({
     isButtonGiftREPsVisible: {
@@ -23,7 +15,7 @@
       type: Boolean,
       default: false,
     },
-    videoDetails: {
+    channelDetails: {
       type: Object,
       required: true,
     },
@@ -56,26 +48,28 @@
         <div
           :class="[
             'flex items-center justify-center  w-16 h-16 rounded-full',
-            videoDetails.isLive ? 'border-[3px] border-red' : '',
+            channelDetails.isLive ? 'border-[3px] border-red' : '',
           ]"
         >
           <img
-            :src="videoDetails.avatar"
+            :src="channelDetails.avatar"
             alt="Avatar"
             class="w-full h-full rounded-full object-cover p-[1.5px]"
           />
           <Live
-            v-if="videoDetails.isLive"
+            v-if="channelDetails.isLive"
             class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
           />
         </div>
       </div>
       <div>
         <p class="text-[20px] flex items-center">
-          {{ videoDetails.channelName }}
-          <Verified v-if="videoDetails.isVerified" class="ml-2 mb-1 mr-2 fill-blue" />
-          is now {{ videoDetails.status }}
+          <span class="mr-2"> {{ channelDetails.channelName }} </span>
+          <Verified v-if="channelDetails.popularCheck" class="ml-1 mb-1 mr-2 fill-blue" />
+          <span class="whitespace-nowrap" v-if="channelDetails.isLive"> is now online</span>
+          <span class="whitespace-nowrap" v-else> is now offline</span>
         </p>
+
         <p class="text-[14px] text-body">{{ totalFollower }} followers</p>
       </div>
     </div>

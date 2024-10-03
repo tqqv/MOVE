@@ -29,22 +29,37 @@ const createChannel = async (userId, username, avatar) => {
   }
 }
 
-const subscribeChannel = async (userId, channelId) => {
+const followChannel = async (userId, channelId) => {
   try {
+    const checkChannelExist = await Channel.findOne({
+      where: {
+        id: channelId
+      }
+    })
+
+    if(!checkChannelExist) {
+      return {
+        status: 400,
+        data: null,
+        message: "Channel not found"
+      }
+    }
+
+    // Nếu mà có giá trị thì sẽ là unFollow
     const checkSubscribe = await Subscribe.destroy({
       where: {
         userId: userId,
         channelId: channelId
       }})
-      if(checkSubscribe) {
-        return {
-          status: 200,
-          data: null,
-          message: "Unsubscribe successful."
-        }
+    if(checkSubscribe) {
+      return {
+        status: 200,
+        data: null,
+        message: "Unsubscribe successful."
       }
+    }
 
-
+    // Không được follow chính channel của mình
     const channel = await Channel.findOne({
       where: {
         userId: userId,
@@ -97,30 +112,18 @@ const listSubscribeOfChannel = async (channelId) => {
 
     const listFollow = await listSubscribeOfUser(channel.userId)
 
-
-    // const subscriber = await Subscribe.findAll({
-    //   where: {
-    //     channelId: channelId,
-    //   },
-    //   include: [
-    //     {
-    //       model: User,
-    //       as: 'subscribeUser',
-    //       attributes: ['username', 'avatar', 'role'],
-    //       include: [
-    //         {
-    //           model: Channel,
-    //           attributes: ['channelName', 'avatar'],
-    //         }
-    //       ]
-    //     },
-    //   ],
-    // });
-
-    return {
-      status: listFollow.status,
-      data: listFollow.data,
-      message: "Get list subscriber of channel successfully."
+    if(listFollow.status === 200){
+      return {
+        status: listFollow.status,
+        data: listFollow.data,
+        message: "Get list subscriber of channel successfully."
+      }
+    }else {
+      return {
+        status: listFollow.status,
+        data: listFollow.data,
+        message: listFollow.message
+      }
     }
   } catch (error) {
     return {
@@ -133,15 +136,20 @@ const listSubscribeOfChannel = async (channelId) => {
 
 const listSubscribeOfUser = async(userId) => {
   try {
-
     const listSubscribe = await Subscribe.findAll({
       where: {
         userId: userId
       },
       include: [{
         model: Channel,
-        as: "subscribeChannel",
-        attributes: ['channelName', 'avatar']
+        as: "followChannel",
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+          [sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM subscribes AS s
+          WHERE s.channelId = followChannel.id
+          )`), 'followCount']
+        ],
       }]
     })
     return {
@@ -208,19 +216,22 @@ const editProfileChannel = async(userId, data, username) => {
     if(username) {
       const user = await User.findByPk(userId)
 
-      if(!user) {
+      if (username.length < 3 || username.length > 32) {
         return {
-          status: 404,
+          status: 400,
           data: null,
-          message: "User not found."
+          message: "Must be between 3 and 32 in length."
+        }
+      } else if (!validateUsername(username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Please only use numbers, letters, underscores or periods."
         }
       }
 
-      const checkExist = await User.findOne({where: {
-        username: username
-      }})
-
-      if(checkExist) {
+      const usernameCheck = await User.findOne({where: {username: username}})
+      if(usernameCheck) {
         return {
           status: 400,
           data: null,
@@ -411,7 +422,7 @@ const searchVideoChannel = async(data, limit, offset) => {
       },
       order: [
         [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
-        ["username", "ASC"], 
+        ["username", "ASC"],
       ],
     });
 
@@ -503,7 +514,7 @@ const getAllInforFollow = async(userId) => {
 
 module.exports = {
   createChannel,
-  subscribeChannel,
+  followChannel,
   listSubscribeOfChannel,
   listSubscribeOfUser,
   getProfileChannel,

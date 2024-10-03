@@ -37,40 +37,42 @@
 <template>
   <section
     v-if="query && (categories.length || users.length || videos.length) && !loading"
-    class="px-10 flex-grow"
+    class="flex-grow"
   >
-    <div>
-      <div class="flex items-center gap-x-[30px]">
-        <h1 class="text_title flex-shrink-0">Search results for {{ query }}</h1>
-        <Divider />
+   <div class="container">
+      <div>
+        <div class="flex items-center gap-x-[30px]">
+          <h1 class="text_title flex-shrink-0">Search results for {{ query }}</h1>
+          <Divider />
+        </div>
+        <div class="my-2">
+          <!-- CATEGORIES -->
+          <div v-if="categories.length" class="">
+            <h1 class="text_subTitle mb-2">Categories</h1>
+            <CategoryImage :categories="categories" />
+          </div>
+          <hr v-if="categories.length" class="h-px my-10 bg-gray-dark border-0" />
+          <!-- CHANNELS -->
+          <div v-if="users.length">
+            <h1 class="text_subTitle mb-4">Channels</h1>
+            <ChannelList :users="users" />
+          </div>
+          <hr v-if="users.length" class="h-px my-10 bg-gray-dark border-0" />
+          <!-- VIDEOS -->
+          <div v-if="videos.length">
+            <h1 class="text_subTitle mb-4">Videos</h1>
+            <SearchVideo :videos="videos" />
+          </div>
+        </div>
       </div>
-      <div class="my-2">
-        <!-- CATEGORIES -->
-        <div v-if="categories.length" class="">
-          <h1 class="text_subTitle mb-2">Categories</h1>
-          <CategoryImage :categories="categories" />
-        </div>
-        <hr v-if="categories.length" class="h-px my-10 bg-gray-dark border-0" />
-        <!-- CHANNELS -->
-        <div v-if="users.length">
-          <h1 class="text_subTitle mb-4">Channels</h1>
-          <ChannelList :users="users" />
-        </div>
-        <hr v-if="users.length" class="h-px my-10 bg-gray-dark border-0" />
-        <!-- VIDEOS -->
-        <div v-if="videos.length">
-          <h1 class="text_subTitle mb-4">Videos</h1>
-          <SearchVideo :videos="videos" />
-        </div>
-      </div>
-    </div>
+   </div>
   </section>
   <div
     v-if="!query || (query && !categories.length && !videos.length && !users.length && !loading)"
     class="flex flex-col justify-center items-center w-full h-[382px] mt-32"
   >
     <notFound class="scale-75" />
-    <div class="flex items-center flex-col text-center gap-y-5">
+    <div class="flex items-center flex-col text-center gap-y-3">
       <h1 class="font-semibold text-xl">No results found</h1>
       <p class="text-sm">Try different keywords or remove search filters</p>
     </div>

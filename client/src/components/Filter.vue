@@ -33,7 +33,7 @@
 
 <template>
   <div class="flex justify-content-center items-center gap-x-4">
-    <h1 class="uppercase text_subTitle text-[12px]">{{ title }}</h1>
+    <h1 class="whitespace-nowrap uppercase text_subTitle text-[12px]">{{ title }}</h1>
     <Dropdown
       v-model="selectedOption"
       :options="props.options"

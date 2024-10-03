@@ -1,6 +1,6 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
-var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, getRequestStatusById } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
@@ -29,8 +29,8 @@ const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {expires: loginResult.cookie.expires, secure: true, httpOnly: true})
-    .cookie('isLogin','true', {expires: loginResult.cookie.expires, secure: true})
+    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, )
+    .cookie('isLogin','true', )
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
@@ -55,6 +55,8 @@ const logoutController = async (req, res, next) => {
 
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
+
+
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
@@ -101,35 +103,7 @@ const resetPasswordController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
-const getProfileController = async (req, res, next) => {
-  const userId = req.user.id;
-  const result = await getProfile(userId);
 
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
-const editProfileController = async (req, res, next) => {
-  const userId = req.user.id;
-  const data = req.body;
-  const result = await editProfile(userId, data);
-
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
-const changePasswordController = async (req, res, next) => {
-  const userId = req.user.id;
-  const data = req.body;
-  const result = await changePassword(userId, data.oldPass, data.newPass, data.confirmPass)
-
-  responseHandler(result.status, null, result.message)(req, res, next);
-}
-
-const requestChannelController = async (req, res, next) => {
-  const userId = req.user.id;
-  const result = await requestChannel(userId);
-
-  responseHandler(result.status, null, result.message)(req, res, next);
-}
 
 const setStatusRqChannel = async (req, res, next) => {
   const data = req.body;
@@ -144,10 +118,10 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
-    { failureMessage: true }, 
+    { failureMessage: true },
     async (error, user) => {
       if (error || !user) {
-        return res.redirect(process.env.CLIENT_HOST); 
+        return res.redirect(process.env.CLIENT_HOST);
       }
 
       const loginResult = await loginByGoogle(error, user);
@@ -219,7 +193,6 @@ const verifyAccountFacebookController = async (req, res, next) => {
 };
 
 
-
 module.exports = {
   loginController,
   registerController,
@@ -229,15 +202,11 @@ module.exports = {
   sendMailForgotPass,
   resetPasswordController,
   verifyTokenRsController,
-  getProfileController,
-  editProfileController,
-  changePasswordController,
-  requestChannelController,
   setStatusRqChannel,
   googleLogin,
   googleCallbackController,
   facebookLogin,
   facebookCallback,
   sendMailVerifyFacebookController,
-  verifyAccountFacebookController
+  verifyAccountFacebookController,
 };

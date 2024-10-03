@@ -1,12 +1,12 @@
 import axios from './axios';
 
 const getProfile = () => {
-  return axios.get('/auth/getProfile');
+  return axios.get('/user/getProfile');
 };
 
 const updateProfile = async (data) => {
   try {
-    const response = await axios.put('/auth/editprofile', data);
+    const response = await axios.patch('/user/editprofile', data);
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -15,7 +15,7 @@ const updateProfile = async (data) => {
 
 const changePassword = async (data) => {
   try {
-    const response = await axios.put('/auth/changePassword', data);
+    const response = await axios.put('/user/changePassword', data);
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -38,4 +38,38 @@ const getViewChannel = async (username) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-export { getProfile, updateProfile, changePassword, viewFollowChannel, getViewChannel };
+const requestToStreamer = async () => {
+  try {
+    const response = await axios.get('/user/createRequestChannel');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getRequestStreamer = async () => {
+  try {
+    const response = await axios.get('/user/getRequestChannelById');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const postFollowChannel = async () => {
+  try {
+    const response = await axios.post('/channel/followChannelController');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+export {
+  getProfile,
+  updateProfile,
+  changePassword,
+  viewFollowChannel,
+  requestToStreamer,
+  getRequestStreamer,
+  getViewChannel,
+  postFollowChannel,
+};
