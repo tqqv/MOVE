@@ -76,7 +76,7 @@
     popupStore.openChangePassword();
   };
 
-  // capitalize
+  // CAPITALIZE
   const capitalizeInput = (event, field) => {
     const words = event.target.value.split(' ');
     event.target.value = words
