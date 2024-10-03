@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         });
         this.belongsTo(models.Channel, {
             foreignKey: 'channelId',
-            as: 'subscribeChannel',
+            as: 'followChannel',
             onDelete: 'CASCADE',
         });
     }

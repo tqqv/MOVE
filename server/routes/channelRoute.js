@@ -1,6 +1,6 @@
 const express = require("express");
 const channelRouter = express.Router();
-const { getListSubscribeOfChannel, subChannelController, getListSubscribeOfUser, getProfileChannelController, updateProfileChannelController, viewChannelController, getAllInforFollowController, searchVideoChannelController } = require("../controllers/channelController");
+const { getListSubscribeOfChannel, followChannelController, getListSubscribeOfUser, getProfileChannelController, updateProfileChannelController, viewChannelController, getAllInforFollowController, searchVideoChannelController } = require("../controllers/channelController");
 const { verifyUser, verifyStreamer } = require("../middlewares/verifyToken");
 const { getCommentsByChannelIdController } = require("../controllers/commentController");
 
@@ -8,7 +8,7 @@ channelRouter.get("/getListFollowed/:channelId", getListSubscribeOfChannel)
 channelRouter.get("/getListFollower/", verifyUser, getListSubscribeOfUser)
 
 // unsub/sub
-channelRouter.post("/subscribe", verifyUser, subChannelController)
+channelRouter.post("/followChannel", verifyUser, followChannelController)
 
 channelRouter.get("/comments/:channelId",  verifyStreamer, getCommentsByChannelIdController)
 channelRouter.get("/getProfileChannel/", verifyUser, getProfileChannelController)
