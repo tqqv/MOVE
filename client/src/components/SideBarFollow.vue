@@ -1,10 +1,13 @@
 <script setup>
   import { onMounted, ref } from 'vue';
-  import verified from '@icons/verified.vue';
   import { useUserStore } from '@/stores/user.store';
+  import { usePopupStore } from '@/stores';
+  import logoIcon from '@icons/logoIcon.vue';
+  import verified from '@icons/verified.vue';
+  import Button from 'primevue/button';
 
   const userStore = useUserStore();
-
+  const popupStore = usePopupStore();
   // xu ly show va hidden sidebar
   const isShow = ref(true);
 
@@ -15,16 +18,19 @@
   onMounted(async () => {
     await userStore.loadFollowers();
   });
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+  };
 </script>
 
 <template>
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden min-h-[calc(100vh-72px)] md:block border-r-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[241px] border-r-2 border-gray-dark bg-white"
   >
-    <div class="flex flex-col w-[241px] px-4 py-4">
-      <div class="flex items-center justify-between">
+    <div class="flex flex-col w-[241px] p-4">
+      <div class="flex items-center my-2 justify-between">
         <h2 class="uppercase text_subTitle text-[13px]">follow channels</h2>
         <i
           class="pi pi-arrow-left cursor-pointer text-[19px]"
@@ -32,7 +38,33 @@
           @click="handleShow"
         ></i>
       </div>
+      <!-- NOT LOG IN -->
+      <div
+        v-if="!userStore.user"
+        class="flex flex-col justify-center px-3 py-5 mt-4 rounded-md bg-primary text-center"
+      >
+        <div class="flex justify-center"><logoIcon class="f scale-" fill="black" /></div>
+        <h1 class="text_subTitle text-white mt-2 mb-1">Join MOVE!</h1>
+        <p class="text-xs mb-6 text-black/80">Sign up now to follow your favorite instructor!</p>
+        <Button
+          class="w-full border-none bg-white text-primary font-bold px-[40px] text-nowrap"
+          @click="openLoginPopup"
+          >Sign up</Button
+        >
+      </div>
       <div class="flex flex-col gap-y-4 my-5">
+        <!-- NOTE FOLLOWING CHANNEL -->
+        <div
+          v-if="userStore.followers.length === 0 && userStore.user"
+          class="flex flex-col justify-center mt-4"
+        >
+          <p class="mb-3 text-sm text-body">You have not followed any instructors yet.</p>
+          <RouterLink
+            to="/browse"
+            class="rounded-lg block w-1/2 text-center text-white px-3 py-2 text-gray-300 bg-primary font-bold"
+            >Browse</RouterLink
+          >
+        </div>
         <div
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
@@ -75,7 +107,7 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="hidden md:block w-[89px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[89px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-4 py-4">
       <div class="flex items-center justify-center">
@@ -85,6 +117,25 @@
           @click="handleShow"
         ></i>
       </div>
+      <!-- NOT LOG IN -->
+      <div v-if="!userStore.user" class="flex flex-col justify-center mt-4 rounded-md">
+        <div
+          v-tooltip="'sign up'"
+          class="flex justify-center items-center py-[18px] px-6 rounded-full cursor-pointer hover:bg-primary text-center"
+          @click="openLoginPopup"
+        >
+          <i class="pi pi-sign-in"></i>
+        </div>
+      </div>
+      <!-- NOTE FOLLOWING CHANNEL -->
+      <RouterLink
+        v-if="userStore.followers.length === 0 && useUserStore.user"
+        v-tooltip="'browse'"
+        class="flex justify-center items-center py-[18px] px-6 rounded-full cursor-pointer hover:bg-primary text-center"
+        to="/browse"
+      >
+        <i class="pi pi-th-large"></i>
+      </RouterLink>
       <div class="flex flex-col gap-y-4 my-5">
         <div
           v-for="userFollower in userStore.followers"
