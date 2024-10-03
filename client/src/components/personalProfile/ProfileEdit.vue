@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted, computed } from 'vue';
+  import { ref, onMounted, computed, watch } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
   import ChangePasswordPopup from '../changePassword/ChangePasswordPopup.vue';
@@ -144,22 +144,37 @@
 
   onMounted(async () => {
     await userStore.fetchUserProfile();
-    if (userStore.user) {
-      profileData.value = {
-        username: userStore.user.username,
-        avatar: userStore.user.avatar,
-        email: userStore.user.email || 'No found email',
-        fullName: userStore.user.fullName,
-        gender: userStore.user.gender,
-        country: userStore.user.country,
-        state: userStore.user.state,
-        city: userStore.user.city,
-        dob: userStore.user.dob,
-      };
-      initialProfileData.value = { ...profileData.value };
-    }
     loadCountries();
+
+    if (userStore.user) {
+      updateProfileData(userStore.user);
+    }
   });
+
+  const updateProfileData = (user) => {
+    profileData.value = {
+      username: user.username,
+      avatar: user.avatar,
+      email: user.email,
+      fullName: user.fullName,
+      gender: user.gender,
+      country: user.country,
+      state: user.state,
+      city: user.city,
+      dob: user.dob,
+    };
+    initialProfileData.value = { ...profileData.value };
+  };
+
+  watch(
+    () => userStore.user,
+    (newUser) => {
+      if (newUser) {
+        updateProfileData(newUser);
+      }
+    },
+    { immediate: true },
+  );
 </script>
 <template>
   <form @submit.prevent="handleUpdate" class="my-2">
@@ -191,7 +206,7 @@
       />
 
       <span
-        class="text-primary cursor-pointer text-[14px] hover:font-medium"
+        class="text-primary cursor-pointer text-[14px] hover:font-medium w-fit"
         @click="handleFileInputClick"
       >
         Update profile picture
@@ -244,7 +259,7 @@
           <div class="flex flex-col gap-y-1">
             <label for="password" class="text_para">Password</label>
             <span
-              class="text-primary cursor-pointer text-[14px] underline"
+              class="text-primary cursor-pointer text-[14px] underline w-fit"
               @click="openPasswordDialog"
               >Change password</span
             >

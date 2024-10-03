@@ -19,6 +19,7 @@ const {
   facebookLogin,
   sendMailVerifyFacebookController,
   verifyAccountFacebookController,
+  getRequestChannelController,
 } = require("../controllers/authController");
 const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
@@ -44,6 +45,7 @@ authRouter.put("/changePassword", verifyUser, changePasswordController)
 authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
 
 authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
+authRouter.get("/getRequestChannelById", verifyUser, getRequestChannelController)
 
 // SSO google
 authRouter.get("/google", googleLogin);

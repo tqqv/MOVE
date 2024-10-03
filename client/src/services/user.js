@@ -25,11 +25,35 @@ const changePassword = async (data) => {
 const viewFollowChannel = async () => {
   try {
     const response = await axios.get('/channel/getListFollower');
-    return response.data; 
+    return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
 
-export { getProfile, updateProfile, changePassword, viewFollowChannel };
+const requestToStreamer = async () => {
+  try {
+    const response = await axios.get('/auth/createRequestChannel');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 
+const getRequestStreamer = async () => {
+  try {
+    const response = await axios.get('/auth/getRequestChannelById');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  getProfile,
+  updateProfile,
+  changePassword,
+  viewFollowChannel,
+  requestToStreamer,
+  getRequestStreamer,
+};

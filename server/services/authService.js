@@ -42,6 +42,13 @@ async function generateUniqueReferralCode() {
 
 const register = async (userData) => {
   try {
+    if(!userData.email || !userData.password || !userData.confirmPassword){
+      return {
+        status: 400,
+        message: "Not null",
+      }
+    }
+
     const user = await User.findOne({
       where: { email: userData.email },
     });
@@ -86,19 +93,27 @@ const register = async (userData) => {
       };
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(userData.password, salt);
-    const newUser = new User({
-      email: userData.email,
-      password: hash,
-      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
-      referralCode : await generateUniqueReferralCode()
-    });
 
-    const savedUser = await newUser.save();
+    if(userData.password === userData.confirmPassword){
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(userData.password, salt);
+      const newUser = new User({
+        email: userData.email,
+        password: hash,
+        avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
+        referralCode : await generateUniqueReferralCode()
+      });
+
+      await newUser.save();
+    }else {
+      return {
+        status: 400,
+        message: "Check your confirm password",
+      };
+    }
 
 
-    await savedUser.save();
+    // await savedUser.save();
     //
     // Nếu tạo bảng để link cái referralCode thì Viết logic code ở đây
     // Code here
@@ -161,7 +176,7 @@ const login = async (userData) => {
     cookie: {
       cookieName: "accessToken",
       token: token,
-      expires: process.env.TOKEN_EXPIRES_LOGIN,
+      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
     },
     status: 200,
     message: "Successfully login",
@@ -607,6 +622,30 @@ const requestChannel = async(userId) => {
   }
 }
 
+const getRequestStatusById = async(userId) => {
+  try {
+    const result = await RequestChannel.findOne({where: {userId: userId}})
+    if(!result) {
+      return {
+        status: 203,
+        data: null,
+        message: "Request not found"
+      }
+    }
+
+    return {
+      status: 200,
+      data: result,
+      message: "Get request successfully."
+    }
+  } catch (error) {
+    return {
+      status: error.status || 500,
+      message: error.message
+    }
+  }
+}
+
 const statusRequestChannel = async(userId, status) => {
   // API của admin
   try {
@@ -679,7 +718,7 @@ const sendMailVerifyFacebook = async (email, fullName) => {
       cookie: {
         cookieName: "digitVerificationToken",
         token: verificationToken,
-        expires: verificationToken.expiresIn,
+        expires: new Date(Date.now() + 15 * 60 * 1000),
       },
       status: 200,
       message: "Verification email sent successfully",
@@ -715,7 +754,7 @@ const verifyAccountFacebook = async (accountInfor, token) => {
           cookie: {
             cookieName: "accessToken",
             token: token,
-            expires: token.expiresIn,
+            expires: new Date(Date.now() + 15 * 60 * 1000),
           },
           status: 200,
           message: "Email verified successfully",
@@ -757,5 +796,6 @@ module.exports = {
   generateJwtToken,
   sendMailVerifyFacebook,
   verifyAccountFacebook,
-  generateUniqueReferralCode
+  generateUniqueReferralCode,
+  getRequestStatusById,
 };
