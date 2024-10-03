@@ -6,11 +6,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
         // Define relationships if necessary
         this.belongsTo(models.User, {
-            as: 'videoViewUser',
+            as: 'viewVideoUser',
             onDelete: 'CASCADE',
         });
         this.belongsTo(models.Video, {
-            as: 'videoViewVideo',
+            as: 'viewVideosVideo',
             onDelete: 'CASCADE',
         });
     }
@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "ViewVideo",
-      tableName: "VideoViews",
+      tableName: "ViewVideos",
       timestamps: true,
   });
   return ViewVideo;
