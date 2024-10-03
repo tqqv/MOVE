@@ -8,10 +8,6 @@ const {
   verifyTokenRsController,
   sendMailForgotPass,
   resetPasswordController,
-  getProfileController,
-  editProfileController,
-  changePasswordController,
-  requestChannelController,
   setStatusRqChannel,
   googleLogin,
   googleCallbackController,
@@ -35,13 +31,6 @@ authRouter.get("/verify-account/:token", verifyAccountController);
 authRouter.get("/verify-token/:token", verifyTokenRsController);
 authRouter.post("/forgot-password", sendMailForgotPass);
 authRouter.post("/reset-password", resetPasswordController);
-
-authRouter.get("/getProfile", verifyUser, getProfileController)
-authRouter.put("/editProfile", verifyUser, editProfileController)
-
-authRouter.put("/changePassword", verifyUser, changePasswordController)
-
-authRouter.get("/createRequestChannel", verifyUser, requestChannelController)
 
 authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
 

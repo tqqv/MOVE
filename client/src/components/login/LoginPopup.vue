@@ -34,6 +34,7 @@
         toast.error(response.message || 'Login failed');
       } else {
         userStore.fetchUserProfile();
+        userStore.loadFollowers();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
       }

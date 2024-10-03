@@ -29,7 +29,7 @@ const createChannel = async (userId, username, avatar) => {
   }
 }
 
-const subscribeChannel = async (userId, channelId) => {
+const followChannel = async (userId, channelId) => {
   try {
     const checkSubscribe = await Subscribe.destroy({
       where: {
@@ -140,7 +140,7 @@ const listSubscribeOfUser = async(userId) => {
       },
       include: [{
         model: Channel,
-        as: "subscribeChannel",
+        as: "followChannel",
         attributes: ['channelName', 'avatar']
       }]
     })
@@ -208,19 +208,22 @@ const editProfileChannel = async(userId, data, username) => {
     if(username) {
       const user = await User.findByPk(userId)
 
-      if(!user) {
+      if (username.length < 3 || username.length > 32) {
         return {
-          status: 404,
+          status: 400,
           data: null,
-          message: "User not found."
+          message: "Must be between 3 and 32 in length."
+        }
+      } else if (!validateUsername(username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Please only use numbers, letters, underscores or periods."
         }
       }
 
-      const checkExist = await User.findOne({where: {
-        username: username
-      }})
-
-      if(checkExist) {
+      const usernameCheck = await User.findOne({where: {username: username}})
+      if(usernameCheck) {
         return {
           status: 400,
           data: null,
@@ -408,7 +411,11 @@ const searchVideoChannel = async(data, limit, offset) => {
           { username: { [Op.like]: `%${normalData}%` } }, // Truy vấn LIKE trên username
           { '$Channel.channelName$': { [Op.like]: `%${normalData}%` } } // Truy vấn LIKE trên channelName của bảng Channel
         ]
-      }
+      },
+      order: [
+        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
+        ["username", "ASC"],
+      ],
     });
 
     return {
@@ -499,7 +506,7 @@ const getAllInforFollow = async(userId) => {
 
 module.exports = {
   createChannel,
-  subscribeChannel,
+  followChannel,
   listSubscribeOfChannel,
   listSubscribeOfUser,
   getProfileChannel,
