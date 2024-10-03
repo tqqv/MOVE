@@ -76,6 +76,15 @@
     popupStore.openChangePassword();
   };
 
+  // capitalize
+  const capitalizeInput = (event, field) => {
+    const words = event.target.value.split(' ');
+    event.target.value = words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    profileData.value[field] = event.target.value;
+  };
+
   // CALL API COUNTRY
   const loadCountries = async () => {
     try {
@@ -188,19 +197,6 @@
     initialProfileData.value = { ...profileData.value };
   };
 
-  // CAPITALIZE
-  const fieldsToCapitalize = ['fullName', 'city'];
-  fieldsToCapitalize.forEach((field) => {
-    watch(
-      () => profileData.value[field],
-      (newValue) => {
-        if (newValue) {
-          profileData.value[field] = capitalize(newValue);
-        }
-      },
-    );
-  });
-
   watch(
     () => userStore.user,
     (newUser) => {
@@ -270,7 +266,6 @@
           </div>
           <span v-if="errors.username" class="error_message">{{ errors.username }}</span>
         </div>
-
         <!-- EMAIL -->
         <div class="flex flex-col gap-y-1">
           <label for="email" class="text_para">Email</label>
@@ -299,12 +294,13 @@
             <input
               v-model="profileData.fullName"
               type="text"
-              class="input_custom"
+              class="input_custom capitalize"
               placeholder="Enter username"
               :class="{
                 error_input: errors.fullName,
               }"
               required
+              @input="(e) => capitalizeInput(e, 'fullName')"
             />
             <Warning
               v-if="errors.fullName"
@@ -388,12 +384,13 @@
               <input
                 v-model="profileData.city"
                 type="text"
-                class="input_custom"
+                class="input_custom capitalize"
                 placeholder="Enter city"
                 :class="{
                   error_input: errors.city,
                 }"
                 required
+                @input="(e) => capitalizeInput(e, 'city')"
               />
               <Warning
                 v-if="errors.city"
