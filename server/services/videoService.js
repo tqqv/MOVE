@@ -2,7 +2,7 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
-const { Video } = db;
+const {  Video, Category, User, Sequelize, LevelWorkout } = db;
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -64,7 +64,7 @@ const saveVideoService = async (videoId, userId, title, description, thumbnailUr
   } catch (error) {
     return {
       status: 500,
-      message: error.message, 
+      message: error.message,
       data: null
     };
   }
@@ -90,7 +90,7 @@ const updateVideoService = async (videoId, updateData) => {
   } catch (error) {
     return {
       status: 500,
-      message: error.message, 
+      message: error.message,
       data: null
     };
   }
@@ -137,7 +137,7 @@ const checkVideoStatusService = async (videoUri) => {
       resolve({
         status: 200,
         message: 'Video status fetched successfully.',
-        data: body 
+        data: body
       });
     });
   });
@@ -163,7 +163,7 @@ const uploadThumbnailService = async (videoUri, thumbnailPath) => {
 
     // Get the upload link for the thumbnail
     const uploadLink =  await createThumbnailResource(pictureResponse.metadata.connections.pictures.uri);
-    
+
     // Upload the thumbnail to the video
     const uploadResponse = await fetch(uploadLink, {
       method: 'PUT',
@@ -191,7 +191,7 @@ const uploadThumbnailService = async (videoUri, thumbnailPath) => {
           return ({
             status: 500,
             message: 'Error deleting temporary file.',
-            data: null 
+            data: null
           });
         }
       });
@@ -221,7 +221,7 @@ const createThumbnailResource = async (picturesUri) => {
       if (error) {
         reject(error);
       } else {
-        resolve(body.link); 
+        resolve(body.link);
       }
     });
   });
@@ -233,9 +233,9 @@ const setThumbnailActive = (picturesUri) => {
     client.request({
       method: 'PATCH',
       path: picturesUri,
-      query: { 
-        active: true, 
-        time: 0 
+      query: {
+        active: true,
+        time: 0
       },
     }, (error) => {
       if (error) {
@@ -244,7 +244,7 @@ const setThumbnailActive = (picturesUri) => {
         resolve({
           status: 200,
           message: 'Thumbnail uploaded successfully.',
-          data: null 
+          data: null
         });
       }
     });
@@ -277,8 +277,14 @@ const uploadMetadataService = async (videoUri, title, description) => {
   });
 };
 
-const getAllVideosService = async () => {
-  const videos = await Video.findAll();
+const getAllVideosService = async (page, pageSize) => {
+  const videos = await Video.findAll(
+    {
+      where: { status:  "public" },
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    }
+  );
   if (!videos) {
     return {
       status: 404,
@@ -293,9 +299,46 @@ const getAllVideosService = async () => {
   };
 };
 
-const getVideoByUserIdService = async (userId) => {
+const getVideoByUserIdService = async (channelId, page, pageSize, level, category, sortCondition) => {
+  let attributes = {};
+
+  // handle case sort by rating avg
+  if("ratings".includes(sortCondition.sortBy)) {
+    attributes = {
+      include: [
+        [
+          Sequelize.literal(`(
+          SELECT AVG(rating) as ratings
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+          )`),
+          sortCondition.sortBy
+        ]
+      ]
+    }
+  }
+
   const videos = await Video.findAll({
-    where: { channelId: userId }
+    where: { channelId: channelId },
+    // if no rating => no calculate avg rating
+    attributes: attributes,
+    include: [
+      {
+        model: LevelWorkout,
+        attributes: [],
+        as: "levelWorkout",
+        where: level ? {levelWorkout: level} : {}
+      },
+      {
+        model: Category,
+        attributes: [],
+        as: 'category',
+        where: category ? {title: category} : {}
+      }
+    ],
+    order: [[sortCondition.sortBy, sortCondition.order]],
+    offset: (page - 1) * pageSize,
+    limit: pageSize * 1,
   });
   if (!videos) {
     return {

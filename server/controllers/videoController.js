@@ -1,10 +1,10 @@
-const { 
-  generateUploadLink, 
-  uploadThumbnailService, 
-  uploadMetadataService, 
-  saveVideoService, 
-  getVideoService, 
-  checkVideoStatusService, 
+const {
+  generateUploadLink,
+  uploadThumbnailService,
+  uploadMetadataService,
+  saveVideoService,
+  getVideoService,
+  checkVideoStatusService,
   updateVideoService,
   getAllVideosService,
   getVideoByUserIdService,
@@ -51,7 +51,7 @@ const getVideo = async (req, res, next) => {
 
 const checkVideoStatus = async (req, res, next) => {
   const { videoUri } = req.body;
-  try { 
+  try {
     const result = await checkVideoStatusService(videoUri);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
@@ -70,13 +70,24 @@ const updateVideo = async (req, res, next) => {
 };
 
 const getAllVideos = async (req, res, next) => {
-  const result = await getAllVideosService();
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const result = await getAllVideosService(page, pageSize);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
 const getVideoByUserId = async (req, res, next) => {
   const { channelId } = req.params;
-  const result = await getVideoByUserIdService(channelId);
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const level = req.query.level;
+  const category = req.query.category;
+  // updateAt = desc same as Most recent
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'updatedAt',
+    order: req.query.order || 'desc'
+  };
+  const result = await getVideoByUserIdService(channelId, page, pageSize, level, category, sortCondition);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
