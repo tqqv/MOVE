@@ -132,7 +132,7 @@
 
         <div class="flex flex-col gap-y-2">
           <Field name="password" v-slot="{ field, errors }">
-            <label for="password" class="text_para">Password</label>
+            <label for="password" class="text_para ml-1">Password</label>
             <div
               class="relative text-[14px] rounded-lg"
               :class="errors.length ? 'error_password' : 'normal_password'"
