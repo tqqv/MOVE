@@ -48,8 +48,7 @@ export const updateProfileSchema = yup.object({
     .string()
     .required('Username is required')
     .matches(/.*\s+.*/, 'Full name must contain at least one space')
-    .matches(/^[^\d]*$/, 'Full name cannot contain numbers')
-    .matches(/^[a-zA-Z\s]*$/, 'Full name cannot contain numbers or special characters'),
+    .matches(/^[a-zA-Z\s]*$/, 'Full name cannot contain special characters'),
   city: yup
     .string()
     .required('City is required')

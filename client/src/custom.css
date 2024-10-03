@@ -44,13 +44,16 @@
 .p-tablist-active-bar {
   display: none;
 }
+
 .p-tablist-tab-list {
   gap: 30px;
 }
+
 .p-tab {
   padding-left: 0;
   padding-right: 0;
 }
+
 .p-tab-active {
   border-color: #13d0b4;
   color: #13d0b4;
@@ -97,15 +100,18 @@
 .hide-progress-value .p-progressbar-label {
   display: none;
 }
+
 .custom-dropdown {
   .p-select-label {
     color: #13d0b4;
   }
 }
+
 .p-select-option {
   font-size: 12px;
   color: black;
 }
+
 .p-icon {
   color: #13d0b4;
 }

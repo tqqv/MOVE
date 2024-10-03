@@ -7,6 +7,7 @@
   import { usePopupStore } from '@/stores';
   import { Form, Field } from 'vee-validate';
   import { signUpSchema } from '@/functions/vadilation';
+  import Warning from '../icons/warning.vue';
 
   const popupStore = usePopupStore();
   const referralCode = ref('');
@@ -14,9 +15,9 @@
   const showConfirmPassword = ref(false);
 
   const submitSignupForm = async (values) => {
-    const { email, password } = values;
+    const { email, password, confirmPassword } = values;
 
-    const data = { email, password, referralCode: referralCode.value };
+    const data = { email, password, confirmPassword, referralCode: referralCode.value };
     try {
       const response = await postSignup(data);
       if (response.error) {
@@ -55,64 +56,82 @@
     </div>
     <Form @submit="submitSignupForm" :validation-schema="signUpSchema" class="w-full space-y-4">
       <div class="flex flex-col gap-y-4">
-        <div class="flex flex-col gap-y-1">
+        <!-- EMAIL -->
+        <div class="flex flex-col gap-y-2">
           <Field name="email" v-slot="{ field, errors }">
-            <label for="email" class="text_para">Email</label>
-            <input
-              v-bind="field"
-              type="email"
-              class="input_custom"
-              :class="{
-                'focus:outline-red text-red focus:caret-red border-red': errors.length,
-              }"
-              required
-            />
-            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+            <label for="email" class="text_para ml-1">Email</label>
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.length ? 'error_password' : 'normal_password'"
+            >
+              <input
+                v-bind="field"
+                type="email"
+                class="password_custom"
+                placeholder="Enter email"
+                required
+              />
+              <Warning
+                v-if="errors.length"
+                class="absolute top-1/2 right-4 transform -translate-y-1/2 "
+              />
+            </div>
+            <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
           </Field>
         </div>
-        <div class="flex flex-col gap-y-1">
+        <!-- PASSWORD -->
+        <div class="flex flex-col gap-y-2">
           <Field name="password" v-slot="{ field, errors }">
-            <label for="password" class="text_para">Password</label>
-            <div class="relative">
+            <label for="password" class="text_para ml-1">Password</label>
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.length ? 'error_password' : 'normal_password'"
+            >
               <input
                 v-bind="field"
                 :type="showPassword ? 'text' : 'password'"
-                class="input_custom"
-                :class="{
-                  'focus:outline-red text-red focus:caret-red border-red': errors.length,
-                }"
+                class="password_custom"
+                placeholder="Enter password"
                 required
               />
 
-              <button @click="showPassword = !showPassword" type="button" class="btn_eyes">
+              <button
+                @click="showPassword = !showPassword"
+                type="button"
+                class="btn_eyes"
+                tabindex="-1"
+              >
                 <i :class="[showPassword ? 'pi pi-eye' : 'pi pi-eye-slash']"></i>
               </button>
             </div>
-            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+            <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
           </Field>
         </div>
-        <div class="flex flex-col gap-y-1">
+        <!-- CONFIRM PASSWORD -->
+        <div class="flex flex-col gap-y-2">
           <Field name="confirmPassword" v-slot="{ field, errors }">
-            <label for="confirmPassword" class="text_para">Confirm Password</label>
-            <div class="relative">
+            <label for="confirmPassword" class="text_para ml-1">Confirm Password</label>
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.length ? 'error_password' : 'normal_password'"
+            >
               <input
                 v-bind="field"
                 :type="showConfirmPassword ? 'text' : 'password'"
-                class="input_custom"
-                :class="{
-                  'focus:outline-red text-red focus:caret-red border-red': errors.length,
-                }"
+                class="password_custom"
+                placeholder="Enter confirm password"
                 required
               />
               <button
                 @click="showConfirmPassword = !showConfirmPassword"
                 type="button"
                 class="btn_eyes"
+                tabindex="-1"
               >
                 <i :class="[showConfirmPassword ? 'pi pi-eye' : 'pi pi-eye-slash']"></i>
               </button>
             </div>
-            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+            <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
           </Field>
         </div>
         <div class="flex flex-col gap-y-1">
