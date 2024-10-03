@@ -1,12 +1,12 @@
 import axios from './axios';
 
 const getProfile = () => {
-  return axios.get('/auth/getProfile');
+  return axios.get('/user/getProfile');
 };
 
 const updateProfile = async (data) => {
   try {
-    const response = await axios.put('/auth/editprofile', data);
+    const response = await axios.patch('/user/editprofile', data);
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -15,7 +15,7 @@ const updateProfile = async (data) => {
 
 const changePassword = async (data) => {
   try {
-    const response = await axios.put('/auth/changePassword', data);
+    const response = await axios.put('/user/changePassword', data);
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -33,7 +33,7 @@ const viewFollowChannel = async () => {
 
 const requestToStreamer = async () => {
   try {
-    const response = await axios.get('/auth/createRequestChannel');
+    const response = await axios.get('/user/createRequestChannel');
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -42,7 +42,7 @@ const requestToStreamer = async () => {
 
 const getRequestStreamer = async () => {
   try {
-    const response = await axios.get('/auth/getRequestChannelById');
+    const response = await axios.get('/user/getRequestChannelById');
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
