@@ -131,7 +131,7 @@
   };
 </script>
 <template>
-  <Button label="Upload video" @click="openUploadVideoPopup" />
+  <h1 class="mb-1 group-hover:text-primary" @click="openUploadVideoPopup">Upload a video</h1>
   <Dialog
     v-model:visible="showUploadVideoPopup"
     modal

@@ -29,7 +29,7 @@ const createChannel = async (userId, username, avatar) => {
   }
 }
 
-const subscribeChannel = async (userId, channelId) => {
+const followChannel = async (userId, channelId) => {
   try {
     const checkSubscribe = await Subscribe.destroy({
       where: {
@@ -140,7 +140,7 @@ const listSubscribeOfUser = async(userId) => {
       },
       include: [{
         model: Channel,
-        as: "subscribeChannel",
+        as: "followChannel",
         attributes: ['channelName', 'avatar']
       }]
     })
@@ -506,7 +506,7 @@ const getAllInforFollow = async(userId) => {
 
 module.exports = {
   createChannel,
-  subscribeChannel,
+  followChannel,
   listSubscribeOfChannel,
   listSubscribeOfUser,
   getProfileChannel,
