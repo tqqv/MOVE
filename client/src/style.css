@@ -10,12 +10,6 @@
 }
 
 @layer base {
-  html {
-    font-family: 'Montserrat', sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-  }
-
   section {
     @apply py-[30px];
   }
@@ -87,15 +81,15 @@
   }
 
   .text_subLabel {
-    @apply text-[13px] text-[#777777]
+    @apply text-[13px] text-[#777777];
   }
 
   .error_input {
-    @apply focus:outline-red text-red focus:caret-red border-red
+    @apply focus:outline-red text-red focus:caret-red border-red;
   }
 
-  .error_message{
-    @apply text-[11px] italic text-red font-semibold
+  .error_message {
+    @apply text-[11px] italic text-red font-semibold;
   }
 }
 

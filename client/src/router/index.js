@@ -1,5 +1,5 @@
-import { createMemoryHistory, createRouter, createWebHistory } from 'vue-router';
-import Test from '@pages/Test.vue';
+import { createRouter, createWebHistory } from 'vue-router';
+import HomePage from '@/pages/HomePage.vue';
 import ResetPassword from '@/pages/ResetPassword.vue';
 import StreamerLayout from '@/layouts/StreamerLayout.vue';
 import ChannelSetting from '@/components/streamer/channelProfile/ChannelSetting.vue';
@@ -18,7 +18,7 @@ const routes = [
     path: '/',
     component: UserLayout,
     children: [
-      { path: '', component: Test },
+      { path: '', component: HomePage },
       { path: 'personal-profile', component: ProfileContent },
       { path: 'view-channels', component: ViewChannelsContent },
       { path: 'browse', component: BrowseContent },
@@ -32,16 +32,14 @@ const routes = [
     path: '/streamer',
     component: StreamerLayout,
     children: [
-      { path: 'home', component: DashboardStreamer },
+      { path: '', component: DashboardStreamer },
       { path: 'comments', component: CommentStreamer },
-
       { path: 'channel-setting', component: ChannelSetting },
     ],
   },
 ];
 
 const router = createRouter({
-  // history: createMemoryHistory(import.meta.env.BASE_URL),
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
