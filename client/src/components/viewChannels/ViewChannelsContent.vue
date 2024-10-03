@@ -16,8 +16,9 @@
     { title: 'Videos', component: markRaw(TabVideoList), value: '0' },
     { title: 'About', component: markRaw(TabAbout), value: '1' },
   ]);
-  const username = ref('channelHoang'); // Thay thế bằng username thực tế bạn muốn lấy
+  const username = ref('ChannelH'); // Thay thế bằng username thực tế bạn muốn lấy
   const channelId = ref(3);
+
   const channelDetails = ref({});
   const followChannelDetails = ref({});
 
@@ -51,7 +52,6 @@
   onMounted(() => {
     fetchChannelData();
     fetchListFollowOfChannel(channelId.value);
-    console.log(channelDetails);
   });
 </script>
 
@@ -61,7 +61,9 @@
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"
       :channelDetails="channelDetails"
+      :channelId="channelId"
       :totalFollower="totalFollower"
+      @updateFollowers="fetchChannelData"
       class="pl-3"
     />
     <div>

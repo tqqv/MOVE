@@ -1,11 +1,13 @@
 <script setup>
-  import { ref } from 'vue';
-  // import MMAImage from '../assets/category/MMA.png';
+  import { onMounted, ref, computed, onBeforeMount } from 'vue';
   import Verified from './icons/verified.vue';
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
+  import { postFollowChannel, getListFollowOfUser } from '@/services/user';
 
+  const successMessage = ref('');
+  const errorMessage = ref('');
   const props = defineProps({
     isButtonGiftREPsVisible: {
       type: Boolean,
@@ -19,12 +21,17 @@
       type: Object,
       required: true,
     },
+    channelId: {
+      type: Number,
+      required: true,
+    },
     totalFollower: {
       type: Number,
       required: true,
     },
   });
-
+  const followedChannels = ref([]);
+  const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
 
@@ -36,9 +43,45 @@
     isMenuVisible.value = false;
   };
 
-  const toggleFill = () => {
-    isFilled.value = !isFilled.value;
+  const fetchListFollowOfUser = async () => {
+    const result = await getListFollowOfUser();
+    if (result.success) {
+      followedChannels.value = result.data;
+    } else {
+      errorMessage.value = result.message;
+    }
   };
+  const followChannel = async () => {
+    try {
+      const response = await postFollowChannel({
+        channelId: props.channelId,
+      });
+
+      if (response.success) {
+        successMessage.value = response.message;
+        isFilled.value = !isFilled.value;
+        emit('updateFollowers');
+        fetchListFollowOfUser();
+      } else {
+        isFilled.value = !isFilled.value;
+        errorMessage.value = response.message;
+        emit('updateFollowers');
+        fetchListFollowOfUser();
+      }
+    } catch (error) {
+      errorMessage.value = error.message || 'Something went wrong';
+    }
+  };
+
+  const toggleFollow = () => {
+    followChannel();
+  };
+  const isChannelFollowed = computed(() => {
+    return followedChannels.value.some(
+      (channel) => channel.channelId === props.channelId.toString(),
+    );
+  });
+  onMounted(fetchListFollowOfUser);
 </script>
 
 <template>
@@ -70,16 +113,16 @@
           <span class="whitespace-nowrap" v-else> is now offline</span>
         </p>
 
-        <p class="text-[14px] text-body">{{ totalFollower }} followers</p>
+        <p class="text-[14px] text-body">{{ totalFollower ?? 0 }} followers</p>
       </div>
     </div>
     <div
       v-if="isUserAction"
       class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
-      @click="toggleFill"
+      @click="toggleFollow"
     >
       <heart
-        :fill="isFilled ? 'fill-primary' : 'fill-white'"
+        :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
         stroke="stroke-primary"
         class="mr-1"
       />

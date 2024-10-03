@@ -24,7 +24,7 @@ const changePassword = async (data) => {
 
 const viewFollowChannel = async () => {
   try {
-    const response = await axios.get('/channel/getListFollower');
+    const response = await axios.get('/user/getListFollower');
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -55,9 +55,17 @@ const getRequestStreamer = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-const postFollowChannel = async () => {
+const postFollowChannel = async (data) => {
   try {
-    const response = await axios.post('/channel/followChannelController');
+    const response = await axios.post('/user/followChannel', data);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getListFollowOfUser = async () => {
+  try {
+    const response = await axios.get('/user/getListFollower');
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
@@ -72,4 +80,5 @@ export {
   getRequestStreamer,
   getViewChannel,
   postFollowChannel,
+  getListFollowOfUser,
 };

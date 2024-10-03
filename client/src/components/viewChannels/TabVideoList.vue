@@ -4,9 +4,7 @@
   import Filter from '@components/Filter.vue';
   import facebook from '@/components/icons/facebookLogin.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
-  import MMAImage from '@/assets/category/MMA.png';
-  import HIITImage from '@/assets/category/HIIT.png';
-  import JustMoveImage from '@/assets/category/JustMove.png';
+
   import { getVideobyChannel } from '@/services/video';
 
   const levelOptions = [
