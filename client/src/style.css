@@ -88,8 +88,20 @@
     @apply focus:outline-red text-red focus:caret-red border-red;
   }
 
+  .error_password {
+    @apply bg-red/20 border-[1.7px] border-red text-red focus-within:border-red
+  }
+
+  .normal_password {
+    @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary
+  }
+ 
+  .password_custom {
+    @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg
+  }
+
   .error_message {
-    @apply text-[11px] italic text-red font-semibold;
+    @apply text-[11px] italic text-red font-semibold pl-1
   }
 }
 

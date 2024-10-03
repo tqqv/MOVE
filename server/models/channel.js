@@ -12,6 +12,12 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'channelVideos', // Alias cho videos của người dùng
             });
 
+            // Mối quan hệ 1-n với Livestream (Người dùng có nhiều video)
+            this.hasMany(models.Livestream, {
+                foreignKey: 'streamerId',
+                as: 'channelLivestreams', // Alias cho videos của người dùng
+            });
+
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
                 foreignKey: 'userId',
@@ -24,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
             id: {
                 type: DataTypes.UUID,
                 primaryKey: true,
-                defaultValue: DataTypes.UUID,
+                defaultValue: DataTypes.UUIDV4,
                 allowNull: false,
                 validate: {
                     isUUID: true
