@@ -15,28 +15,44 @@ const responseHandler = require("../middlewares/responseHandler");
 
 const getUploadLink = async (req, res, next) => {
   const { fileName, fileSize } = req.body;
-  const result = await generateUploadLink(fileName, fileSize);
-  responseHandler(result.status, result.data, result.message)(req, res, next);
+  try {
+    const result = await generateUploadLink(fileName, fileSize);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res,next);    
+  }
 };
 
 const uploadThumbnail = async (req, res, next) => {
   const { videoUri } = req.body;
   const thumbnailPath = req.file.path;
-  const result = await uploadThumbnailService(videoUri, thumbnailPath);
-  responseHandler(result.status, result.data, result.message)(req, res, next);
+  try {
+    const result = await uploadThumbnailService(videoUri, thumbnailPath);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res, next);    
+  }
 };
 
 const uploadMetadata = async (req, res, next) => {
   const { videoUri, title, description } = req.body;
-  const result = await uploadMetadataService(videoUri, title, description);
-  responseHandler(result.status, result.data, result.message)(req, res, next);
+  try {
+    const result = await uploadMetadataService(videoUri, title, description);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res, next);
+  }
 };
 
 const saveVideo = async (req, res, next) => {
   const userId = req.user.channelId;
   const { videoId, title, description, thumbnailUrl, videoUrl, duration, status } = req.body;
-  const result = await saveVideoService(videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status);
-  responseHandler(result.status, result.data, result.message)(req, res, next);
+  try {
+    const result = await saveVideoService(videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res, next);
+  }
 };
 
 const getVideo = async (req, res, next) => {

@@ -12,7 +12,11 @@ export const useVideoStore = defineStore('video', () => {
   const thumbnailPreview = ref('');
   const duration = ref(0);
   const commentSetting = ref(true);
+  const tab = ref('1');
 
+  const setTab = (value) => {
+    tab.value = value;
+  };
   const setUploadProgress = (value) => {
     uploadProgress.value = value;
   };
@@ -43,7 +47,19 @@ export const useVideoStore = defineStore('video', () => {
   const setCommentSetting = (value) => {
     commentSetting.value = value;
   };
-
+  const clear = () => {
+    uploadProgress.value = 0;
+    uri.value = null;
+    isNext.value = false;
+    uploadTitle.value = '';
+    uploadDescription.value = '';
+    uploadCategory.value = '';
+    uploadThumbnail.value = null;
+    thumbnailPreview.value = '';
+    duration.value = 0;
+    commentSetting.value = true;
+    tab.value = '1';
+  };
   return {
     uploadProgress,
     uri,
@@ -55,6 +71,7 @@ export const useVideoStore = defineStore('video', () => {
     thumbnailPreview,
     duration,
     commentSetting,
+    tab,
     setUploadProgress,
     setUri,
     setIsNext,
@@ -65,5 +82,7 @@ export const useVideoStore = defineStore('video', () => {
     setThumbnailPreview,
     setDuration,
     setCommentSetting,
+    clear,
+    setTab,
   };
 });

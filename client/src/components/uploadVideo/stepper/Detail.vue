@@ -27,7 +27,9 @@
     isLoading.value = true;
     if (thumbnail.value) {
       setUploadThumbnail(thumbnail.value);
-      previewUrl.value = URL.createObjectURL(thumbnail.value);
+      if (thumbnailPreview.value != '') {
+        previewUrl.value = URL.createObjectURL(thumbnail.value);
+      }
       isLoading.value = false;
       startUpload();
     }
