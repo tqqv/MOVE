@@ -1,6 +1,6 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
-const { setCookies } = require("../utils/setCookies");
+const { setCookies, clearCookies } = require("../utils/cookies.js");
 var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
@@ -49,8 +49,10 @@ const registerController = async (req, res, next) => {
 };
 
 const logoutController = async (req, res, next) => {
-  res.clearCookie("accessToken", { httpOnly: true, secure: true });
-  res.clearCookie("isLogin", { secure: true });
+  clearCookies([
+    {name: 'accessToken', options: { httpOnly: true }},
+    {name: 'isLogin'}
+  ])(req, res, next);
 
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
