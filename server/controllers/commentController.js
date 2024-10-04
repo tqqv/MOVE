@@ -5,7 +5,8 @@ var { createComment, getCommentsByVideo, getChildCommentsByParentId, getComments
 const commentOnVideoController = async (req, res, next) => {
   const videoId = req.params.videoId;
   const userId = req.user.id;
-  const commentResult = await createComment(videoId, userId, req.body);
+  const channelId = req.user.channelId || null;
+  const commentResult = await createComment(videoId, userId, channelId, req.body);
 
   responseHandler(commentResult.status, commentResult.data, commentResult.message)(
     req,
