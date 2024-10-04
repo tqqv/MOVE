@@ -20,4 +20,26 @@ const setCookies = (cookies = []) => {
   };
 };
 
-module.exports = {setCookies}
+const clearCookies = (cookies = []) => {
+  return (req, res) => {
+    let domain = null;
+    if (req.hostname === 'localhost') {
+      domain = req.hostname;
+    } else {
+      domain = process.env.DOMAIN;
+    }
+
+    cookies.forEach(({ name, options = {} }) => {
+      const finalOptions = {
+        domain: domain,
+        path: '/',
+        secure: true,
+        sameSite: 'None',
+        ...options,
+      };
+      res.clearCookie(name, finalOptions);
+    });
+  };
+};
+
+module.exports = { setCookies, clearCookies }
