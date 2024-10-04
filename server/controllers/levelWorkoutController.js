@@ -16,8 +16,8 @@ const getAllLevelWorkoutController = async(req, res, next) => {
 }
 
 const getLvWorkoutByIdController = async(req, res, next) => {
-  const LvWorkoutId = req.params.LvWorkoutId
-  const result = await getLvWorkoutById(LvWorkoutId)
+  const lvWorkoutId = req.params.lvWorkoutId
+  const result = await getLvWorkoutById(lvWorkoutId)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -30,8 +30,8 @@ const editLevelWorkoutController = async (req, res, next) => {
 }
 
 const deleteLevelWorkoutController = async (req, res, next) => {
-  const LvWorkoutId = req.params.LvWorkoutId
-  const result = await deleteLevelWorkout(LvWorkoutId)
+  const lvWorkoutId = req.params.lvWorkoutId
+  const result = await deleteLevelWorkout(lvWorkoutId)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

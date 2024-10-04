@@ -45,9 +45,9 @@ const getAllLevelWorkout = async() => {
   }
 }
 
-const getLvWorkoutById = async(LvWorkoutId) => {
+const getLvWorkoutById = async(lvWorkoutId) => {
   try {
-    const levelWorkout = await LevelWorkout.findByPk(LvWorkoutId)
+    const levelWorkout = await LevelWorkout.findByPk(lvWorkoutId)
 
     if(!levelWorkout) {
       return {
@@ -71,10 +71,10 @@ const getLvWorkoutById = async(LvWorkoutId) => {
   }
 }
 
-const editLevelWorkout = async(LvWorkoutId, data) => {
+const editLevelWorkout = async(lvWorkoutId, data) => {
   try {
     // Tìm LvWorkout trong DB
-    const LevelWorkout = await LevelWorkout.findByPk(LvWorkoutId)
+    const LevelWorkout = await LevelWorkout.findByPk(lvWorkoutId)
     if(!LevelWorkout) {
       return {
         status: 400,
@@ -107,9 +107,9 @@ const editLevelWorkout = async(LvWorkoutId, data) => {
   }
 }
 
-const deleteLevelWorkout = async (LvWorkoutId) => {
+const deleteLevelWorkout = async (lvWorkoutId) => {
   try {
-    const LevelWorkout = await LevelWorkout.findByPk(LvWorkoutId);
+    const LevelWorkout = await LevelWorkout.findByPk(lvWorkoutId);
     if (!LevelWorkout) {
       return {
         status: 404,

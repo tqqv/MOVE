@@ -4,10 +4,10 @@ const { createCategoryController, getCateByIdController, editCategoryController,
 const cateRouter = express.Router();
 
 
-cateRouter.post('/create', verifyAdmin, createCategoryController);
-cateRouter.get('/getAllCate', getAllCategoryController);
+cateRouter.post('/', verifyAdmin, createCategoryController);
+cateRouter.get('/', getAllCategoryController);
 cateRouter.get('/getCateById/:cateId', getCateByIdController);
-cateRouter.patch('/edit', verifyAdmin, editCategoryController);
-cateRouter.delete('/delete/:cateId', verifyAdmin, deleteCategoryController);
+cateRouter.patch('/', verifyAdmin, editCategoryController);
+cateRouter.delete('/:cateId', verifyAdmin, deleteCategoryController);
 
 module.exports = cateRouter;

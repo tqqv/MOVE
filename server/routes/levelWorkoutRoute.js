@@ -4,10 +4,10 @@ const { createLevelWorkoutController, getAllLevelWorkoutController, getLvWorkout
 const lvWorkoutRouter = express.Router();
 
 
-lvWorkoutRouter.post('/create', verifyAdmin, createLevelWorkoutController);
-lvWorkoutRouter.get('/getAllCate', getAllLevelWorkoutController);
-lvWorkoutRouter.get('/getCateById/:cateId', getLvWorkoutByIdController);
-lvWorkoutRouter.patch('/edit', verifyAdmin, editLevelWorkoutController);
-lvWorkoutRouter.delete('/delete/:cateId', verifyAdmin, deleteLevelWorkoutController);
+lvWorkoutRouter.post('/', verifyAdmin, createLevelWorkoutController);
+lvWorkoutRouter.get('/', getAllLevelWorkoutController);
+lvWorkoutRouter.get('/getLvWorkoutById/:lvWorkoutId', getLvWorkoutByIdController);
+lvWorkoutRouter.patch('/', verifyAdmin, editLevelWorkoutController);
+lvWorkoutRouter.delete('/:lvWorkoutId', verifyAdmin, deleteLevelWorkoutController);
 
 module.exports = lvWorkoutRouter;
