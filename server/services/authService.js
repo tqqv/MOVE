@@ -103,7 +103,7 @@ const register = async (userData) => {
         password: hash,
         avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
         referralCode : referralCode,
-        username: "user-" + referralCode
+        username: "user_" + referralCode
       });
 
       await newUser.save();
