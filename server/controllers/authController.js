@@ -49,8 +49,8 @@ const registerController = async (req, res, next) => {
 };
 
 const logoutController = async (req, res, next) => {
-  res.clearCookie("accessToken");
-  res.clearCookie("isLogin");
+  res.clearCookie("accessToken", { httpOnly: true, secure: true });
+  res.clearCookie("isLogin", { secure: true });
 
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
