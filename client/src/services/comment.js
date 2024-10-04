@@ -22,4 +22,29 @@ const getAllChildComments = (parentId) => {
   });
 };
 
-export { postComments, getAllComments, getAllChildComments };
+// COMMENT STREAMER
+const getAllCommentOfStreamer = async (streamerId) => {
+  try {
+    const response = await axios.get(`/channel/comments/${streamerId}/?isResponsed=false`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getReplyCommentOfVideo = async (commentId) => {
+  try {
+    const response = await axios.get(`/channel/comments/?parentId=${commentId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  postComments,
+  getAllComments,
+  getAllChildComments,
+  getAllCommentOfStreamer,
+  getReplyCommentOfVideo,
+};

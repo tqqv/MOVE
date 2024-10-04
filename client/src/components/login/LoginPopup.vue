@@ -118,7 +118,7 @@
                 v-bind="field"
                 type="text"
                 class="password_custom"
-                placeholder="Enter username"
+                placeholder="Enter email"
                 required
               />
               <Warning
@@ -140,6 +140,7 @@
               <input
                 v-bind="field"
                 :type="showPassword ? 'text' : 'password'"
+                placeholder="Enter password"
                 class="password_custom"
                 required
               />

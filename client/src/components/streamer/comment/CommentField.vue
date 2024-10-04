@@ -1,7 +1,11 @@
 <script setup>
-  import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
-  //   import EmojiPicker from 'vue3-emoji-picker';
+  import { ref, computed, onMounted } from 'vue';
   import MMAImage from '@/assets/category/MMA.png';
+
+  defineProps({
+    commentId: String,
+  });
+ 
 
   const commentText = ref('');
   const commentInput = ref(null);
@@ -20,7 +24,7 @@
   };
 
   onMounted(() => {
-    commentInput.value?.focus(); 
+    commentInput.value?.focus();
   });
 </script>
 
@@ -30,7 +34,7 @@
       <img :src="MMAImage" alt="Avatar" class="size-10 rounded-full object-cover" />
       <div class="flex-grow px-4 py-2 rounded-lg bg-gray-dark/25">
         <input
-          class="flex-grow bg-transparent focus:outline-none  placeholder:text-xs placeholder:font-medium placeholder:text-black/50 w-full h-10"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-medium placeholder:text-black/50 w-full h-10"
           type="text"
           placeholder="Reply comment..."
           @input="handleCommentInput"
