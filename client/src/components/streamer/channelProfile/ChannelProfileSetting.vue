@@ -9,6 +9,8 @@
   import { toast } from 'vue3-toastify';
   import { checkDataChanged, getChangedFields } from '@/functions/compareData';
   import { uploadAvatar } from '@/services/cloudinary';
+  import { updateChannelSchema } from '@/functions/vadilation';
+  import Warning from '@/components/icons/warning.vue';
 
   const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
@@ -23,6 +25,23 @@
     youtubeUrl: '',
   });
   const initialProfileData = ref({ ...profileData.value });
+  const errors = ref({});
+
+  // VALIDATION
+  const validateChannelData = async () => {
+    try {
+      await updateChannelSchema.validate(profileData.value, { abortEarly: false }); // abortEarly choose all false not choose first false
+      errors.value = {};
+      return true;
+    } catch (validationErrors) {
+      const validationResult = {};
+      validationErrors.inner.forEach((error) => {
+        validationResult[error.path] = error.message;
+      });
+      errors.value = validationResult;
+      return false;
+    }
+  };
 
   // COPY STREAMKEY
   const copyToClipboard = () => {
@@ -71,6 +90,12 @@
 
   //UPDATE PROFILE CHANNEL
   const handleUpdateProfileChannel = async () => {
+    const isValid = await validateChannelData();
+    if (!isValid) {
+      toast.error('Please check the information again');
+      return;
+    }
+
     const changedFields = getChangedFields(profileData.value, initialProfileData.value);
     if (Object.keys(changedFields).length > 0) {
       try {
@@ -182,21 +207,41 @@
             <label for="" class="text_subTitle">Username</label>
             <p class="text_subLabel">Name that will display on your username & MOVE</p>
           </div>
-          <input
-            v-model="profileData.username"
-            type="text"
-            class="input_custom"
-            autocomplete="false"
-            required
-          />
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.username ? 'error_password' : 'normal_password'"
+          >
+            <input
+              v-model="profileData.username"
+              type="text"
+              class="password_custom"
+              autocomplete="false"
+              required
+            />
+            <Warning
+              v-if="errors.username"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+            />
+          </div>
+          <span v-if="errors.username" class="error_message">{{ errors.username }}</span>
         </div>
-        <!-- CHANNEL NAEM -->
+        <!-- CHANNEL NAME -->
         <div class="flex flex-col gap-y-3">
           <div class="flex flex-col gap-y-1">
             <label for="channelName" class="text_subTitle">Channel name</label>
             <p class="text_subLabel">Name that will display on your channel & MOVE</p>
           </div>
-          <input v-model="profileData.channelName" type="text" class="input_custom" required />
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.channelName ? 'error_password' : 'normal_password'"
+          >
+            <input v-model="profileData.channelName" type="text" class="password_custom" required />
+            <Warning
+              v-if="errors.channelName"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+            />
+          </div>
+          <span v-if="errors.channelName" class="error_message">{{ errors.channelName }}</span>
         </div>
         <!-- BIO -->
         <div class="flex flex-col gap-y-3">

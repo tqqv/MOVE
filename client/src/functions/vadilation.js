@@ -38,23 +38,47 @@ export const loginSchema = yup.object({
   password: yup.string().required('Password is required'),
 });
 
+const isAgeValid = (dob) => {
+  const birthDate = new Date(dob);
+  const today = new Date();
+  let userAge = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    userAge--;
+  }
+  return userAge >= 12;
+};
+
 export const updateProfileSchema = yup.object({
   username: yup
     .string()
     .required('Username is required')
     .min(6, 'Username must be at least 6 characters')
-    .matches(/^[a-zA-Z0-9]*$/, 'Username cannot contain spaces or special characters'),
+    .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
   fullName: yup
     .string()
     .required('Username is required')
     .matches(/.*\s+.*/, 'Full name must contain at least one space')
-    .matches(/^[a-zA-Z\s]*$/, 'Full name cannot contain special characters'),
+    .matches(/^[\p{L}\s_.]*$/u, 'Full name cannot contain special characters'),
   city: yup
     .string()
     .required('City is required')
-    .matches(/^[a-zA-Z\s]*$/, 'City cannot contain numbers or special characters'),
+    .matches(/^[\p{L}\s_.]*$/u, 'City cannot contain numbers or special characters'),
+  dob: yup
+    .string()
+    .required('Date of birth is required')
+    .test('is-age-valid', 'User must be at least 12 years old', (value) => isAgeValid(value)),
 });
 
-export const capitalize = (value) => {
-  return value.toLowerCase().replace(/\b\w/g, (char) => char.toUpperCase());
-};
+export const updateChannelSchema = yup.object({
+  username: yup
+    .string()
+    .required('Username is required')
+    .min(6, 'Username must be at least 6 characters')
+    .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
+  channelName: yup
+    .string()
+    .required('Channel name is required')
+    .matches(/^[a-zA-Z0-9\s]*$/, 'Channel name cannot contain special characters'),
+});
