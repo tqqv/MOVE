@@ -178,7 +178,6 @@ const login = async (userData) => {
     cookie: {
       cookieName: "accessToken",
       token: token,
-      expires: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
     },
     status: 200,
     message: "Successfully login",
@@ -195,8 +194,6 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
-    // user: "duyan3k@gmail.com",
-    // pass: "weifwabvmsbynnxl",
   },
 });
 
