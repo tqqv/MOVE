@@ -22,7 +22,7 @@
   import { debounce } from '@/functions/debounce';
   import { searchInformation } from '@/services/search';
   import UploadVideo from './uploadVideo/UploadVideo.vue';
-
+  import VideoDetail from './uploadVideo/VideoDetail.vue';
   const popupStore = usePopupStore();
   const userStore = useUserStore();
 
@@ -383,7 +383,7 @@
                             </g>
                           </g>
                         </svg>
-                        <UploadVideo />
+                        <h1 class="mb-1 group-hover:text-primary">Upload a video</h1>
                       </button>
                     </div>
                   </div>
@@ -530,4 +530,6 @@
   </nav>
   <Login v-model:visible="popupStore.showLoginPopup" />
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
+  <UploadVideo />
+  <VideoDetail />
 </template>
