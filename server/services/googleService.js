@@ -20,7 +20,6 @@ const loginByGoogle = async (error, user) => {
       cookie: {
         cookieName: "accessToken",
         token: token,
-        expires: token.expiresIn,
       },
       status: 200,
       message: "Successfully login with Google",

@@ -39,6 +39,14 @@ const editProfile = async (id, data) => {
       }
     }
 
+    if(data.role) {
+      return {
+        status: 400,
+        data: null,
+        message: "You can't change your role"
+      }
+    }
+
     if(user.email && user.isVerified) {
       return {
         status: 400,

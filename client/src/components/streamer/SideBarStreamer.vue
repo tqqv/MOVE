@@ -8,10 +8,9 @@
   import SettingIcon from '@icons/setting.vue';
 
   const route = useRoute();
-  console.log(route.path);
 
   const menuItems = [
-    { name: 'Home', icon: HomeIcon, link: '/streamer/home' },
+    { name: 'Home', icon: HomeIcon, link: '/streamer' },
     { name: 'Video', icon: VideoIcon, link: '/streamer/video' },
     { name: 'Comments', icon: CommentIcon, link: '/streamer/comments' },
     { name: 'Analytics', icon: AnalyticsIcon, link: '/streamer/analytics' },
@@ -20,7 +19,9 @@
   ];
 </script>
 <template>
-  <div class="sticky top-[72px] h-[calc(100vh-72px)] w-[261px] border-r-2 border-gray-dark bg-white">
+  <div
+    class="sticky top-[72px] h-[calc(100vh-72px)] w-[261px] border-r-2 border-gray-dark bg-white"
+  >
     <div class="flex flex-col py-3">
       <ul>
         <router-link

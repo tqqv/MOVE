@@ -45,8 +45,15 @@ module.exports = (sequelize, DataTypes) => {
       // this.belongsToMany(models.Video, {
       // through: models.Rating,
       // foreignKey: 'userId',
-      // as: 'userRating',
+      // as: 'userRatingVideo',
       // });
+
+      // // many to many video - livestream
+      // this.belongsToMany(models.Livestream, {
+      //   through: models.Rating,
+      //   foreignKey: 'userId',
+      //   as: 'userRatingLivestream',
+      //   });
 
     }
   }

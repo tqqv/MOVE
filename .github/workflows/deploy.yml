@@ -1,0 +1,46 @@
+name: MOVE CI/CD
+
+on:
+  push:
+    branches: ["test"]
+
+jobs:
+  build:
+    runs-on: self-hosted
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Decode and Create config.json for Server
+        run: |
+          echo "${{ secrets.CONFIG_JSON }}" | base64 --decode > server/config/config.json
+
+      - name: Create .env for Server
+        run: |
+          echo "${{ secrets.SERVER_ENV }}" > server/.env
+
+      - name: Install Server dependencies and run migrations
+        run: |
+          cd server
+          npm install
+          npx sequelize-cli db:migrate
+          pm2 start index.js --name move-api || pm2 restart move-api
+
+      - name: Create .env for Client
+        run: |
+          echo "${{ secrets.CLIENT_ENV }}" > client/.env
+
+      - name: Install Client dependencies and build
+        run: |
+          cd client
+          npm install
+          npm run build
+
+      - name: Reload Nginx
+        run: |
+          sudo service nginx reload

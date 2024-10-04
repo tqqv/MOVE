@@ -10,8 +10,6 @@
 }
 
 @layer base {
-
-
   section {
     @apply py-[30px];
   }
@@ -83,7 +81,11 @@
   }
 
   .text_subLabel {
-    @apply text-[13px] text-[#777777]
+    @apply text-[13px] text-[#777777];
+  }
+
+  .error_input {
+    @apply focus:outline-red text-red focus:caret-red border-red;
   }
 
   .error_password {

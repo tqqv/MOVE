@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize, LevelWorkout } = db;
+const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -18,7 +18,7 @@ const checkLevelAndGetParentId = async (parentId) => {
   }
 };
 
-const createComment = async (videoId, userId, commentInfor) => {
+const createComment = async (videoId, userId, channelId, commentInfor) => {
   try {
     // check exist video or not
     const videoChecker = await Video.findOne({ where: { id: videoId } });
@@ -64,7 +64,7 @@ const createComment = async (videoId, userId, commentInfor) => {
 
     // Nếu parentId != null, thì phải kiểm tra để xem parent của nó là comment nào.
     commentInfor.parentId = !commentInfor.parentId  ? null : await checkLevelAndGetParentId(commentInfor.parentId)
-    const comment = await Comment.create({videoId, userId, ...commentInfor})
+    const comment = await Comment.create({videoId, userId, channelId, ...commentInfor})
     if(!comment) {
         return {
             status: 400,
@@ -118,7 +118,13 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
         as: 'userComments',
         attributes: ['avatar', 'username', 'email', 'isVerified']
       },
+      {
+        model: Channel,
+        as: 'channelComments',
+        attributes: ['avatar','channelName', 'popularCheck']
+      },
     ],
+
     order: [
       ['updatedAt', 'ASC']
     ],
@@ -189,6 +195,11 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
         attributes: ['avatar', 'username', 'email', 'isVerified']
       },
       {
+        model: Channel,
+        as: 'channelComments',
+        attributes: ['avatar','channelName', 'popularCheck']
+      },
+      {
         model: Video,
         attributes: ['thumbnailUrl', 'title', 'duration', 'updatedAt'],
         where: {
@@ -246,6 +257,11 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
         model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',
         attributes: ['avatar', 'username', 'email']
+      },
+      {
+        model: Channel,
+        as: 'channelComments',
+        attributes: ['avatar','channelName', 'popularCheck']
       },
     ],
     order: [
