@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
             foreignKey: 'levelWorkoutsId',
             as: 'levelWorkoutVideos',
         });
+
+        this.hasMany(models.Livestream, {
+          foreignKey: 'levelWorkoutsId',
+          as: 'levelWorkoutLivestreams',
+        });
     }
   }
   LevelWorkout.init(
@@ -16,7 +21,7 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       levelWorkout: {

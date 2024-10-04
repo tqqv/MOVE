@@ -33,6 +33,14 @@
       toast.error('Failed to change password');
     }
   };
+
+  // handle submit invalid oldpassword
+  const handleInput = () => {
+    if (showInvalid.value || errors.value.length > 0) {
+      showInvalid.value = false;
+      errors.value = [];
+    }
+  };
 </script>
 
 <template>
@@ -49,21 +57,21 @@
         least 8 characters.
       </p>
       <Form @submit="handleChangePassword" :validation-schema="changePasswordSchema" class="pt-4">
-        <div class="flex flex-col gap-y-3">
+        <div class="flex flex-col gap-y-5">
           <!-- Old Password -->
-          <div class="flex flex-col gap-y-1 relative">
+          <div class="flex flex-col gap-y-2 relative">
             <Field name="oldPass" v-slot="{ field, errors }">
-              <label for="oldPassword" class="text_para">Old password</label>
-              <div class="relative">
+              <label for="oldPassword" class="text_para pl-1">Old password</label>
+              <div
+                class="relative text-[14px] rounded-lg"
+                :class="errors.length || showInvalid ? 'error_password' : 'normal_password'"
+              >
                 <input
                   placeholder="Enter old password"
                   v-bind="field"
                   :type="showPassword ? 'text' : 'password'"
-                  class="input_custom"
-                  :class="{
-                    'focus:outline-red text-red focus:caret-red border-red':
-                      showInvalid || errors.length,
-                  }"
+                  class="password_custom"
+                  @input="handleInput"
                 />
                 <button
                   @click="showPassword = !showPassword"
@@ -73,23 +81,26 @@
                   <i :class="[showPassword ? 'pi pi-eye' : 'pi pi-eye-slash']"></i>
                 </button>
               </div>
-              <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
-              <span v-if="showInvalid" class="text-[11px] italic text-red"
-                >"You have entered an invalid password"</span
+              <span v-if="errors.length > 0" class="error_message">{{ errors[0] }}</span>
+              <span v-else-if="showInvalid && errors.length === 0" class="error_message"
+                >You have entered an invalid password</span
               >
             </Field>
           </div>
 
           <!-- New Password -->
-          <div class="flex flex-col gap-y-1 relative">
+          <div class="flex flex-col gap-y-2 relative">
             <Field name="newPass" v-slot="{ field, errors }">
-              <label for="newPassword" class="text_para">New password</label>
-              <div class="relative">
+              <label for="newPassword" class="text_para pl-1">New password</label>
+              <div
+                class="relative text-[14px] rounded-lg"
+                :class="errors.length ? 'error_password' : 'normal_password'"
+              >
                 <input
                   placeholder="Enter new password"
                   v-bind="field"
                   :type="showNewPassword ? 'text' : 'password'"
-                  class="input_custom"
+                  class="password_custom"
                 />
                 <button
                   @click="showNewPassword = !showNewPassword"
@@ -99,20 +110,23 @@
                   <i :class="showNewPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
                 </button>
               </div>
-              <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+              <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
             </Field>
           </div>
 
           <!-- Confirm New Password -->
-          <div class="flex flex-col gap-y-1 relative">
+          <div class="flex flex-col gap-y-2 relative">
             <Field name="confirmPass" v-slot="{ field, errors }">
-              <label for="confirmNewPassword" class="text_para">Confirm new password</label>
-              <div class="relative">
+              <label for="confirmNewPassword" class="text_para pl-1">Confirm new password</label>
+              <div
+                class="relative text-[14px] rounded-lg"
+                :class="errors.length ? 'error_password' : 'normal_password'"
+              >
                 <input
                   placeholder="Confirm new password"
                   v-bind="field"
                   :type="showConfirmNewPassword ? 'text' : 'password'"
-                  class="input_custom"
+                  class="password_custom"
                 />
                 <button
                   @click="showConfirmNewPassword = !showConfirmNewPassword"
@@ -122,11 +136,11 @@
                   <i :class="showConfirmNewPassword ? 'pi pi-eye' : 'pi pi-eye-slash'"></i>
                 </button>
               </div>
-              <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+              <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
             </Field>
           </div>
         </div>
-        <div class="flex justify-center mt-4">
+        <div class="flex justify-center mt-6">
           <Button type="submit" class="btn w-full md:w-2/3">Confirm</Button>
         </div>
       </Form>

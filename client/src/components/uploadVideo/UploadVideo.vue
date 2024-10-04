@@ -58,7 +58,27 @@
   };
 
   const startUpload = async () => {
-    if (!selectedFile.value) return;
+    const videoTypes = [
+      'video/mp4',
+      'video/x-m4v',
+      'video/ogg',
+      'video/webm',
+      'video/quicktime',
+      'video/x-msvideo',
+      'video/x-ms-wmv',
+      'video/x-matroska',
+      'video/x-flv',
+      'video/ogg',
+    ];
+    const MAX_SIZE = 2 * 1024 * 1024 * 1024;
+    if (!(selectedFile.value && videoTypes.includes(selectedFile.value.type))) {
+      toast.error('Please select a valid video file!');
+      return;
+    }
+    if (!(selectedFile.value && selectedFile.value.size < MAX_SIZE)) {
+      toast.error('The video file must not exceed 2GB!');
+      return;
+    }
     uploadProgress.value = 0;
 
     try {
@@ -131,7 +151,6 @@
   };
 </script>
 <template>
-  <Button label="Upload video" @click="openUploadVideoPopup" />
   <Dialog
     v-model:visible="showUploadVideoPopup"
     modal

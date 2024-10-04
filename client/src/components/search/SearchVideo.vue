@@ -36,12 +36,12 @@
 
         <div class="flex py-3">
           <div
-            :class="[video.isStreaming ? 'border-[3px] border-red' : '']"
+            :class="[video.channel.isLive ? 'border-[3px] border-red' : '']"
             class="flex items-center justify-center size-12 rounded-full"
           >
             <img
-              :src="video.userVideos"
-              alt="Avatar"
+              :src="video.channel.avatar"
+              :alt="video.channel.channelName"
               class="w-full h-full rounded-full object-cover p-[1.5px]"
             />
           </div>
@@ -55,19 +55,19 @@
               </div>
             </div>
             <div class="flex items-center gap-x-3">
-              <span class="text_secondary whitespace-nowrap">{{
-                video.userVideos.Channel.channelName
-              }}</span>
-              <span class="mb-1"><verified fill="fill-blue" /></span>
+              <span class="text_secondary whitespace-nowrap">{{ video.channel.channelName }}</span>
+              <span class="mb-1"
+                ><verified v-if="video.channel && video.channel.popularCheck" fill="fill-blue"
+              /></span>
             </div>
             <div class="flex items-center text_secondary mb-2 gap-x-2">
-              {{ video.category || 'Strength' }}
+              {{ video.category.ttile || 'Strength' }}
               <span class="font-bold text-xl pl-1 pr-1">•</span>Posted
               {{ formatDate(video.createdAt) }}
             </div>
             <div class="flex gap-2 items-center text-[10px] font-bold mb-2">
               <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-                video.level || 'hard'
+                video.levelWorkout.levelWorkout || 'hard'
               }}</span>
               <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
                 genreDuration(video.duration)

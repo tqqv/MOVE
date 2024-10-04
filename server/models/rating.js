@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       userId: {
@@ -44,16 +44,16 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE', // Xóa follow khi user bị xóa
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
-      // livestreamId: {
-      //   type: DataTypes.UUID,
-      //   allowNull: true,
-      //   references: {
-      //     model: 'livestreams', // Tên bảng users
-      //     key: 'id',      // Khóa chính từ bảng users
-      //   },
-      //   onDelete: 'CASCADE', // Xóa follow khi user bị xóa
-      //   onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
-      // },
+      livestreamId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'livestreams', // Tên bảng users
+          key: 'id',      // Khóa chính từ bảng users
+        },
+        onDelete: 'CASCADE', // Xóa follow khi user bị xóa
+        onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
+      },
     },
     {
       sequelize,

@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted, computed } from 'vue';
+  import { ref, onMounted, computed, watch } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
   import Button from 'primevue/button';
   import ChangePasswordPopup from '../changePassword/ChangePasswordPopup.vue';
@@ -11,6 +11,8 @@
   import { toast } from 'vue3-toastify';
   import { uploadAvatar } from '@/services/cloudinary';
   import { checkDataChanged, getChangedFields } from '@/functions/compareData';
+  import { updateProfileSchema } from '@/functions/vadilation';
+  import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();
   const profileData = ref({
@@ -26,23 +28,25 @@
   });
 
   const initialProfileData = ref({ ...profileData.value });
-
   const countries = ref([]);
   const states = ref([]);
-
   const isLoadingAvatar = ref(false);
+  const errors = ref({});
 
-  // VALIDATE AGE
-  const isAgeValid = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let userAge = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      userAge--;
+  // VALIDATION
+  const validateProfileData = async () => {
+    try {
+      await updateProfileSchema.validate(profileData.value, { abortEarly: false }); // abortEarly choose all false not choose first false
+      errors.value = {};
+      return true;
+    } catch (validationErrors) {
+      const validationResult = {};
+      validationErrors.inner.forEach((error) => {
+        validationResult[error.path] = error.message;
+      });
+      errors.value = validationResult;
+      return false;
     }
-    return userAge >= 12;
   };
 
   // DISABLED EMAIL
@@ -57,6 +61,15 @@
 
   const openPasswordDialog = () => {
     popupStore.openChangePassword();
+  };
+
+  // CAPITALIZE
+  const capitalizeInput = (event, field) => {
+    const words = event.target.value.split(' ');
+    event.target.value = words
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+    profileData.value[field] = event.target.value;
   };
 
   // CALL API COUNTRY
@@ -120,8 +133,9 @@
 
   // UPDATE PROFILE
   const handleUpdate = async () => {
-    if (!isAgeValid(profileData.value.dob)) {
-      toast.error('Use must enough 12 years old ');
+    const isValid = await validateProfileData();
+    if (!isValid) {
+      toast.error('Please check the information again');
       return;
     }
 
@@ -144,22 +158,37 @@
 
   onMounted(async () => {
     await userStore.fetchUserProfile();
-    if (userStore.user) {
-      profileData.value = {
-        username: userStore.user.username,
-        avatar: userStore.user.avatar,
-        email: userStore.user.email || 'No found email',
-        fullName: userStore.user.fullName,
-        gender: userStore.user.gender,
-        country: userStore.user.country,
-        state: userStore.user.state,
-        city: userStore.user.city,
-        dob: userStore.user.dob,
-      };
-      initialProfileData.value = { ...profileData.value };
-    }
     loadCountries();
+
+    if (userStore.user) {
+      updateProfileData(userStore.user);
+    }
   });
+
+  const updateProfileData = (user) => {
+    profileData.value = {
+      username: user.username,
+      avatar: user.avatar,
+      email: user.email,
+      fullName: user.fullName,
+      gender: user.gender,
+      country: user.country,
+      state: user.state,
+      city: user.city,
+      dob: user.dob,
+    };
+    initialProfileData.value = { ...profileData.value };
+  };
+
+  watch(
+    () => userStore.user,
+    (newUser) => {
+      if (newUser) {
+        updateProfileData(newUser);
+      }
+    },
+    { immediate: true },
+  );
 </script>
 <template>
   <form @submit.prevent="handleUpdate" class="my-2">
@@ -191,7 +220,7 @@
       />
 
       <span
-        class="text-primary cursor-pointer text-[14px] hover:font-medium"
+        class="text-primary cursor-pointer text-[14px] hover:font-medium w-fit"
         @click="handleFileInputClick"
       >
         Update profile picture
@@ -199,24 +228,39 @@
     </div>
     <div class="flex flex-col w-full md:w-1/2 my-3">
       <div class="flex flex-col gap-y-4">
-        <div class="flex flex-col gap-y-1">
+        <!-- USERNAME -->
+        <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <input
-            v-model="profileData.username"
-            value=""
-            type="text"
-            class="input_custom"
-            required
-          />
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.username ? 'error_password' : 'normal_password'"
+          >
+            <input
+              v-model="profileData.username"
+              type="text"
+              placeholder="Enter username"
+              class="password_custom"
+              required
+            />
+            <Warning
+              v-if="errors.username"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+            />
+          </div>
+          <span v-if="errors.username" class="error_message">{{ errors.username }}</span>
         </div>
-        <div class="flex flex-col gap-y-1">
+        <!-- EMAIL -->
+        <div class="flex flex-col gap-y-2">
           <label for="email" class="text_para">Email</label>
-          <div class="relative">
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.email ? 'error_password' : 'normal_password'"
+          >
             <input
               v-model="profileData.email"
               type="email"
               disabled
-              class="input_custom"
+              class="password_custom bg-gray-light"
               :class="{ 'italic text-body ': !profileData.email }"
               required
             />
@@ -229,22 +273,35 @@
             </p>
           </div>
         </div>
-        <div class="flex flex-col gap-y-1">
-          <label for="fullName" class="text_para">Full name</label>
-          <input
-            v-model="profileData.fullName"
-            value=""
-            type="text"
-            class="input_custom"
-            required
-          />
+        <!-- FULLNAME -->
+        <div class="flex flex-col gap-y-2">
+          <label for="username" class="text_para">Username</label>
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.fullName ? 'error_password' : 'normal_password'"
+          >
+            <input
+              v-model="profileData.fullName"
+              type="text"
+              placeholder="Enter full name"
+              class="password_custom capitalize"
+              required
+              @input="(e) => capitalizeInput(e, 'fullName')"
+            />
+            <Warning
+              v-if="errors.fullName"
+              class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+            />
+          </div>
+          <span v-if="errors.fullName" class="error_message">{{ errors.fullName }}</span>
         </div>
+
         <div class="flex flex-col gap-y-6">
           <!--FORGOT PASSWORD  -->
           <div class="flex flex-col gap-y-1">
             <label for="password" class="text_para">Password</label>
             <span
-              class="text-primary cursor-pointer text-[14px] underline"
+              class="text-primary cursor-pointer text-[14px] underline w-fit"
               @click="openPasswordDialog"
               >Change password</span
             >
@@ -270,14 +327,18 @@
           <!-- DATE OF BIRTH -->
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
-            <div class="flex">
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.dob ? 'error_password' : 'normal_password'"
+            >
               <input
                 v-model="profileData.dob"
-                class="w-full select_custom text-[14px]"
+                class="password_custom w-full text-[14px]"
                 type="date"
                 name=""
               />
             </div>
+            <span v-if="errors.dob" class="error_message">{{ errors.dob }}</span>
           </div>
           <!-- COUNTRY VS STATE -->
           <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
@@ -308,8 +369,25 @@
           </div>
           <!-- CITY -->
           <div class="flex flex-col w-full md:w-1/2 gap-y-2">
-            <label for="gender" class="text_para">City</label>
-            <input v-model="profileData.city" value="" type="text" class="input_custom" />
+            <label for="city" class="text_para">City</label>
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.city ? 'error_password' : 'normal_password'"
+            >
+              <input
+                v-model="profileData.city"
+                type="text"
+                placeholder="Enter city"
+                class="password_custom capitalize"
+                required
+                @input="(e) => capitalizeInput(e, 'city')"
+              />
+              <Warning
+                v-if="errors.city"
+                class="absolute top-1/2 right-2 transform -translate-y-1/2 pi pi-exclamation-triangle"
+              />
+            </div>
+            <span v-if="errors.city" class="error_message">{{ errors.city }}</span>
           </div>
         </div>
       </div>
