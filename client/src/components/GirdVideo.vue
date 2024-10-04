@@ -1,34 +1,42 @@
 <script setup>
   import { ref, computed } from 'vue';
-  import MMAImage from '../assets/category/MMA.png';
-  import HIITImage from '../assets/category/HIIT.png';
-  import JustMoveImage from '../assets/category/JustMove.png';
   import verified from './icons/verified.vue';
   import rate from './icons/rate.vue';
   import Paginator from 'primevue/paginator';
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
+
   dayjs.extend(relativeTime);
+
   const props = defineProps({
     videos: {
       type: Array,
       required: true,
     },
     channelDetails: {
-      type: Array,
+      type: Object,
+      required: true,
+    },
+    page: {
+      type: Number,
+      required: true,
+    },
+    pageSize: {
+      type: Number,
+      required: true,
+    },
+    totalPages: {
+      type: Number,
       required: true,
     },
   });
-  const totalRecords = computed(() => props.videos.length);
-  const rowsPerPage = 9;
-  const first = ref(0);
 
-  const paginatedvideos = computed(() => {
-    return props.videos.slice(first.value, first.value + rowsPerPage);
-  });
+  const emit = defineEmits(['pageChange']);
+
   const timeFromNow = (createAt) => {
     return dayjs(createAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
   };
+
   const formatDuration = (seconds) => {
     const hours = Math.floor(seconds / 3600)
       .toString()
@@ -39,6 +47,7 @@
     const secs = (seconds % 60).toString().padStart(2, '0');
     return `${hours}:${minutes}:${secs}`;
   };
+
   const formatViewCount = (count) => {
     if (count >= 1000 && count < 1000000) {
       return (count / 1000).toFixed(2).replace(/\.00$/, '') + 'k';
@@ -48,27 +57,30 @@
       return count ?? 0;
     }
   };
+
   const formatDurationTag = (durationInSeconds) => {
     const durationInMinutes = Math.floor(durationInSeconds / 60);
     if (durationInMinutes < 30) {
       return '< 30 mins';
     } else if (durationInMinutes >= 30 && durationInMinutes < 60) {
-      return '< 1 hour>';
+      return '< 1 hour';
     } else if (durationInMinutes >= 60) {
       return '> 1 hour';
     }
     return '';
   };
+
   const onPageChange = (event) => {
-    first.value = event.first;
+    emit('pageChange', event.page + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 </script>
+
 <template>
   <div class="w-full py-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <div
-        v-for="(video, index) in paginatedvideos"
+        v-for="(video, index) in videos"
         :key="index"
         class="max-w-sm bg-white overflow-hidden cursor-pointer"
       >
@@ -109,9 +121,9 @@
             </div>
             <div class="flex items-center gap-x-3">
               <span class="text_secondary whitespace-nowrap">{{ channelDetails.channelName }}</span>
-              <span v-if="channelDetails.popularCheck" lass="mb-1"
-                ><verified fill="fill-blue"
-              /></span>
+              <span v-if="channelDetails.popularCheck" class="mb-1">
+                <verified fill="fill-blue" />
+              </span>
             </div>
             <div class="flex items-center text_secondary mb-2">
               <span v-if="video.category">
@@ -132,11 +144,10 @@
     </div>
 
     <Paginator
-      :rows="rowsPerPage"
-      :totalRecords="totalRecords"
-      :first="first"
+      :rows="props.pageSize"
+      :first="(props.page - 1) * props.pageSize"
+      :totalRecords="props.totalPages * props.pageSize"
       @page="onPageChange"
-      class="mt-4"
     />
   </div>
 </template>

@@ -1,11 +1,11 @@
 <script setup>
-  import { onMounted, ref, computed, onBeforeMount } from 'vue';
+  import { onMounted, ref, computed } from 'vue';
   import Verified from './icons/verified.vue';
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
   import { postFollowChannel, getListFollowOfUser } from '@/services/user';
-
+  import { toast } from 'vue3-toastify';
   const successMessage = ref('');
   const errorMessage = ref('');
   const props = defineProps({
@@ -58,13 +58,13 @@
       });
 
       if (response.success) {
-        successMessage.value = response.message;
+        toast.success(response.message);
         isFilled.value = !isFilled.value;
         emit('updateFollowers');
         fetchListFollowOfUser();
       } else {
         isFilled.value = !isFilled.value;
-        errorMessage.value = response.message;
+        toast.success(response.message);
         emit('updateFollowers');
         fetchListFollowOfUser();
       }

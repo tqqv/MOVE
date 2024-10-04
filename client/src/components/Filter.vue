@@ -1,6 +1,7 @@
 <script setup>
-  import { computed, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import Dropdown from 'primevue/dropdown';
+  const emit = defineEmits();
 
   const props = defineProps({
     options: {
@@ -13,22 +14,16 @@
     },
   });
   const selectedOption = ref(null);
-  const placeholder = computed(() => {
-    return props.options.length > 0 ? props.options[0].name : 'None option';
+  watch(selectedOption, (newValue) => {
+    if (newValue) {
+      emit('change', newValue);
+    }
   });
-
-  // TRUYEN PROPS
-  // const props = defineProps({
-  //   options: sortOptions,
-  //   title: {
-  //     type: String,
-  //     default: 'None',
-  //   },
-  // });
-  // const selectedOption = ref(null);
-  // const placeholder = computed(() => {
-  //   return options.length > 0 ? options[0].name : 'None option';
-  // });
+  onMounted(() => {
+    if (props.options.length > 0) {
+      selectedOption.value = props.options[0]; // Chọn cái đầu tiên
+    }
+  });
 </script>
 
 <template>
@@ -38,7 +33,6 @@
       v-model="selectedOption"
       :options="props.options"
       optionLabel="name"
-      :placeholder="placeholder"
       class="w-auto border-primary custom-dropdown text-xs"
     ></Dropdown>
   </div>
