@@ -9,6 +9,8 @@ const channelRouter = require("./routes/channelRoute.js");
 const videoRouter = require("./routes/videoRoute.js");
 const commentRouter = require("./routes/commentRoute.js");
 const userRouter = require("./routes/userRoute.js");
+const cateRouter = require("./routes/categoryRoute.js");
+const lvWorkoutRouter = require("./routes/levelWorkoutRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -30,6 +32,8 @@ app.use("/api/channel", channelRouter);
 app.use("/api/video", videoRouter);
 app.use("/api/comment", commentRouter);
 app.use("/api/user", userRouter);
+app.use("/api/category", cateRouter);
+app.use("/api/levelWorkout", lvWorkoutRouter);
 
 
 // connect DB

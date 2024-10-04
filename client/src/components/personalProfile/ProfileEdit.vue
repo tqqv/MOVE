@@ -11,7 +11,7 @@
   import { toast } from 'vue3-toastify';
   import { uploadAvatar } from '@/services/cloudinary';
   import { checkDataChanged, getChangedFields } from '@/functions/compareData';
-  import { capitalize, updateProfileSchema } from '@/functions/vadilation';
+  import { updateProfileSchema } from '@/functions/vadilation';
   import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();
@@ -47,19 +47,6 @@
       errors.value = validationResult;
       return false;
     }
-  };
-
-  // VALIDATE AGE
-  const isAgeValid = (dob) => {
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let userAge = today.getFullYear() - birthDate.getFullYear();
-    const monthDiff = today.getMonth() - birthDate.getMonth();
-
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-      userAge--;
-    }
-    return userAge >= 12;
   };
 
   // DISABLED EMAIL
@@ -146,10 +133,6 @@
 
   // UPDATE PROFILE
   const handleUpdate = async () => {
-    if (!isAgeValid(profileData.value.dob)) {
-      toast.error('Use must enough 12 years old ');
-      return;
-    }
     const isValid = await validateProfileData();
     if (!isValid) {
       toast.error('Please check the information again');
@@ -248,15 +231,15 @@
         <!-- USERNAME -->
         <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <div class="relative">
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.username ? 'error_password' : 'normal_password'"
+          >
             <input
               v-model="profileData.username"
               type="text"
-              class="input_custom"
               placeholder="Enter username"
-              :class="{
-                error_input: errors.username,
-              }"
+              class="password_custom"
               required
             />
             <Warning
@@ -267,14 +250,17 @@
           <span v-if="errors.username" class="error_message">{{ errors.username }}</span>
         </div>
         <!-- EMAIL -->
-        <div class="flex flex-col gap-y-1">
+        <div class="flex flex-col gap-y-2">
           <label for="email" class="text_para">Email</label>
-          <div class="relative">
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.email ? 'error_password' : 'normal_password'"
+          >
             <input
               v-model="profileData.email"
               type="email"
               disabled
-              class="input_custom"
+              class="password_custom bg-gray-light"
               :class="{ 'italic text-body ': !profileData.email }"
               required
             />
@@ -290,15 +276,15 @@
         <!-- FULLNAME -->
         <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <div class="relative">
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.fullName ? 'error_password' : 'normal_password'"
+          >
             <input
               v-model="profileData.fullName"
               type="text"
-              class="input_custom capitalize"
-              placeholder="Enter username"
-              :class="{
-                error_input: errors.fullName,
-              }"
+              placeholder="Enter full name"
+              class="password_custom capitalize"
               required
               @input="(e) => capitalizeInput(e, 'fullName')"
             />
@@ -341,14 +327,18 @@
           <!-- DATE OF BIRTH -->
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
-            <div class="flex">
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.dob ? 'error_password' : 'normal_password'"
+            >
               <input
                 v-model="profileData.dob"
-                class="w-full select_custom text-[14px]"
+                class="password_custom w-full text-[14px]"
                 type="date"
                 name=""
               />
             </div>
+            <span v-if="errors.dob" class="error_message">{{ errors.dob }}</span>
           </div>
           <!-- COUNTRY VS STATE -->
           <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
@@ -380,15 +370,15 @@
           <!-- CITY -->
           <div class="flex flex-col w-full md:w-1/2 gap-y-2">
             <label for="city" class="text_para">City</label>
-            <div class="relative">
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.city ? 'error_password' : 'normal_password'"
+            >
               <input
                 v-model="profileData.city"
                 type="text"
-                class="input_custom capitalize"
                 placeholder="Enter city"
-                :class="{
-                  error_input: errors.city,
-                }"
+                class="password_custom capitalize"
                 required
                 @input="(e) => capitalizeInput(e, 'city')"
               />

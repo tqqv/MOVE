@@ -1,6 +1,7 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
-var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, getRequestStatusById } = require("../services/authService");
+const { setCookies } = require("../utils/setCookies");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
@@ -17,10 +18,6 @@ var {
   forgotPassword,
   resetPassword,
   verifyTokenRs,
-  getProfile,
-  editProfile,
-  changePassword,
-  requestChannel,
   statusRequestChannel,
 } = require("../services/authService");
 
@@ -29,8 +26,10 @@ const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, )
-    .cookie('isLogin','true', )
+    setCookies([
+      {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
+      {name: 'isLogin', value: 'true', days: 15}
+    ])(req, res);
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
@@ -51,7 +50,7 @@ const registerController = async (req, res, next) => {
 
 const logoutController = async (req, res, next) => {
   res.clearCookie("accessToken");
-  res.clearCookie("isLogin", { httpOnly: true, secure: true });
+  res.clearCookie("isLogin");
 
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
@@ -127,12 +126,11 @@ const googleCallbackController = (req, res, next) => {
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {
-        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
-          httpOnly: true,
-          expires: loginResult.cookie.expires,
-        })
-        .cookie('isLogin', 'true')
-        .redirect(process.env.CLIENT_HOST);
+        setCookies([
+          {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: {httpOnly: true}},
+          {name: 'isLogin', value: 'true', days: 15},
+        ])(req, res);
+        res.redirect(process.env.CLIENT_HOST);
       }
     }
   )(req, res, next);

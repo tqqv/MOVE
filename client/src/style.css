@@ -10,12 +10,6 @@
 }
 
 @layer base {
-  html {
-    font-family: 'Montserrat', sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-  }
-
   section {
     @apply py-[30px];
   }
@@ -55,7 +49,7 @@
   }
 
   .btn {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px];
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px] leading-none ;
   }
 
   .notification_custom {
@@ -87,15 +81,27 @@
   }
 
   .text_subLabel {
-    @apply text-[13px] text-[#777777]
+    @apply text-[13px] text-[#777777];
   }
 
   .error_input {
-    @apply focus:outline-red text-red focus:caret-red border-red
+    @apply focus:outline-red text-red focus:caret-red border-red;
   }
 
-  .error_message{
-    @apply text-[11px] italic text-red font-semibold
+  .error_password {
+    @apply bg-red/20 border-[1.7px] border-red text-red focus-within:border-red
+  }
+
+  .normal_password {
+    @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary
+  }
+ 
+  .password_custom {
+    @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg
+  }
+
+  .error_message {
+    @apply text-[11px] italic text-red font-semibold pl-1
   }
 }
 
