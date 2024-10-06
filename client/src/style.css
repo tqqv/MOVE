@@ -10,12 +10,6 @@
 }
 
 @layer base {
-  html {
-    font-family: 'Montserrat', sans-serif;
-    font-optical-sizing: auto;
-    font-style: normal;
-  }
-
   section {
     @apply py-[30px];
   }
@@ -33,9 +27,11 @@
   .text_title {
     @apply py-[15px] text-[24px] text-title font-bold;
   }
+
   .text_nav {
     @apply text-base font-bold;
   }
+
   .text_subTitle {
     @apply text-[18px] text-title font-bold;
   }
@@ -53,7 +49,7 @@
   }
 
   .btn {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px];
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px] leading-none ;
   }
 
   .notification_custom {
@@ -80,15 +76,32 @@
     @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
   }
 
-  .select_custom {
-    @apply flex-1 px-1 py-2.5 ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
-  }
-
   .btn_eyes {
     @apply flex justify-center items-center absolute top-1/2 right-2 transform -translate-y-1/2 z-20 px-3 cursor-pointer text-[#666666];
   }
-  .text_subLabel{
-    @apply text-[13px] text-[#777777]
+
+  .text_subLabel {
+    @apply text-[13px] text-[#777777];
+  }
+
+  .error_input {
+    @apply focus:outline-red text-red focus:caret-red border-red;
+  }
+
+  .error_password {
+    @apply bg-red/20 border-[1.7px] border-red text-red focus-within:border-red
+  }
+
+  .normal_password {
+    @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary
+  }
+ 
+  .password_custom {
+    @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg
+  }
+
+  .error_message {
+    @apply text-[11px] italic text-red font-semibold pl-1
   }
 }
 

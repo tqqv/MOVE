@@ -9,13 +9,16 @@
   import { getLogout } from '@/services/auth';
   import router from '@/router';
 
+  import { useRouter } from 'vue-router';
   const userStore = useUserStore();
+  const router = useRouter();
   const handleLogout = async () => {
     try {
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       userStore.clearUserData();
       toast.success(response.data.message || 'Logout successful!');
+      router.push('/');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
     }
@@ -32,7 +35,7 @@
 <template>
   <div class="shadow-lg rounded-md w-[260px]" v-if="props.user">
     <div class="px-4 py-5">
-      <RouterLink to="/personal-profile" class="flex flex-row gap-x-3 items-center pb-3">
+      <div to="/personal-profile" class="flex flex-row gap-x-3 items-center pb-3">
         <img
           :src="props.user.avatar"
           :alt="props.user.username"
@@ -40,7 +43,7 @@
         />
         <h1 class="text_subTitle whitespace-nowrap">{{ props.user.username }}</h1>
         <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
-      </RouterLink>
+      </div>
       <hr class="h-px bg-gray-dark border-0 mb-4" />
       <div class="flex flex-col justify-start text-[13px]">
         <div class="flex flex-col gap-y-4 px-1">
@@ -55,10 +58,13 @@
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />
         <div class="flex flex-col gap-y-3 px-[2px]">
-          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
+          <RouterLink
+            to="/personal-profile"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer"
+          >
             <setting class="fill-black group-hover:fill-primary" />
             <h1 class="group-hover:text-primary">Setting</h1>
-          </div>
+          </RouterLink>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />
         <div class="flex flex-col gap-y-3 px-1">

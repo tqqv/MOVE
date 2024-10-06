@@ -11,18 +11,74 @@
 
   const selectedFile = ref(null);
   const uploadProgress = ref(0);
+  const title = ref('');
+  const description = ref('');
+  const thumbnailUrl = ref('');
+  const videoUrl = ref('');
+  const duration = ref('');
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
   const { showUploadVideoPopup } = storeToRefs(popupStore);
   const { openVideoDetailPopup, openUploadVideoPopup, closeUploadVideoPopup } = popupStore;
-  const { setUploadProgress, setUri } = videoStore;
+  const { setUploadProgress, setUri, setThumbnailPreview, setDuration } = videoStore;
+
+  const saveVideo = async (videoId) => {
+    try {
+      const response = await axiosInstance.post('video/save-video', {
+        videoId,
+        title: title.value,
+        description: description.value,
+        thumbnailUrl: thumbnailUrl.value,
+        videoUrl: videoUrl.value,
+        duration: duration.value,
+        status: 'private',
+      });
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const getVideoData = async (videoUri) => {
+    try {
+      const response = await axiosInstance.post('video/get-video', {
+        videoUri,
+      });
+      title.value = response.data.data.title;
+      description.value = response.data.data.description;
+      thumbnailUrl.value = response.data.data.thumbnailUrl;
+      videoUrl.value = response.data.data.videoUrl;
+      duration.value = response.data.data.duration;
+      return response.data.data;
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
   const onFileSelected = (event) => {
     selectedFile.value = event.target.files[0];
     startUpload();
   };
 
   const startUpload = async () => {
-    if (!selectedFile.value) return;
+    const videoTypes = [
+      'video/mp4',
+      'video/x-m4v',
+      'video/ogg',
+      'video/webm',
+      'video/quicktime',
+      'video/x-msvideo',
+      'video/x-ms-wmv',
+      'video/x-matroska',
+      'video/x-flv',
+      'video/ogg',
+    ];
+    const MAX_SIZE = 2 * 1024 * 1024 * 1024;
+    if (!(selectedFile.value && videoTypes.includes(selectedFile.value.type))) {
+      toast.error('Please select a valid video file!');
+      return;
+    }
+    if (!(selectedFile.value && selectedFile.value.size < MAX_SIZE)) {
+      toast.error('The video file must not exceed 2GB!');
+      return;
+    }
     uploadProgress.value = 0;
 
     try {
@@ -36,8 +92,8 @@
         toast.error('Failed to get upload link');
         throw new Error('Failed to get upload link');
       }
-
       const { uploadLink, uri } = response.data.data;
+      const videoId = uri.split('/').pop();
       const upload = new tus.Upload(selectedFile.value, {
         endpoint: uploadLink,
         uploadUrl: uploadLink,
@@ -54,9 +110,37 @@
           setUploadProgress(uploadProgress.value);
         },
         onSuccess: async () => {
-          toast.success('Upload successful');
-          setUri(uri);
-          closeUploadVideoPopup();
+          try {
+            setUri(uri);
+            closeUploadVideoPopup();
+            const checkProcessing = async () => {
+              const videoData = await axiosInstance.post('video/check-video-status', {
+                videoUri: uri,
+              });
+              // check if video is precessed duration and thumbnailUrl is not default
+              if (videoData.data.data.upload.status === 'complete') {
+                const { duration, thumbnailUrl } = await getVideoData(uri);
+                if (duration !== 0 && thumbnailUrl !== 'https://i.vimeocdn.com/video/default') {
+                  toast.success('Upload successful');
+                  setThumbnailPreview(thumbnailUrl);
+                  setDuration(duration);
+                  return videoData.data.data;
+                } else {
+                  await new Promise((resolve) => setTimeout(resolve, 5000));
+                  return await checkProcessing();
+                }
+              } else {
+                await new Promise((resolve) => setTimeout(resolve, 5000));
+                return await checkProcessing();
+              }
+            };
+            // use it to control uploading progress
+            const processedVideoData = await checkProcessing();
+            await getVideoData(uri);
+            saveVideo(videoId);
+          } catch (error) {
+            toast.error(error.message);
+          }
         },
       });
 
@@ -67,7 +151,6 @@
   };
 </script>
 <template>
-  <Button label="Upload video" @click="openUploadVideoPopup" />
   <Dialog
     v-model:visible="showUploadVideoPopup"
     modal

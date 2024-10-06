@@ -1,16 +1,17 @@
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User, RequestChannel } = db;
+const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
 const { createChannel } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
+const { v4: uuidv4 } = require('uuid');
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
     try {
       const token = jwt.sign(
-        { id: user._id, role: user.role },
+        { id: user.id, role: user.role },
         process.env.JWT_SECRET_KEY,
         { expiresIn: "15d" }
       );
@@ -21,8 +22,33 @@ const generateJwtToken = (user) => {
   });
 };
 
+async function generateUniqueReferralCode() {
+  let referralCode;
+  let isUnique = false;
+
+  // Keep generating a new code until a unique one is found
+  while (!isUnique) {
+    referralCode = uuidv4().slice(0, 6);
+    const existingUser = await User.findOne({ where: { referralCode } });
+
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return referralCode;
+}
+
+
 const register = async (userData) => {
   try {
+    if(!userData.email || !userData.password || !userData.confirmPassword){
+      return {
+        status: 400,
+        message: "Not null",
+      }
+    }
+
     const user = await User.findOne({
       where: { email: userData.email },
     });
@@ -67,21 +93,29 @@ const register = async (userData) => {
       };
     }
 
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(userData.password, salt);
-    const newUser = new User({
-      email: userData.email,
-      password: hash,
-      avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png"
-    });
 
-    const savedUser = await newUser.save();
+    if(userData.password === userData.confirmPassword){
+      const salt = bcrypt.genSaltSync(10);
+      const hash = bcrypt.hashSync(userData.password, salt);
+      const referralCode = await generateUniqueReferralCode()
+      const newUser = new User({
+        email: userData.email,
+        password: hash,
+        avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
+        referralCode : referralCode,
+        username: "user_" + referralCode
+      });
 
-    const referralCode = 1000 + savedUser.dataValues.id;
+      await newUser.save();
+    }else {
+      return {
+        status: 400,
+        message: "Check your confirm password",
+      };
+    }
 
-    savedUser.referralCode = referralCode;
 
-    await savedUser.save();
+    // await savedUser.save();
     //
     // Nếu tạo bảng để link cái referralCode thì Viết logic code ở đây
     // Code here
@@ -122,18 +156,28 @@ const login = async (userData) => {
     };
   }
 
-  const token = jwt.sign(
-    { id: user.id, role: user.role },
-    process.env.JWT_SECRET_KEY,
-    { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
-  );
+  let token = null
+
+  if (user.role === "streamer") {
+    const channel = await Channel.findOne({ where: { userId: user.id }})
+    token = jwt.sign(
+      { id: user.id, role: user.role, channelId: channel.id },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+    );
+  } else {
+    token = jwt.sign(
+      { id: user.id, role: user.role },
+      process.env.JWT_SECRET_KEY,
+      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+    );
+  }
 
   // set token in cookies
   return {
     cookie: {
       cookieName: "accessToken",
       token: token,
-      expires: process.env.TOKEN_EXPIRES_LOGIN,
     },
     status: 200,
     message: "Successfully login",
@@ -150,8 +194,6 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASSWORD,
-    // user: "duyan3k@gmail.com",
-    // pass: "weifwabvmsbynnxl",
   },
 });
 
@@ -380,205 +422,6 @@ const resetPassword = async (email, userId, newPassword, confirmPassword) => {
 };
 // logic Forgot password - END
 
-const getProfile = async (id) => {
-  try {
-    const user = await User.findByPk(id);
-    if(!user){
-      return {
-        status: 200,
-        message: "User not found"
-      }
-    }
-
-    return {
-      status: 200,
-      data: user,
-      message: "Get profile successfully"
-    }
-  } catch (error) {
-    return {
-      status: 400,
-      message: error.message,
-      data: null
-    }
-  }
-}
-
-const editProfile = async (id, data) => {
-  try {
-    const user = await User.findByPk(id);
-    if(!user){
-      return {
-        status: 400,
-        data: null,
-        message: "User not found"
-      }
-    }
-
-    if(user.email && user.isVerified) {
-      return {
-        status: 400,
-        data: null,
-        message: "You can't change your verified email"
-      }
-    }
-
-    const updateUser = await user.update(data)
-    if(!updateUser) {
-      return {
-        status: 400,
-        data: null,
-        message: "Update failed."
-      }
-    }
-
-    return {
-      status: 200,
-      data: updateUser,
-      message: "Update successfully."
-    }
-  } catch (error) {
-    return {
-      status: 400,
-      data: null,
-      message: error.message
-    }
-  }
-}
-
-const changePassword = async (userId, oldPass, newPass, confirmPass) => {
-  try {
-    const user = await User.findByPk(userId);
-
-    if(!user) {
-      return {
-        status: 400,
-        message: "User not found"
-      }
-    }
-
-    const checkCorrectPassword = await bcrypt.compare(oldPass, user.password);
-
-    if (!checkCorrectPassword) {
-      return {
-        status: 400,
-        message: "Incorrect email or password",
-      };
-    }
-
-    const conditions = {
-      lowercase: /[a-z]/.test(newPass),
-      uppercase: /[A-Z]/.test(newPass),
-      number: /[0-9]/.test(newPass),
-      specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(newPass),
-      minLength: newPass.length >= 8,
-    };
-
-    if (
-      !conditions.lowercase ||
-      !conditions.uppercase ||
-      !conditions.number ||
-      !conditions.specialChar ||
-      !conditions.minLength
-    ) {
-      return {
-        status: 400,
-        message:
-          "Password must be at least 8 characters long, and include uppercase, lowercase, number, and special character",
-      };
-    }
-
-    if (newPass !== confirmPass) {
-      return {
-        status: 400,
-        message: "Check your confirm password",
-      };
-    }
-
-    const salt = bcrypt.genSaltSync(10);
-    const hash = bcrypt.hashSync(newPass, salt);
-
-    user.password = hash;
-    await user.save();
-
-    return {
-      status: 200,
-      message: "Password updated successfully",
-    };
-  } catch (error) {
-    return {
-      status: 400,
-      message: error.message
-    }
-  }
-}
-
-const requestChannel = async(userId) => {
-  try {
-    const user = await User.findByPk(userId)
-    if(!user) {
-      return {
-        status: 400,
-        message: "User not found"
-      }
-    }
-
-    if(user.role !== "user") {
-      return {
-        status: 400,
-        message: "You are not a User"
-      }
-    }
-
-    const request = await RequestChannel.findOne({
-      where : {
-        userId: userId
-      }
-    })
-
-    if (request) {
-      const currentDate = new Date();
-      const createdAt = new Date(request.createdAt);
-      const daysDifference = Math.floor((currentDate.getTime() - createdAt.getTime()) / (1000 * 60 * 60 * 24));
-
-      if (daysDifference >= 15) {
-        if (request.status === "rejected") {
-          request.status = "pending";
-          await request.save();
-
-          return {
-            status: 200,
-            message: "Create request channel successfully."
-          };
-        } else {
-          return {
-            status: 400,
-            message: "You can't send request."
-          };
-        }
-      } else {
-        return {
-          status: 400,
-          message: `Request must be older than 15 days. Please wait ${15 - daysDifference} days to send new request.`
-        };
-      }
-    }
-
-
-    await RequestChannel.create({userId: userId})
-
-    return {
-      status: 200,
-      message: "Create request channel successfully."
-    }
-  } catch (error) {
-    return {
-      status: 500,
-      message: error.message
-    }
-  }
-}
-
 const statusRequestChannel = async(userId, status) => {
   // API của admin
   try {
@@ -651,7 +494,7 @@ const sendMailVerifyFacebook = async (email, fullName) => {
       cookie: {
         cookieName: "digitVerificationToken",
         token: verificationToken,
-        expires: verificationToken.expiresIn,
+        expires: new Date(Date.now() + 15 * 60 * 1000),
       },
       status: 200,
       message: "Verification email sent successfully",
@@ -687,7 +530,7 @@ const verifyAccountFacebook = async (accountInfor, token) => {
           cookie: {
             cookieName: "accessToken",
             token: token,
-            expires: token.expiresIn,
+            expires: new Date(Date.now() + 15 * 60 * 1000),
           },
           status: 200,
           message: "Email verified successfully",
@@ -721,12 +564,9 @@ module.exports = {
   verifyAccount,
   resetPassword,
   verifyTokenRs,
-  getProfile,
-  editProfile,
-  changePassword,
-  requestChannel,
   statusRequestChannel,
   generateJwtToken,
   sendMailVerifyFacebook,
-  verifyAccountFacebook
+  verifyAccountFacebook,
+  generateUniqueReferralCode,
 };

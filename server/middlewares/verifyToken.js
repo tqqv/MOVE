@@ -10,7 +10,6 @@ const verifyToken = (req, res, next) => {
       message: "You're not authenticated",
     });
   }
-  // console.log("token here: " + token)
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
     if (err) {
       return responseHandler(400, null, "Tokent is invalid")(req, res, next);
@@ -51,7 +50,6 @@ const verifyAdmin = (req, res, next) => {
   });
 };
 
-// User thì kh xóa được video của User Authorize
 
 module.exports = {
   verifyToken,

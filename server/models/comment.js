@@ -9,6 +9,11 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId',
         as: 'userComments'
       });
+
+      this.belongsTo(models.Channel, {
+        foreignKey: 'channelId',
+        as: 'channelComments'
+      });
       // models/Comment.js
       this.belongsTo(models.Video, { foreignKey: 'videoId' });
       this.belongsTo(models.Comment, {
@@ -24,13 +29,16 @@ module.exports = (sequelize, DataTypes) => {
   Comment.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
+        // validate: {
+        //   isUUID: true
+        // }
       },
       userId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
             model: 'users',
@@ -39,8 +47,18 @@ module.exports = (sequelize, DataTypes) => {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
       },
+      channelId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'channels',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
       videoId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
               model: 'videos',
@@ -59,12 +77,15 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false
       },
       parentId: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'comments',
           key: 'id',
         },
+        // validate: {
+        //   isUUID: true
+        // },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
       }
@@ -72,7 +93,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "Comment",
-      tableName: "Comments",
+      tableName: "comments",
       timestamps: true,
   });
   return Comment;

@@ -12,7 +12,7 @@ module.exports = (sequelize, DataTypes) => {
         });
         this.belongsTo(models.Channel, {
             foreignKey: 'channelId',
-            as: 'subscribeChannel',
+            as: 'followChannel',
             onDelete: 'CASCADE',
         });
     }
@@ -20,13 +20,13 @@ module.exports = (sequelize, DataTypes) => {
   Subscribe.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       userId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
             model: 'users', // Reference to the users table
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
           onUpdate: 'CASCADE',
       },
       channelId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
               model: 'channels', // Reference to the categories table

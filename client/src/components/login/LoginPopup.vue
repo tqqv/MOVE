@@ -8,13 +8,13 @@
   import { useUserStore } from '@/stores';
   import { Form, Field } from 'vee-validate';
   import { loginSchema } from '@/functions/vadilation';
+  import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();
   const showLoginWithEmail = ref(false);
   const showPassword = ref(false);
   const popupStore = usePopupStore();
 
-  
   // const buttonColor = computed(() => {
   //   return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
   // });
@@ -25,7 +25,7 @@
     showLoginWithEmail.value = true;
   };
 
-// HANDLE LOGIN
+  // HANDLE LOGIN
   const submitLoginForm = async (values) => {
     const { email, password } = values;
     const data = { email, password };
@@ -34,8 +34,8 @@
       if (response.error) {
         toast.error(response.message || 'Login failed');
       } else {
-        localStorage.setItem('isLogin', 'true');
         userStore.fetchUserProfile();
+        userStore.loadFollowers();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
       }
@@ -52,6 +52,10 @@
   const handleGoogleLogin = () => {
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.open(url, '_self');
+  };
+  const handleFacebookLogin = () => {
+    const url = `${import.meta.env.VITE_API_URL}auth/facebook`;
+    window.location.href = url;
   };
 
   // onMounted(async () => {
@@ -82,6 +86,7 @@
     <!-- Login Facebook  -->
 
     <button
+      @click="handleFacebookLogin"
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
       <span class="flex-shrink-0">
@@ -102,39 +107,48 @@
       class="w-full mt-4 space-y-4"
     >
       <div class="flex flex-col gap-y-4">
-        <div class="flex flex-col gap-y-1">
+        <div class="flex flex-col gap-y-2">
           <Field name="email" v-slot="{ field, errors }">
-            <label for="email" class="text_para">Email</label>
-            <input
-              v-bind="field"
-              type="email"
-              class="input_custom"
-              :class="{
-                'focus:outline-red text-red focus:caret-red border-red': errors.length,
-              }"
-              required
-            />
-            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+            <label for="email" class="text_para ml-1">Email</label>
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.length ? 'error_password' : 'normal_password'"
+            >
+              <input
+                v-bind="field"
+                type="text"
+                class="password_custom"
+                placeholder="Enter email"
+                required
+              />
+              <Warning
+                v-if="errors.length"
+                class="absolute top-1/2 right-4 transform -translate-y-1/2 "
+              />
+            </div>
+            <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
           </Field>
         </div>
-        <div class="flex flex-col gap-y-1">
+
+        <div class="flex flex-col gap-y-2">
           <Field name="password" v-slot="{ field, errors }">
-            <label for="password" class="text_para">Password</label>
-            <div class="relative">
+            <label for="password" class="text_para ml-1">Password</label>
+            <div
+              class="relative text-[14px] rounded-lg"
+              :class="errors.length ? 'error_password' : 'normal_password'"
+            >
               <input
                 v-bind="field"
                 :type="showPassword ? 'text' : 'password'"
-                class="input_custom"
-                :class="{
-                  'focus:outline-red text-red focus:caret-red border-red': errors.length,
-                }"
+                placeholder="Enter password"
+                class="password_custom"
                 required
               />
-              <button @click="showPassword = !showPassword" type="button" class="btn_eyes">
+              <button @click="showPassword = !showPassword" type="button" class="btn_eyes" tabindex="-1">
                 <i :class="[showPassword ? 'pi pi-eye' : 'pi pi-eye-slash']"></i>
               </button>
             </div>
-            <span v-if="errors.length" class="text-[11px] italic text-red">{{ errors[0] }}</span>
+            <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
           </Field>
         </div>
         <div>

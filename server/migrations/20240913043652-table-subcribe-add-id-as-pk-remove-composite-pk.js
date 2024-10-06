@@ -1,24 +1,34 @@
 "use strict";
 
+const { DataTypes } = require('sequelize');
+
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
   async up(queryInterface, Sequelize) {
-    // Remove the composite primary keys
-    await queryInterface.removeColumn('subscribes', 'userId');
-    await queryInterface.removeColumn('subscribes', 'channelId');
+    // Check if the 'userId' column exists before attempting to remove it
+    const tableDefinition = await queryInterface.describeTable('subscribes');
+
+    if (tableDefinition.userId) {
+      await queryInterface.removeColumn('subscribes', 'userId');
+    }
+
+    if (tableDefinition.channelId) {
+      await queryInterface.removeColumn('subscribes', 'channelId');
+    }
 
     // Add a new 'id' field and set it as the primary key
     await queryInterface.addColumn('subscribes', 'id', {
-      type: Sequelize.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
-      autoIncrement: true,
+      defaultValue: DataTypes.UUIDV4,
       primaryKey: true,
     });
 
     // Re-add the 'userId' and 'channelId' fields as foreign keys
     await queryInterface.addColumn('subscribes', 'userId', {
-      type: Sequelize.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
+      unique: false,
       references: {
         model: 'users', // Table 'users'
         key: 'id',      // Primary key from 'users'
@@ -28,8 +38,9 @@ module.exports = {
     });
 
     await queryInterface.addColumn('subscribes', 'channelId', {
-      type: Sequelize.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
+      unique: false,
       references: {
         model: 'channels', // Table 'channels'
         key: 'id',         // Primary key from 'channels'
@@ -45,7 +56,7 @@ module.exports = {
 
     // Re-add composite primary keys (userId, channelId)
     await queryInterface.addColumn('subscribes', 'userId', {
-      type: Sequelize.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
       references: {
         model: 'users',
@@ -57,7 +68,7 @@ module.exports = {
     });
 
     await queryInterface.addColumn('subscribes', 'channelId', {
-      type: Sequelize.INTEGER,
+      type: DataTypes.UUID,
       allowNull: false,
       references: {
         model: 'channels',

@@ -1,5 +1,6 @@
 const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
+const { setCookies, clearCookies } = require("../utils/cookies.js");
 var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
@@ -17,10 +18,6 @@ var {
   forgotPassword,
   resetPassword,
   verifyTokenRs,
-  getProfile,
-  editProfile,
-  changePassword,
-  requestChannel,
   statusRequestChannel,
 } = require("../services/authService");
 
@@ -29,7 +26,10 @@ const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
 
   if (loginResult.cookie) {
-    res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, loginResult.cookie.expires);
+    setCookies([
+      {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
+      {name: 'isLogin', value: 'true', days: 15}
+    ])(req, res);
   }
 
   responseHandler(loginResult.status, loginResult.data, loginResult.message)(
@@ -49,9 +49,15 @@ const registerController = async (req, res, next) => {
 };
 
 const logoutController = async (req, res, next) => {
-  res.clearCookie("accessToken");
+  clearCookies([
+    {name: 'accessToken', options: { httpOnly: true }},
+    {name: 'isLogin'}
+  ])(req, res, next);
+
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
+
+
 
 //Verify account
 const sendMailVerifyController = async (req, res, next) => {
@@ -98,35 +104,7 @@ const resetPasswordController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
-const getProfileController = async (req, res, next) => {
-  const userId = req.user.id;
-  const result = await getProfile(userId);
 
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
-const editProfileController = async (req, res, next) => {
-  const userId = req.user.id;
-  const data = req.body;
-  const result = await editProfile(userId, data);
-
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
-const changePasswordController = async (req, res, next) => {
-  const userId = req.user.id;
-  const data = req.body;
-  const result = await changePassword(userId, data.oldPass, data.newPass, data.confirmPass)
-
-  responseHandler(result.status, null, result.message)(req, res, next);
-}
-
-const requestChannelController = async (req, res, next) => {
-  const userId = req.user.id;
-  const result = await requestChannel(userId);
-
-  responseHandler(result.status, null, result.message)(req, res, next);
-}
 
 const setStatusRqChannel = async (req, res, next) => {
   const data = req.body;
@@ -141,22 +119,25 @@ const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'
 const googleCallbackController = (req, res, next) => {
   passport.authenticate(
     'google',
-    {
-      successRedirect: '/', successMessage:true,
-      failureRedirect: '/login', failureMessage: true },
+    { failureMessage: true },
     async (error, user) => {
+      if (error || !user) {
+        return res.redirect(process.env.CLIENT_HOST);
+      }
+
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {
-        res.cookie(loginResult.cookie.cookieName, loginResult.cookie.token, {
-          httpOnly: true,
-          expires: loginResult.cookie.expires,
-        })
-        // .redirect(process.env.CLIENT_HOST)
+        setCookies([
+          {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: {httpOnly: true}},
+          {name: 'isLogin', value: 'true', days: 15},
+        ])(req, res);
+        res.redirect(process.env.CLIENT_HOST);
       }
     }
   )(req, res, next);
 };
+
 // facebook
 const facebookLogin = passport.authenticate('facebook');
 
@@ -212,7 +193,6 @@ const verifyAccountFacebookController = async (req, res, next) => {
 };
 
 
-
 module.exports = {
   loginController,
   registerController,
@@ -222,15 +202,11 @@ module.exports = {
   sendMailForgotPass,
   resetPasswordController,
   verifyTokenRsController,
-  getProfileController,
-  editProfileController,
-  changePasswordController,
-  requestChannelController,
   setStatusRqChannel,
   googleLogin,
   googleCallbackController,
   facebookLogin,
   facebookCallback,
   sendMailVerifyFacebookController,
-  verifyAccountFacebookController
+  verifyAccountFacebookController,
 };

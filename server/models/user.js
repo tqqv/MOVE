@@ -14,12 +14,6 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'userId'
       });
 
-      // Mối quan hệ 1-n với Video (Người dùng có nhiều video)
-      this.hasMany(models.Video, {
-        foreignKey: 'userId',
-        as: 'userVideos', // Alias cho videos của người dùng
-      });
-
       // one to many comment
       this.hasMany(models.Comment, {
         foreignKey: 'userId',
@@ -40,28 +34,35 @@ module.exports = (sequelize, DataTypes) => {
         as: 'userSubscribe',
       });
 
-      // many to many video - video view
-      this.belongsToMany(models.Video, {
-        through: models.ViewVideo,
-        foreignKey: 'viewerId',
-        as: 'userViewVideo',
-      });
+      // // many to many video - video view
+      // this.belongsToMany(models.Video, {
+      //   through: models.ViewVideo,
+      //   foreignKey: 'viewerId',
+      //   as: 'userViewVideo',
+      // });
 
-      // many to many video - rating
-      this.belongsToMany(models.Video, {
-      through: models.Rating,
-      foreignKey: 'userId',
-      as: 'userRating',
-      });
+      // // many to many video - rating
+      // this.belongsToMany(models.Video, {
+      // through: models.Rating,
+      // foreignKey: 'userId',
+      // as: 'userRatingVideo',
+      // });
+
+      // // many to many video - livestream
+      // this.belongsToMany(models.Livestream, {
+      //   through: models.Rating,
+      //   foreignKey: 'userId',
+      //   as: 'userRatingLivestream',
+      //   });
 
     }
   }
   User.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       googleId: {
@@ -134,12 +135,8 @@ module.exports = (sequelize, DataTypes) => {
         defaultValue: "user",
       },
       referralCode: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.STRING(6),
         unique: true,
-      },
-      isLive: {
-        type: DataTypes.BOOLEAN,
-        defaultValue: false
       }
     },
     {

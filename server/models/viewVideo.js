@@ -6,11 +6,11 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
         // Define relationships if necessary
         this.belongsTo(models.User, {
-            as: 'videoViewUser',
+            as: 'viewVideoUser',
             onDelete: 'CASCADE',
         });
         this.belongsTo(models.Video, {
-            as: 'videoViewVideo',
+            as: 'viewVideosVideo',
             onDelete: 'CASCADE',
         });
     }
@@ -18,13 +18,13 @@ module.exports = (sequelize, DataTypes) => {
   ViewVideo.init(
     {
       id: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.UUID,
         primaryKey: true,
-        autoIncrement: true,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       viewerId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
             model: 'users', // Reference to the users table
@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
           onUpdate: 'CASCADE',
       },
       videoId: {
-          type: DataTypes.INTEGER,
+          type: DataTypes.UUID,
           allowNull: false,
           references: {
               model: 'videos', // Reference to the categories table
@@ -47,7 +47,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "ViewVideo",
-      tableName: "VideoViews",
+      tableName: "ViewVideos",
       timestamps: true,
   });
   return ViewVideo;
