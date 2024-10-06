@@ -339,7 +339,11 @@ const listSubscribeOfUser = async(userId) => {
       include: [{
         model: Channel,
         as: "followChannel",
-        attributes: ['channelName', 'avatar']
+        attributes: ['channelName', 'avatar'],
+        include: [{
+          model: User,
+          attributes: ['username'] 
+        }]
       }]
     })
     return {

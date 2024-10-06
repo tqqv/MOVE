@@ -9,15 +9,18 @@
   import TabVideoList from '@components/viewChannels/TabVideoList.vue';
   import VideoDetail from '@components/VideoDetail.vue';
   import TabAbout from './TabAbout.vue';
-  import MMAImage from '@/assets/category/MMA.png';
+  import { useRoute } from 'vue-router';
   import { getViewChannel } from '@/services/user';
   import { getListFollowOfChannel } from '@/services/streamer';
   const tabs = ref([
     { title: 'Videos', component: markRaw(TabVideoList), value: '0' },
     { title: 'About', component: markRaw(TabAbout), value: '1' },
   ]);
-  const username = ref('ChannelH'); // Thay thế bằng username thực tế bạn muốn lấy
+  const route = useRoute();
+
+  const username = ref(route.params.username);
   const channelId = ref(3);
+  console.log(username);
 
   const channelDetails = ref({});
   const followChannelDetails = ref({});
@@ -27,10 +30,11 @@
 
   const fetchChannelData = async () => {
     const result = await getViewChannel(username.value);
-    console.log(result.data.profile);
+    console.log(route.query.param);
 
     if (result.error) {
-      errorData.value = result.data.profile;
+      errorData.value = result.message;
+      console.log(errorData.value);
     } else {
       channelDetails.value = result.data.profile;
       totalFollower.value = result.data.totalFollower;

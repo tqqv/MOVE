@@ -1,12 +1,15 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
   import verified from './icons/verified.vue';
   import rate from './icons/rate.vue';
   import Paginator from 'primevue/paginator';
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
+  import { getLevelWorkoutById, getCategoryById } from '@/services/video';
 
   dayjs.extend(relativeTime);
+  const levelWorkout = ref(null);
+  const category = ref(null);
 
   const props = defineProps({
     videos: {
@@ -30,7 +33,26 @@
       required: true,
     },
   });
-
+  const fetchLevelWorkoutById = async (lvWorkoutId) => {
+    try {
+      const response = await getLevelWorkoutById(lvWorkoutId);
+      levelWorkout.value = response.data.levelWorkout;
+      return response.data.levelWorkout;
+    } catch (error) {
+      console.error('Error fetching level workout:', error);
+      return null;
+    }
+  };
+  const fetchCategoryById = async (cateId) => {
+    try {
+      const response = await getCategoryById(cateId);
+      category.value = response.data.title;
+      return response.data.title;
+    } catch (error) {
+      console.error('Error fetching level workout:', error);
+      return null;
+    }
+  };
   const emit = defineEmits(['pageChange']);
 
   const timeFromNow = (createAt) => {
@@ -74,13 +96,29 @@
     emit('pageChange', event.page + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
+  const videosData = ref([]);
+
+  onMounted(async () => {
+    const videosUpdated = await Promise.all(
+      props.videos.map(async (video) => {
+        const levelWorkout = await fetchLevelWorkoutById(video.levelWorkoutsId);
+        const category = await fetchCategoryById(video.categoryId);
+        return {
+          ...video,
+          levelWorkout: levelWorkout,
+          category: category,
+        };
+      }),
+    );
+    videosData.value = videosUpdated;
+  });
 </script>
 
 <template>
   <div class="w-full py-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <div
-        v-for="(video, index) in videos"
+        v-for="(video, index) in videosData"
         :key="index"
         class="max-w-sm bg-white overflow-hidden cursor-pointer"
       >
@@ -125,15 +163,16 @@
                 <verified fill="fill-blue" />
               </span>
             </div>
-            <div class="flex items-center text_secondary mb-2">
-              <span v-if="video.category">
+            <div class="flex items-center space-x-1 text_secondary mb-2">
+              <span v-if="video.category" class="flex items-center">
                 {{ video.category }}
-                <span class="font-bold text-xl pl-1 pr-1">•</span>
+                <span class="font-bold text-xl px-1 pb-1">•</span>
               </span>
               <span>Post {{ timeFromNow(video.createdAt) }} </span>
             </div>
+
             <div class="flex gap-2 items-center text-[10px] font-bold mb-2">
-              <span class="bg-[#EEEEEE] rounded-full text-black p-2">{{ video.level }}</span>
+              <span class="bg-[#EEEEEE] rounded-full text-black p-2">{{ video.levelWorkout }}</span>
               <span class="bg-[#EEEEEE] rounded-full text-black p-2">
                 {{ formatDurationTag(video.duration) }}
               </span>

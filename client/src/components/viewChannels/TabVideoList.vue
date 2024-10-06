@@ -2,20 +2,11 @@
   import { ref, onMounted, watch } from 'vue';
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
-  import { getVideobyChannel } from '@/services/video';
+  import { getVideobyChannel, getAllLevelWorkout, getAllCategory } from '@/services/video';
 
-  const levelOptions = [
-    { id: 1, name: 'Beginner' },
-    { id: 2, name: 'Intermediate' },
-    { id: 3, name: 'Advanced' },
-  ];
+  const levelOptions = ref([{ id: 0, name: 'All levels' }]);
+  const categoryOptions = ref([{ id: 0, name: 'All categories' }]);
 
-  const categoryOptions = [
-    { id: 1, name: 'All categories' },
-    { id: 2, name: 'MMA' },
-    { id: 3, name: 'Boxing' },
-    { id: 4, name: 'Volleyball' },
-  ];
   const sortByOptions = [
     { id: 1, name: 'Most recent' },
     { id: 2, name: 'Views (High to Low)', sortBy: 'viewCount', order: 'desc' },
@@ -25,8 +16,8 @@
     { id: 6, name: 'Ratings (High to Low)', sortBy: 'ratings', order: 'desc' },
     { id: 7, name: 'Ratings (Low to High)', sortBy: 'ratings', order: 'asc' },
   ];
-  const totalPages = ref([]);
 
+  const totalPages = ref(0);
   const videos = ref([]);
   const props = defineProps({
     channelDetails: {
@@ -41,13 +32,48 @@
 
   const page = ref(1);
   const pageSize = 9;
-
   const selectedSortOption = ref(sortByOptions[0]);
+  const selectedLevelOption = ref(levelOptions.value[0]);
+  const selectedCategoryOption = ref(categoryOptions.value[0]);
 
-  const getVideo = async (channelId, page, pageSize, sortBy, order, level, category) => {
+  const fetchLevels = async () => {
     try {
+      const { data } = await getAllLevelWorkout();
+      levelOptions.value = [
+        { id: 0, name: 'All levels' },
+        ...data.map((level) => ({ id: level.id, name: level.levelWorkout })),
+      ];
+    } catch (error) {
+      console.error('Error fetching levels:', error);
+    }
+  };
+
+  // Hàm fetch categories
+  const fetchCategories = async () => {
+    try {
+      const { data } = await getAllCategory();
+      categoryOptions.value = [
+        { id: 0, name: 'All categories' },
+        ...data.map((category) => ({ id: category.id, name: category.title })),
+      ];
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
+  };
+
+  const fetchVideos = async () => {
+    try {
+      const sortBy = selectedSortOption.value.sortBy;
+      const order = selectedSortOption.value.order;
+      const level =
+        selectedLevelOption.value?.name === 'All levels' ? null : selectedLevelOption.value.name;
+      const category =
+        selectedCategoryOption.value?.name === 'All categories'
+          ? null
+          : selectedCategoryOption.value.name;
+
       const result = await getVideobyChannel(
-        channelId,
+        props.channelId,
         page.value,
         pageSize,
         sortBy,
@@ -57,67 +83,68 @@
       );
       videos.value = result.data.data.videos.rows;
       totalPages.value = result.data.data.totalPages;
-
-      console.log('daaaaa', videos.value);
     } catch (error) {
-      console.error('Error fetching video:', error);
+      console.error('Error fetching videos:', error);
     }
   };
 
   onMounted(() => {
-    getVideo(
-      props.channelId,
-      page.value,
-      pageSize,
-      selectedSortOption.value.sortBy,
-      selectedSortOption.value.order,
-    );
+    fetchLevels();
+    fetchCategories();
+    fetchVideos();
   });
 
   const onSortByChange = (option) => {
-    selectedSortOption.value = option;
+    if (option.id !== selectedSortOption.value.id) {
+      selectedSortOption.value = option;
+      fetchVideos();
+    }
   };
 
-  watch(selectedSortOption, (newOption) => {
-    getVideo(props.channelId, page.value, pageSize, newOption.sortBy, newOption.order);
-  });
-  const onPageChange = (newPage) => {
-    console.log('Page changed to:', newPage);
-    if (newPage > totalPages.value) {
-      console.warn('No more videos available for this page');
-      return;
+  const onLevelChange = (option) => {
+    if (option.id !== selectedLevelOption.value.id) {
+      selectedLevelOption.value = option;
+      fetchVideos();
     }
-    page.value = newPage;
-    getVideo(
-      props.channelId,
-      page.value,
-      pageSize,
-      selectedSortOption.value.sortBy,
-      selectedSortOption.value.order,
-    );
+  };
+
+  const onCategoryChange = (option) => {
+    if (option.id !== selectedCategoryOption.value.id) {
+      selectedCategoryOption.value = option;
+      fetchVideos();
+    }
+  };
+
+  const onPageChange = (newPage) => {
+    if (newPage <= totalPages.value) {
+      page.value = newPage;
+      fetchVideos();
+    }
   };
 </script>
 
 <template>
-  <div v-if="videos.length > 0" class="pt-2">
+  <div class="space-y-2">
     <div class="flex flex-grow items-center justify-between">
       <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
       <div class="flex gap-x-6">
-        <Filter :title="'LEVEL'" :options="levelOptions" />
-        <Filter :title="'CATEGORY'" :options="categoryOptions" />
+        <Filter :title="'LEVEL'" :options="levelOptions" @change="onLevelChange" />
+        <Filter :title="'CATEGORY'" :options="categoryOptions" @change="onCategoryChange" />
         <Filter :title="'SORT BY'" :options="sortByOptions" @change="onSortByChange" />
       </div>
     </div>
-    <GirdVideo
-      :totalPages="totalPages"
-      :videos="videos"
-      :channelDetails="props.channelDetails"
-      :page="page"
-      :pageSize="pageSize"
-      @page-change="onPageChange"
-    />
-  </div>
-  <div v-else class="text-base text-black italic">
-    {{ channelDetails.channelName }} has not uploaded any videos yet.
+    <div v-if="videos.length > 0">
+      <GirdVideo
+        :totalPages="totalPages"
+        :videos="videos"
+        :channelDetails="props.channelDetails"
+        :page="page"
+        :pageSize="pageSize"
+        @page-change="onPageChange"
+      />
+    </div>
+    <div v-else class="text-base text-black italic">
+      {{ channelDetails.channelName }} has not uploaded any videos yet.
+    </div>
   </div>
 </template>

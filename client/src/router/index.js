@@ -20,7 +20,7 @@ const routes = [
     children: [
       { path: '', component: HomePage },
       { path: 'personal-profile', component: ProfileContent },
-      { path: 'view-channels', component: ViewChannelsContent },
+      { path: ':username', component: ViewChannelsContent },
       { path: 'browse', component: BrowseContent },
       { path: 'browse/category', component: CategoryDetailsContent },
       { path: 'search', component: SearchContent },

@@ -21,7 +21,7 @@
   });
   onMounted(() => {
     if (props.options.length > 0) {
-      selectedOption.value = props.options[0]; // Chọn cái đầu tiên
+      selectedOption.value = props.options[0];
     }
   });
 </script>
