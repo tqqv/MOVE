@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, ref } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import Dropdown from 'primevue/dropdown';
 
   const props = defineProps({
@@ -12,23 +12,17 @@
       required: true,
     },
   });
-  const selectedOption = ref(null);
+
+  const emit = defineEmits();
+  const selectedOption = ref(props.options[0]);
+
   const placeholder = computed(() => {
-    return props.options.length > 0 ? props.options[0].name : 'None option';
+    return props.options.length > 0 ? props.options[0].name : 'No options';
   });
 
-  // TRUYEN PROPS
-  // const props = defineProps({
-  //   options: sortOptions,
-  //   title: {
-  //     type: String,
-  //     default: 'None',
-  //   },
-  // });
-  // const selectedOption = ref(null);
-  // const placeholder = computed(() => {
-  //   return options.length > 0 ? options[0].name : 'None option';
-  // });
+  watch(selectedOption, (newValue) => {
+    emit('update:modelValue', newValue.value); 
+  });
 </script>
 
 <template>

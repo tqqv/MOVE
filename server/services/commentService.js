@@ -235,7 +235,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
 }
 
 const getChildCommentsByParentId = async (parentId, page, pageSize) => {
-  const comments = await Comment.findAll({
+  const comments = await Comment.findAndCountAll({
     where: {
       parentId: parentId,
     },
@@ -273,7 +273,10 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
 
   return {
     status: 200,
-    data: comments,
+    data: {
+      comments,
+      totalPages: Math.ceil(comments.count/pageSize)
+    },
     message: "Get comments by parent id success"
   }
 }

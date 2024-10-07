@@ -23,18 +23,30 @@ const getAllChildComments = (parentId) => {
 };
 
 // COMMENT STREAMER
-const getAllCommentOfStreamer = async (streamerId) => {
+const getAllCommentOfStreamer = async (streamerId, pageSize, currentPage, isResponsed, sortBy) => {
   try {
-    const response = await axios.get(`/channel/comments/${streamerId}/?isResponsed=false`);
+    const params = {
+      pageSize,
+      page: currentPage,
+    };
+
+    if (isResponsed !== '') {
+      params.isResponsed = isResponsed;
+    } 
+    if(sortBy !== ''){
+      params.sortBy = sortBy;
+    }
+
+    const response = await axios.get(`/channel/comments/${streamerId}`, { params });
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
 
-const getReplyCommentOfVideo = async (commentId) => {
+const getReplyCommentOfVideo = async (commentId, page) => {
   try {
-    const response = await axios.get(`/channel/comments/?parentId=${commentId}`);
+    const response = await axios.get(`comment/?parentId=${commentId}&pageSize=5&page=${page}`);
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };

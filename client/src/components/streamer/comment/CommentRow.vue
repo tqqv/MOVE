@@ -7,22 +7,70 @@
   import verified from '@icons/verified.vue';
   import CommentField from './CommentField.vue';
   import CommentReply from './CommentReply.vue';
+  import { getReplyCommentOfVideo } from '@/services/comment';
+  import SmallLoading from '@/components/icons/smallLoading.vue';
+  import { formatDate } from '@/functions/calculatorDate';
 
+  const props = defineProps({
+    comment: Object,
+    fetchAllCommentStreamer: Function,
+  });
   const openCommentField = ref(false);
   const openCommentReply = ref(false);
-
-  defineProps({
-    comment: Object,
-  });
-
-  // HANDLE FIELD REPLY
+  const replies = ref([]);
+  const loadingReplies = ref(false);
+  const currentPage = ref(1);
+  const totalPage = ref();
+  
+  // HANDLE COMMENT FIELD
   const handleOpenCommentField = () => {
     openCommentField.value = !openCommentField.value;
   };
 
-  // HANDLE VIEW REPLY
-  const handleOpenCommentReply = () => {
-    openCommentReply.value = !openCommentReply.value;
+  // OPEN COMMENT REPLY
+  const handleOpenCommentReply = (commentId) => {
+    if (currentPage.value < totalPage.value || replies.value.length === 0) {
+      openCommentReply.value = !openCommentReply.value;
+      fetchData(commentId);
+    } else {
+      openCommentReply.value = !openCommentReply.value;
+    }
+  };
+
+  const handleUpdateTotalRepliesCount = (newCount) => {
+    props.comment.totalRepliesCount = newCount;
+  };
+
+  const addNewReply = (newReply) => {
+    replies.value.unshift(newReply);
+  };
+  // HANDLE FETCH REPLY COMMENT
+  const fetchData = async (commentId) => {
+    loadingReplies.value = true;
+    try {
+      const response = await getReplyCommentOfVideo(commentId, currentPage.value);
+      replies.value = response.data.comments.rows;
+      totalPage.value = response.data.totalPages;
+    } catch (error) {
+      console.error('Error fetching replies:', error);
+    } finally {
+      loadingReplies.value = false;
+    }
+  };
+
+  // HANDLE LOAD MORE REPLY COMMENT
+  const loadMoreReplies = async (commentId) => {
+    currentPage.value++;
+    loadingReplies.value = true;
+    try {
+      const response = await getReplyCommentOfVideo(commentId, currentPage.value);
+      replies.value = [...replies.value, ...response.data.comments.rows];
+      totalPage.value = response.data.totalPages;
+    } catch (error) {
+      console.error('Error loading more replies:', error);
+    } finally {
+      loadingReplies.value = false;
+    }
   };
 </script>
 
@@ -32,31 +80,36 @@
     <td class="w-1/2 px-6 py-4 font-normal align-top text-gray-900">
       <div class="flex gap-x-4">
         <img
-          :src="comment.userComments.avatar"
+          :src="comment.channelComments?.avatar || comment.userComments?.avatar"
           alt="avatar"
           class="size-14 object-cover rounded-full"
         />
         <!-- RIGHT COMMENT -->
-        <div class="flex flex-col gap-y-1">
+        <div class="flex flex-col flex-grow gap-y-1">
           <!-- REPS SENDER -->
-          <div class="flex items-center rounded-full bg-yellow-dark px-3 py-1 gap-x-1 mb-3 w-fit">
+          <div
+            v-if="comment.rep"
+            class="flex items-center rounded-full bg-yellow-dark px-3 py-1 gap-x-1 mb-2 w-fit"
+          >
             <rep />
             <h1 class="text-white font-bold text-[10px]">REPs Sender</h1>
           </div>
           <!-- USERNAME -->
           <div class="flex items-center gap-x-4">
-            <h1 class="font-bold">{{ comment.userComments.username }}</h1>
-            <span v-if="comment.userComments.verified" class="mb-1">
+            <h1 class="font-bold">
+              {{ comment.channelComments?.channelName || comment.userComments?.username }}
+            </h1>
+            <span v-if="comment.channelComments?.popularCheck" class="mb-1">
               <verified fill="fill-blue" />
             </span>
-            <p class="text-xs text-footer">{{ comment.timeAgo }}</p>
+            <p class="text-xs text-footer">{{ formatDate(comment.updatedAt) }}</p>
           </div>
           <!-- COMMENT -->
           <p class="text-sm break-words">
             {{ comment.content }}
           </p>
           <!-- REPLY COMMENT -->
-          <div class="flex mt-4 gap-x-6 text-sm">
+          <div class="flex mt-2 gap-x-6 text-sm">
             <div class="flex gap-x-8 items-center text-primary">
               <!-- LIKE DISLIKE -->
               <div class="flex items-center gap-x-3">
@@ -72,34 +125,49 @@
               </div>
               <i class="pi pi-ellipsis-v text-lg cursor-pointer"></i>
               <p @click="handleOpenCommentField" class="cursor-pointer font-medium">Reply</p>
+
               <div
+                v-if="comment.totalRepliesCount > 0"
                 class="flex items-center font-medium gap-x-4 cursor-pointer"
-                @click="handleOpenCommentReply"
+                @click="handleOpenCommentReply(comment.id)"
               >
-                <p class="truncate">View {{ comment.totalRepliesCount > 0 ? comment.totalRepliesCount: '' }} replies</p>
-                <i class="pi pi-chevron-down text-sm"></i>
+                <p class="truncate">
+                  View {{ comment.totalRepliesCount > 0 ? comment.totalRepliesCount : '' }} replies
+                </p>
+                <div v-if="loadingReplies"><SmallLoading /></div>
               </div>
             </div>
           </div>
           <!-- COMMENT FIELD -->
-          <div v-show="openCommentField" class="mt-8">
+          <div v-if="openCommentField" class="mt-8">
             <CommentField
-              @commentId ="comment.id"
               @handleOpenCommentField="handleOpenCommentField"
+              @updateTotalRepliesCount="handleUpdateTotalRepliesCount"
+              :comment="comment"
+              @updateReplies="addNewReply"
             />
           </div>
+
           <!-- REPLY COMMENT -->
-          <div v-show="openCommentReply" class="mt-8">
-            <CommentReply />
+          <div v-if="openCommentReply" class="mt-8">
+            <CommentReply
+              v-if="replies.length > 0"
+              :replies="replies"
+              :loadMoreReplies="loadMoreReplies"
+              :loadingReplies="loadingReplies"
+              :commentId="comment.id"
+              :currentPage="currentPage"
+              :totalPage="totalPage"
+            />
           </div>
         </div>
       </div>
     </td>
     <!-- REPS RECEIVED -->
     <td class="w-[16%] px-6 py-4 align-top">
-      <div class="flex items-center gap-x-2">
+      <div v-if="comment.rep" class="flex items-center gap-x-2">
         <div class="scale-50"><rep2500 /></div>
-        <p class="font-semibold text-base">{{ comment.reps }}</p>
+        <p class="font-semibold text-base">{{ comment.rep }}</p>
       </div>
     </td>
     <!-- VIDEO -->
