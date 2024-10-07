@@ -17,7 +17,7 @@
   const hasMoreChildComments = ref({}); // Trạng thái có thêm bình luận con hay không
 
   const fetchComments = async () => {
-    const videoId = 1;
+    const videoId = 1016042125;
     try {
       const response = await getAllComments(videoId, {
         page: currentPage.value,
@@ -35,7 +35,7 @@
             if (!totalRepliesCount.value[newComment.id]) {
               totalRepliesCount.value[newComment.id] = newComment.totalRepliesCount || 0;
             }
-            hasMoreChildComments.value[newComment.id] = true; // Khởi tạo trạng thái phân trang cho bình luận con
+            hasMoreChildComments.value[newComment.id] = true;
           }
         });
 

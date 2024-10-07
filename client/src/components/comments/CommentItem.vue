@@ -123,7 +123,7 @@
             } else {
               totalRepliesCount[parentId] = 1;
             }
-            props.fetchChildComments(parentId);
+            // props.fetchChildComments(parentId);
           }
         "
       />

@@ -7,9 +7,8 @@
   import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
-  import router from '@/router';
-
   import { useRouter } from 'vue-router';
+
   const userStore = useUserStore();
   const router = useRouter();
   const handleLogout = async () => {

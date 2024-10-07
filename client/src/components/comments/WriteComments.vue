@@ -3,10 +3,13 @@
   import EmojiPicker from 'vue3-emoji-picker';
   import { postComments } from '@/services/comment';
   import { getProfile } from '@/services/user';
-  const avatar = ref('');
+  import { useUserStore } from '@/stores';
+
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
+  const userStore = useUserStore();
+  const avatar = computed(() => userStore.user?.avatar || '');
   const props = defineProps({
     fetchComments: {
       type: Function,
@@ -21,17 +24,7 @@
       required: true,
     },
   });
-  //ghép page bỏ cái này dùng prop
-  const fetchUserProfile = async () => {
-    try {
-      const response = await getProfile();
-      if (response.data.success) {
-        avatar.value = response.data.data.avatar || '';
-      }
-    } catch (error) {
-      console.error('Error fetching user profile:', error);
-    }
-  };
+
   const parentId = ref(props.commentId || null);
 
   const showActions = ref(false);
@@ -52,7 +45,7 @@
     console.log(data);
     console.log(commentText.value);
 
-    const videoId = 1;
+    const videoId = 1016042125;
 
     try {
       const response = await postComments(videoId, data);
@@ -67,7 +60,6 @@
         const parentID = response.data.data.parentId || null;
         emit('sendComment', parentID);
         console.log(parentID);
-        console.log('ĐANG FETCHHHH');
       } else {
         console.error('Failed to create comment');
       }
@@ -100,7 +92,9 @@
   };
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
-    fetchUserProfile();
+    if (!avatar.value) {
+      userStore.fetchUserProfile();
+    }
   });
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
