@@ -5,11 +5,8 @@
   import Paginator from 'primevue/paginator';
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
-  import { getLevelWorkoutById, getCategoryById } from '@/services/video';
 
   dayjs.extend(relativeTime);
-  const levelWorkout = ref(null);
-  const category = ref(null);
 
   const props = defineProps({
     videos: {
@@ -33,26 +30,7 @@
       required: true,
     },
   });
-  const fetchLevelWorkoutById = async (lvWorkoutId) => {
-    try {
-      const response = await getLevelWorkoutById(lvWorkoutId);
-      levelWorkout.value = response.data.levelWorkout;
-      return response.data.levelWorkout;
-    } catch (error) {
-      console.error('Error fetching level workout:', error);
-      return null;
-    }
-  };
-  const fetchCategoryById = async (cateId) => {
-    try {
-      const response = await getCategoryById(cateId);
-      category.value = response.data.title;
-      return response.data.title;
-    } catch (error) {
-      console.error('Error fetching level workout:', error);
-      return null;
-    }
-  };
+
   const emit = defineEmits(['pageChange']);
 
   const timeFromNow = (createAt) => {
@@ -96,29 +74,13 @@
     emit('pageChange', event.page + 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
-  const videosData = ref([]);
-
-  onMounted(async () => {
-    const videosUpdated = await Promise.all(
-      props.videos.map(async (video) => {
-        const levelWorkout = await fetchLevelWorkoutById(video.levelWorkoutsId);
-        const category = await fetchCategoryById(video.categoryId);
-        return {
-          ...video,
-          levelWorkout: levelWorkout,
-          category: category,
-        };
-      }),
-    );
-    videosData.value = videosUpdated;
-  });
 </script>
 
 <template>
   <div class="w-full py-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
       <div
-        v-for="(video, index) in videosData"
+        v-for="(video, index) in videos"
         :key="index"
         class="max-w-sm bg-white overflow-hidden cursor-pointer"
       >

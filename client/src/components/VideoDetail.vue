@@ -77,8 +77,8 @@
     followChannel();
   };
   const isChannelFollowed = computed(() => {
-    return followedChannels.value.some(
-      (channel) => channel.channelId === props.channelId.toString(),
+    return followedChannels.value.some((channel) =>
+      channel.channelId === props.channelId ? props.channelId.toString() : null,
     );
   });
   onMounted(fetchListFollowOfUser);
@@ -134,7 +134,7 @@
     >
       <share class="mr-1" /> Share
     </div>
-    <button v-if="isButtonGiftREPsVisible" class="btn">
+    <button v-if="isButtonGiftREPsVisible" class="btn whitespace-nowrap">
       Gift REPs <i class="pi pi-angle-right text-white" />
     </button>
     <div class="relative">

@@ -19,7 +19,7 @@
   const route = useRoute();
 
   const username = ref(route.params.username);
-  const channelId = ref(3);
+  const channelId = ref(null);
   console.log(username);
 
   const channelDetails = ref({});
@@ -30,14 +30,16 @@
 
   const fetchChannelData = async () => {
     const result = await getViewChannel(username.value);
-    console.log(route.query.param);
 
     if (result.error) {
       errorData.value = result.message;
+      // router.push({ path: '/404' });
       console.log(errorData.value);
     } else {
       channelDetails.value = result.data.profile;
       totalFollower.value = result.data.totalFollower;
+      channelId.value = result.data.profile.id;
+      console.log(channelId.value);
       console.log(channelDetails.value);
     }
   };
@@ -53,9 +55,9 @@
     }
   };
 
-  onMounted(() => {
-    fetchChannelData();
-    fetchListFollowOfChannel(channelId.value);
+  onMounted(async () => {
+    await fetchChannelData(); // Đợi fetchChannelData hoàn tất
+    await fetchListFollowOfChannel(channelId.value); // Sau đó gọi fetchListFollowOfChannel
   });
 </script>
 

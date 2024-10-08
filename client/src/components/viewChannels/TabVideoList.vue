@@ -2,7 +2,13 @@
   import { ref, onMounted, watch } from 'vue';
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
-  import { getVideobyChannel, getAllLevelWorkout, getAllCategory } from '@/services/video';
+  import {
+    getVideobyChannel,
+    getAllLevelWorkout,
+    getAllCategory,
+    getLevelWorkoutById,
+    getCategoryById,
+  } from '@/services/video';
 
   const levelOptions = ref([{ id: 0, name: 'All levels' }]);
   const categoryOptions = ref([{ id: 0, name: 'All categories' }]);
@@ -35,7 +41,8 @@
   const selectedSortOption = ref(sortByOptions[0]);
   const selectedLevelOption = ref(levelOptions.value[0]);
   const selectedCategoryOption = ref(categoryOptions.value[0]);
-
+  const levelWorkout = ref(null);
+  const category = ref(null);
   const fetchLevels = async () => {
     try {
       const { data } = await getAllLevelWorkout();
@@ -48,7 +55,6 @@
     }
   };
 
-  // Hàm fetch categories
   const fetchCategories = async () => {
     try {
       const { data } = await getAllCategory();
@@ -60,7 +66,26 @@
       console.error('Error fetching categories:', error);
     }
   };
-
+  const fetchLevelWorkoutById = async (lvWorkoutId) => {
+    try {
+      const response = await getLevelWorkoutById(lvWorkoutId);
+      levelWorkout.value = response.data.levelWorkout;
+      return response.data.levelWorkout;
+    } catch (error) {
+      console.error('Error fetching level workout:', error);
+      return null;
+    }
+  };
+  const fetchCategoryById = async (cateId) => {
+    try {
+      const response = await getCategoryById(cateId);
+      category.value = response.data.title;
+      return response.data.title;
+    } catch (error) {
+      console.error('Error fetching level workout:', error);
+      return null;
+    }
+  };
   const fetchVideos = async () => {
     try {
       const sortBy = selectedSortOption.value.sortBy;
@@ -81,7 +106,23 @@
         level,
         category,
       );
-      videos.value = result.data.data.videos.rows;
+      console.log(props.channelId);
+
+      const fetchedVideos = result.data.data.videos.rows;
+
+      const updatedVideos = await Promise.all(
+        fetchedVideos.map(async (video) => {
+          const levelWorkout = await fetchLevelWorkoutById(video.levelWorkoutsId);
+          const category = await fetchCategoryById(video.categoryId);
+          return {
+            ...video,
+            levelWorkout,
+            category,
+          };
+        }),
+      );
+
+      videos.value = updatedVideos;
       totalPages.value = result.data.data.totalPages;
     } catch (error) {
       console.error('Error fetching videos:', error);

@@ -11,6 +11,7 @@ import ViewChannelsContent from '@/components/viewChannels/ViewChannelsContent.v
 import BrowseContent from '@/components/browse/BrowseContent.vue';
 import CategoryDetailsContent from '@/components/CategoryDetails/CategoryDetailsContent.vue';
 import SearchContent from '@/components/search/SearchContent.vue';
+import PageNotFound from '@/pages/PageNotFound.vue';
 
 const routes = [
   // User router
@@ -36,6 +37,10 @@ const routes = [
       { path: 'comments', component: CommentStreamer },
       { path: 'channel-setting', component: ChannelSetting },
     ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: PageNotFound,
   },
 ];
 
