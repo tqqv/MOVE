@@ -5,7 +5,7 @@
   import Like from '../icons/like.vue';
   import Dislike from '../icons/dislike.vue';
   import WriteComments from './WriteComments.vue';
-  import CommentItem from './CommentItem.vue'; // Assuming CommentItem is the child comment component
+  import CommentItem from './CommentItem.vue';
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
 
@@ -16,6 +16,7 @@
     fetchChildComments: Function,
     childComments: Object,
     totalRepliesCount: Object,
+    totalCountOfComment: Number,
   });
 
   const isShowMoreChild = ref(false);
@@ -45,26 +46,59 @@
     currentPageChild.value++;
     await props.fetchChildComments(props.comment.id);
   };
-
   const toggleShowMoreChild = async () => {
     isShowMoreChild.value = !isShowMoreChild.value;
 
-    if (isShowMoreChild.value && !props.childComments[props.comment.id]) {
-      await props.fetchChildComments(props.comment.id);
+    // Nếu đang mở bình luận con
+    if (isShowMoreChild.value) {
+      // Kiểm tra xem bình luận cha đã có dữ liệu chưa
+      if (!props.childComments[props.comment.id]) {
+        await props.fetchChildComments(props.comment.id); // Gọi API để lấy bình luận con
+      } else {
+        // Dữ liệu đã có sẵn, không cần gọi API
+        console.log('Dữ liệu bình luận con đã được tải về:', props.childComments[props.comment.id]);
+      }
+
+      const childComments = props.childComments[props.comment.id] || [];
+      for (const childComment of childComments) {
+        // Chỉ gọi API nếu bình luận con chưa có dữ liệu
+        if (!props.childComments[childComment.id]) {
+          await props.fetchChildComments(childComment.id);
+        }
+      }
     }
   };
 
   const canLoadMoreChildComments = computed(() => {
-    return (
-      props.childComments[props.comment.id]?.length < props.totalRepliesCount[props.comment.id]
-    );
+    return props.childComments[props.comment.id]?.length < props.totalCountOfComment;
   });
+
+  const handleSendComment = (newComment) => {
+    if (newComment) {
+      // Thêm avatar vào newComment
+      if (!props.childComments[newComment.parentId]) {
+        props.childComments[newComment.parentId] = []; // Khởi tạo nếu không tồn tại
+      }
+
+      // Thêm comment mới vào danh sách child comments
+      props.childComments[newComment.parentId].push(newComment); // Thêm comment mới
+
+      // Cập nhật tổng số câu trả lời
+      if (!props.totalRepliesCount[newComment.parentId]) {
+        props.totalRepliesCount[newComment.parentId] = 0; // Khởi tạo nếu không tồn tại
+      }
+      props.totalRepliesCount[newComment.parentId]++; // Cập nhật tổng số câu trả lời
+    } else {
+      console.error('New comment is undefined or null');
+    }
+  };
 </script>
+
 <template>
   <div class="flex gap-x-4">
     <div class="flex-shrink-0">
       <img
-        :src="comment.userComments.avatar"
+        :src="comment?.userComments?.avatar"
         alt="Avatar"
         class="size-10 object-cover rounded-full"
       />
@@ -72,8 +106,8 @@
     <div class="space-y-2">
       <!-- USERNAME -->
       <div class="flex justify-between items-center gap-x-4 w-fit">
-        <h1 class="font-bold">{{ comment.userComments.username }}</h1>
-        <span v-if="comment.userComments.isVerified">
+        <h1 class="font-bold">{{ comment.userComments?.username }}</h1>
+        <span v-if="comment.userComments?.isVerified">
           <Verified class="fill-blue" />
         </span>
         <div v-if="comment.rep > 0" class="flex items-center whitespace-nowrap">
@@ -112,21 +146,7 @@
       </div>
 
       <!-- Write comment component -->
-      <WriteComments
-        v-if="isReplyChild"
-        :commentId="comment.id"
-        @sendComment="
-          (parentId) => {
-            isReplyChild = false;
-            if (totalRepliesCount[parentId] !== undefined) {
-              totalRepliesCount[parentId] += 1;
-            } else {
-              totalRepliesCount[parentId] = 1;
-            }
-            // props.fetchChildComments(parentId);
-          }
-        "
-      />
+      <WriteComments v-if="isReplyChild" :commentId="comment.id" @sendComment="handleSendComment" />
 
       <!-- Toggle to show/hide child comments -->
       <div v-if="totalRepliesCount?.[comment.id] > 0" class="space-y-4">
@@ -138,7 +158,8 @@
         <!-- Display child comments -->
         <div v-if="isShowMoreChild">
           <CommentItem
-            v-for="(child, index) in props.childComments[comment.id]?.slice(
+            class="my-4"
+            v-for="(child, index) in childComments[comment.id]?.slice(
               0,
               currentPageChild * commentsPerPageChild,
             )"

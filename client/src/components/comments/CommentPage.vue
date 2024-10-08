@@ -10,8 +10,9 @@
   const commentsPerPage = ref(5);
   const hasMoreComments = ref(true);
   const totalRepliesCount = ref({});
+  const totalCountOfComment = ref(0);
 
-  // bình luận con
+  // Bình luận con
   const childCommentsPage = ref({}); // Trang hiện tại cho từng bình luận con
   const childCommentsPerPage = 5; // Số bình luận con mỗi trang
   const hasMoreChildComments = ref({}); // Trạng thái có thêm bình luận con hay không
@@ -25,21 +26,37 @@
       });
 
       if (response.data.success) {
-        const newComments = response.data.data;
-
-        // Kiểm tra và loại bỏ bình luận trùng lặp
+        const newComments = response.data.data.comments.rows;
         newComments.forEach((newComment) => {
           const exists = comments.value.some((comment) => comment.id === newComment.id);
+
+          // Nếu bình luận không tồn tại, thêm nó vào danh sách
           if (!exists) {
             comments.value.push(newComment);
+
+            // Cập nhật tổng số bình luận con cho bình luận mới
             if (!totalRepliesCount.value[newComment.id]) {
               totalRepliesCount.value[newComment.id] = newComment.totalRepliesCount || 0;
             }
+
             hasMoreChildComments.value[newComment.id] = true;
+          }
+
+          // Cập nhật tổng số bình luận con cho bình luận cha nếu có
+          if (newComment.parentId) {
+            totalRepliesCount.value[newComment.parentId] =
+              (totalRepliesCount.value[newComment.parentId] || 0) + 1;
           }
         });
 
-        hasMoreComments.value = newComments.length === commentsPerPage.value;
+        // Cập nhật tổng số bình luận con cho các bình luận đã có
+        comments.value.forEach((comment) => {
+          if (!totalRepliesCount.value[comment.id]) {
+            totalRepliesCount.value[comment.id] = comment.totalRepliesCount || 0;
+          }
+        });
+
+        hasMoreComments.value = currentPage.value < response.data.data.totalPages;
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -48,7 +65,7 @@
 
   const fetchChildComments = async (parentId) => {
     if (!childCommentsPage.value[parentId]) {
-      childCommentsPage.value[parentId] = 1;
+      childCommentsPage.value[parentId] = 1; // Khởi tạo nếu chưa có
     }
 
     const pageInfo = {
@@ -58,32 +75,30 @@
 
     try {
       const response = await getAllChildComments(parentId, pageInfo);
-      console.log('Child comments for parentId:', parentId, response.data.data);
 
       if (response.data.success && response.data.data) {
-        // Khởi tạo mảng bình luận nếu chưa có
         if (!childComments.value[parentId]) {
-          childComments.value[parentId] = [];
+          childComments.value[parentId] = []; // Khởi tạo nếu chưa có
         }
 
-        // Lọc các bình luận mới để tránh trùng lặp
+        const newComments = response.data.data.comments.rows;
         const existingIds = new Set(childComments.value[parentId].map((comment) => comment.id));
-        const uniqueNewComments = response.data.data.filter(
-          (comment) => !existingIds.has(comment.id),
-        );
+        const uniqueNewComments = newComments.filter((comment) => !existingIds.has(comment.id));
 
-        // Thêm các bình luận mới không trùng lặp vào danh sách
         childComments.value[parentId].push(...uniqueNewComments);
 
-        // Cập nhật trang và kiểm tra xem có thêm bình luận con để tải không
-        hasMoreChildComments.value[parentId] = uniqueNewComments.length === childCommentsPerPage;
+        // Cập nhật tổng số bình luận con
+        totalCountOfComment.value = response.data.data.comments.count;
+        totalRepliesCount.value[parentId] = totalCountOfComment.value;
+        hasMoreChildComments.value[parentId] =
+          childCommentsPage.value[parentId] < response.data.data.totalPages;
+
         if (hasMoreChildComments.value[parentId]) {
           childCommentsPage.value[parentId]++;
         }
-      } else {
-        hasMoreChildComments.value[parentId] = false;
-        console.warn(`No more child comments found for parent ID ${parentId}`);
       }
+      console.log('Fetching child comments for:', parentId);
+      console.log('Current child comments:', childComments.value[parentId]);
     } catch (error) {
       console.error('Error fetching child comments:', error);
     }
@@ -106,18 +121,33 @@
   onMounted(() => {
     fetchComments();
   });
+
+  const handleSendComment = (newComment) => {
+    if (newComment) {
+      comments.value.push(newComment);
+
+      // Cập nhật tổng số bình luận con cho bình luận cha
+      if (newComment.parentId) {
+        totalRepliesCount.value[newComment.parentId] =
+          (totalRepliesCount.value[newComment.parentId] || 0) + 1; // Cập nhật tổng số bình luận con
+
+        // Nếu bình luận cha đã có bình luận con, cập nhật tổng số cho bình luận con của nó
+        const parentComment = comments.value.find((comment) => comment.id === newComment.parentId);
+        if (parentComment) {
+          parentComment.totalRepliesCount = (parentComment.totalRepliesCount || 0) + 1; // Cập nhật tổng số bình luận con
+        }
+      }
+    } else {
+      console.error('New comment is undefined or null');
+    }
+  };
+
+  console.log('Comments data:', comments);
 </script>
 
 <template>
   <div class="space-y-8">
-    <WriteComments
-      :fetchChildComments="fetchChildComments"
-      @sendComment="
-        (videoId) => {
-          fetchComments(videoId);
-        }
-      "
-    />
+    <WriteComments :fetchChildComments="fetchChildComments" @sendComment="handleSendComment" />
 
     <CommentItem
       v-for="(comment, index) in comments"
@@ -127,6 +157,7 @@
       :loadMoreChildComments="() => loadMoreChildComments(comment.id)"
       :childComments="childComments"
       :totalRepliesCount="totalRepliesCount"
+      :totalCountOfComment="totalCountOfComment"
     />
 
     <div

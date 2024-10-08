@@ -10,6 +10,7 @@
   const emit = defineEmits(['sendComment']);
   const userStore = useUserStore();
   const avatar = computed(() => userStore.user?.avatar || '');
+
   const props = defineProps({
     fetchComments: {
       type: Function,
@@ -49,16 +50,23 @@
 
     try {
       const response = await postComments(videoId, data);
-      console.log(response.data.success);
+      console.log('Response data:', response.data); // In ra dữ liệu nhận được
 
       if (response.data.success && response.data.data) {
         console.log('Comment created successfully:', response.data.data);
 
         commentText.value = '';
         showActions.value = false;
-
+        const newComment = {
+          ...response.data.data,
+          userComments: {
+            avatar: userStore.user.avatar,
+            username: userStore.user.username,
+            isVerified: userStore.user.isVerified,
+          },
+        };
         const parentID = response.data.data.parentId || null;
-        emit('sendComment', parentID);
+        emit('sendComment', newComment);
         console.log(parentID);
       } else {
         console.error('Failed to create comment');

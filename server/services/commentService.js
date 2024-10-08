@@ -89,7 +89,7 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
 
 const getCommentsByVideo = async (videoId, page, pageSize) => {
 
-  const comments = await Comment.findAll({
+  const comments = await Comment.findAndCountAll({
     where: {
       parentId: null,
       videoId: videoId,
@@ -134,7 +134,11 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
 
   return {
     status: 200,
-    data: comments,
+    data: {
+      comments,
+      totalPages: Math.ceil(comments.count/pageSize)
+    
+    },
     message: "Get comments success"
   }
 }
@@ -232,7 +236,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
 }
 
 const getChildCommentsByParentId = async (parentId, page, pageSize) => {
-  const comments = await Comment.findAll({
+  const comments = await Comment.findAndCountAll({
     where: {
       parentId: parentId,
     },
@@ -270,7 +274,11 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
 
   return {
     status: 200,
-    data: comments,
+    data: {
+      comments,
+      totalPages: Math.ceil(comments.count/pageSize)
+
+    },
     message: "Get comments by parent id success"
   }
 }

@@ -14,10 +14,12 @@ const getAllComments = (videoId, pageInfo) => {
   });
 };
 // GetAll comment của 1 parent
-const getAllChildComments = (parentId) => {
+const getAllChildComments = (parentId, pageInfo) => {
   return axios.get('/comment', {
     params: {
       parentId: parentId,
+      page: pageInfo.page,
+      pageSize: pageInfo.pageSize,
     },
   });
 };
