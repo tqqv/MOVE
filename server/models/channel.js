@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'userId',
                 as: 'channelUser', // Alias for the users that follow this category
               });
+
+              this.hasMany(models.Subscribe, {
+                foreignKey: 'channelId',
+                as: 'subscribe', // Alias cho videos của người dùng
+            });
         }
     }
     Channel.init(

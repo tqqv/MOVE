@@ -2,7 +2,8 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
-const {  Video, Category, User, Sequelize, LevelWorkout } = db;
+const { Op } = require('sequelize');
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Subscribe } = db;
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -398,6 +399,74 @@ const deleteVideoService = async (videoId) => {
   });
 }
 
+const getListTopVideo = async(pageSize, page) => {
+  try {
+    const topVideos = await Video.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating'
+          ]
+        ]
+      },
+      order: [['viewCount', 'DESC']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+
+    return {
+      status: 200,
+      data: topVideos,
+      message: "Get top videos successfully"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const getListVideoHighestRate = async(pageSize, page) => {
+  try {
+    const listVideo = await Video.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating'
+          ]
+        ]
+      },
+      order: [['averageRating', 'DESC']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+
+    return {
+      status: 200,
+      data: listVideo,
+      message: "Get list video highest rate successfully"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -409,5 +478,7 @@ module.exports = {
   getAllVideosService,
   getVideoByUserIdService,
   getVideoByVideoIdService,
-  deleteVideoService
+  deleteVideoService,
+  getListTopVideo,
+  getListVideoHighestRate
 };

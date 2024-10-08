@@ -9,7 +9,9 @@ const {
   getAllVideosService,
   getVideoByUserIdService,
   getVideoByVideoIdService,
-  deleteVideoService
+  deleteVideoService,
+  getListTopVideo,
+  getListVideoHighestRate
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -19,7 +21,7 @@ const getUploadLink = async (req, res, next) => {
     const result = await generateUploadLink(fileName, fileSize);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
-    responseHandler(error.status, error.data, error.message)(req, res,next);    
+    responseHandler(error.status, error.data, error.message)(req, res,next);
   }
 };
 
@@ -30,7 +32,7 @@ const uploadThumbnail = async (req, res, next) => {
     const result = await uploadThumbnailService(videoUri, thumbnailPath);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
-    responseHandler(error.status, error.data, error.message)(req, res, next);    
+    responseHandler(error.status, error.data, error.message)(req, res, next);
   }
 };
 
@@ -123,6 +125,24 @@ const deleteVideo = async (req, res, next) => {
   }
 }
 
+const getListTopVideoController = async(req, res, next) => {
+  // const userId = req.user.id
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const result = await getListTopVideo(pageSize, page)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListVideoHighestRateController = async(req, res, next) => {
+  // const userId = req.user.id
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const result = await getListVideoHighestRate(pageSize, page)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -134,5 +154,7 @@ module.exports = {
   getAllVideos,
   getVideoByUserId,
   getVideoByVideoId,
-  deleteVideo
+  deleteVideo,
+  getListTopVideoController,
+  getListVideoHighestRateController
 };
