@@ -342,7 +342,7 @@ const listSubscribeOfUser = async(userId) => {
         attributes: ['channelName', 'avatar'],
         include: [{
           model: User,
-          attributes: ['username'] 
+          attributes: ['username']
         }]
       }]
     })
@@ -427,6 +427,28 @@ const getAllInforFollow = async(userId) => {
   }
 }
 
+const isExistUsername = async(userName) => {
+  try {
+    const result = await User.findOne({where: {username: userName}});
+    console.log("result, ", result)
+    if(!result) {
+      return {
+        status: 404,
+        message: "Username is not existed"
+      }
+    }
+    return {
+      status: 200,
+      message: "Username is existed."
+    }
+  } catch (error) {
+    return {
+      status: error.status || 500,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   getProfile,
   editProfile,
@@ -435,5 +457,6 @@ module.exports = {
   requestChannel,
   listSubscribeOfUser,
   followChannel,
-  getAllInforFollow
+  getAllInforFollow,
+  isExistUsername
 }
