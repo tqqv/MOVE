@@ -14,7 +14,6 @@
     },
   });
 
-  const emit = defineEmits();
   const selectedOption = ref(props.options[0]);
 
   const placeholder = computed(() => {
@@ -22,7 +21,7 @@
   });
 
   watch(selectedOption, (newValue) => {
-    emit('update:modelValue', newValue.value); 
+    emit('update:modelValue', newValue.value);
   });
 </script>
 
