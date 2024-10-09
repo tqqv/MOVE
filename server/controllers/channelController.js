@@ -12,20 +12,7 @@ const getListSubscribeOfChannel = async(req, res, next) => {
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const followChannelController = async(req, res, next) => {
-    const userId = req.user.id;
-    const channelId = req.body.channelId;
-    const result = await followChannel(userId, channelId);
 
-    responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
-const getListSubscribeOfUser = async(req, res, next) => {
-    const userId = req.user.id;
-    const result = await listSubscribeOfUser(userId);
-
-    responseHandler(result.status, result.data, result.message)(req, res, next);
-}
 
 const getProfileChannelController = async(req, res, next) => {
     const userId = req.user.id;
@@ -58,20 +45,12 @@ const searchVideoChannelController = async(req, res, next) => {
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const getAllInforFollowController = async(req, res, next) => {
-    const userId = req.user.id;
-    const result = await getAllInforFollow(userId);
 
-    responseHandler(result.status, result.data, result.message)(req, res, next);
-}
 
 module.exports = {
     getListSubscribeOfChannel,
-    followChannelController,
-    getListSubscribeOfUser,
     getProfileChannelController,
     updateProfileChannelController,
     viewChannelController,
     searchVideoChannelController,
-    getAllInforFollowController,
 }
