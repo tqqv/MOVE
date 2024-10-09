@@ -16,13 +16,22 @@
     fetchChildComments: Function,
     childComments: Object,
     totalRepliesCount: Object,
-    totalCountOfComment: Number,
+    childCommentsPage: {
+      type: Number,
+      required: true,
+    },
+    childCommentsPerPage: {
+      type: Number,
+      required: true,
+    },
+    hasMoreChildComments: Boolean,
   });
-
-  const isShowMoreChild = ref(false);
-  const isReplyChild = ref(false);
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
+  const isShowMoreChild = ref(false);
+  const isReplyChild = ref(false);
+
+  const newComments = ref([]);
 
   const toggleLike = () => {
     props.comment.isLike = !props.comment.isLike;
@@ -34,10 +43,6 @@
     if (props.comment.isDisLike) props.comment.isLike = false;
   };
 
-  const toggleReply = () => {
-    isReplyChild.value = !isReplyChild.value;
-  };
-
   const timeFromNow = (createdAt) => {
     return dayjs(createdAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
   };
@@ -45,53 +50,57 @@
   const loadMoreChildComments = async () => {
     currentPageChild.value++;
     await props.fetchChildComments(props.comment.id);
+
+    if (props.totalRepliesCount[props.comment.id]) {
+      props.totalRepliesCount[props.comment.id] += commentsPerPageChild.value;
+    }
+  };
+  const toggleReply = () => {
+    isReplyChild.value = !isReplyChild.value;
+    loadMoreChildComments();
   };
   const toggleShowMoreChild = async () => {
     isShowMoreChild.value = !isShowMoreChild.value;
+    console.log('show  ne ', isShowMoreChild.value);
 
-    // Nếu đang mở bình luận con
     if (isShowMoreChild.value) {
-      // Kiểm tra xem bình luận cha đã có dữ liệu chưa
       if (!props.childComments[props.comment.id]) {
-        await props.fetchChildComments(props.comment.id); // Gọi API để lấy bình luận con
+        await props.fetchChildComments(props.comment.id);
       } else {
-        // Dữ liệu đã có sẵn, không cần gọi API
         console.log('Dữ liệu bình luận con đã được tải về:', props.childComments[props.comment.id]);
       }
 
       const childComments = props.childComments[props.comment.id] || [];
       for (const childComment of childComments) {
-        // Chỉ gọi API nếu bình luận con chưa có dữ liệu
-        if (!props.childComments[childComment.id]) {
+        if (childComment.totalRepliesCount > 0 && !props.childComments[childComment.id]) {
           await props.fetchChildComments(childComment.id);
         }
       }
     }
   };
 
-  const canLoadMoreChildComments = computed(() => {
-    return props.childComments[props.comment.id]?.length < props.totalCountOfComment;
-  });
-
   const handleSendComment = (newComment) => {
+    console.log('send ne', isShowMoreChild.value);
+
     if (newComment) {
-      // Thêm avatar vào newComment
+      newComments.value.unshift(newComment);
+
       if (!props.childComments[newComment.parentId]) {
-        props.childComments[newComment.parentId] = []; // Khởi tạo nếu không tồn tại
+        props.childComments[newComment.parentId] = [];
       }
 
-      // Thêm comment mới vào danh sách child comments
-      props.childComments[newComment.parentId].push(newComment); // Thêm comment mới
+      props.childComments[newComment.parentId].unshift(newComment);
 
-      // Cập nhật tổng số câu trả lời
-      if (!props.totalRepliesCount[newComment.parentId]) {
-        props.totalRepliesCount[newComment.parentId] = 0; // Khởi tạo nếu không tồn tại
-      }
-      props.totalRepliesCount[newComment.parentId]++; // Cập nhật tổng số câu trả lời
+      // if (!props.totalRepliesCount[newComment.parentId]) {
+      //   props.totalRepliesCount[newComment.parentId] = 0;
+      // }
+      // props.totalRepliesCount[newComment.parentId]++;
+      isReplyChild.value = false;
     } else {
       console.error('New comment is undefined or null');
     }
   };
+  console.log(props.hasMoreChildComments);
 </script>
 
 <template>
@@ -147,11 +156,20 @@
 
       <!-- Write comment component -->
       <WriteComments v-if="isReplyChild" :commentId="comment.id" @sendComment="handleSendComment" />
-
+      <div v-if="!isShowMoreChild">
+        <div v-for="(newComment, index) in newComments" :key="'new-' + newComment.id">
+          <CommentItem
+            :comment="newComment"
+            :fetchChildComments="props.fetchChildComments"
+            :childComments="props.childComments"
+            :totalRepliesCount="props.totalRepliesCount"
+          />
+        </div>
+      </div>
       <!-- Toggle to show/hide child comments -->
       <div v-if="totalRepliesCount?.[comment.id] > 0" class="space-y-4">
         <div class="font-bold text-[13px] text-primary cursor-pointer" @click="toggleShowMoreChild">
-          <span v-if="!isShowMoreChild"> Show replies ({{ totalRepliesCount[comment.id] }}) </span>
+          <span v-if="!isShowMoreChild"> Show replies ({{ comment.totalRepliesCount }}) </span>
           <span v-else class="mt-4"> Hide replies </span>
         </div>
 
@@ -169,15 +187,14 @@
             :childComments="props.childComments"
             :totalRepliesCount="props.totalRepliesCount"
           />
-
-          <!-- Load More Child Comments -->
           <div
-            v-if="canLoadMoreChildComments"
+            v-if="hasMoreChildComments"
             class="font-bold text-[13px] text-primary cursor-pointer"
             @click="loadMoreChildComments"
           >
             <span>Show more replies</span>
           </div>
+          <!-- Load More Child Comments -->
         </div>
       </div>
     </div>

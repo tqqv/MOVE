@@ -126,7 +126,7 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     ],
 
     order: [
-      ['updatedAt', 'ASC']
+      ['updatedAt', 'DESC']
     ],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
@@ -266,7 +266,7 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
       },
     ],
     order: [
-      ['updatedAt', 'ASC']
+      ['updatedAt', 'DESC']
     ],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
