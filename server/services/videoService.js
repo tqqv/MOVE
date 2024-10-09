@@ -2,7 +2,7 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
-const {  Video, Category, User, Sequelize, LevelWorkout } = db;
+const {  Video, Category, User, Sequelize, LevelWorkout, Channel, Rating, sequelize } = db;
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -362,7 +362,42 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
 
 const getVideoByVideoIdService = async (videoId) => {
   const video = await Video.findOne({
-    where: { id: videoId }
+    where: { id: videoId },
+    attributes: {
+      include: [
+        [
+          Sequelize.literal(`(
+          SELECT AVG(rating) as ratings
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+          )`),
+          'ratings'
+        ]
+      ]
+    },
+    include: [
+      {
+        model: Channel,
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM subscribes
+              WHERE subscribes.channelId = channel.id
+            )`),
+            'followCount' 
+          ]],
+        as: 'channel',
+      },
+      {
+        model: Category,
+        as: 'category',
+      },
+      {
+        model: LevelWorkout,
+        as: "levelWorkout",
+      },
+    ]
   });
   if (!video) {
     return {
