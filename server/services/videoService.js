@@ -416,6 +416,11 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
       },
       include: [
         {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
           model: LevelWorkout,
           attributes: ['levelWorkout'],
           as: "levelWorkout",
