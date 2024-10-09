@@ -31,8 +31,7 @@
   const isShowMoreChild = ref(false);
   const isReplyChild = ref(false);
 
-  const newComments = ref([]);
-
+  const newComments = ref({});
   const toggleLike = () => {
     props.comment.isLike = !props.comment.isLike;
     if (props.comment.isLike) props.comment.isDisLike = false;
@@ -79,27 +78,43 @@
     }
   };
 
-  const handleSendComment = (newComment) => {
-    console.log('send ne', isShowMoreChild.value);
-
+  const handleSendComment = async (newComment) => {
     if (newComment) {
-      newComments.value.unshift(newComment);
-
-      if (!props.childComments[newComment.parentId]) {
-        props.childComments[newComment.parentId] = [];
+      // Khởi tạo newComments cho parentId nếu chưa có
+      if (!newComments.value[newComment.parentId]) {
+        newComments.value[newComment.parentId] = [];
       }
 
-      props.childComments[newComment.parentId].unshift(newComment);
+      // Thêm bình luận mới vào newComments cho parentId
+      newComments.value[newComment.parentId].unshift(newComment);
 
-      // if (!props.totalRepliesCount[newComment.parentId]) {
-      //   props.totalRepliesCount[newComment.parentId] = 0;
-      // }
-      // props.totalRepliesCount[newComment.parentId]++;
+      // Nếu bình luận mới là phản hồi cho bình luận hiện tại
+      if (newComment.parentId === props.comment.id) {
+        // Khởi tạo childComments cho bình luận hiện tại nếu chưa có
+        if (!props.childComments[props.comment.id]) {
+          props.childComments[props.comment.id] = [];
+        }
+        // Thêm bình luận mới vào childComments cho bình luận hiện tại
+        props.childComments[props.comment.id].unshift(newComment);
+      } else {
+        // Nếu không phải bình luận hiện tại, cần phân tầng cho các bình luận khác
+        const parentCommentId = newComment.parentId;
+
+        // Kiểm tra và khởi tạo childComments cho parentCommentId nếu chưa có
+        if (!props.childComments[parentCommentId]) {
+          props.childComments[parentCommentId] = [];
+        }
+
+        // Thêm bình luận mới vào childComments cho parentCommentId
+        props.childComments[parentCommentId].unshift(newComment);
+      }
+
       isReplyChild.value = false;
     } else {
       console.error('New comment is undefined or null');
     }
   };
+
   console.log(props.hasMoreChildComments);
 </script>
 
@@ -157,7 +172,7 @@
       <!-- Write comment component -->
       <WriteComments v-if="isReplyChild" :commentId="comment.id" @sendComment="handleSendComment" />
       <div v-if="!isShowMoreChild">
-        <div v-for="(newComment, index) in newComments" :key="'new-' + newComment.id">
+        <div v-for="(newComment, index) in newComments[comment.id]" :key="'new-' + newComment.id">
           <CommentItem
             :comment="newComment"
             :fetchChildComments="props.fetchChildComments"
