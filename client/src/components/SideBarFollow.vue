@@ -43,7 +43,7 @@
         v-if="!userStore.user"
         class="flex flex-col justify-center px-3 py-5 mt-4 rounded-md bg-primary text-center"
       >
-        <div class="flex justify-center"><logoIcon class="f scale-" fill="black" /></div>
+        <div class="flex justify-center"><logoIcon  fill="black" /></div>
         <h1 class="text_subTitle text-white mt-2 mb-1">Join MOVE!</h1>
         <p class="text-xs mb-6 text-black/80">Sign up now to follow your favorite instructor!</p>
         <Button
@@ -107,21 +107,21 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[89px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[100px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
-    <div class="flex flex-col px-4 py-4">
-      <div class="flex items-center justify-center my-2">
-        <i
-          class="pi pi-align-right cursor-pointer text-[19.5px]"
-          style="font-weight: 800"
-          @click="handleShow"
-        ></i>
+    <div class="flex flex-col px-2 py-4">
+      <div
+        class="flex items-center justify-center hover:bg-gray-light rounded-md my-2 py-5 px-3 cursor-pointer"
+        v-tooltip="'Expand sidebar '"
+        @click="handleShow"
+      >
+        <i class="pi pi-align-right text-[19.5px]" style="font-weight: 800"></i>
       </div>
       <!-- NOT LOG IN -->
-      <div v-if="!userStore.user" class="flex flex-col justify-center mt-4 rounded-md">
+      <div v-if="!userStore.user" class="flex  justify-center mt-4 rounded-md">
         <div
           v-tooltip="'sign up'"
-          class="flex justify-center items-center py-[18px] px-6 rounded-full cursor-pointer hover:bg-primary text-center"
+          class="flex justify-center items-center size-12 rounded-full cursor-pointer hover:bg-primary-light text-center"
           @click="openLoginPopup"
         >
           <i class="pi pi-sign-in"></i>
