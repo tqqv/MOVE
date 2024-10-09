@@ -56,8 +56,8 @@
   };
 
   onMounted(async () => {
-    await fetchChannelData(); // Đợi fetchChannelData hoàn tất
-    await fetchListFollowOfChannel(channelId.value); // Sau đó gọi fetchListFollowOfChannel
+    await fetchChannelData();
+    await fetchListFollowOfChannel(channelId.value);
   });
 </script>
 
@@ -81,6 +81,7 @@
           <TabPanels>
             <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
               <component
+                v-if="channelId"
                 :is="tab.component"
                 :channelDetails="channelDetails"
                 :channelId="channelId"
