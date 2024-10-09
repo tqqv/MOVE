@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { User, RequestChannel } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 
 
@@ -260,10 +260,180 @@ const getRequestStatusById = async(userId) => {
   }
 }
 
+const followChannel = async (userId, channelId) => {
+  try {
+    const checkChannelExist = await Channel.findOne({
+      where: {
+        id: channelId
+      }
+    })
+
+    if(!checkChannelExist) {
+      return {
+        status: 400,
+        data: null,
+        message: "Channel not found"
+      }
+    }
+
+    // Nếu mà có giá trị thì sẽ là unFollow
+    const checkSubscribe = await Subscribe.destroy({
+      where: {
+        userId: userId,
+        channelId: channelId
+      }})
+    if(checkSubscribe) {
+      return {
+        status: 200,
+        data: null,
+        message: "Unsubscribe successful."
+      }
+    }
+
+    // Không được follow chính channel của mình
+    const channel = await Channel.findOne({
+      where: {
+        userId: userId,
+        id: channelId
+      }
+    })
+
+    if(channel){
+      return {
+        status: 400,
+        data: null,
+        message: "You can not subscribe your channel."
+      }
+    }
+
+    const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
+
+    if(!subscribe) {
+      return {
+          status: 400,
+          data: subscribe,
+          message: "You subscribe failed."
+      }
+    }
+    return {
+      status: 200,
+      data: null,
+      message: "Subscribe successful."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const listSubscribeOfUser = async(userId) => {
+  try {
+
+    const listSubscribe = await Subscribe.findAll({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: Channel,
+        as: "followChannel",
+        attributes: ['channelName', 'avatar'],
+        include: [{
+          model: User,
+          attributes: ['username'] 
+        }]
+      }]
+    })
+    return {
+      status: 200,
+      data: listSubscribe,
+      message: "Get list channel you follow successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const getAllInforFollow = async(userId) => {
+  try {
+    const listSubscribe = await Subscribe.findAll({
+      where: {
+        userId: userId
+      },
+      attributes: ['channelId'],
+    })
+
+    const listChannelId = listSubscribe.map(follow => follow.channelId);
+
+    const videos = await Video.findAll({
+      where: {
+        channelId: {
+          [Op.in]: listChannelId
+        }
+      },
+      include: [{
+        model: Channel,
+        as: 'channel',
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+      }],
+      limit: 6,
+      order: [['createdAt', 'DESC']]
+    });
+
+    const cate = await CategoryFollow.findAll({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: Category,
+        as: 'category',
+        attributes: ['title', 'imgUrl'],
+      }],
+      limit: 4,
+      order: [['createdAt', 'DESC']]
+    })
+
+    if(!videos && !cate) {
+      return {
+        status: 200,
+        data: null,
+        message: "No channels, categories have been followed."
+      }
+    }
+
+    // thieu live stream ...
+
+    return {
+      status: 200,
+      data: {
+        categories: cate,
+        videos: videos
+      },
+      message: "Get all infor successfully"
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   getProfile,
   editProfile,
   changePassword,
   getRequestStatusById,
-  requestChannel
+  requestChannel,
+  listSubscribeOfUser,
+  followChannel,
+  getAllInforFollow
 }

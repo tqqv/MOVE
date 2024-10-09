@@ -1,19 +1,13 @@
 <script setup>
-  import { ref } from 'vue';
-  // import MMAImage from '../assets/category/MMA.png';
+  import { onMounted, ref, computed } from 'vue';
   import Verified from './icons/verified.vue';
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
-  // const videoDetails = {
-  //   nameChannel: 'dianeTV',
-  //   avatar: MMAImage,
-  //   followers: 2222,
-  //   status: 'Online',
-  //   isLive: true,
-  //   isVerified: true,
-  // };
-
+  import { postFollowChannel, getListFollowOfUser } from '@/services/user';
+  import { toast } from 'vue3-toastify';
+  const successMessage = ref('');
+  const errorMessage = ref('');
   const props = defineProps({
     isButtonGiftREPsVisible: {
       type: Boolean,
@@ -23,12 +17,21 @@
       type: Boolean,
       default: false,
     },
-    videoDetails: {
+    channelDetails: {
       type: Object,
       required: true,
     },
+    channelId: {
+      type: String,
+      required: true,
+    },
+    totalFollower: {
+      type: Number,
+      required: true,
+    },
   });
-
+  const followedChannels = ref([]);
+  const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
 
@@ -40,9 +43,45 @@
     isMenuVisible.value = false;
   };
 
-  const toggleFill = () => {
-    isFilled.value = !isFilled.value;
+  const fetchListFollowOfUser = async () => {
+    const result = await getListFollowOfUser();
+    if (result.success) {
+      followedChannels.value = result.data;
+    } else {
+      errorMessage.value = result.message;
+    }
   };
+  const followChannel = async () => {
+    try {
+      const response = await postFollowChannel({
+        channelId: props.channelId,
+      });
+
+      if (response.success) {
+        toast.success(response.message);
+        isFilled.value = !isFilled.value;
+        emit('updateFollowers');
+        fetchListFollowOfUser();
+      } else {
+        isFilled.value = !isFilled.value;
+        toast.success(response.message);
+        emit('updateFollowers');
+        fetchListFollowOfUser();
+      }
+    } catch (error) {
+      errorMessage.value = error.message || 'Something went wrong';
+    }
+  };
+
+  const toggleFollow = () => {
+    followChannel();
+  };
+  const isChannelFollowed = computed(() => {
+    return followedChannels.value.some((channel) =>
+      channel.channelId === props.channelId ? props.channelId.toString() : null,
+    );
+  });
+  onMounted(fetchListFollowOfUser);
 </script>
 
 <template>
@@ -52,36 +91,38 @@
         <div
           :class="[
             'flex items-center justify-center  w-16 h-16 rounded-full',
-            videoDetails.isLive ? 'border-[3px] border-red' : '',
+            channelDetails.isLive ? 'border-[3px] border-red' : '',
           ]"
         >
           <img
-            :src="videoDetails.avatar"
+            :src="channelDetails.avatar"
             alt="Avatar"
             class="w-full h-full rounded-full object-cover p-[1.5px]"
           />
           <Live
-            v-if="videoDetails.isLive"
+            v-if="channelDetails.isLive"
             class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
           />
         </div>
       </div>
       <div>
         <p class="text-[20px] flex items-center">
-          {{ videoDetails.name }}
-          <Verified v-if="videoDetails.isVerified" class="ml-2 mb-1 mr-2 fill-blue" />
-          is now {{ videoDetails.status }}
+          <span class="mr-2"> {{ channelDetails.channelName }} </span>
+          <Verified v-if="channelDetails.popularCheck" class="ml-1 mb-1 mr-2 fill-blue" />
+          <span class="whitespace-nowrap" v-if="channelDetails.isLive"> is now online</span>
+          <span class="whitespace-nowrap" v-else> is now offline</span>
         </p>
-        <p class="text-[14px] text-body">{{ videoDetails.followers }} followers</p>
+
+        <p class="text-[14px] text-body">{{ totalFollower ?? 0 }} followers</p>
       </div>
     </div>
     <div
       v-if="isUserAction"
       class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
-      @click="toggleFill"
+      @click="toggleFollow"
     >
       <heart
-        :fill="isFilled ? 'fill-primary' : 'fill-white'"
+        :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
         stroke="stroke-primary"
         class="mr-1"
       />
@@ -93,7 +134,7 @@
     >
       <share class="mr-1" /> Share
     </div>
-    <button v-if="isButtonGiftREPsVisible" class="btn">
+    <button v-if="isButtonGiftREPsVisible" class="btn whitespace-nowrap">
       Gift REPs <i class="pi pi-angle-right text-white" />
     </button>
     <div class="relative">
