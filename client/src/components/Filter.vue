@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref, watch } from 'vue';
+  import { computed, ref, watch } from 'vue';
   import Dropdown from 'primevue/dropdown';
   const emit = defineEmits();
 
@@ -13,16 +13,16 @@
       required: true,
     },
   });
-  const selectedOption = ref(null);
-  watch(selectedOption, (newValue) => {
-    if (newValue) {
-      emit('change', newValue);
-    }
+
+  const emit = defineEmits();
+  const selectedOption = ref(props.options[0]);
+
+  const placeholder = computed(() => {
+    return props.options.length > 0 ? props.options[0].name : 'No options';
   });
-  onMounted(() => {
-    if (props.options.length > 0) {
-      selectedOption.value = props.options[0];
-    }
+
+  watch(selectedOption, (newValue) => {
+    emit('update:modelValue', newValue.value); 
   });
 </script>
 
