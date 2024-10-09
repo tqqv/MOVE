@@ -1,6 +1,6 @@
 const express = require("express");
 const channelRouter = express.Router();
-const { getListSubscribeOfChannel, followChannelController, getListSubscribeOfUser, getProfileChannelController, updateProfileChannelController, viewChannelController, getAllInforFollowController, searchVideoChannelController } = require("../controllers/channelController");
+const { getListSubscribeOfChannel, followChannelController, getListSubscribeOfUser, getProfileChannelController, updateProfileChannelController, viewChannelController, getAllInforFollowController, searchVideoChannelController, validateStreamKeyController, createStreamKeyController } = require("../controllers/channelController");
 const { verifyUser, verifyStreamer } = require("../middlewares/verifyToken");
 const { getCommentsByChannelIdController } = require("../controllers/commentController");
 
@@ -17,5 +17,8 @@ channelRouter.get("/viewChannel/:username", viewChannelController)
 
 channelRouter.get("/searchVideoChannel", searchVideoChannelController)
 channelRouter.get("/getAllInforFollow", verifyUser, getAllInforFollowController)
+
+channelRouter.post("/validateStreamKey", validateStreamKeyController)
+channelRouter.get("/createStreamKey", verifyStreamer, createStreamKeyController)
 
 module.exports = channelRouter;

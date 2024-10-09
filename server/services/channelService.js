@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
-
+const { v4: uuidv4 } = require('uuid');
 
 // Function này để lúc admin accept request live sẽ gọi
 const createChannel = async (userId, username, avatar) => {
@@ -514,6 +514,73 @@ const getAllInforFollow = async(userId) => {
   }
 }
 
+const generatedStreamKey = async() => {
+  let streamKey = '';
+  let isUnique = false;
+
+  // Keep generating a new streamKey until a unique one is found
+  while (!isUnique) {
+    streamKey = "MOVE" + uuidv4().slice(0, 20);
+    const existingUser = await Channel.findOne({ where: { streamKey } });
+
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return streamKey;
+}
+
+
+const createStreamKey = async(channelId) => {
+  try {
+    const channel = await Channel.findByPk(channelId);
+    if(channel) {
+      channel.streamKey = await generatedStreamKey();
+    }
+
+    await channel.save();
+    return {
+      status: 200,
+      message: "Create stream key successfully."
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const validateStreamKey = async(streamKey) => {
+  try {
+    const valid = await Channel.findOne({where: {streamKey: streamKey}});
+    if(valid){
+      return {
+        status: 404,
+        data: null,
+        message: "Streaming Key is invalid"
+      }
+    }
+
+    return {
+      status: 200,
+      data: null,
+      message: "Streaming Key is valid"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+
 module.exports = {
   createChannel,
   followChannel,
@@ -523,5 +590,7 @@ module.exports = {
   editProfileChannel,
   viewChannel,
   searchVideoChannel,
-  getAllInforFollow
+  getAllInforFollow,
+  createStreamKey,
+  validateStreamKey
 }
