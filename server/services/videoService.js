@@ -318,8 +318,11 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
     }
   }
 
-  const videos = await Video.findAll({
-    where: { channelId: channelId },
+  const videos = await Video.findAndCountAll({
+    where: { 
+      channelId: channelId,
+      status: "public"
+    },
     // if no rating => no calculate avg rating
     attributes: attributes,
     include: [
@@ -350,7 +353,10 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   return {
     status: 200,
     message: 'Videos fetched successfully',
-    data: videos
+    data: {
+      videos,
+      totalPages: Math.ceil(videos.count/pageSize)
+    }
   };
 };
 

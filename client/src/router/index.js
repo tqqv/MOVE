@@ -12,6 +12,7 @@ import BrowseContent from '@/components/browse/BrowseContent.vue';
 import CategoryDetailsContent from '@/components/CategoryDetails/CategoryDetailsContent.vue';
 import SearchContent from '@/components/search/SearchContent.vue';
 import VideoDetails from '@/pages/VideoDetails.vue';
+import PageNotFound from '@/pages/PageNotFound.vue';
 
 const routes = [
   // User router
@@ -21,7 +22,7 @@ const routes = [
     children: [
       { path: '', component: HomePage },
       { path: 'personal-profile', component: ProfileContent },
-      { path: 'view-channels', component: ViewChannelsContent },
+      { path: ':username', component: ViewChannelsContent },
       { path: 'browse', component: BrowseContent },
       { path: 'browse/category', component: CategoryDetailsContent },
       { path: 'search', component: SearchContent },
@@ -38,6 +39,10 @@ const routes = [
       { path: 'comments', component: CommentStreamer },
       { path: 'channel-setting', component: ChannelSetting },
     ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: PageNotFound,
   },
 ];
 
