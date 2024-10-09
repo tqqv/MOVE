@@ -11,6 +11,7 @@ import ViewChannelsContent from '@/components/viewChannels/ViewChannelsContent.v
 import BrowseContent from '@/components/browse/BrowseContent.vue';
 import CategoryDetailsContent from '@/components/CategoryDetails/CategoryDetailsContent.vue';
 import SearchContent from '@/components/search/SearchContent.vue';
+import VideoDetails from '@/pages/VideoDetails.vue';
 
 const routes = [
   // User router
@@ -24,6 +25,7 @@ const routes = [
       { path: 'browse', component: BrowseContent },
       { path: 'browse/category', component: CategoryDetailsContent },
       { path: 'search', component: SearchContent },
+      { path: 'video/:videoId', component: VideoDetails },
     ],
   },
   { path: '/reset-password/:token', component: ResetPassword },
