@@ -250,13 +250,23 @@ const searchVideoChannel = async(data, limit, offset) => {
 
     const cates = await Category.findAll({
       where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${normalData}%` } }
-        ]
+        title: { [Op.like]: `%${normalData}%` }
       },
-      limit: limitInt,
-      offset: offsetInt,
-    })
+      attributes: [
+        'id',
+        'imgUrl',
+        'title',
+        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
+      ],
+      include: [
+        {
+          model: Video,
+          as: 'categoryVideos',
+          attributes: [],
+        }
+      ],
+      group: ['Category.id'],
+    });
 
     const videos = await Video.findAll({
       where: {

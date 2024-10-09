@@ -9,7 +9,8 @@ const {
   getAllVideosService,
   getVideoByUserIdService,
   getVideoByVideoIdService,
-  deleteVideoService
+  deleteVideoService,
+  getListVideoByFilter
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -19,7 +20,7 @@ const getUploadLink = async (req, res, next) => {
     const result = await generateUploadLink(fileName, fileSize);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
-    responseHandler(error.status, error.data, error.message)(req, res,next);    
+    responseHandler(error.status, error.data, error.message)(req, res,next);
   }
 };
 
@@ -30,7 +31,7 @@ const uploadThumbnail = async (req, res, next) => {
     const result = await uploadThumbnailService(videoUri, thumbnailPath);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
-    responseHandler(error.status, error.data, error.message)(req, res, next);    
+    responseHandler(error.status, error.data, error.message)(req, res, next);
   }
 };
 
@@ -123,6 +124,21 @@ const deleteVideo = async (req, res, next) => {
   }
 }
 
+const getListVideoByFilterController = async(req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const level = req.query.level;
+  const category = req.query.category;
+  // updateAt = desc same as Most recent
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'updatedAt',
+    order: req.query.order || 'desc'
+  };
+  const result = await getListVideoByFilter(page, pageSize, level, category, sortCondition)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -134,5 +150,6 @@ module.exports = {
   getAllVideos,
   getVideoByUserId,
   getVideoByVideoId,
-  deleteVideo
+  deleteVideo,
+  getListVideoByFilterController
 };

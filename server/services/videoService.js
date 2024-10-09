@@ -2,7 +2,8 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
-const {  Video, Category, User, Sequelize, LevelWorkout, Channel, Rating, sequelize } = db;
+const { Op } = require('sequelize');
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe } = db;
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -439,6 +440,59 @@ const deleteVideoService = async (videoId) => {
   });
 }
 
+const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
+  try {
+    const listVideo = await Video.findAll({
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating'
+          ]
+        ]
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: LevelWorkout,
+          attributes: ['levelWorkout'],
+          as: "levelWorkout",
+          where: level ? {levelWorkout: level} : {}
+        },
+        {
+          model: Category,
+          attributes: ['title'],
+          as: 'category',
+          where: category ? {title: category} : {}
+        }
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    return {
+      status: 200,
+      data: listVideo,
+      message: "Get list video successfully"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -450,5 +504,6 @@ module.exports = {
   getAllVideosService,
   getVideoByUserIdService,
   getVideoByVideoIdService,
-  deleteVideoService
+  deleteVideoService,
+  getListVideoByFilter,
 };
