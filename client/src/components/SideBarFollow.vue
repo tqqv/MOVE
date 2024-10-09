@@ -8,7 +8,6 @@
 
   const userStore = useUserStore();
   const popupStore = usePopupStore();
-  // xu ly show va hidden sidebar
   const isShow = ref(true);
 
   const handleShow = () => {
@@ -43,7 +42,7 @@
         v-if="!userStore.user"
         class="flex flex-col justify-center px-3 py-5 mt-4 rounded-md bg-primary text-center"
       >
-        <div class="flex justify-center"><logoIcon  fill="black" /></div>
+        <div class="flex justify-center"><logoIcon fill="black" /></div>
         <h1 class="text_subTitle text-white mt-2 mb-1">Join MOVE!</h1>
         <p class="text-xs mb-6 text-black/80">Sign up now to follow your favorite instructor!</p>
         <Button
@@ -65,10 +64,11 @@
             >Browse</RouterLink
           >
         </div>
-        <div
+        <RouterLink
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
           class="flex items-center gap-x-3 cursor-pointer"
+          :to="`/${userFollower.followChannel.User.username}`"
         >
           <div
             :class="[
@@ -77,14 +77,14 @@
             ]"
           >
             <img
-              :src="userFollower.subscribeChannel?.avatar || 'default-avatar.png'"
+              :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
               class="w-full h-full rounded-full object-cover p-[1.5px]"
             />
           </div>
           <div class="flex flex-col gap-y-1">
             <div class="flex flex-row gap-x-3">
-              <p class="text_para">{{ userFollower.subscribeChannel?.channelName }}</p>
+              <p class="text_para">{{ userFollower.followChannel?.channelName }}</p>
               <verified v-if="userFollower.verified" class="ml-1 mb-1 fill-blue" />
             </div>
             <div
@@ -100,7 +100,7 @@
               <p class="">{{ userFollower.totalVideos }} videos</p>
             </div>
           </div>
-        </div>
+        </RouterLink>
       </div>
     </div>
   </div>
@@ -118,7 +118,7 @@
         <i class="pi pi-align-right text-[19.5px]" style="font-weight: 800"></i>
       </div>
       <!-- NOT LOG IN -->
-      <div v-if="!userStore.user" class="flex  justify-center mt-4 rounded-md">
+      <div v-if="!userStore.user" class="flex justify-center mt-4 rounded-md">
         <div
           v-tooltip="'sign up'"
           class="flex justify-center items-center size-12 rounded-full cursor-pointer hover:bg-primary-light text-center"
@@ -149,7 +149,7 @@
             ]"
           >
             <img
-              :src="userFollower.subscribeChannel?.avatar"
+              :src="userFollower.followChannel?.avatar"
               alt="Avatar"
               class="w-full h-full rounded-full object-cover"
             />

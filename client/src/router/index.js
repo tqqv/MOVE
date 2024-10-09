@@ -14,6 +14,8 @@ import SearchContent from '@/components/search/SearchContent.vue';
 import LiveStreamPage from '@/pages/LiveStreamPage.vue';
 import SetUpLive from '@/components/streamer/liveStream/SetUpLive.vue';
 import DashboardLive from '@/components/streamer/liveStream/DashboardLive.vue';
+import VideoDetails from '@/pages/VideoDetails.vue';
+import PageNotFound from '@/pages/PageNotFound.vue';
 
 const routes = [
   // User router
@@ -23,10 +25,11 @@ const routes = [
     children: [
       { path: '', component: HomePage },
       { path: 'personal-profile', component: ProfileContent },
-      { path: 'view-channels', component: ViewChannelsContent },
+      { path: ':username', component: ViewChannelsContent },
       { path: 'browse', component: BrowseContent },
       { path: 'browse/category', component: CategoryDetailsContent },
       { path: 'search', component: SearchContent },
+      { path: 'video/:videoId', component: VideoDetails },
     ],
   },
   { path: '/reset-password/:token', component: ResetPassword },
@@ -48,6 +51,10 @@ const routes = [
       { path: 'stream-setup', component: SetUpLive },
       { path: 'dashboard-live', component: DashboardLive },
     ],
+  },
+  {
+    path: '/:pathMatch(.*)*',
+    component: PageNotFound,
   },
 ];
 

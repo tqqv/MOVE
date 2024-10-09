@@ -1,7 +1,8 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
+const { listSubscribeOfUser } = require("./userService.js");
 const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
-
+const { v4: uuidv4 } = require('uuid');
 
 // Function này để lúc admin accept request live sẽ gọi
 const createChannel = async (userId, username, avatar) => {
@@ -29,59 +30,6 @@ const createChannel = async (userId, username, avatar) => {
   }
 }
 
-const followChannel = async (userId, channelId) => {
-  try {
-    const checkSubscribe = await Subscribe.destroy({
-      where: {
-        userId: userId,
-        channelId: channelId
-      }})
-      if(checkSubscribe) {
-        return {
-          status: 200,
-          data: null,
-          message: "Unsubscribe successful."
-        }
-      }
-
-
-    const channel = await Channel.findOne({
-      where: {
-        userId: userId,
-        id: channelId
-      }
-    })
-
-    if(channel){
-      return {
-        status: 400,
-        data: null,
-        message: "You can not subscribe your channel."
-      }
-    }
-
-    const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
-
-    if(!subscribe) {
-      return {
-          status: 400,
-          data: subscribe,
-          message: "You subscribe failed."
-      }
-    }
-    return {
-      status: 200,
-      data: null,
-      message: "Subscribe successful."
-    }
-  } catch (error) {
-    return {
-      status: 400,
-      data: null,
-      message: error.message
-    }
-  }
-}
 
 const listSubscribeOfChannel = async (channelId) => {
   try {
@@ -97,30 +45,18 @@ const listSubscribeOfChannel = async (channelId) => {
 
     const listFollow = await listSubscribeOfUser(channel.userId)
 
-
-    // const subscriber = await Subscribe.findAll({
-    //   where: {
-    //     channelId: channelId,
-    //   },
-    //   include: [
-    //     {
-    //       model: User,
-    //       as: 'subscribeUser',
-    //       attributes: ['username', 'avatar', 'role'],
-    //       include: [
-    //         {
-    //           model: Channel,
-    //           attributes: ['channelName', 'avatar'],
-    //         }
-    //       ]
-    //     },
-    //   ],
-    // });
-
-    return {
-      status: listFollow.status,
-      data: listFollow.data,
-      message: "Get list subscriber of channel successfully."
+    if(listFollow.status === 200){
+      return {
+        status: listFollow.status,
+        data: listFollow.data,
+        message: "Get list subscriber of channel successfully."
+      }
+    }else {
+      return {
+        status: listFollow.status,
+        data: listFollow.data,
+        message: listFollow.message
+      }
     }
   } catch (error) {
     return {
@@ -130,34 +66,6 @@ const listSubscribeOfChannel = async (channelId) => {
     }
   }
 }
-
-const listSubscribeOfUser = async(userId) => {
-  try {
-
-    const listSubscribe = await Subscribe.findAll({
-      where: {
-        userId: userId
-      },
-      include: [{
-        model: Channel,
-        as: "followChannel",
-        attributes: ['channelName', 'avatar']
-      }]
-    })
-    return {
-      status: 200,
-      data: listSubscribe,
-      message: "Get list channel you follow successfully."
-    }
-  } catch (error) {
-    return {
-      status: 400,
-      data: null,
-      message: error.message
-    }
-  }
-}
-
 
 const getProfileChannel = async(userId) =>{
   try {
@@ -342,13 +250,23 @@ const searchVideoChannel = async(data, limit, offset) => {
 
     const cates = await Category.findAll({
       where: {
-        [Op.or]: [
-          { title: { [Op.like]: `%${normalData}%` } }
-        ]
+        title: { [Op.like]: `%${normalData}%` }
       },
-      limit: limitInt,
-      offset: offsetInt,
-    })
+      attributes: [
+        'id',
+        'imgUrl',
+        'title',
+        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
+      ],
+      include: [
+        {
+          model: Video,
+          as: 'categoryVideos',
+          attributes: [],
+        }
+      ],
+      group: ['Category.id'],
+    });
 
     const videos = await Video.findAll({
       where: {
@@ -504,14 +422,80 @@ const getAllInforFollow = async(userId) => {
   }
 }
 
+const generatedStreamKey = async() => {
+  let streamKey = '';
+  let isUnique = false;
+
+  // Keep generating a new streamKey until a unique one is found
+  while (!isUnique) {
+    streamKey = "MOVE" + uuidv4().slice(0, 20);
+    const existingUser = await Channel.findOne({ where: { streamKey } });
+
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return streamKey;
+}
+
+
+const createStreamKey = async(channelId) => {
+  try {
+    const channel = await Channel.findByPk(channelId);
+    if(channel) {
+      channel.streamKey = await generatedStreamKey();
+    }
+
+    await channel.save();
+    return {
+      status: 200,
+      message: "Create stream key successfully."
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const validateStreamKey = async(streamKey) => {
+  try {
+    const valid = await Channel.findOne({where: {streamKey: streamKey}});
+    if(valid){
+      return {
+        status: 404,
+        data: null,
+        message: "Streaming Key is invalid"
+      }
+    }
+
+    return {
+      status: 200,
+      data: null,
+      message: "Streaming Key is valid"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createChannel,
-  followChannel,
   listSubscribeOfChannel,
-  listSubscribeOfUser,
   getProfileChannel,
   editProfileChannel,
   viewChannel,
   searchVideoChannel,
-  getAllInforFollow
+  getAllInforFollow,
+  createStreamKey,
+  validateStreamKey
 }

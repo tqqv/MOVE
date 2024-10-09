@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, markRaw } from 'vue';
+  import { ref, markRaw, onMounted } from 'vue';
 
   import Tabs from 'primevue/tabs';
   import TabList from 'primevue/tablist';
@@ -9,26 +9,52 @@
   import TabVideoList from '@components/viewChannels/TabVideoList.vue';
   import VideoDetail from '@components/VideoDetail.vue';
   import TabAbout from './TabAbout.vue';
-  import MMAImage from '@/assets/category/MMA.png';
-
+  import { useRoute } from 'vue-router';
+  import { getViewChannel } from '@/services/user';
+  import { getListFollowOfChannel } from '@/services/streamer';
   const tabs = ref([
     { title: 'Videos', component: markRaw(TabVideoList), value: '0' },
     { title: 'About', component: markRaw(TabAbout), value: '1' },
   ]);
+  const route = useRoute();
 
-  const videoDetails = {
-    name: 'dianeTV',
-    avatar: MMAImage,
-    followers: 2222,
-    status: 'Online',
-    isLive: true,
-    isVerified: true,
-    isFacebook: true,
-    isInstagram: true,
-    isYoutube: true,
-    description:
-      'Lorem ipsum dolor sit amet, consetetur sadipscing elitr, sed diam nonumy eirmod tempor invidunt ut labore et dolore magna aliquyam erat, sed diam voluptua. At vero eos et accusam et justo duo dolores et ea rebum. Stet clita kasd gubergren, no sea takimata sanctus est Lorem',
+  const username = ref(route.params.username);
+  const channelId = ref(null);
+
+  const channelDetails = ref({});
+  const followChannelDetails = ref({});
+
+  const totalFollower = ref(null);
+  const errorData = ref(null);
+
+  const fetchChannelData = async () => {
+    const result = await getViewChannel(username.value);
+
+    if (result.error) {
+      errorData.value = result.message;
+      // router.push({ path: '/404' });
+    } else {
+      channelDetails.value = result.data.profile;
+      totalFollower.value = result.data.totalFollower;
+      channelId.value = result.data.profile.id;
+    }
   };
+  const fetchListFollowOfChannel = async (channelId) => {
+    const result = await getListFollowOfChannel(channelId);
+
+    if (result.error) {
+      errorData.value = result.message || 'Error occurred';
+    } else if (result.data && result.data.length > 0) {
+      followChannelDetails.value = result.data.map((item) => item.followChannel);
+    } else {
+      followChannelDetails.value = [];
+    }
+  };
+
+  onMounted(async () => {
+    await fetchChannelData();
+    await fetchListFollowOfChannel(channelId.value);
+  });
 </script>
 
 <template>
@@ -36,7 +62,10 @@
     <VideoDetail
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"
-      :videoDetails="videoDetails"
+      :channelDetails="channelDetails"
+      :channelId="channelId"
+      :totalFollower="totalFollower"
+      @updateFollowers="fetchChannelData"
       class="pl-3"
     />
     <div>
@@ -47,7 +76,13 @@
           </TabList>
           <TabPanels>
             <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
-              <component :is="tab.component" :videoDetails="videoDetails" />
+              <component
+                v-if="channelId"
+                :is="tab.component"
+                :channelDetails="channelDetails"
+                :channelId="channelId"
+                :followChannelDetails="followChannelDetails"
+              />
             </TabPanel>
           </TabPanels>
         </Tabs>

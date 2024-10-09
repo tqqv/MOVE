@@ -1,6 +1,7 @@
 <script setup>
   import { computed, ref, watch } from 'vue';
   import Dropdown from 'primevue/dropdown';
+  const emit = defineEmits();
 
   const props = defineProps({
     options: {
@@ -13,7 +14,6 @@
     },
   });
 
-  const emit = defineEmits();
   const selectedOption = ref(props.options[0]);
 
   const placeholder = computed(() => {
@@ -21,18 +21,17 @@
   });
 
   watch(selectedOption, (newValue) => {
-    emit('update:modelValue', newValue.value); 
+    emit('update:modelValue', newValue.value);
   });
 </script>
 
 <template>
   <div class="flex justify-content-center items-center gap-x-4">
-    <h1 class="uppercase text_subTitle text-[12px]">{{ title }}</h1>
+    <h1 class="whitespace-nowrap uppercase text_subTitle text-[12px]">{{ title }}</h1>
     <Dropdown
       v-model="selectedOption"
       :options="props.options"
       optionLabel="name"
-      :placeholder="placeholder"
       class="w-auto border-primary custom-dropdown text-xs"
     ></Dropdown>
   </div>

@@ -12,5 +12,12 @@ const updateChannelProfile = async (data) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
-export { getProfileChannel, updateChannelProfile };
+const getListFollowOfChannel = async (channelId) => {
+  try {
+    const response = await axios.get(`/channel/getListFollowed/${channelId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+export { getProfileChannel, updateChannelProfile, getListFollowOfChannel };
