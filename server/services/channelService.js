@@ -2,7 +2,7 @@ const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { listSubscribeOfUser } = require("./userService.js");
 const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
-
+const { v4: uuidv4 } = require('uuid');
 
 // Function này để lúc admin accept request live sẽ gọi
 const createChannel = async (userId, username, avatar) => {
@@ -355,6 +355,139 @@ const searchVideoChannel = async(data, limit, offset) => {
   }
 };
 
+const getAllInforFollow = async(userId) => {
+  try {
+    const listSubscribe = await Subscribe.findAll({
+      where: {
+        userId: userId
+      },
+      attributes: ['channelId'],
+    })
+
+    const listChannelId = listSubscribe.map(follow => follow.channelId);
+
+    const videos = await Video.findAll({
+      where: {
+        channelId: {
+          [Op.in]: listChannelId
+        }
+      },
+      include: [{
+        model: Channel,
+        as: 'channel',
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+      }],
+      limit: 6,
+      order: [['createdAt', 'DESC']]
+    });
+
+    const cate = await CategoryFollow.findAll({
+      where: {
+        userId: userId
+      },
+      include: [{
+        model: Category,
+        as: 'category',
+        attributes: ['title', 'imgUrl'],
+      }],
+      limit: 4,
+      order: [['createdAt', 'DESC']]
+    })
+
+    if(!videos && !cate) {
+      return {
+        status: 200,
+        data: null,
+        message: "No channels, categories have been followed."
+      }
+    }
+
+    // thieu live stream ...
+
+    return {
+      status: 200,
+      data: {
+        categories: cate,
+        videos: videos
+      },
+      message: "Get all infor successfully"
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const generatedStreamKey = async() => {
+  let streamKey = '';
+  let isUnique = false;
+
+  // Keep generating a new streamKey until a unique one is found
+  while (!isUnique) {
+    streamKey = "MOVE" + uuidv4().slice(0, 20);
+    const existingUser = await Channel.findOne({ where: { streamKey } });
+
+    if (!existingUser) {
+      isUnique = true;
+    }
+  }
+
+  return streamKey;
+}
+
+
+const createStreamKey = async(channelId) => {
+  try {
+    const channel = await Channel.findByPk(channelId);
+    if(channel) {
+      channel.streamKey = await generatedStreamKey();
+    }
+
+    await channel.save();
+    return {
+      status: 200,
+      message: "Create stream key successfully."
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const validateStreamKey = async(streamKey) => {
+  try {
+    const valid = await Channel.findOne({where: {streamKey: streamKey}});
+    if(valid){
+      return {
+        status: 404,
+        data: null,
+        message: "Streaming Key is invalid"
+      }
+    }
+
+    return {
+      status: 200,
+      data: null,
+      message: "Streaming Key is valid"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createChannel,
   listSubscribeOfChannel,
@@ -362,4 +495,7 @@ module.exports = {
   editProfileChannel,
   viewChannel,
   searchVideoChannel,
+  getAllInforFollow,
+  createStreamKey,
+  validateStreamKey
 }
