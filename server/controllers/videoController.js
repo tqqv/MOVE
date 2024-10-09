@@ -10,8 +10,7 @@ const {
   getVideoByUserIdService,
   getVideoByVideoIdService,
   deleteVideoService,
-  getListTopVideo,
-  getListVideoHighestRate
+  getListVideoByFilter
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -125,20 +124,17 @@ const deleteVideo = async (req, res, next) => {
   }
 }
 
-const getListTopVideoController = async(req, res, next) => {
-  // const userId = req.user.id
+const getListVideoByFilterController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const result = await getListTopVideo(pageSize, page)
-
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
-const getListVideoHighestRateController = async(req, res, next) => {
-  // const userId = req.user.id
-  const page = req.query.page || 1;
-  const pageSize = req.query.pageSize || 10;
-  const result = await getListVideoHighestRate(pageSize, page)
+  const level = req.query.level;
+  const category = req.query.category;
+  // updateAt = desc same as Most recent
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'updatedAt',
+    order: req.query.order || 'desc'
+  };
+  const result = await getListVideoByFilter(page, pageSize, level, category, sortCondition)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -155,6 +151,5 @@ module.exports = {
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
-  getListTopVideoController,
-  getListVideoHighestRateController
+  getListVideoByFilterController
 };

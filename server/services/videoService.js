@@ -399,41 +399,7 @@ const deleteVideoService = async (videoId) => {
   });
 }
 
-const getListTopVideo = async(pageSize, page) => {
-  try {
-    const topVideos = await Video.findAll({
-      attributes: {
-        include: [
-          [
-            sequelize.literal(`(
-              SELECT AVG(rating)
-              FROM ratings
-              WHERE ratings.videoId = Video.id
-            )`),
-            'averageRating'
-          ]
-        ]
-      },
-      order: [['viewCount', 'DESC']],
-      offset: (page - 1) * pageSize,
-      limit: pageSize * 1,
-    })
-
-    return {
-      status: 200,
-      data: topVideos,
-      message: "Get top videos successfully"
-    }
-  } catch (error) {
-    return {
-      status: 500,
-      data: null,
-      message: error.message
-    }
-  }
-}
-
-const getListVideoHighestRate = async(pageSize, page) => {
+const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
     const listVideo = await Video.findAll({
       attributes: {
@@ -448,15 +414,29 @@ const getListVideoHighestRate = async(pageSize, page) => {
           ]
         ]
       },
-      order: [['averageRating', 'DESC']],
+      include: [
+        {
+          model: LevelWorkout,
+          attributes: ['levelWorkout'],
+          as: "levelWorkout",
+          where: level ? {levelWorkout: level} : {}
+        },
+        {
+          model: Category,
+          attributes: ['title'],
+          as: 'category',
+          where: category ? {title: category} : {}
+        }
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
-    })
+    });
 
     return {
       status: 200,
       data: listVideo,
-      message: "Get list video highest rate successfully"
+      message: "Get list video successfully"
     }
   } catch (error) {
     return {
@@ -479,6 +459,5 @@ module.exports = {
   getVideoByUserIdService,
   getVideoByVideoIdService,
   deleteVideoService,
-  getListTopVideo,
-  getListVideoHighestRate
+  getListVideoByFilter,
 };
