@@ -24,13 +24,20 @@ const changePassword = async (data) => {
 
 const viewFollowChannel = async () => {
   try {
-    const response = await axios.get('/channel/getListFollower');
+    const response = await axios.get('/user/getListFollower');
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
+const getViewChannel = async (username) => {
+  try {
+    const response = await axios.get(`/channel/viewChannel/${username}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 const requestToStreamer = async () => {
   try {
     const response = await axios.get('/user/createRequestChannel');
@@ -48,7 +55,22 @@ const getRequestStreamer = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
+const postFollowChannel = async (data) => {
+  try {
+    const response = await axios.post('/user/followChannel', data);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getListFollowOfUser = async () => {
+  try {
+    const response = await axios.get('/user/getListFollower');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   getProfile,
   updateProfile,
@@ -56,4 +78,7 @@ export {
   viewFollowChannel,
   requestToStreamer,
   getRequestStreamer,
+  getViewChannel,
+  postFollowChannel,
+  getListFollowOfUser,
 };

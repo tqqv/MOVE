@@ -8,7 +8,6 @@
 
   const userStore = useUserStore();
   const popupStore = usePopupStore();
-  // xu ly show va hidden sidebar
   const isShow = ref(true);
 
   const handleShow = () => {
@@ -70,36 +69,38 @@
           :key="userFollower.id"
           class="flex items-center gap-x-3 cursor-pointer"
         >
-          <div
-            :class="[
-              'flex items-center justify-center  w-12 h-12 rounded-full',
-              userFollower.isStreaming ? 'border-[3px] border-red' : '',
-            ]"
-          >
-            <img
-              :src="userFollower.subscribeChannel?.avatar || 'default-avatar.png'"
-              alt="Avatar"
-              class="w-full h-full rounded-full object-cover p-[1.5px]"
-            />
-          </div>
-          <div class="flex flex-col gap-y-1">
-            <div class="flex flex-row gap-x-3">
-              <p class="text_para">{{ userFollower.subscribeChannel?.channelName }}</p>
-              <verified v-if="userFollower.verified" class="ml-1 mb-1 fill-blue" />
-            </div>
+          <RouterLink :to="`/${userFollower.followChannel.User.username}`">
             <div
-              v-if="userFollower.isStreaming"
-              class="flex flex-row text_secondary text-body text-[12px] gap-x-1"
+              :class="[
+                'flex items-center justify-center  w-12 h-12 rounded-full',
+                userFollower.isStreaming ? 'border-[3px] border-red' : '',
+              ]"
             >
-              <p>Just move</p>
-              •
-              <p class="">{{ userFollower.viewers }} viewers</p>
+              <img
+                :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
+                alt="Avatar"
+                class="w-full h-full rounded-full object-cover p-[1.5px]"
+              />
             </div>
-            <!-- STREAMING FASLE NÈ-->
-            <div v-else class="flex flex-row text_secondary text-body text-[12px] gap-x-2">
-              <p class="">{{ userFollower.totalVideos }} videos</p>
-            </div>
-          </div>
+            <div class="flex flex-col gap-y-1">
+              <div class="flex flex-row gap-x-3">
+                <p class="text_para">{{ userFollower.followChannel?.channelName }}</p>
+                <verified v-if="userFollower.verified" class="ml-1 mb-1 fill-blue" />
+              </div>
+              <div
+                v-if="userFollower.isStreaming"
+                class="flex flex-row text_secondary text-body text-[12px] gap-x-1"
+              >
+                <p>Just move</p>
+                •
+                <p class="">{{ userFollower.viewers }} viewers</p>
+              </div>
+              <!-- STREAMING FASLE NÈ-->
+              <div v-else class="flex flex-row text_secondary text-body text-[12px] gap-x-2">
+                <p class="">{{ userFollower.totalVideos }} videos</p>
+              </div>
+            </div></RouterLink
+          >
         </div>
       </div>
     </div>
@@ -149,7 +150,7 @@
             ]"
           >
             <img
-              :src="userFollower.subscribeChannel?.avatar"
+              :src="userFollower.followChannel?.avatar"
               alt="Avatar"
               class="w-full h-full rounded-full object-cover"
             />
