@@ -429,17 +429,16 @@ const getAllInforFollow = async(userId) => {
 
 const isExistUsername = async(userName) => {
   try {
-    const result = await User.findOne({where: {username: userName}});
-    console.log("result, ", result)
+    let result = await User.findOne({where: {username: userName}}) || await Channel.findOne({where: {channelName: userName}});
     if(!result) {
       return {
         status: 404,
-        message: "Username is not existed"
+        message: "Username or channel name is not existed"
       }
     }
     return {
       status: 200,
-      message: "Username is existed."
+      message: "Username or channel name is existed."
     }
   } catch (error) {
     return {
