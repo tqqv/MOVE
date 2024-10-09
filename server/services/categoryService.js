@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Category } = db;
+const { Category, Video, sequelize } = db;
 
 const createCategory = async(data) => {
   try {
@@ -135,10 +135,43 @@ const deleteCategory = async (cateId) => {
   }
 };
 
+const getAllCategoryWithView = async() => {
+  try {
+    const listCate = await Category.findAll({
+      attributes: [
+        'imgUrl',
+        'title',
+        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
+      ],
+      include: [
+        {
+          model: Video,
+          as: 'categoryVideos',
+          attributes: [],
+        }
+      ],
+      group: ['Category.id'],
+    })
+
+    return {
+      status: 200,
+      data: listCate,
+      message: "Get list successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createCategory,
   getAllCategory,
   getCateById,
   editCategory,
-  deleteCategory
+  deleteCategory,
+  getAllCategoryWithView
 }
