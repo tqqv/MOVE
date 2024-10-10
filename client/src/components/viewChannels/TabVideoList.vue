@@ -106,7 +106,6 @@
         level,
         category,
       );
-      console.log(props.channelId);
 
       const fetchedVideos = result.data.data.videos.rows;
 
