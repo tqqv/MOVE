@@ -36,7 +36,7 @@
     props.comment.isLike = !props.comment.isLike;
     if (props.comment.isLike) props.comment.isDisLike = false;
   };
-
+  const id = ref(null);
   const toggleDislike = () => {
     props.comment.isDisLike = !props.comment.isDisLike;
     if (props.comment.isDisLike) props.comment.isLike = false;
@@ -54,10 +54,16 @@
       props.totalRepliesCount[props.comment.id] += commentsPerPageChild.value;
     }
   };
-  const toggleReply = () => {
+  const toggleReply = (commentId) => {
     isReplyChild.value = !isReplyChild.value;
-    loadMoreChildComments();
+
+    if (isReplyChild.value) {
+      console.log('Replying to comment ID:', commentId);
+      id.value = commentId;
+      console.log(id.value);
+    }
   };
+
   const toggleShowMoreChild = async () => {
     isShowMoreChild.value = !isShowMoreChild.value;
     console.log('show  ne ', isShowMoreChild.value);
@@ -89,26 +95,9 @@
       newComments.value[newComment.parentId].unshift(newComment);
 
       // Nếu bình luận mới là phản hồi cho bình luận hiện tại
-      if (newComment.parentId === props.comment.id) {
-        // Khởi tạo childComments cho bình luận hiện tại nếu chưa có
-        if (!props.childComments[props.comment.id]) {
-          props.childComments[props.comment.id] = [];
-        }
-        // Thêm bình luận mới vào childComments cho bình luận hiện tại
-        props.childComments[props.comment.id].unshift(newComment);
-      } else {
-        // Nếu không phải bình luận hiện tại, cần phân tầng cho các bình luận khác
-        const parentCommentId = newComment.parentId;
-
-        // Kiểm tra và khởi tạo childComments cho parentCommentId nếu chưa có
-        if (!props.childComments[parentCommentId]) {
-          props.childComments[parentCommentId] = [];
-        }
-
-        // Thêm bình luận mới vào childComments cho parentCommentId
-        props.childComments[parentCommentId].unshift(newComment);
+      if (newComment.parentId === props.comment.parentId) {
+        console.log('bug day ne');
       }
-
       isReplyChild.value = false;
     } else {
       console.error('New comment is undefined or null');
@@ -164,7 +153,10 @@
           />
           <span>{{ comment.dislike }}</span>
         </div>
-        <span class="font-semibold text-[13px] text-primary cursor-pointer" @click="toggleReply">
+        <span
+          class="font-semibold text-[13px] text-primary cursor-pointer"
+          @click="() => toggleReply(comment.id)"
+        >
           Reply
         </span>
       </div>
@@ -190,18 +182,14 @@
 
         <!-- Display child comments -->
         <div v-if="isShowMoreChild">
-          <CommentItem
-            class="my-4"
-            v-for="(child, index) in childComments[comment.id]?.slice(
-              0,
-              currentPageChild * commentsPerPageChild,
-            )"
-            :key="child.id"
-            :comment="child"
-            :fetchChildComments="props.fetchChildComments"
-            :childComments="props.childComments"
-            :totalRepliesCount="props.totalRepliesCount"
-          />
+          <div v-for="(newComment, index) in newComments[comment.id]" :key="'new-' + newComment.id">
+            <CommentItem
+              :comment="newComment"
+              :fetchChildComments="props.fetchChildComments"
+              :childComments="props.childComments"
+              :totalRepliesCount="props.totalRepliesCount"
+            />
+          </div>
           <div
             v-if="hasMoreChildComments"
             class="font-bold text-[13px] text-primary cursor-pointer"

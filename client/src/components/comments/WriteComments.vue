@@ -65,9 +65,8 @@
             isVerified: userStore.user.isVerified,
           },
         };
-        const parentID = response.data.data.parentId || null;
         emit('sendComment', newComment);
-        console.log(parentID);
+        console.log(newComment);
       } else {
         console.error('Failed to create comment');
       }
