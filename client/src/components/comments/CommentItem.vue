@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
   import Verified from '@/components/icons/verified.vue';
   import Gift from '../icons/gift.vue';
   import Like from '../icons/like.vue';
@@ -31,12 +31,13 @@
   const isShowMoreChild = ref(false);
   const isReplyChild = ref(false);
 
-  const newComments = ref({});
+  const id = ref(null);
+  const parentIdReply = ref(null);
+
   const toggleLike = () => {
     props.comment.isLike = !props.comment.isLike;
     if (props.comment.isLike) props.comment.isDisLike = false;
   };
-  const id = ref(null);
   const toggleDislike = () => {
     props.comment.isDisLike = !props.comment.isDisLike;
     if (props.comment.isDisLike) props.comment.isLike = false;
@@ -54,13 +55,14 @@
       props.totalRepliesCount[props.comment.id] += commentsPerPageChild.value;
     }
   };
-  const toggleReply = (commentId) => {
+  const toggleReply = (commentId, parentId) => {
     isReplyChild.value = !isReplyChild.value;
 
     if (isReplyChild.value) {
-      console.log('Replying to comment ID:', commentId);
+      console.log('Replying to comment ID:', commentId, 'with parent ID:', parentId);
       id.value = commentId;
-      console.log(id.value);
+      parentIdReply.value = parentId;
+      console.log('Current ID:', id);
     }
   };
 
@@ -81,29 +83,24 @@
           await props.fetchChildComments(childComment.id);
         }
       }
+      console.log('data', childComments);
     }
   };
-
   const handleSendComment = async (newComment) => {
     if (newComment) {
-      // Khởi tạo newComments cho parentId nếu chưa có
-      if (!newComments.value[newComment.parentId]) {
-        newComments.value[newComment.parentId] = [];
+      newComment.isNew = true;
+
+      if (!props.childComments[id.value]) {
+        props.childComments[id.value] = [];
       }
 
-      // Thêm bình luận mới vào newComments cho parentId
-      newComments.value[newComment.parentId].unshift(newComment);
+      props.childComments[id.value].unshift(newComment);
 
-      // Nếu bình luận mới là phản hồi cho bình luận hiện tại
-      if (newComment.parentId === props.comment.parentId) {
-        console.log('bug day ne');
-      }
       isReplyChild.value = false;
     } else {
       console.error('New comment is undefined or null');
     }
   };
-
   console.log(props.hasMoreChildComments);
 </script>
 
@@ -155,7 +152,11 @@
         </div>
         <span
           class="font-semibold text-[13px] text-primary cursor-pointer"
-          @click="() => toggleReply(comment.id)"
+          @click="
+            () => {
+              toggleReply(comment.id, comment.parentId);
+            }
+          "
         >
           Reply
         </span>
@@ -164,14 +165,14 @@
       <!-- Write comment component -->
       <WriteComments v-if="isReplyChild" :commentId="comment.id" @sendComment="handleSendComment" />
       <div v-if="!isShowMoreChild">
-        <div v-for="(newComment, index) in newComments[comment.id]" :key="'new-' + newComment.id">
-          <CommentItem
-            :comment="newComment"
-            :fetchChildComments="props.fetchChildComments"
-            :childComments="props.childComments"
-            :totalRepliesCount="props.totalRepliesCount"
-          />
-        </div>
+        <CommentItem
+          v-for="(child, index) in childComments[comment.id]?.filter((c) => c.isNew)"
+          :key="'new-' + child.id"
+          :comment="child"
+          :fetchChildComments="props.fetchChildComments"
+          :childComments="props.childComments"
+          :totalRepliesCount="props.totalRepliesCount"
+        />
       </div>
       <!-- Toggle to show/hide child comments -->
       <div v-if="totalRepliesCount?.[comment.id] > 0" class="space-y-4">
@@ -182,14 +183,18 @@
 
         <!-- Display child comments -->
         <div v-if="isShowMoreChild">
-          <div v-for="(newComment, index) in newComments[comment.id]" :key="'new-' + newComment.id">
-            <CommentItem
-              :comment="newComment"
-              :fetchChildComments="props.fetchChildComments"
-              :childComments="props.childComments"
-              :totalRepliesCount="props.totalRepliesCount"
-            />
-          </div>
+          <CommentItem
+            class="my-4"
+            v-for="(child, index) in childComments[comment.id]?.slice(
+              0,
+              currentPageChild * commentsPerPageChild,
+            )"
+            :key="child.id"
+            :comment="child"
+            :fetchChildComments="props.fetchChildComments"
+            :childComments="props.childComments"
+            :totalRepliesCount="props.totalRepliesCount"
+          />
           <div
             v-if="hasMoreChildComments"
             class="font-bold text-[13px] text-primary cursor-pointer"
