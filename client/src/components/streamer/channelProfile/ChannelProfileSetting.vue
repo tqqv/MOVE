@@ -7,11 +7,11 @@
   import { useStreamerStore } from '@/stores/streamer.store';
   import { updateChannelProfile } from '@/services/streamer';
   import { toast } from 'vue3-toastify';
-  import { checkDataChanged, getChangedFields } from '@/functions/compareData';
+  import { checkDataChanged, getChangedFields } from '@/utils/compareData';
   import { uploadAvatar } from '@/services/cloudinary';
-  import { updateChannelSchema } from '@/functions/vadilation';
+  import { updateChannelSchema } from '@/utils/vadilation';
   import Warning from '@/components/icons/warning.vue';
-  import { copyToClipboard } from '@/functions/copyToClipboard';
+  import { copyToClipboard } from '@/utils/copyToClipboard';
 
   const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
@@ -46,7 +46,11 @@
 
   // COPY STREAMKEY
   const handleCopyStreamKey = () => {
-    copyToClipboard(profileData.value.streamKey, 'Successfully copied to clipboard', 'Failed copied to clipboard');
+    copyToClipboard(
+      profileData.value.streamKey,
+      'Successfully copied to clipboard',
+      'Failed copied to clipboard',
+    );
   };
   //   UPDATE AVATAR
   const isLoadingAvatar = ref(false);

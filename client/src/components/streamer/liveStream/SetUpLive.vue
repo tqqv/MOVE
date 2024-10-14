@@ -4,10 +4,10 @@
   import LiveStream from '@/components/icons/liveStream.vue';
   import Micro from '@/components/icons/micro.vue';
   import ScreenShare from '@/components/icons/screenShare.vue';
-  import { copyToClipboard } from '@/functions/copyToClipboard';
+  import { copyToClipboard } from '@/utils/copyToClipboard';
   import Dropdown from 'primevue/dropdown';
   import { ref, onMounted, watch } from 'vue';
-  import { startScreenShare, stopScreenShare } from '../../../functions/setUpDevice';
+  import { startScreenShare, stopScreenShare } from '../../../utils/setUpDevice';
 
   const video = ref(null);
   const streamKey = ref('HE329132-32342MfS342-3rwer');

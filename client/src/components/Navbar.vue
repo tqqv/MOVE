@@ -19,7 +19,7 @@
   import { useUserStore } from '@/stores/user.store';
   import { RouterLink } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
-  import { debounce } from '@/functions/debounce';
+  import { debounce } from '@/utils/debounce';
   import { searchInformation } from '@/services/search';
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';

@@ -1,4 +1,3 @@
-// screenShare.js
 export const startScreenShare = async (videoElement) => {
   try {
     const mediaStream = await navigator.mediaDevices.getDisplayMedia({
