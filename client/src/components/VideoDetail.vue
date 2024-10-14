@@ -6,6 +6,7 @@
   import heart from './icons/heart.vue';
   import { postFollowChannel, getListFollowOfUser } from '@/services/user';
   import { toast } from 'vue3-toastify';
+  import { useStreamerStore } from '@/stores';
   const successMessage = ref('');
   const errorMessage = ref('');
   const props = defineProps({
@@ -34,6 +35,8 @@
   const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
+
+  const streamerStore = useStreamerStore();
 
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
@@ -116,47 +119,52 @@
         <p class="text-[14px] text-body">{{ totalFollower ?? 0 }} followers</p>
       </div>
     </div>
-    <div
-      v-if="isUserAction"
-      class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
-      @click="toggleFollow"
-    >
-      <heart
-        :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
-        stroke="stroke-primary"
-        class="mr-1"
-      />
-      Follow
-    </div>
-    <div
-      v-if="isUserAction"
-      class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
-    >
-      <share class="mr-1" /> Share
-    </div>
-    <button v-if="isButtonGiftREPsVisible" class="btn whitespace-nowrap">
-      Gift REPs <i class="pi pi-angle-right text-white" />
-    </button>
-    <div class="relative">
-      <button
-        v-if="isUserAction"
-        aria-expanded="false"
-        aria-controls="menu"
-        class="pi pi-ellipsis-v text-primary text-[20px]"
-        @click="toggleMenu"
-      />
+    <div class="flex gap-x-9 items-center">
       <div
-        v-if="isMenuVisible"
-        class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-50"
+        v-if="streamerStore.streamerChannel?.channelName !== channelDetails.channelName"
+        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
+        @click="toggleFollow"
       >
-        <ul class="flex items-center justify-center h-full m-0 p-0">
-          <li
-            class="flex items-center justify-center text-[13px] cursor-pointer text-center"
-            @click="closeMenu"
-          >
-            Report video
-          </li>
-        </ul>
+        <heart
+          :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
+          stroke="stroke-primary"
+          class="mr-1"
+        />
+       Follow
+      </div>
+      <div
+        v-if="isUserAction"
+        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
+      >
+        <share class="mr-1" /> Share
+      </div>
+      <button
+        v-if="streamerStore.streamerChannel?.channelName !== channelDetails.channelName"
+        class="btn whitespace-nowrap"
+      >
+        Gift REPs <i class="pi pi-angle-right text-white" />
+      </button>
+      <div class="relative">
+        <button
+          v-if="isUserAction"
+          aria-expanded="false"
+          aria-controls="menu"
+          class="pi pi-ellipsis-v text-primary text-[20px]"
+          @click="toggleMenu"
+        />
+        <div
+          v-if="isMenuVisible"
+          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-50"
+        >
+          <ul class="flex items-center justify-center h-full m-0 p-0">
+            <li
+              class="flex items-center justify-center text-[13px] cursor-pointer text-center"
+              @click="closeMenu"
+            >
+              Report video
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>

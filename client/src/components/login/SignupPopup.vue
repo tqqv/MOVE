@@ -6,7 +6,7 @@
   import { postSignup } from '@/services/auth';
   import { usePopupStore } from '@/stores';
   import { Form, Field } from 'vee-validate';
-  import { signUpSchema } from '@/functions/vadilation';
+  import { signUpSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
 
   const popupStore = usePopupStore();
@@ -73,7 +73,7 @@
               />
               <Warning
                 v-if="errors.length"
-                class="absolute top-1/2 right-4 transform -translate-y-1/2 "
+                class="absolute top-1/2 right-4 transform -translate-y-1/2"
               />
             </div>
             <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>

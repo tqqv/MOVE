@@ -9,19 +9,23 @@
   import CommentReply from './CommentReply.vue';
   import { getReplyCommentOfVideo } from '@/services/comment';
   import SmallLoading from '@/components/icons/smallLoading.vue';
-  import { formatDate } from '@/functions/calculatorDate';
+  import { formatDate } from '@/utils/calculatorDate';
 
   const props = defineProps({
     comment: Object,
     fetchAllCommentStreamer: Function,
   });
+
   const openCommentField = ref(false);
   const openCommentReply = ref(false);
+  const openViewAllComment = ref(false);
   const replies = ref([]);
+  const newReplies = ref([]);
   const loadingReplies = ref(false);
   const currentPage = ref(1);
   const totalPage = ref();
-  
+  const hasInitialFetch = ref(false);
+
   // HANDLE COMMENT FIELD
   const handleOpenCommentField = () => {
     openCommentField.value = !openCommentField.value;
@@ -29,28 +33,44 @@
 
   // OPEN COMMENT REPLY
   const handleOpenCommentReply = (commentId) => {
-    if (currentPage.value < totalPage.value || replies.value.length === 0) {
-      openCommentReply.value = !openCommentReply.value;
-      fetchData(commentId);
-    } else {
-      openCommentReply.value = !openCommentReply.value;
+    openViewAllComment.value = !openViewAllComment.value;
+    openCommentReply.value = false;
+    if (openViewAllComment.value && !hasInitialFetch.value) {
+      fetchReplyOfComment(commentId);
+      hasInitialFetch.value = true;
     }
   };
 
+  // VIEW REPLIES
   const handleUpdateTotalRepliesCount = (newCount) => {
     props.comment.totalRepliesCount = newCount;
   };
 
-  const addNewReply = (newReply) => {
-    replies.value.unshift(newReply);
+  // SEND COMMENT
+  const handleSendCommentReply = async (newReply) => {
+    newReply.isNew = true;
+    if (openViewAllComment.value) {
+      const isExisting = replies.value.some((reply) => reply.id === newReply.id);
+      if (!isExisting) {
+        replies.value.unshift(newReply);
+      }
+    } else {
+      newReplies.value.unshift(newReply);
+    }
   };
-  // HANDLE FETCH REPLY COMMENT
-  const fetchData = async (commentId) => {
+
+  // FETCH DATA REPLIES
+  const fetchReplyOfComment = async (commentId) => {
     loadingReplies.value = true;
     try {
       const response = await getReplyCommentOfVideo(commentId, currentPage.value);
-      replies.value = response.data.comments.rows;
+      const existingCommentIds = [...replies.value, ...newReplies.value].map((reply) => reply.id);
+      const newComments = response.data.comments.rows.filter(
+        (comment) => !existingCommentIds.includes(comment.id),
+      );
+      replies.value = [...newReplies.value, ...newComments];
       totalPage.value = response.data.totalPages;
+      newReplies.value = [];
     } catch (error) {
       console.error('Error fetching replies:', error);
     } finally {
@@ -58,13 +78,18 @@
     }
   };
 
-  // HANDLE LOAD MORE REPLY COMMENT
+  // LOAD MORE
   const loadMoreReplies = async (commentId) => {
     currentPage.value++;
     loadingReplies.value = true;
     try {
       const response = await getReplyCommentOfVideo(commentId, currentPage.value);
-      replies.value = [...replies.value, ...response.data.comments.rows];
+      // CHECK COMMENT EXIST DON'T RENDER AGAIN
+      const existingCommentIds = replies.value.map((reply) => reply.id);
+      const newComments = response.data.comments.rows.filter(
+        (comment) => !existingCommentIds.includes(comment.id),
+      );
+      replies.value = [...replies.value, ...newComments];
       totalPage.value = response.data.totalPages;
     } catch (error) {
       console.error('Error loading more replies:', error);
@@ -123,16 +148,17 @@
                   stroke="#13ceb3"
                 />
               </div>
-              <i class="pi pi-ellipsis-v text-lg cursor-pointer"></i>
+              <i class="pi pi-ellipsis-v text-md cursor-pointer"></i>
               <p @click="handleOpenCommentField" class="cursor-pointer font-medium">Reply</p>
 
               <div
                 v-if="comment.totalRepliesCount > 0"
-                class="flex items-center font-medium gap-x-4 cursor-pointer"
+                class="flex items-center gap-x-4 cursor-pointer font-medium"
                 @click="handleOpenCommentReply(comment.id)"
               >
                 <p class="truncate">
-                  View {{ comment.totalRepliesCount > 0 ? comment.totalRepliesCount : '' }} replies
+                  View {{ comment.totalRepliesCount > 0 ? comment.totalRepliesCount : '' }}
+                  {{ comment.totalRepliesCount === 1 ? 'Reply' : 'Replies' }}
                 </p>
                 <div v-if="loadingReplies"><SmallLoading /></div>
               </div>
@@ -144,14 +170,13 @@
               @handleOpenCommentField="handleOpenCommentField"
               @updateTotalRepliesCount="handleUpdateTotalRepliesCount"
               :comment="comment"
-              @updateReplies="addNewReply"
+              @handleSendCommentReply="handleSendCommentReply"
             />
           </div>
 
           <!-- REPLY COMMENT -->
-          <div v-if="openCommentReply" class="mt-8">
+          <div v-if="openViewAllComment" class="mt-8">
             <CommentReply
-              v-if="replies.length > 0"
               :replies="replies"
               :loadMoreReplies="loadMoreReplies"
               :loadingReplies="loadingReplies"
@@ -159,6 +184,10 @@
               :currentPage="currentPage"
               :totalPage="totalPage"
             />
+          </div>
+
+          <div v-if="!openViewAllComment && newReplies.length > 0" class="mt-8">
+            <CommentReply :replies="newReplies" />
           </div>
         </div>
       </div>

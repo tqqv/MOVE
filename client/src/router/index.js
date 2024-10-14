@@ -11,6 +11,9 @@ import ViewChannelsContent from '@/components/viewChannels/ViewChannelsContent.v
 import BrowseContent from '@/components/browse/BrowseContent.vue';
 import CategoryDetailsContent from '@/components/CategoryDetails/CategoryDetailsContent.vue';
 import SearchContent from '@/components/search/SearchContent.vue';
+import LiveStreamPage from '@/pages/LiveStreamPage.vue';
+import SetUpLive from '@/components/streamer/liveStream/SetUpLive.vue';
+import DashboardLive from '@/components/streamer/liveStream/DashboardLive.vue';
 import VideoDetails from '@/pages/VideoDetails.vue';
 import PageNotFound from '@/pages/PageNotFound.vue';
 
@@ -38,6 +41,15 @@ const routes = [
       { path: '', component: DashboardStreamer },
       { path: 'comments', component: CommentStreamer },
       { path: 'channel-setting', component: ChannelSetting },
+    ],
+  },
+  // Live stream
+  {
+    path: '/live',
+    component: LiveStreamPage,
+    children: [
+      { path: 'stream-setup', component: SetUpLive },
+      { path: 'dashboard-live', component: DashboardLive },
     ],
   },
   {
