@@ -13,7 +13,6 @@
     },
     followChannelDetails: {
       type: Object,
-      required: true,
     },
   });
 </script>
@@ -61,7 +60,7 @@
         <div v-else class="text-sm italic">No social network found.</div>
       </div>
     </div>
-    <div class="space-y-8">
+    <div v-if="followChannelDetails" class="space-y-8">
       <div class="text-2xl font-bold text-black">{{ channelDetails.channelName }} is following</div>
       <div class="grid grid-cols-4 gap-4">
         <div

@@ -32,7 +32,6 @@
 
     if (result.error) {
       errorData.value = result.message;
-      // router.push({ path: '/404' });
     } else {
       channelDetails.value = result.data.profile;
       totalFollower.value = result.data.totalFollower;

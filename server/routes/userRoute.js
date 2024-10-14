@@ -1,7 +1,7 @@
 var express = require("express");
 const userRouter = express.Router();
 
-const { getProfileController, editProfileController, changePasswordController, requestChannelController, getRequestChannelController, getListSubscribeOfUser, followChannelController, getAllInforFollowController } = require("../controllers/userController")
+const { getProfileController, editProfileController, changePasswordController, requestChannelController, getRequestChannelController, getListSubscribeOfUser, followChannelController, getAllInforFollowController, checkExistUsername } = require("../controllers/userController")
 const { verifyUser } = require("../middlewares/verifyToken")
 
 
@@ -12,6 +12,7 @@ userRouter.get("/createRequestChannel", verifyUser, requestChannelController)
 userRouter.get("/getRequestChannelById", verifyUser, getRequestChannelController)
 
 userRouter.get("/getListFollower/", verifyUser, getListSubscribeOfUser)
+userRouter.get("/:username", verifyUser, checkExistUsername)
 
 // unsub/sub
 userRouter.post("/followChannel", verifyUser, followChannelController)
