@@ -39,7 +39,7 @@
         selectedPageSize.value,
         currentPage.value,
         selectedResponsesOptions.value,
-        selectedSortOptions.value
+        selectedSortOptions.value,
       );
       comments.value = response.data.commentsWithVideo.rows;
       totalComments.value = response.data.commentsWithVideo.count;
@@ -88,9 +88,13 @@
         <Filter
           :title="'responses'"
           :options="responsesOptions"
-          v-model="selectedResponsesOptions"
+          @change="selectedResponsesOptions = $event.value"
         />
-        <Filter :title="'sort by'" :options="sortOptions" v-model="selectedSortOptions" />
+        <Filter
+          :title="'sort by'"
+          :options="sortOptions"
+          @change="selectedSortOptions = $event.value"
+        />
       </div>
     </div>
     <div class="py-5">
@@ -115,7 +119,11 @@
       </div>
     </div>
     <div class="flex justify-end gap-x-12 items-center px-12 pt-3">
-      <Filter :title="'Rows per page'" :options="pageSizeOptions" v-model="selectedPageSize" />
+      <Filter
+        :title="'Rows per page'"
+        :options="pageSizeOptions"
+        @change="selectedPageSize = $event.value"
+      />
       <div class="">
         <span>
           {{ (currentPage - 1) * selectedPageSize + 1 }}

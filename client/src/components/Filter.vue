@@ -33,7 +33,7 @@
       v-model="selectedOption"
       :options="props.options"
       optionLabel="name"
-      class="w-auto border-primary custom-dropdown text-xs"
+      class="w-[150px] border-primary custom-dropdown text-xs"
     ></Dropdown>
   </div>
 </template>
