@@ -282,6 +282,41 @@ const getAllVideosService = async (page, pageSize) => {
   const videos = await Video.findAll(
     {
       where: { status:  "public" },
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+            SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ]
+        ]
+      },
+      include: [
+        {
+          model: Channel,
+          attributes: ['channelName', 'bio', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM subscribes
+                WHERE subscribes.channelId = channel.id
+              )`),
+              'followCount' 
+            ]],
+          as: 'channel',
+        },
+        {
+          model: Category,
+          as: 'category',
+        },
+        {
+          model: LevelWorkout,
+          as: "levelWorkout",
+        },
+      ],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
     }
@@ -379,7 +414,7 @@ const getVideoByVideoIdService = async (videoId) => {
     include: [
       {
         model: Channel,
-        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
+        attributes: ['channelName', 'bio', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
           [
             sequelize.literal(`(
               SELECT COUNT(*)
@@ -451,7 +486,7 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
               FROM ratings
               WHERE ratings.videoId = Video.id
             )`),
-            'averageRating'
+            'ratings'
           ]
         ]
       },

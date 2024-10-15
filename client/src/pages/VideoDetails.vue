@@ -6,43 +6,66 @@
   import OfflineTitle from '@/components/OfflineTitle.vue';
   import Divider from 'primevue/divider';
   import axiosInstance from '@/services/axios';
+  import Tabs from 'primevue/tabs';
+  import TabList from 'primevue/tablist';
+  import Tab from 'primevue/tab';
+  import TabPanels from 'primevue/tabpanels';
+  import TabPanel from 'primevue/tabpanel';
+  import TabAbout from '@/components/viewChannels/TabAbout.vue';
+  import CommentPage from '@/components/comments/CommentPage.vue';
+  import VideoCard from '@/components/VideoCard.vue';
 
   const route = useRoute();
   const vimeoPlayer = ref(null);
   const videoId = route.params.videoId;
   const video = ref(null);
-  const videoDetails = ref(null);
+  const channelDetails = ref(null);
+  const totalFollower = ref(null);
+  const channelId = ref(null);
+  const videos = ref([]);
+
+  const fetchAllVideo = async () => {
+    try {
+      const res = await axiosInstance.get('video');
+      if (res.status === 200) {
+        videos.value = res.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
 
   const fetchVideoById = async () => {
     try {
       const res = await axiosInstance.get(`video/${videoId}`);
       if (res.status === 200) {
         video.value = res.data.data;
-        console.log(res);
-        videoDetails.value = {
-          name: res.data.data.channel.channelName,
+        channelDetails.value = {
+          channelName: res.data.data.channel.channelName,
           avatar: res.data.data.channel.avatar,
-          followers: res.data.data.channel.followCount,
-          status: 'Online',
-          isVerified: true,
+          popularCheck: res.data.data.channel.popularCheck,
           isLive: res.data.data.channel.isLive,
+          bio: res.data.data.channel.bio,
         };
+        totalFollower.value = res.data.data.channel.followCount;
+        channelId.value = res.data.data.channelId;
       }
     } catch (error) {
-      console.log(error);
+      toast.error(error.message);
     }
   };
 
   onMounted(() => {
     const player = new Player(vimeoPlayer.value, {
       id: videoId,
-      loop: false,
+      loop: true,
       autoplay: true,
       title: false,
       byline: false,
       portrait: false,
     });
     fetchVideoById();
+    fetchAllVideo();
   });
 </script>
 <template>
@@ -53,15 +76,38 @@
         <OfflineTitle v-if="video" :video="video" />
         <Divider />
         <VideoDetail
-          v-if="videoDetails"
-          :videoDetails="videoDetails"
+          v-if="channelDetails"
+          :channelDetails="channelDetails"
           :isButtonGiftREPsVisible="true"
+          :totalFollower="totalFollower"
+          :channelId="channelId"
         />
+        <Tabs value="about" class="p-0">
+          <TabList class="!p-0">
+            <Tab value="about">About</Tab>
+          </TabList>
+          <TabPanels class="p-0">
+            <TabPanel value="about"
+              ><TabAbout class="mt-3" v-if="channelDetails" :channelDetails="channelDetails"
+            /></TabPanel>
+          </TabPanels>
+        </Tabs>
+        <Divider />
+        <CommentPage />
       </div>
     </div>
     <div class="col-span-4">
       <div class="p-[10px]">
-        <h3 class="font-bold">WATCH ALSO</h3>
+        <h3 class="font-bold mb-2">WATCH ALSO</h3>
+        <div>
+          <VideoCard
+            v-if="videos"
+            v-for="(video, index) in videos"
+            :key="index"
+            :video="video"
+            :channelDetails="video.channel"
+          />
+        </div>
       </div>
     </div>
   </div>

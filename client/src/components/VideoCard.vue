@@ -3,7 +3,7 @@
   import rate from './icons/rate.vue';
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
-  import { onMounted } from 'vue';
+  import { formatRating, formatView } from '@/utils';
 
   dayjs.extend(relativeTime);
   const props = defineProps({
@@ -16,6 +16,11 @@
       required: true,
     },
   });
+  
+  if(props.video.category.title && props.video.levelWorkout.levelWorkout) {
+    props.video.category = props.video.category.title;
+    props.video.levelWorkout = props.video.levelWorkout.levelWorkout;
+  }
   const timeFromNow = (createAt) => {
     return dayjs(createAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
   };
@@ -31,16 +36,6 @@
     return `${hours}:${minutes}:${secs}`;
   };
 
-  const formatViewCount = (count) => {
-    if (count >= 1000 && count < 1000000) {
-      return (count / 1000).toFixed(2).replace(/\.00$/, '') + 'k';
-    } else if (count >= 1000000) {
-      return (count / 1000000).toFixed(2).replace(/\.00$/, '') + 'M';
-    } else {
-      return count ?? 0;
-    }
-  };
-
   const formatDurationTag = (durationInSeconds) => {
     const durationInMinutes = Math.floor(durationInSeconds / 60);
     if (durationInMinutes < 30) {
@@ -52,9 +47,6 @@
     }
     return '';
   };
-  onMounted(() => {
-    console.log(props.video);
-  });
 </script>
 <template>
   <div class="max-w-sm bg-white overflow-hidden cursor-pointer">
@@ -64,7 +56,7 @@
         class="text-xs absolute bottom-2 left-4 flex items-center font-bold text-white bg-black bg-opacity-70 p-1 rounded"
       >
         <i class="pi pi-eye mr-1 text-xs" />
-        <span>{{ formatViewCount(video.viewCount ?? 0) }}</span>
+        <span>{{ formatView(video.viewCount) }}</span>
       </div>
       <div
         class="absolute bottom-2 right-4 text-white text-xs font-bold bg-black bg-opacity-70 p-1 rounded"
@@ -90,7 +82,7 @@
           <h3 class="text-base font-bold whitespace-nowrap text-black">{{ video.title }}</h3>
           <div class="flex items-center">
             <rate class="mr-1 mb-1" />
-            <span class="text-sm font-bold">{{ video.rating ?? 0 }}</span>
+            <span class="text-sm font-bold">{{ formatRating(video.ratings) }}</span>
           </div>
         </div>
         <div class="flex items-center gap-x-3">

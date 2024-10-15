@@ -2,7 +2,7 @@
   import { ref, computed } from 'vue';
   import verified from '@icons/verified.vue';
   import rate from '@icons/rate.vue';
-  import { formatDate, genreDuration } from '@/functions/calculatorDate';
+  import { formatDate, genreDuration } from '@/utils/calculatorDate';
 
   const props = defineProps({
     videos: {
