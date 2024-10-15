@@ -6,7 +6,7 @@
   import Column from 'primevue/column';
   import Filter from '@/components/Filter.vue';
   import { getVideoSetting, deleteVideoById } from '@services/video';
-  import { genreDuration } from '@/utils/calculatorDate';
+  import { genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
   import { usePopupStore } from '@/stores';
 
