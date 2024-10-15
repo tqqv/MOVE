@@ -11,21 +11,15 @@
       type: Array,
       required: true,
     },
-    channelDetails: {
-      type: Object,
-      required: true,
-    },
+
     page: {
       type: Number,
-      required: true,
     },
     pageSize: {
       type: Number,
-      required: true,
     },
     totalPages: {
       type: Number,
-      required: true,
     },
   });
   console.log(props.videos);
@@ -40,19 +34,16 @@
 <template>
   <div class="w-full py-4">
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <VideoCard
-        v-for="(video, index) in videos"
-        :key="index"
-        :video="video"
-        :channelDetails="channelDetails"
-      />
+      <VideoCard v-for="(video, index) in videos" :key="index" :video="video" />
     </div>
 
-    <Paginator
-      :rows="pageSize"
-      :first="(page - 1) * pageSize"
-      :totalRecords="totalPages * pageSize"
-      @page="onPageChange"
-    />
+    <div v-if="page !== undefined && pageSize !== undefined && totalPages > 0">
+      <Paginator
+        :rows="pageSize"
+        :first="(page - 1) * pageSize"
+        :totalRecords="totalPages * pageSize"
+        @page="onPageChange"
+      />
+    </div>
   </div>
 </template>

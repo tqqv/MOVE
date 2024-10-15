@@ -1,3 +1,73 @@
-<script setup></script>
+<script setup>
+  import { onMounted, ref } from 'vue';
+  import Slider from '@/components/Slider.vue';
 
-<template></template>
+  import Divider from '@/components/Divider.vue';
+  import CategoryImage from '@/components/CategoryImage.vue';
+  import { getAllCategory, getAllVideos } from '@/services/video';
+  import GirdVideo from '@/components/GirdVideo.vue';
+  const categories = ref([]);
+  const videos = ref([]);
+
+  const fetchAllCategory = async () => {
+    try {
+      const res = await getAllCategory();
+      if (res.success) {
+        categories.value = res.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const fetchAllVideos = async () => {
+    try {
+      const res = await getAllVideos();
+
+      if (res.data.success) {
+        videos.value = res.data.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+
+  onMounted(async () => {
+    fetchAllCategory();
+    fetchAllVideos();
+  });
+</script>
+
+<template>
+  <section>
+    <div class="container">
+      <div class="flex items-center">
+        <span class="font-bold text-[24px] pr-8">Featured</span>
+        <Divider class="flex-grow mt-1" />
+      </div>
+      <div><Slider /></div>
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <div class="items-center space-y-4">
+        <Divider class="flex-grow mt-1" />
+        <div class="flex justify-between">
+          <span class="font-bold text-[24px]">Categories</span>
+          <RouterLink to="/browse"
+            ><span class="text-sm text-primary cursor-pointer">View all</span></RouterLink
+          >
+        </div>
+      </div>
+      <CategoryImage :categories="categories" girdCol="6" />
+    </div>
+  </section>
+  <section>
+    <div class="container">
+      <div class="items-center space-y-4">
+        <Divider class="flex-grow mt-1" />
+        <div><span class="font-bold text-[24px] whitespace-nowrap">Video you may like</span></div>
+      </div>
+      <GirdVideo :videos="videos.slice(0, 6)" />
+    </div>
+  </section>
+</template>

@@ -11,13 +11,9 @@
       type: Object,
       required: true,
     },
-    channelDetails: {
-      type: Object,
-      required: true,
-    },
   });
-  
-  if(props.video.category.title && props.video.levelWorkout.levelWorkout) {
+
+  if (props.video.category.title && props.video.levelWorkout.levelWorkout) {
     props.video.category = props.video.category.title;
     props.video.levelWorkout = props.video.levelWorkout.levelWorkout;
   }
@@ -67,11 +63,11 @@
 
     <div class="flex py-3">
       <div
-        :class="[channelDetails.isLive ? 'border-[3px] border-red' : '']"
+        :class="[video.channel.isLive ? 'border-[3px] border-red' : '']"
         class="flex items-center justify-center size-12 rounded-full flex-shrink-0"
       >
         <img
-          :src="channelDetails.avatar"
+          :src="video.channel.avatar"
           alt="Avatar"
           class="w-full h-full rounded-full object-cover p-[1.5px]"
         />
@@ -86,8 +82,8 @@
           </div>
         </div>
         <div class="flex items-center gap-x-3">
-          <span class="text_secondary whitespace-nowrap">{{ channelDetails.channelName }}</span>
-          <span v-if="channelDetails.popularCheck" class="mb-1">
+          <span class="text_secondary whitespace-nowrap">{{ video.channel.channelName }}</span>
+          <span v-if="video.channel.popularCheck" class="mb-1">
             <verified fill="fill-blue" />
           </span>
         </div>

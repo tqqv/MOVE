@@ -109,9 +109,9 @@
     v-else
     class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[100px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
-    <div class="flex flex-col px-2 py-4">
+    <div class="flex flex-col px-2">
       <div
-        class="flex items-center justify-center hover:bg-gray-light rounded-md my-2 py-5 px-3 cursor-pointer"
+        class="flex items-center justify-center hover:bg-gray-light rounded-md my-2 py-3 px-3 cursor-pointer"
         v-tooltip="'Expand sidebar '"
         @click="handleShow"
       >
@@ -136,7 +136,7 @@
       >
         <i class="pi pi-th-large"></i>
       </RouterLink>
-      <div class="flex flex-col gap-y-4 my-5">
+      <div class="flex flex-col gap-y-4 my-2 items-center">
         <div
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
