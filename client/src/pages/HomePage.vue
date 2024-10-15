@@ -58,7 +58,11 @@
           >
         </div>
       </div>
-      <CategoryImage :categories="categories" girdCol="6" />
+      <div
+        class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+      >
+        <CategoryImage :categories="categories" />
+      </div>
     </div>
   </section>
   <section>
