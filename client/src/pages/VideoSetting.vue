@@ -1,6 +1,6 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue';
-  import { formatRating, formatDate } from '@/utils';
+  import { formatRating, formatDatePosted } from '@/utils';
   import rate from '@/components/icons/rate.vue';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
@@ -103,7 +103,7 @@
       </Column>
       <Column header="Date Posted">
         <template #body="{ data }">
-          <span>{{ formatDate(data.createdAt) }}</span>
+          <span>{{ formatDatePosted(data.createdAt) }}</span>
         </template>
       </Column>
       <Column header="Views">

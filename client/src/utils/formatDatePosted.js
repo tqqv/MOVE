@@ -1,4 +1,4 @@
-export const formatDate = (dateString) => {
+export const formatDatePosted = (dateString) => {
   const months = [
     'Jan',
     'Feb',
