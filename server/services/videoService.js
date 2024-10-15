@@ -528,6 +528,71 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
   }
 }
 
+const getListVideoByChannel = async(channelId, page, pageSize) => {
+  try {
+    const listVideo =  await Video.findAndCountAll({
+      where: {channelId: channelId},
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ]
+        ]
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: LevelWorkout,
+          attributes: ['levelWorkout'],
+          as: "levelWorkout",
+          // where: level ? {levelWorkout: level} : {}
+        },
+        {
+          model: Category,
+          attributes: ['title'],
+          as: 'category',
+          // where: category ? {title: category} : {}
+        }
+      ],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    if(!listVideo) {
+      return {
+        status: 404,
+        data: null,
+        message: "Videos of channel not found."
+      }
+    }
+
+    return {
+      status: 200,
+      message: 'Videos fetched successfully',
+      data: {
+        listVideo,
+        totalPages: Math.ceil(listVideo.count/pageSize)
+      }
+    };
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -541,4 +606,5 @@ module.exports = {
   getVideoByVideoIdService,
   deleteVideoService,
   getListVideoByFilter,
+  getListVideoByChannel,
 };
