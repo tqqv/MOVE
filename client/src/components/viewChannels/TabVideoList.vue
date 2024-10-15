@@ -37,7 +37,7 @@
   });
 
   const page = ref(1);
-  const pageSize = 9;
+  const pageSize = 2;
   const selectedSortOption = ref(sortByOptions[0]);
   const selectedLevelOption = ref(levelOptions.value[0]);
   const selectedCategoryOption = ref(categoryOptions.value[0]);
@@ -168,7 +168,7 @@
     <div class="flex flex-grow items-center justify-between">
       <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
       <div class="flex gap-x-6">
-        <Filter :title="'LEVEL'" :options="levelOptions" @change="onLevelChange" />
+        <Filter :title="'LtotalPagesEVEL'" :options="levelOptions" @change="onLevelChange" />
         <Filter :title="'CATEGORY'" :options="categoryOptions" @change="onCategoryChange" />
         <Filter :title="'SORT BY'" :options="sortByOptions" @change="onSortByChange" />
       </div>
