@@ -468,21 +468,21 @@ const validateStreamKey = async(streamKey) => {
     if(!valid){
       return {
         status: 404,
-        data: null,
+        data: streamKey,
         message: "Streaming Key is invalid"
       }
     }
 
     return {
       status: 200,
-      data: null,
+      data: streamKey,
       message: "Streaming Key is valid"
     }
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      data: null,
+      data: streamKey,
       message: error.message
     }
   }
