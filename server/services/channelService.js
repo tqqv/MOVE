@@ -465,7 +465,7 @@ const createStreamKey = async(channelId) => {
 const validateStreamKey = async(streamKey) => {
   try {
     const valid = await Channel.findOne({where: {streamKey: streamKey}});
-    if(valid){
+    if(!valid){
       return {
         status: 404,
         data: null,
