@@ -363,14 +363,19 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
     attributes: attributes,
     include: [
       {
+        model: Channel,
+        as: 'channel',
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+      },
+      {
         model: LevelWorkout,
-        attributes: [],
+        attributes: ['levelWorkout'],
         as: "levelWorkout",
         where: level ? {levelWorkout: level} : {}
       },
       {
         model: Category,
-        attributes: [],
+        attributes: ['title'],
         as: 'category',
         where: category ? {title: category} : {}
       }
@@ -477,7 +482,7 @@ const deleteVideoService = async (videoId) => {
 
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
-    const listVideo = await Video.findAll({
+    const listVideo = await Video.findAndCountAll({
       attributes: {
         include: [
           [
@@ -516,7 +521,10 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
 
     return {
       status: 200,
-      data: listVideo,
+      data: {
+        listVideo,
+        totalPages: Math.ceil(listVideo.count/pageSize)
+      },
       message: "Get list video successfully"
     }
   } catch (error) {

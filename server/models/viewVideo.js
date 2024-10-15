@@ -43,6 +43,10 @@ module.exports = (sequelize, DataTypes) => {
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
       },
+      viewTime: {
+        type:DataTypes.INTEGER,
+        defaultValue: 0
+      }
     },
     {
       sequelize,
