@@ -57,7 +57,7 @@
 </script>
 
 <template>
-  <section class="px-10 flex-grow mr-14">
+  <section class="px-10 flex-grow">
     <VideoDetail
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"

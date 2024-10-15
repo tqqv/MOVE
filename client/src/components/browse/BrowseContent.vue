@@ -1,46 +1,40 @@
 <script setup>
-  import { ref, markRaw } from 'vue';
-
-  import Tabs from 'primevue/tabs';
-  import TabList from 'primevue/tablist';
-  import Tab from 'primevue/tab';
-  import TabPanels from 'primevue/tabpanels';
-  import TabPanel from 'primevue/tabpanel';
+  import { ref, markRaw, onMounted } from 'vue';
   import Divider from '@/components/Divider.vue';
-  import CategoryImage from '@/components/CategoryImage.vue';
-  import TabTopVideo from './TabTopVideo.vue';
-  import TabMostView from './TabMostView.vue';
-  import TabHighestRated from './TabHighestRated.vue';
-  const tabs = ref([
-    { title: 'Categories', component: markRaw(CategoryImage), value: '0' },
-    { title: 'Top videos', component: markRaw(TabTopVideo), value: '1' },
-    { title: 'Most viewed', component: markRaw(TabMostView), value: '2' },
-    { title: 'Highest rated', component: markRaw(TabHighestRated), value: '3' },
+
+  const tabBrowse = ref([
+    { id: 1, title: 'Categories', link: '/browse/categories' },
+    { id: 2, title: 'Top videos', link: '/browse/top-videos' },
+    { id: 3, title: 'Most viewed', link: '/browse/most-viewed' },
+    { id: 4, title: 'Highest rated', link: '/browse/highest-rated' },
   ]);
 </script>
 
 <template>
-  <section class="px-10 flex-grow mr-14">
-    <div class="flex items-center pl-4">
-      <span class="font-bold text-[24px]">Browse</span>
-      <Divider class="flex-grow mx-4" />
-    </div>
-    <div>
-      <div class="mt-2">
-        <Tabs value="0">
-          <TabList>
-            <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
-          </TabList>
-          <TabPanels>
-            <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
-              <component :is="tab.component" :videoDetails="videoDetails" />
-            </TabPanel>
-          </TabPanels>
-        </Tabs>
+  <section class="flex-grow">
+    <div class="container">
+      <div class="flex items-center pl-4">
+        <span class="font-bold text-[24px]">Browse</span>
+        <Divider class="flex-grow mx-4" />
+      </div>
+      <div class="px-[18px] mt-4">
+        <div class="flex flex-wrap items-center justify-center md:justify-start gap-x-6 border-b border-[#e2e8f0]">
+          <router-link
+            v-for="tab in tabBrowse"
+            :key="tab.id"
+            :to="tab.link"
+            class="tab_custom"
+            active-class="text-primary font-bold border-b-4 border-primary hover:text-primary"
+          >
+            {{ tab.title }}
+          </router-link>
+        </div>
+      </div>
+      <div>
+        <div class="mt-7 mx-4">
+          <router-view />
+        </div>
       </div>
     </div>
-    <div></div>
   </section>
 </template>
-
-<style></style>

@@ -19,7 +19,7 @@
   import { useUserStore } from '@/stores/user.store';
   import { RouterLink } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
-  import { debounce } from '@/utils/debounce';
+  import { debounce } from '@/utils';
   import { searchInformation } from '@/services/search';
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
@@ -226,7 +226,7 @@
                 >Following</RouterLink
               >
               <RouterLink
-                to="/browse"
+                to="/browse/categories"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 >Browse</RouterLink
               >
