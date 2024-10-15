@@ -140,7 +140,7 @@
         <div
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
-          class="flex items-center gap-x-3 cursor-pointer"
+          class="flex items-center justify-center gap-x-3 cursor-pointer"
         >
           <div
             :class="[

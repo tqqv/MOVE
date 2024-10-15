@@ -166,3 +166,18 @@
   background-color: black;
   border: none;
 }
+.video-settings {
+  display: none;
+}
+.p-row-even:hover {
+  background: #e6fffb;
+}
+.p-row-odd:hover {
+  background: #e6fffb;
+}
+.p-datatable-tbody tr:hover .video-settings {
+  display: block;
+}
+.p-checkbox .p-checkbox-icon {
+  color: white;
+}

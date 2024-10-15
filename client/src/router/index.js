@@ -15,7 +15,12 @@ import LiveStreamPage from '@/pages/LiveStreamPage.vue';
 import SetUpLive from '@/components/streamer/liveStream/SetUpLive.vue';
 import DashboardLive from '@/components/streamer/liveStream/DashboardLive.vue';
 import VideoDetails from '@/pages/VideoDetails.vue';
+import VideoSetting from '@/pages/VideoSetting.vue';
 import PageNotFound from '@/pages/PageNotFound.vue';
+import TabCategories from '@/components/browse/TabCategories.vue';
+import TabHighestRated from '@/components/browse/TabHighestRated.vue';
+import TabTopVideo from '@/components/browse/TabTopVideo.vue';
+import TabMostView from '@/components/browse/TabMostView.vue';
 
 const routes = [
   // User router
@@ -26,8 +31,16 @@ const routes = [
       { path: '', component: HomePage },
       { path: 'personal-profile', component: ProfileContent },
       { path: ':username', component: ViewChannelsContent },
-      { path: 'browse', component: BrowseContent },
-      { path: 'browse/category', component: CategoryDetailsContent },
+      {
+        path: 'browse',
+        component: BrowseContent,
+        children: [
+          { path: 'categories', component: TabCategories },
+          { path: 'top-videos', component: TabTopVideo },
+          { path: 'most-viewed', component: TabMostView },
+          { path: 'highest-rated', component: TabHighestRated },
+        ],
+      },
       { path: 'search', component: SearchContent },
       { path: 'video/:videoId', component: VideoDetails },
     ],
@@ -41,6 +54,7 @@ const routes = [
       { path: '', component: DashboardStreamer },
       { path: 'comments', component: CommentStreamer },
       { path: 'channel-setting', component: ChannelSetting },
+      { path: 'videos', component: VideoSetting },
     ],
   },
   // Live stream
