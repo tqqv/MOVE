@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, markRaw, onMounted } from 'vue';
+  import { ref, markRaw, onMounted, watch } from 'vue';
 
   import Tabs from 'primevue/tabs';
   import TabList from 'primevue/tablist';
@@ -54,10 +54,19 @@
     await fetchChannelData();
     await fetchListFollowOfChannel(channelId.value);
   });
+  
+  watch(
+    () => route.params.username,
+    async (newUsername) => {
+      username.value = newUsername;
+      await fetchChannelData();
+      await fetchListFollowOfChannel(channelId.value);
+    },
+  );
 </script>
 
 <template>
-  <section class="px-10 flex-grow mr-14">
+  <section class="px-10 flex-grow">
     <VideoDetail
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"
