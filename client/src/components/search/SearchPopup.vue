@@ -55,8 +55,9 @@
       </div>
       <!-- USER -->
       <div v-if="users.length > 0" class="flex flex-col">
-        <div
+        <router-link
           v-for="user in users"
+          :to="`/user/${user.username}`"
           :key="user.id"
           class="flex items-center justify-between px-2 py-3 mt-2 gap-x-3 cursor-pointer rounded-md hover:bg-gray-light"
         >
@@ -74,9 +75,9 @@
               <verified v-if="user.Channel?.popularCheck" class="fill-blue scale-90 mr-1" />
             </div>
             <h1 v-else class="truncate">{{ user.username }}</h1>
-          </div iv>
+          </div>
           <span class="text-xs italic text-footer">{{ user.Channel ? 'Streamer' : 'User' }}</span>
-        </div>
+        </router-link>
       </div>
       <!-- SEARCH  -->
       <div class="flex gap-x-3 pb-1 pt-1 mt-3">

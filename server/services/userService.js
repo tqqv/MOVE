@@ -1,5 +1,6 @@
+const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, sequelize } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 
 
@@ -339,7 +340,15 @@ const listSubscribeOfUser = async(userId) => {
       include: [{
         model: Channel,
         as: "followChannel",
-        attributes: ['channelName', 'avatar'],
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM subscribes
+              WHERE subscribes.channelId = followChannel.id
+            )`),
+            'followCount' // Alias to store the result as followCount
+          ]],
         include: [{
           model: User,
           attributes: ['username']
@@ -352,6 +361,7 @@ const listSubscribeOfUser = async(userId) => {
       message: "Get list channel you follow successfully."
     }
   } catch (error) {
+    console.log(error)
     return {
       status: 400,
       data: null,

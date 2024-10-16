@@ -1,13 +1,20 @@
 <script setup>
+  import { ref, onMounted, watch, computed } from 'vue';
+  import { copyToClipboard } from '@/utils/copyToClipboard';
+  import { startScreenShare, stopScreenShare } from '../../../utils/setUpDevice';
+  import Filter from '@components/Filter.vue';
   import Camera from '@/components/icons/camera.vue';
   import Key from '@/components/icons/key.vue';
   import LiveStream from '@/components/icons/liveStream.vue';
   import Micro from '@/components/icons/micro.vue';
   import ScreenShare from '@/components/icons/screenShare.vue';
-  import { copyToClipboard } from '@/utils/copyToClipboard';
   import Dropdown from 'primevue/dropdown';
-  import { ref, onMounted, watch } from 'vue';
-  import { startScreenShare, stopScreenShare } from '../../../utils/setUpDevice';
+
+  import { useCategoriesStore } from '@/stores';
+  import { useLevelWorkoutStore } from '@/stores';
+
+  const categoriesStore = useCategoriesStore();
+  const levelWorkoutStore = useLevelWorkoutStore();
 
   const video = ref(null);
   const streamKey = ref('HE329132-32342MfS342-3rwer');
@@ -17,6 +24,14 @@
   const isLiveStreamSelected = ref(false);
   const isScreenSharing = ref(false);
   const connectCamera = ref(false);
+
+  // SELECT OPTION
+
+  const categoryOptions = computed(() => categoriesStore.categoryOptions);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
+
+  const selectCategoryOptions = ref('');
+  const selectLevelWorkoutOptions = ref('');
 
   const emit = defineEmits(['updateConnectCamera']);
 
@@ -67,9 +82,28 @@
       isScreenSharing.value = true;
     }
   };
-  onMounted(() => {
-    startCamera();
+
+  // CATEGORIES VS LEVEL WORKOUT
+
+  watch(categoryOptions, (newOptions) => {
+    if (newOptions.length > 0 && !selectCategoryOptions.value) {
+      selectCategoryOptions.value = newOptions[0].value || '';
+    }
   });
+
+  watch(levelWorkoutOptions, (newOptions) => {
+    if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
+      selectLevelWorkoutOptions.value = newOptions[0].value || '';
+    }
+  });
+
+  onMounted(async () => {
+    startCamera();
+    await categoriesStore.fetchCategories();
+    await levelWorkoutStore.fetchLevelWorkout();
+   
+  });
+
   watch(connectCamera, (newVal) => {
     emit('updateConnectCamera', newVal);
   });
@@ -123,6 +157,7 @@
                 </div>
               </div>
             </div>
+            <!-- ZOOM IT OUT -->
             <div class="pt-2 pb-6 px-8">
               <div class="flex w-full items-center justify-between gap-x-3">
                 <p class="font-semibold">Your screen</p>
@@ -282,11 +317,27 @@
             <h1 class="font-semibold mb-4">Add post details</h1>
             <div class="flex flex-col gap-y-4">
               <input type="text" class="input_custom" v-model="title" placeholder="Title" />
-              <input
+              <textarea
                 type="text"
-                class="input_custom"
+                class="input_custom h-32 resize-none"
                 v-model="description"
                 placeholder="Description"
+              ></textarea>
+            </div>
+            <div class="flex flex-col my-4 gap-y-3">
+              <h1 class="font-semibold">Categories</h1>
+              <Filter
+                :class="'w-full py-1'"
+                :options="categoryOptions"
+                @change="selectCategoryOptions = $event.title"
+              />
+            </div>
+            <div class="flex flex-col gap-y-3">
+              <h1 class="font-semibold">Level workout</h1>
+              <Filter
+                :class="'w-full py-1'"
+                :options="levelWorkoutOptions"
+                @change="selectLevelWorkoutOptions = $event.title"
               />
             </div>
           </div>

@@ -51,7 +51,11 @@
           <!-- CATEGORIES -->
           <div v-if="categories.length" class="">
             <h1 class="text_subTitle mb-2">Categories</h1>
-            <CategoryImage :categories="categories" />
+            <div
+              class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            >
+              <CategoryImage :categories="categories" />
+            </div>
           </div>
           <hr v-if="categories.length" class="h-px my-10 bg-gray-dark border-0" />
           <!-- CHANNELS -->
