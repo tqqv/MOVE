@@ -462,27 +462,69 @@ const createStreamKey = async(channelId) => {
   }
 }
 
-const validateStreamKey = async(streamKey) => {
+const validateStreamKey = async (streamKey, userName) => {
   try {
-    const valid = await Channel.findOne({where: {streamKey: streamKey}});
-    if(!valid){
+    const valid = await Channel.findOne({where: { streamKey: streamKey },
+      include: [{
+        model: User, // Giả sử bạn đã định nghĩa mối quan hệ giữa Channel và User
+        where: { username: userName }, // Thêm điều kiện lọc username
+      }],
+    });
+
+    if (!valid) {
       return {
         status: 404,
-        data: streamKey,
-        message: "Streaming Key is invalid"
-      }
+        data: { streamKey, userName },
+        message: "Streaming Key is invalid or does not belong to the specified user."
+      };
     }
+    if(valid.isLive) {
+      return {
+        status: 400,
+        data: { streamKey, userName },
+        message: "Existing streaming thread by provided streamkey."
+      };
+    }
+
+    valid.isLive = true;
+    valid.save();
 
     return {
       status: 200,
-      data: streamKey,
+      data: { streamKey, userName },
       message: "Streaming Key is valid"
     }
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      data: streamKey,
+      data: { streamKey, userName },
+      message: error.message
+    }
+  }
+}
+
+const endStream = async (streamKey, userName) => {
+  try {
+    const valid = await Channel.findOne({where: { streamKey: streamKey },
+      include: [{
+        model: User, // Giả sử bạn đã định nghĩa mối quan hệ giữa Channel và User
+        where: { username: userName }, // Thêm điều kiện lọc username
+      }],
+    });
+
+    valid.isLive = false;
+    valid.save();
+    return {
+      status: 200,
+      data: { streamKey, userName },
+      message: "Streaming stopped"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: { streamKey, userName },
       message: error.message
     }
   }
@@ -497,5 +539,6 @@ module.exports = {
   searchVideoChannel,
   getAllInforFollow,
   createStreamKey,
-  validateStreamKey
+  validateStreamKey,
+  endStream
 }
