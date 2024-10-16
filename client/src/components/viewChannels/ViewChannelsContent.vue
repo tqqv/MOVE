@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, markRaw, onMounted } from 'vue';
+  import { ref, markRaw, onMounted, watch } from 'vue';
 
   import Tabs from 'primevue/tabs';
   import TabList from 'primevue/tablist';
@@ -54,6 +54,15 @@
     await fetchChannelData();
     await fetchListFollowOfChannel(channelId.value);
   });
+  
+  watch(
+    () => route.params.username,
+    async (newUsername) => {
+      username.value = newUsername;
+      await fetchChannelData();
+      await fetchListFollowOfChannel(channelId.value);
+    },
+  );
 </script>
 
 <template>
