@@ -1,7 +1,9 @@
 let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
+const path = require('path');
 const db = require("../models/index.js");
+const youtubedl = require('youtube-dl-exec')
 const { Op } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe } = db;
 
@@ -601,6 +603,36 @@ const getListVideoByChannel = async(channelId, page, pageSize) => {
   }
 }
 
+const downloadVideoService = async (req, res, next) => {
+  const videoUrl = 'https://vimeo.com/1016043010';
+  const customName = 'lewlew.mp4';
+  const outputPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Downloads', customName);
+  console.log(outputPath);
+  const downloadProcess = youtubedl(videoUrl, {
+    output: outputPath,
+    format: 'bestvideo+bestaudio/best',
+    noCheckCertificate: true,
+  });
+  downloadProcess.then(output => {
+    console.log(output);
+    return {status: 200, data: null, message: 'ok'}
+  }).catch(err => {
+    console.error(err);
+    return {status: 500, data: null, message: '!ok'}
+  });
+  // youtubedl(videoUrl, {
+  //   output: outputPath,
+  //   allFormats: true,
+  // }).then(output => {
+  //   console.log(output)
+  //   return {
+  //     status: 500,
+  //     data: null,
+  //     message: 'ok'
+  //   }
+  // });
+}
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -615,4 +647,5 @@ module.exports = {
   deleteVideoService,
   getListVideoByFilter,
   getListVideoByChannel,
+  downloadVideoService
 };

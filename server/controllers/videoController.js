@@ -12,6 +12,7 @@ const {
   deleteVideoService,
   getListVideoByFilter,
   getListVideoByChannel,
+  downloadVideoService,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -152,6 +153,13 @@ const getListVideoByChannelController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const downloadVideo = async(req, res, next) => {
+  const result = await downloadVideoService()
+
+  console.log(result);
+  
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -166,4 +174,5 @@ module.exports = {
   deleteVideo,
   getListVideoByFilterController,
   getListVideoByChannelController,
+  downloadVideo,
 };
