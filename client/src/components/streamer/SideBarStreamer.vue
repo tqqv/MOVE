@@ -11,7 +11,7 @@
 
   const menuItems = [
     { name: 'Home', icon: HomeIcon, link: '/streamer' },
-    { name: 'Video', icon: VideoIcon, link: '/streamer/video' },
+    { name: 'Video', icon: VideoIcon, link: '/streamer/videos' },
     { name: 'Comments', icon: CommentIcon, link: '/streamer/comments' },
     { name: 'Analytics', icon: AnalyticsIcon, link: '/streamer/analytics' },
     { name: 'Cashout', icon: CashoutIcon, link: '/streamer/cashout' },

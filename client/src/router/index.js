@@ -15,6 +15,7 @@ import LiveStreamPage from '@/pages/LiveStreamPage.vue';
 import SetUpLive from '@/components/streamer/liveStream/SetUpLive.vue';
 import DashboardLive from '@/components/streamer/liveStream/DashboardLive.vue';
 import VideoDetails from '@/pages/VideoDetails.vue';
+import VideoSetting from '@/pages/VideoSetting.vue';
 import PageNotFound from '@/pages/PageNotFound.vue';
 import TabCategories from '@/components/browse/TabCategories.vue';
 import TabHighestRated from '@/components/browse/TabHighestRated.vue';
@@ -53,6 +54,7 @@ const routes = [
       { path: '', component: DashboardStreamer },
       { path: 'comments', component: CommentStreamer },
       { path: 'channel-setting', component: ChannelSetting },
+      { path: 'videos', component: VideoSetting },
     ],
   },
   // Live stream

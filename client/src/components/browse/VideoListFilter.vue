@@ -4,7 +4,6 @@
   import GirdVideo from '@/components/GirdVideo.vue';
   import Paginator from 'primevue/paginator';
   import NotFoundPage from '@/pages/NotFoundPage.vue';
-
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
 
@@ -30,9 +29,6 @@
   const currentPage = ref(1);
   const totalPage = ref();
   const pageSize = ref(12);
-
-  const categoryOptions = computed(() => categoriesStore.categoryOptions);
-  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
 
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
@@ -72,7 +68,7 @@
     }
   };
 
-  watch(categoryOptions, (newOptions) => {
+watch(categoryOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectCategoryOptions.value) {
       selectCategoryOptions.value = newOptions[0].value || '';
     }
