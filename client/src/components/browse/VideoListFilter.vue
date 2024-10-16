@@ -1,10 +1,12 @@
 <script setup>
-  import { onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, ref, watch } from 'vue';
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
   import Paginator from 'primevue/paginator';
   import NotFoundPage from '@/pages/NotFoundPage.vue';
-  import { getAllCategories } from '@/services/categories';
+
+  import { useCategoriesStore } from '@/stores';
+  import { useLevelWorkoutStore } from '@/stores';
 
   const props = defineProps({
     title: {
@@ -21,23 +23,19 @@
     },
   });
 
-  const levelOptions = [
-    { id: 1, name: 'All levels', value: '' },
-    { id: 2, name: 'Beginner', value: 'beginner' },
-    { id: 3, name: 'Intermediate', value: 'intermediate' },
-    { id: 4, name: 'Advanced', value: 'advanced' },
-  ];
-
-  const categoryOptions = ref([{ id: 0, name: 'All categories', title: '' }]);
+  const categoriesStore = useCategoriesStore();
+  const levelWorkoutStore = useLevelWorkoutStore();
 
   const videos = ref([]);
-  const categories = ref([]);
   const currentPage = ref(1);
   const totalPage = ref();
   const pageSize = ref(12);
 
-  const selectedLevelOptions = ref(levelOptions[0]?.value || '');
-  const selectCategoryOptions = ref(categoryOptions.value[0]?.value || '');
+  const categoryOptions = computed(() => categoriesStore.categoryOptions);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
+
+  const selectCategoryOptions = ref('');
+  const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(props.sortByOptions[0].value);
   const selectedOrder = ref(props.sortByOptions[0].order);
 
@@ -50,17 +48,19 @@
     }
   };
 
+  // CREATE PARAM TO BE
   const handleSortChange = (newValue) => {
     selectedSortBy.value = newValue.value || '';
     selectedOrder.value = newValue.order;
   };
 
+  // FETCH VIDEO
   const fetchVideos = async () => {
     try {
       const response = await props.fetchVideosFunction(
         currentPage.value,
         pageSize.value,
-        selectedLevelOptions.value,
+        selectLevelWorkoutOptions.value,
         selectCategoryOptions.value,
         selectedSortBy.value,
         selectedOrder.value,
@@ -72,31 +72,20 @@
     }
   };
 
-  const fetchCategories = async () => {
-    try {
-      const response = await getAllCategories();
-      categories.value = response.data;
-      if (Array.isArray(categories.value)) {
-        categoryOptions.value.push(
-          ...categories.value.map((category) => ({
-            id: category.id,
-            name: category.title,
-            title: category.title,
-          })),
-        );
-      }
-    } catch (error) {
-      console.log(error);
+  watch(categoryOptions, (newOptions) => {
+    if (newOptions.length > 0 && !selectCategoryOptions.value) {
+      selectCategoryOptions.value = newOptions[0].value || '';
     }
-  };
+  });
 
-  onMounted(() => {
-    fetchCategories();
-    fetchVideos();
+  watch(levelWorkoutOptions, (newOptions) => {
+    if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
+      selectLevelWorkoutOptions.value = newOptions[0].value || '';
+    }
   });
 
   watch(
-    [selectedLevelOptions, selectCategoryOptions, selectedSortBy, selectedOrder],
+    [selectLevelWorkoutOptions, selectCategoryOptions, selectedSortBy, selectedOrder],
     (newValues, oldValues) => {
       if (newValues !== oldValues) {
         currentPage.value = 1;
@@ -104,6 +93,12 @@
       }
     },
   );
+
+  onMounted(async () => {
+    await categoriesStore.fetchCategories();
+    await levelWorkoutStore.fetchLevelWorkout();
+    await fetchVideos();
+  });
 </script>
 
 <template>
@@ -115,8 +110,8 @@
       <div class="flex gap-x-6">
         <Filter
           title="LEVEL"
-          :options="levelOptions"
-          @change="selectedLevelOptions = $event.value"
+          :options="levelWorkoutOptions"
+          @change="selectLevelWorkoutOptions = $event.value"
         />
         <Filter
           title="CATEGORY"
