@@ -12,6 +12,14 @@ const getVideobyChannel = (channelId, page, pageSize, sortBy, order, level, cate
     },
   });
 };
+const getVideoSetting = async (page, pageSize) => {
+  try {
+    const response = await axios.get('/video/getVideosByChannel', { params: { page, pageSize } });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 const getAllCategory = async () => {
   try {
     const response = await axios.get('/category');
@@ -44,10 +52,20 @@ const getCategoryById = async (cateId) => {
     return { error: true, message: error.response.data.message };
   }
 };
+const deleteVideoById = async (videoId) => {
+  try {
+    const response = await axios.delete(`video/delete-video/${videoId}`);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 export {
   getVideobyChannel,
   getAllCategory,
   getAllLevelWorkout,
   getLevelWorkoutById,
   getCategoryById,
+  getVideoSetting,
+  deleteVideoById,
 };

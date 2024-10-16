@@ -84,6 +84,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.INTEGER,
           allowNull: true,
         },
+        totalShare: {
+          type: DataTypes.INTEGER,
+          defaultValue: 0,
+        },
         duration: {
           type: DataTypes.STRING(20),
           allowNull: true,
