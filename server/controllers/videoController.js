@@ -10,7 +10,8 @@ const {
   getVideoByUserIdService,
   getVideoByVideoIdService,
   deleteVideoService,
-  getListVideoByFilter
+  getListVideoByFilter,
+  analyticsVideoById
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -139,6 +140,14 @@ const getListVideoByFilterController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const analyticsVideoByIdController = async(req, res, next) => {
+  const videoId = req.params.videoId
+  const channelId = req.user.channelId
+  const result = await analyticsVideoById(videoId, channelId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -151,5 +160,6 @@ module.exports = {
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
-  getListVideoByFilterController
+  getListVideoByFilterController,
+  analyticsVideoByIdController
 };

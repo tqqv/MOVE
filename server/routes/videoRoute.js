@@ -10,12 +10,14 @@ const { getUploadLink,
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
-  getListVideoByFilterController} = require('../controllers/videoController');
+  getListVideoByFilterController,
+  analyticsVideoByIdController} = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
+router.get('/getVideoAnalytics/:videoId', verifyStreamer, analyticsVideoByIdController)
 router.get('/getVideosByFilter', getListVideoByFilterController);
 router.post('/upload-video', verifyStreamer, getUploadLink);
 router.post('/upload-thumbnail',verifyStreamer, upload.single('thumbnailPath'), uploadThumbnail);
