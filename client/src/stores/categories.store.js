@@ -2,7 +2,7 @@ import { ref } from 'vue';
 import { defineStore } from 'pinia';
 import { getAllCategories } from '@/services/categories';
 
-export const useCategoriesStore = defineStore('streamer', () => {
+export const useCategoriesStore = defineStore('categories', () => {
   const error = ref(null);
   const loading = ref(false);
   const categories = ref(null);

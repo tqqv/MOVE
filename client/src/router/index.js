@@ -37,8 +37,8 @@ const routes = [
         children: [
           { path: 'categories', component: TabCategories },
           { path: 'top-videos', component: TabTopVideo },
-          { path: 'most-viewed', component: TabMostView },
-          { path: 'highest-rated', component: TabHighestRated },
+          { path: 'most_viewed', component: TabMostView },
+          { path: 'highest_rated', component: TabHighestRated },
         ],
       },
       { path: 'search', component: SearchContent },

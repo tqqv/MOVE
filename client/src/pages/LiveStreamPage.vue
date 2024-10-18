@@ -2,19 +2,25 @@
   import { ref } from 'vue';
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
-  const connectCamera = ref(false);
 
-  const updateConnectCamera = (value) => {
-    connectCamera.value = value;
+  const statusLive = ref('beforeLive');
+
+  const connectOBS = ref(true);
+  const updateStatusLive = (value) => {
+    statusLive.value = value;
   };
 </script>
 
 <template>
   <Navbar />
   <div class="flex pt-[72px] bg-[#f0f2f5]">
-    <SideBarLive :connectCamera="connectCamera" />
+    <SideBarLive
+      :connectOBS="connectOBS"
+      :statusLive="statusLive"
+      @updateStatusLive="updateStatusLive"
+    />
     <div class="flex-1 overflow-y-auto">
-      <router-view @updateConnectCamera="updateConnectCamera" />
+      <router-view :statusLive="statusLive" :connectOBS="connectOBS" />
     </div>
   </div>
 </template>
