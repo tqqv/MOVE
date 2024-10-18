@@ -171,7 +171,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
         `),
       };
     }
-  const commentsWithVideo = await Comment.findAll({
+  const commentsWithVideo = await Comment.findAndCountAll({
     where: whereCondition,
     attributes: {
       include: [
@@ -196,7 +196,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
       {
         model: User,
         as: 'userComments',
-        attributes: ['avatar', 'username', 'email']
+        attributes: ['avatar', 'username', 'email', 'isVerified']
       },
       {
         model: Channel,
@@ -230,7 +230,10 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
 
   return {
     status: 200,
-    data: commentsWithVideo,
+    data: {
+      commentsWithVideo,
+      totalPages: Math.ceil(commentsWithVideo.count/pageSize)
+    },
     message: "Channel get comments by parent id success"
   }
 }
@@ -277,7 +280,6 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
     data: {
       comments,
       totalPages: Math.ceil(comments.count/pageSize)
-
     },
     message: "Get comments by parent id success"
   }

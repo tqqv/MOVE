@@ -47,7 +47,7 @@ const isAgeValid = (dob) => {
   if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
     userAge--;
   }
-  return userAge >= 12;
+  return userAge >= 12 && userAge <= 140;
 };
 
 export const updateProfileSchema = yup.object({
@@ -68,7 +68,9 @@ export const updateProfileSchema = yup.object({
   dob: yup
     .string()
     .required('Date of birth is required')
-    .test('is-age-valid', 'User must be at least 12 years old', (value) => isAgeValid(value)),
+    .test('is-age-valid', 'User must be between 12 and 140 years old', (value) =>
+      isAgeValid(value),
+    ),
 });
 
 export const updateChannelSchema = yup.object({

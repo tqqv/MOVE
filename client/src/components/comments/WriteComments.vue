@@ -45,9 +45,8 @@
     const data = { content: commentText.value, parentId: parentId.value };
     console.log(data);
     console.log(commentText.value);
-
-    const videoId = 1016042125;
-
+    //  data test videoID
+    const videoId = 1015530843;
     try {
       const response = await postComments(videoId, data);
       console.log('Response data:', response.data); // In ra dữ liệu nhận được

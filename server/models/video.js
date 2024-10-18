@@ -84,6 +84,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.INTEGER,
           allowNull: true,
         },
+        totalShare: {
+          type: DataTypes.INTEGER,
+          defaultValue: 0,
+        },
         duration: {
           type: DataTypes.STRING(20),
           allowNull: true,
@@ -95,7 +99,7 @@ module.exports = (sequelize, DataTypes) => {
         status: {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
           allowNull: false,
-          defaultValue: 'public',
+          defaultValue: 'private',
         },
       },
       {
