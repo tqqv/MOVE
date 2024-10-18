@@ -4,6 +4,14 @@ const getProfile = () => {
   return axios.get('/user/getProfile');
 };
 
+const getProfilebyUsername = async (username) => {
+  try {
+    const response = await axios.get(`/user/viewUser/${username}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 const updateProfile = async (data) => {
   try {
     const response = await axios.patch('/user/editprofile', data);
@@ -30,14 +38,7 @@ const viewFollowChannel = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-const getViewChannel = async (username) => {
-  try {
-    const response = await axios.get(`/channel/viewChannel/${username}`);
-    return response.data;
-  } catch (error) {
-    return { error: true, status: error.response.status, message: error.response.data.message };
-  }
-};
+
 const requestToStreamer = async () => {
   try {
     const response = await axios.get('/user/createRequestChannel');
@@ -78,7 +79,7 @@ export {
   viewFollowChannel,
   requestToStreamer,
   getRequestStreamer,
-  getViewChannel,
   postFollowChannel,
   getListFollowOfUser,
+  getProfilebyUsername,
 };

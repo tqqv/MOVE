@@ -1,14 +1,12 @@
 <script setup>
-  import { onMounted, ref, computed } from 'vue';
+  import { onMounted, ref, computed, watch } from 'vue';
   import Verified from './icons/verified.vue';
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
   import { postFollowChannel, getListFollowOfUser } from '@/services/user';
   import { toast } from 'vue3-toastify';
-  import { useStreamerStore } from '@/stores';
-  const successMessage = ref('');
-  const errorMessage = ref('');
+  import { useUserStore } from '@/stores';
   const props = defineProps({
     isButtonGiftREPsVisible: {
       type: Boolean,
@@ -30,13 +28,15 @@
       type: Number,
       required: true,
     },
+    username: {
+      type: String,
+    },
   });
   const followedChannels = ref([]);
   const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
-
-  const streamerStore = useStreamerStore();
+  const userStore = useUserStore();
 
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
@@ -51,7 +51,7 @@
     if (result.success) {
       followedChannels.value = result.data;
     } else {
-      errorMessage.value = result.message;
+      toast.error(result.message);
     }
   };
   const followChannel = async () => {
@@ -72,7 +72,7 @@
         fetchListFollowOfUser();
       }
     } catch (error) {
-      errorMessage.value = error.message || 'Something went wrong';
+      toast.error(error.message);
     }
   };
 
@@ -84,7 +84,11 @@
       channel.channelId === props.channelId ? props.channelId.toString() : null,
     );
   });
-  onMounted(fetchListFollowOfUser);
+  onMounted(() => {
+    userStore.fetchUserProfile();
+
+    fetchListFollowOfUser();
+  });
 </script>
 
 <template>
@@ -121,7 +125,7 @@
     </div>
     <div class="flex gap-x-9 items-center">
       <div
-        v-if="streamerStore.streamerChannel?.channelName !== channelDetails.channelName"
+        v-if="userStore.user?.username !== username"
         class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
         @click="toggleFollow"
       >
@@ -130,7 +134,7 @@
           stroke="stroke-primary"
           class="mr-1"
         />
-       Follow
+        Follow
       </div>
       <div
         v-if="isUserAction"
@@ -138,10 +142,7 @@
       >
         <share class="mr-1" /> Share
       </div>
-      <button
-        v-if="streamerStore.streamerChannel?.channelName !== channelDetails.channelName"
-        class="btn whitespace-nowrap"
-      >
+      <button v-if="userStore.user?.username !== username" class="btn whitespace-nowrap">
         Gift REPs <i class="pi pi-angle-right text-white" />
       </button>
       <div class="relative">

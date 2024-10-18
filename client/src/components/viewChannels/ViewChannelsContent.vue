@@ -10,7 +10,9 @@
   import VideoDetail from '@components/VideoDetail.vue';
   import TabAbout from './TabAbout.vue';
   import { useRoute } from 'vue-router';
-  import { getViewChannel } from '@/services/user';
+  import { getViewChannel } from '@/services/streamer';
+  import { getProfilebyUsername } from '@/services/user';
+
   import { getListFollowOfChannel } from '@/services/streamer';
   const tabs = ref([
     { title: 'Videos', component: markRaw(TabVideoList), value: '0' },
@@ -22,11 +24,20 @@
   const channelId = ref(null);
 
   const channelDetails = ref({});
+  const userDetails = ref({});
   const followChannelDetails = ref({});
 
   const totalFollower = ref(null);
   const errorData = ref(null);
+  // const fetchUserData = async () => {
+  //   const result = await getProfilebyUsername(username.value);
 
+  //   if (result.error) {
+  //     errorData.value = result.message;
+  //   } else {
+  //     userDetails.value = result.data.profile;
+  //   }
+  // };
   const fetchChannelData = async () => {
     const result = await getViewChannel(username.value);
 
@@ -38,6 +49,7 @@
       channelId.value = result.data.profile.id;
     }
   };
+
   const fetchListFollowOfChannel = async (channelId) => {
     const result = await getListFollowOfChannel(channelId);
 
@@ -52,9 +64,10 @@
 
   onMounted(async () => {
     await fetchChannelData();
+    await fetchUserData();
     await fetchListFollowOfChannel(channelId.value);
   });
-  
+
   watch(
     () => route.params.username,
     async (newUsername) => {
@@ -73,6 +86,7 @@
       :channelDetails="channelDetails"
       :channelId="channelId"
       :totalFollower="totalFollower"
+      :username="username"
       @updateFollowers="fetchChannelData"
       class="pl-3"
     />
