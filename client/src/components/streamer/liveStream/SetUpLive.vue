@@ -10,9 +10,11 @@
   import InLiveStream from './InLiveStream.vue';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import EndLiveStream from './EndLiveStream.vue';
+  import EmptyImage from '@/components/icons/emptyImage.vue';
 
   const categoriesStore = useCategoriesStore();
   const levelWorkoutStore = useLevelWorkoutStore();
+  const isLoadingAvatar = ref(false);
 
   const props = defineProps({
     statusLive: String,
@@ -24,7 +26,7 @@
   const description = ref('');
   const isCameraSelected = ref(false);
   const isLiveStreamSelected = ref(true);
-
+  const thumbnail = ref('');
   // COPYTOCLIPBOARD
   const handleCopyStreamKey = () => {
     copyToClipboard(
@@ -32,6 +34,36 @@
       'Successfully copied to clipboard',
       'Failed copied to clipboard',
     );
+  };
+
+  // UPLOAD IMAGE
+  const fileInputRef = ref(null);
+
+  const handleFileInputClick = () => {
+    fileInputRef.value.click();
+  };
+
+  const handleSelectedFile = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    isLoadingAvatar.value = true;
+
+    try {
+      const data = await uploadAvatar(selectedFile);
+      if (data.secure_url) {
+        // profileData.value.avatar = data.secure_url;
+        thumbnail.value = data.secure_url;
+      } else {
+        isLoadingAvatar.value = false;
+        console.error(error);
+      }
+    } catch (error) {
+      isLoadingAvatar.value = false;
+      console.error(error);
+    } finally {
+      isLoadingAvatar.value = false;
+    }
   };
 
   // SELECT OPTION
@@ -202,13 +234,56 @@
                 @change="selectCategoryOptions = $event.title"
               />
             </div>
-            <div class="flex flex-col gap-y-3">
+            <div class="flex flex-col mb-6 gap-y-3">
               <h1 class="font-semibold">Level workout</h1>
               <Filter
                 :class="'w-full py-1 !border-gray-dark'"
                 :options="levelWorkoutOptions"
                 @change="selectLevelWorkoutOptions = $event.title"
               />
+            </div>
+            <!-- UPLOAD THUMBNAIL -->
+            <div class="flex flex-col gap-y-3">
+              <div class="flex justify-between">
+                <h1 class="font-semibold">Thumbnail</h1>
+                <input
+                  type="file"
+                  id="myFile"
+                  name="filename"
+                  ref="fileInputRef"
+                  class="hidden"
+                  @change="handleSelectedFile"
+                />
+
+                <span
+                  class="text-primary cursor-pointer text-[14px] w-fit"
+                  @click="handleFileInputClick"
+                >
+                  Upload thumbnail
+                </span>
+              </div>
+              <div class="relative">
+                <div
+                  v-show="isLoadingAvatar"
+                  class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                >
+                  <div class="custom-spinner w-8"></div>
+                </div>
+                <!-- IMAGE THUMBNAIL -->
+                <img
+                  v-if="thumbnail"
+                  :src="thumbnail"
+                  class="w-full rounded-md object-cover"
+                  :class="{ 'opacity-20': isLoadingAvatar }"
+                />
+                <!-- DONT THUMBNAIL -->
+                <div
+                  v-else
+                  class="flex flex-col items-center justify-center rounded-md py-20 bg-gray-light/40 border-2 border-dashed border-gray-dark"
+                >
+                  <EmptyImage />
+                </div>
+              </div>
             </div>
           </div>
         </div>

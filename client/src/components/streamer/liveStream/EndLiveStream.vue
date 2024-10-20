@@ -48,11 +48,7 @@
           <div class="flex gap-x-4 text sm">
             <label class="font-medium" for="">Description:</label>
             <h1>
-              - Shop Khô Gà Thầy Giáo Ba: https://shopee.vn/thaygiaoba_1107- Bánh Tằm Thầy Ba:CS 1:
-              342 Tên Lửa Phường Bình Trị Đông B, Quận Bình Tân TPHCM.Page:
-              https://www.facebook.com/BanhTamThayBaWebsite: https://banhtamthayba.comShopeeFood:
-              https://s.net.vn/244NGrabFood: https://s.net.vn/m18b- Contact Công Việc:Page:
-              https://www.facebook.com/BaRoiBe0Mail: BaRoiBeoKols1989@gmail.com.
+              Lorem ipsum dolor sit amet consectetur adipiscing elit in imperdiet ad suspendisse ullamcorper, vivamus primis malesuada diam etiam conubia justo fusce convallis laoreet nullam. Placerat parturient interdum integer nisi vitae luctus commodo, justo morbi inceptos sapien magna sagittis imperdiet, suscipit molestie cras purus nam euismod. 
             </h1>
           </div>
           <div class="flex gap-x-4">
