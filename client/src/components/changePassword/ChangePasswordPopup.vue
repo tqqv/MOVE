@@ -6,7 +6,7 @@
   import { changePassword } from '@/services/user';
   import { toast } from 'vue3-toastify';
   import { Form, Field } from 'vee-validate';
-  import { changePasswordSchema } from '@/functions/vadilation';
+  import { changePasswordSchema } from '@/utils/vadilation';
 
   const popupStore = usePopupStore();
   // SHOW PASSWORD

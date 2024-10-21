@@ -36,7 +36,7 @@
             <img :src="category.imgUrl" :alt="category.title" class="h-14 w-10 object-cover" />
             <h1>{{ category.title }}</h1>
           </div>
-          <span class="text-xs italic text-footer">categories</span>
+          <span class="text-xs italic text-footer">Categories</span>
         </div>
       </div>
       <!-- VIDEO -->
@@ -50,7 +50,7 @@
             <img :src="video.thumbnailUrl" :alt="video.title" class="h-10 w-14 object-cover" />
             <h1>{{ video.title }}</h1>
           </div>
-          <span class="text-xs italic text-footer">videos</span>
+          <span class="text-xs italic text-footer">Videos</span>
         </div>
       </div>
       <!-- USER -->
@@ -75,7 +75,7 @@
             </div>
             <h1 v-else class="truncate">{{ user.username }}</h1>
           </div iv>
-          <span class="text-xs italic text-footer">{{ user.Channel ? 'Instructor' : 'User' }}</span>
+          <span class="text-xs italic text-footer">{{ user.Channel ? 'Streamer' : 'User' }}</span>
         </div>
       </div>
       <!-- SEARCH  -->

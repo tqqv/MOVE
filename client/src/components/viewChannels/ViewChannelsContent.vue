@@ -20,7 +20,6 @@
 
   const username = ref(route.params.username);
   const channelId = ref(null);
-  console.log(username);
 
   const channelDetails = ref({});
   const followChannelDetails = ref({});
@@ -33,14 +32,10 @@
 
     if (result.error) {
       errorData.value = result.message;
-      // router.push({ path: '/404' });
-      console.log(errorData.value);
     } else {
       channelDetails.value = result.data.profile;
       totalFollower.value = result.data.totalFollower;
       channelId.value = result.data.profile.id;
-      console.log(channelId.value);
-      console.log(channelDetails.value);
     }
   };
   const fetchListFollowOfChannel = async (channelId) => {

@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted, watch } from 'vue';
+  import { ref, computed } from 'vue';
   import { useStreamerStore } from '@/stores';
   import { postComments } from '@/services/comment';
   const streamerStore = useStreamerStore();
@@ -9,7 +9,6 @@
   });
 
   const commentText = ref('');
-  const commentInput = ref(null);
 
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
@@ -17,16 +16,18 @@
 
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
 
+  const emit = defineEmits([
+    'handleOpenCommentField',
+    'handleSendCommentReply',
+    'updateTotalRepliesCount',
+  ]);
+  
+
   //   HANDLE CANCEL
-  const emit = defineEmits(['handleOpenCommentField', 'updateReplies', 'updateTotalRepliesCount']);
   const handleCancel = () => {
     commentText.value = '';
     emit('handleOpenCommentField');
   };
-
-  onMounted(() => {
-    commentInput.value?.focus();
-  });
 
   // HANDLE REPLY COMMENT
   const handleSend = async () => {
@@ -42,7 +43,7 @@
         },
       };
 
-      emit('updateReplies', newReply);
+      emit('handleSendCommentReply', newReply);
       emit('updateTotalRepliesCount', props.comment.totalRepliesCount + 1);
       commentText.value = '';
     } catch (error) {
@@ -59,14 +60,13 @@
         alt="Avatar"
         class="size-10 rounded-full object-cover"
       />
-      <div class="flex-grow px-4 py-2 rounded-lg bg-gray-dark/25">
+      <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
         <input
-          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-medium placeholder:text-black/50 w-full h-10"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-normal placeholder:text-black/50 w-full h-12"
           type="text"
           placeholder="Reply comment..."
           @input="handleCommentInput"
           @keyup.enter="handleSend"
-          ref="commentInput"
           v-model="commentText"
         />
         <div class="flex justify-end mt-5">
@@ -81,7 +81,7 @@
               @click="handleSend"
               :disabled="!isCommentNotEmpty"
               :class="{
-                'rounded-lg text-xs font-semibold px-4': true,
+                'rounded-md text-xs font-semibold px-4': true,
                 'bg-primary text-white': isCommentNotEmpty,
                 'bg-black/10 text-black/50': !isCommentNotEmpty,
               }"

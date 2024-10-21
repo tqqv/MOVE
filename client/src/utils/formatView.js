@@ -1,5 +1,7 @@
 export const formatView = (views) => {
-  if (views < 1000) {
+  if (!views) {
+    return `0`;
+  } else if (views < 1000) {
     return views.toString();
   } else if (views < 1000000) {
     const rounded = Math.round(views / 100) / 10;

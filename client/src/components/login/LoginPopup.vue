@@ -7,7 +7,7 @@
   import { postLogin } from '@/services/auth';
   import { useUserStore } from '@/stores';
   import { Form, Field } from 'vee-validate';
-  import { loginSchema } from '@/functions/vadilation';
+  import { loginSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();
@@ -123,7 +123,7 @@
               />
               <Warning
                 v-if="errors.length"
-                class="absolute top-1/2 right-4 transform -translate-y-1/2 "
+                class="absolute top-1/2 right-4 transform -translate-y-1/2"
               />
             </div>
             <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
@@ -144,7 +144,12 @@
                 class="password_custom"
                 required
               />
-              <button @click="showPassword = !showPassword" type="button" class="btn_eyes" tabindex="-1">
+              <button
+                @click="showPassword = !showPassword"
+                type="button"
+                class="btn_eyes"
+                tabindex="-1"
+              >
                 <i :class="[showPassword ? 'pi pi-eye' : 'pi pi-eye-slash']"></i>
               </button>
             </div>

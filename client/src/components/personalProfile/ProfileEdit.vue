@@ -10,8 +10,8 @@
   import { updateProfile } from '@/services/user';
   import { toast } from 'vue3-toastify';
   import { uploadAvatar } from '@/services/cloudinary';
-  import { checkDataChanged, getChangedFields } from '@/functions/compareData';
-  import { updateProfileSchema } from '@/functions/vadilation';
+  import { checkDataChanged, getChangedFields } from '@/utils/compareData';
+  import { updateProfileSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();

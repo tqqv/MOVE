@@ -84,7 +84,7 @@
       <!-- REQUEST TO STREAMER -->
       <div
         v-if="showRequestToStreamer"
-        class="flex gap-y-4 gap-x-2 items-start justify-between notification_custom relative"
+        class="flex gap-y-4 gap-x-2 items-center  justify-between notification_custom relative"
       >
         <h1 class="text_para text-left">
           You've completed your profile information for <span class="font-bold">MOVE</span>. Would
