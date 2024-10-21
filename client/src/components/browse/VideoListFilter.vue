@@ -3,7 +3,7 @@
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
   import Paginator from 'primevue/paginator';
-  import NotFoundPage from '@/pages/NotFoundPage.vue';
+  import EmptyPage from '@/pages/EmptyPage.vue';
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
 
@@ -138,7 +138,7 @@
       @page="onPageChange"
     />
     <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
-      <NotFoundPage
+      <EmptyPage
         title="There are no matching videos"
         subTitle="Try different keywords or remove search filters"
       />

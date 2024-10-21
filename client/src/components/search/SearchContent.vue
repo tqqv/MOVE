@@ -9,7 +9,7 @@
   import notFound from '../icons/not-found.vue';
   import SearchVideo from './SearchVideo.vue';
   import VideoCard from '../VideoCard.vue';
-  import NotFoundPage from '@/pages/NotFoundPage.vue';
+  import EmptyPage from '@/pages/EmptyPage.vue';
 
   const route = useRoute();
   const query = ref(route.query.q || '');
@@ -83,7 +83,7 @@
     v-if="!query || (query && !categories.length && !videos.length && !users.length && !loading)"
     class="h-full flex justify-center items-center"
   >
-    <NotFoundPage
+    <EmptyPage
       title="No results found"
       subTitle="Try different keywords or remove search filters"
     />
