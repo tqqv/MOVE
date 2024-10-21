@@ -32,7 +32,7 @@
   const commentsPerPageChild = ref(5);
   const isShowMoreChild = ref(false);
   const isReplyChild = ref(false);
-
+  const hasFetchedChildComments = ref(false);
   const id = ref(null);
   const parentIdReply = ref(null);
   // const replyToUsername = ref(null);
@@ -73,11 +73,9 @@
   const toggleShowMoreChild = async () => {
     isShowMoreChild.value = !isShowMoreChild.value;
 
-    if (
-      isShowMoreChild.value &&
-      (!props.childComments[props.comment.id] || props.childComments[props.comment.id].length === 0)
-    ) {
+    if (isShowMoreChild.value && !hasFetchedChildComments.value) {
       await props.fetchChildComments(props.comment.id);
+      hasFetchedChildComments.value = true;
     }
   };
   const handleSendComment = async (newComment) => {
