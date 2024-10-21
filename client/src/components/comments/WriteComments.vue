@@ -24,6 +24,7 @@
       type: Function,
       required: true,
     },
+    replyToUsername: String,
   });
 
   const parentId = ref(props.commentId || null);
@@ -46,10 +47,10 @@
     console.log(data);
     console.log(commentText.value);
     //  data test videoID
-    const videoId = 1015530843;
+    const videoId = 1018146045;
     try {
       const response = await postComments(videoId, data);
-      console.log('Response data:', response.data); // In ra dữ liệu nhận được
+      console.log('Response data:', response.data);
 
       if (response.data.success && response.data.data) {
         console.log('Comment created successfully:', response.data.data);
@@ -105,20 +106,25 @@
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+  // onMounted(() => {
+  //   if (props.replyToUsername) {
+  //     commentText.value = `@${props.replyToUsername} `;
+  //   }
+  // });
 </script>
 
 <template>
   <div class="space-y-6">
     <!-- WRITE COMMENTS -->
-    <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full">
+    <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full py-2">
       <div class="flex-shrink-0">
         <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
-      <div class="flex flex-col w-full">
-        <input
+      <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
+        <textarea
           type="text"
           placeholder="Write a comment"
-          class="w-full border-b border-[#CCCCCC] focus:outline-none focus:border-primary"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-9"
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"
@@ -164,9 +170,7 @@
 </template>
 
 <style>
-  input::placeholder {
-    color: #666666;
-    font-size: 14px;
-    font-weight: 500;
-  }
+  /* textarea {
+    resize: none;
+  } */
 </style>

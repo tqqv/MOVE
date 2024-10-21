@@ -15,9 +15,10 @@
   const childCommentsPage = ref({});
   const childCommentsPerPage = 5;
   const hasMoreChildComments = ref({});
+  const loadingRepliesForComment = ref({});
 
   const fetchComments = async () => {
-    const videoId = 1015530843;
+    const videoId = 1018146045;
     try {
       const response = await getAllComments(videoId, {
         page: currentPage.value,
@@ -46,7 +47,7 @@
           }
         });
 
-        // Cập nhật tổng số bình luận con cho các bình luận đã có
+        // Cập nhật tổng số bình luận con cho     bình luận đã có
         comments.value.forEach((comment) => {
           if (!totalRepliesCount.value[comment.id]) {
             totalRepliesCount.value[comment.id] = comment.totalRepliesCount || 0;
@@ -69,7 +70,7 @@
       page: childCommentsPage.value[parentId],
       pageSize: childCommentsPerPage,
     };
-
+    loadingRepliesForComment.value[parentId] = true;
     try {
       const response = await getAllChildComments(parentId, pageInfo);
 
@@ -97,6 +98,8 @@
       }
     } catch (error) {
       console.error('Error fetching child comments:', error);
+    } finally {
+      loadingRepliesForComment.value[parentId] = false;
     }
   };
 
@@ -144,10 +147,10 @@
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
-      :loadMoreChildComments="() => loadMoreChildComments(comment.id)"
       :childComments="childComments"
       :totalRepliesCount="totalRepliesCount"
       :hasMoreChildComments="hasMoreChildComments[comment.id]"
+      :loadingReplies="loadingRepliesForComment[comment.id]"
     />
 
     <div
