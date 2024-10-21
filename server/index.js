@@ -11,6 +11,7 @@ const commentRouter = require("./routes/commentRoute.js");
 const userRouter = require("./routes/userRoute.js");
 const cateRouter = require("./routes/categoryRoute.js");
 const lvWorkoutRouter = require("./routes/levelWorkoutRoute.js");
+const ratingRouter = require("./routes/ratingRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -35,6 +36,7 @@ app.use("/api/comment", commentRouter);
 app.use("/api/user", userRouter);
 app.use("/api/category", cateRouter);
 app.use("/api/levelWorkout", lvWorkoutRouter);
+app.use("/api/rating", ratingRouter);
 
 
 // connect DB
