@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { getProfile, editProfile, changePassword, requestChannel, getRequestStatusById, followChannel, listSubscribeOfUser, getAllInforFollow, isExistUsername, viewUser } = require("../services/userService");
+const { getProfile, editProfile, changePassword, requestChannel, getRequestStatusById, followChannel, listSubscribeOfUser, getAllInforFollow, isExistUsername, getProfileByUserName } = require("../services/userService");
 
 const getProfileController = async (req, res, next) => {
   const userId = req.user.id;
@@ -66,9 +66,9 @@ const checkExistUsername = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const viewUserController = async(req, res, next) => {
+const getProfileByUserNameController = async(req, res, next) => {
   const username = req.params.username;
-  const result = await viewUser(username);
+  const result = await getProfileByUserName(username);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -83,5 +83,5 @@ module.exports = {
   getListSubscribeOfUser,
   getAllInforFollowController,
   checkExistUsername,
-  viewUserController
+  getProfileByUserNameController
 }

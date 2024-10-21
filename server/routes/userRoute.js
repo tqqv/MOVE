@@ -1,10 +1,10 @@
 var express = require("express");
 const userRouter = express.Router();
 
-const { getProfileController, editProfileController, changePasswordController, requestChannelController, getRequestChannelController, getListSubscribeOfUser, followChannelController, getAllInforFollowController, checkExistUsername, viewUserController } = require("../controllers/userController")
+const { getProfileController, editProfileController, changePasswordController, requestChannelController, getRequestChannelController, getListSubscribeOfUser, followChannelController, getAllInforFollowController, checkExistUsername, getProfileByUserNameController } = require("../controllers/userController")
 const { verifyUser } = require("../middlewares/verifyToken")
 
-
+userRouter.get("/getProfileByUsername/:username", getProfileByUserNameController)
 userRouter.get("/getProfile", verifyUser, getProfileController)
 
 userRouter.patch("/editProfile", verifyUser, editProfileController)

@@ -491,6 +491,42 @@ const isExistUsername = async(userName) => {
   }
 }
 
+const getProfileByUserName = async(username) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: username
+      },
+      include: [{
+        model: Channel,
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM subscribes
+              WHERE subscribes.channelId = Channel.id
+            )`),
+            'followCount'
+          ]
+        ],
+      }],
+      attributes: ['username', 'avatar']
+    })
+
+    return {
+      status: 200,
+      data: user,
+      message: "Get profile successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   getProfile,
   editProfile,
@@ -501,5 +537,5 @@ module.exports = {
   followChannel,
   getAllInforFollow,
   isExistUsername,
-  viewUser
+  getProfileByUserName
 }
