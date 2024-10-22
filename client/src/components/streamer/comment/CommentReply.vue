@@ -1,7 +1,7 @@
 <script setup>
   import verified from '@/components/icons/verified.vue';
-  import dislike from '@/components/icons/dislike.vue';
-  import like from '@/components/icons/like.vue';
+  import Dislike from '@/components/icons/dislike.vue';
+  import Like from '@/components/icons/like.vue';
   import { formatDate } from '@/utils/calculatorDate';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   const props = defineProps({
@@ -12,8 +12,6 @@
     currentPage: Number,
     totalPage: Number,
   });
-
-
 </script>
 
 <template>
@@ -44,13 +42,26 @@
         {{ reply.content }}
       </p>
       <!-- LIKE DISLIKE -->
-      <div class="flex gap-x-6 mt-2">
-        <div class="flex items-center gap-x-3">
-          <like class="cursor-pointer hover:scale-110" fill="white" stroke="#13ceb3" />
+      <div class="flex gap-4 items-center mt-2">
+        <div class="flex gap-2" @click="toggleLike">
+          <Like
+            class="cursor-pointer"
+            :fill="reply.isLike ? '#13CEB3' : 'white'"
+            :stroke="reply.isLike ? 'none' : '#13D0B4'"
+          />
+          <span>{{ reply.like }}</span>
         </div>
-        <div>
-          <dislike class="cursor-pointer mt-2 hover:scale-110" fill="white" stroke="#13ceb3" />
+        <div class="flex gap-2" @click="toggleDislike">
+          <Dislike
+            class="cursor-pointer mt-1"
+            :fill="reply.isDisLike ? '#13CEB3' : 'white'"
+            :stroke="reply.isDisLike ? 'none' : '#13D0B4'"
+          />
+          <span>{{ reply.dislike }}</span>
         </div>
+        <span class="font-semibold text-sm text-primary cursor-pointer" @click="toggleReply">
+          Reply
+        </span>
       </div>
     </div>
   </div>
