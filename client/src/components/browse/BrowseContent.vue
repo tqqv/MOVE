@@ -5,8 +5,8 @@
   const tabBrowse = ref([
     { id: 1, title: 'Categories', link: '/browse/categories' },
     { id: 2, title: 'Top videos', link: '/browse/top-videos' },
-    { id: 3, title: 'Most viewed', link: '/browse/most-viewed' },
-    { id: 4, title: 'Highest rated', link: '/browse/highest-rated' },
+    { id: 3, title: 'Most viewed', link: '/browse/most_viewed' },
+    { id: 4, title: 'Highest rated', link: '/browse/highest_rated' },
   ]);
 </script>
 

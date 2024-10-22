@@ -30,6 +30,9 @@
   const totalPage = ref();
   const pageSize = ref(12);
 
+  const categoryOptions = computed(() => categoriesStore.categoryOptions);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
+
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(props.sortByOptions[0].value);
@@ -68,7 +71,7 @@
     }
   };
 
-watch(categoryOptions, (newOptions) => {
+  watch(categoryOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectCategoryOptions.value) {
       selectCategoryOptions.value = newOptions[0].value || '';
     }
