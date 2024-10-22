@@ -49,7 +49,7 @@
   }
 
   .btn {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px] leading-none ;
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px] leading-none;
   }
 
   .notification_custom {
@@ -95,13 +95,17 @@
   .normal_password {
     @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary
   }
- 
+
   .password_custom {
     @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg
   }
 
   .error_message {
     @apply text-[11px] italic text-red font-semibold pl-1
+  }
+
+  .tab_custom {
+    @apply w-full sm:w-1/2 md:w-28 text-center py-4 border-b-4 border-transparent whitespace-nowrap text-[#64748b] font-medium cursor-pointer hover:text-[#334155] transition-all duration-300 ease-in-out
   }
 }
 

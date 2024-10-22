@@ -363,14 +363,19 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
     attributes: attributes,
     include: [
       {
+        model: Channel,
+        as: 'channel',
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+      },
+      {
         model: LevelWorkout,
-        attributes: [],
+        attributes: ['levelWorkout'],
         as: "levelWorkout",
         where: level ? {levelWorkout: level} : {}
       },
       {
         model: Category,
-        attributes: [],
+        attributes: ['title'],
         as: 'category',
         where: category ? {title: category} : {}
       }
@@ -477,7 +482,7 @@ const deleteVideoService = async (videoId) => {
 
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
-    const listVideo = await Video.findAll({
+    const listVideo = await Video.findAndCountAll({
       attributes: {
         include: [
           [
@@ -516,7 +521,10 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
 
     return {
       status: 200,
-      data: listVideo,
+      data: {
+        listVideo,
+        totalPages: Math.ceil(listVideo.count/pageSize)
+      },
       message: "Get list video successfully"
     }
   } catch (error) {
@@ -691,7 +699,72 @@ const analyticsVideoById = async(videoId, channelId) => {
       message: "Get analytics by video successfully."
     };
   } catch (error) {
-    console.log(error);
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+};
+
+const getListVideoByChannel = async(channelId, page, pageSize) => {
+  try {
+    const listVideo =  await Video.findAndCountAll({
+      where: {channelId: channelId},
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ]
+        ]
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: LevelWorkout,
+          attributes: ['levelWorkout'],
+          as: "levelWorkout",
+          // where: level ? {levelWorkout: level} : {}
+        },
+        {
+          model: Category,
+          attributes: ['title'],
+          as: 'category',
+          // where: category ? {title: category} : {}
+        }
+      ],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    if(!listVideo) {
+      return {
+        status: 404,
+        data: null,
+        message: "Videos of channel not found."
+      }
+    }
+
+    return {
+      status: 200,
+      message: 'Videos fetched successfully',
+      data: {
+        listVideo,
+        totalPages: Math.ceil(listVideo.count/pageSize)
+      }
+    };
+  } catch (error) {
+    console.log(error)
     return {
       status: 500,
       data: null,
@@ -714,4 +787,5 @@ module.exports = {
   deleteVideoService,
   getListVideoByFilter,
   analyticsVideoById,
+  getListVideoByChannel,
 };

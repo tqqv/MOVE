@@ -11,7 +11,8 @@ const {
   getVideoByVideoIdService,
   deleteVideoService,
   getListVideoByFilter,
-  analyticsVideoById
+  analyticsVideoById,
+  getListVideoByChannel,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -116,18 +117,21 @@ const getVideoByVideoId = async (req, res, next) => {
 };
 
 const deleteVideo = async (req, res, next) => {
-  const { videoId } = req.body;
+  const { videoId } = req.params;
+  console.log(videoId);
   try {
     const result = await deleteVideoService(videoId);
+    console.log(result);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
+    console.log(error);
     responseHandler(error.status, error.data, error.message)(req, res, next);
   }
 }
 
 const getListVideoByFilterController = async(req, res, next) => {
   const page = req.query.page || 1;
-  const pageSize = req.query.pageSize || 10;
+  const pageSize = req.query.pageSize || 12;
   const level = req.query.level;
   const category = req.query.category;
   // updateAt = desc same as Most recent
@@ -140,10 +144,20 @@ const getListVideoByFilterController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+
 const analyticsVideoByIdController = async(req, res, next) => {
   const videoId = req.params.videoId
   const channelId = req.user.channelId
   const result = await analyticsVideoById(videoId, channelId)
+  
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListVideoByChannelController = async(req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const channelId = req.user.channelId;
+  const result = await getListVideoByChannel(channelId, page, pageSize)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -161,5 +175,6 @@ module.exports = {
   getVideoByVideoId,
   deleteVideo,
   getListVideoByFilterController,
-  analyticsVideoByIdController
+  analyticsVideoByIdController,
+  getListVideoByChannelController,
 };

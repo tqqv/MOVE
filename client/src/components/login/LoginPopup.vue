@@ -1,7 +1,6 @@
 <script setup>
   import { ref, computed, onMounted, watch } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
-  import facebook from '@/components/icons/facebookLogin.vue';
   import { usePopupStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { postLogin } from '@/services/auth';
@@ -53,10 +52,6 @@
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.open(url, '_self');
   };
-  const handleFacebookLogin = () => {
-    const url = `${import.meta.env.VITE_API_URL}auth/facebook`;
-    window.location.href = url;
-  };
 
   // onMounted(async () => {
   //   try {
@@ -82,17 +77,6 @@
         <gmail class="mr-3" />
       </span>
       <span class="flex-grow text-center">Login with Google</span>
-    </button>
-    <!-- Login Facebook  -->
-
-    <button
-      @click="handleFacebookLogin"
-      class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
-    >
-      <span class="flex-shrink-0">
-        <facebook class="mr-3" />
-      </span>
-      <span class="flex-grow text-center">Login with Facebook</span>
     </button>
     <div class="flex items-center w-full">
       <hr class="flex-grow border-t border-[#CCCCCC]" />

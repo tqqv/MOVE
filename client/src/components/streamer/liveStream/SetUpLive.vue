@@ -1,146 +1,109 @@
 <script setup>
+  import { ref, onMounted, watch, computed } from 'vue';
+  import { copyToClipboard } from '@/utils/copyToClipboard';
+  import Filter from '@components/Filter.vue';
   import Camera from '@/components/icons/camera.vue';
   import Key from '@/components/icons/key.vue';
   import LiveStream from '@/components/icons/liveStream.vue';
-  import Micro from '@/components/icons/micro.vue';
-  import ScreenShare from '@/components/icons/screenShare.vue';
-  import { copyToClipboard } from '@/utils/copyToClipboard';
-  import Dropdown from 'primevue/dropdown';
-  import { ref, onMounted, watch } from 'vue';
-  import { startScreenShare, stopScreenShare } from '../../../utils/setUpDevice';
+  import { useCategoriesStore } from '@/stores';
+  import { useLevelWorkoutStore } from '@/stores';
+  import InLiveStream from './InLiveStream.vue';
+  import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
+  import EndLiveStream from './EndLiveStream.vue';
+  import EmptyImage from '@/components/icons/emptyImage.vue';
 
-  const video = ref(null);
+  const categoriesStore = useCategoriesStore();
+  const levelWorkoutStore = useLevelWorkoutStore();
+  const isLoadingAvatar = ref(false);
+
+  const props = defineProps({
+    statusLive: String,
+    connectOBS: Boolean,
+  });
+
   const streamKey = ref('HE329132-32342MfS342-3rwer');
   const title = ref('');
   const description = ref('');
-  const isCameraSelected = ref(true);
-  const isLiveStreamSelected = ref(false);
-  const isScreenSharing = ref(false);
-  const connectCamera = ref(false);
-
-  const emit = defineEmits(['updateConnectCamera']);
-
+  const isCameraSelected = ref(false);
+  const isLiveStreamSelected = ref(true);
+  const thumbnail = ref('');
   // COPYTOCLIPBOARD
   const handleCopyStreamKey = () => {
-    copyToClipboard(streamKey, 'Successfully copied to clipboard', 'Failed copied to clipboard');
+    copyToClipboard(
+      streamKey.value,
+      'Successfully copied to clipboard',
+      'Failed copied to clipboard',
+    );
   };
 
-  //   CONNECT CAMERA BROWSER
-  const startCamera = async () => {
+  // UPLOAD IMAGE
+  const fileInputRef = ref(null);
+
+  const handleFileInputClick = () => {
+    fileInputRef.value.click();
+  };
+
+  const handleSelectedFile = async (e) => {
+    const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
+
+    isLoadingAvatar.value = true;
+
     try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        video.value.srcObject = stream;
-        connectCamera.value = true;
-        emit('updateConnectCamera', connectCamera.value);
+      const data = await uploadAvatar(selectedFile);
+      if (data.secure_url) {
+        // profileData.value.avatar = data.secure_url;
+        thumbnail.value = data.secure_url;
       } else {
-        console.error('Dont support media devices');
-        connectCamera.value = false;
-        emit('updateConnectCamera', connectCamera.value);
+        isLoadingAvatar.value = false;
+        console.error(error);
       }
-    } catch (err) {
-      console.error('Fail: ' + err);
-      console.log(connectCamera.value);
+    } catch (error) {
+      isLoadingAvatar.value = false;
+      console.error(error);
+    } finally {
+      isLoadingAvatar.value = false;
     }
   };
 
-  //   SELECT CAMERA OR OBS
-  const selectCamera = () => {
-    isCameraSelected.value = true;
-    isLiveStreamSelected.value = false;
-    startCamera();
-  };
+  // SELECT OPTION
+  const categoryOptions = computed(() => categoriesStore.categoryOptions);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
 
-  const selectStreaming = () => {
-    isLiveStreamSelected.value = true;
-    isCameraSelected.value = false;
-  };
+  const selectCategoryOptions = ref('');
+  const selectLevelWorkoutOptions = ref('');
 
-  // SHARE SCREEN
-  const startSharing = async () => {
-    if (isScreenSharing.value) {
-      stopScreenShare(video.value);
-      video.value.srcObject = null;
-      isScreenSharing.value = false;
-    } else {
-      await startScreenShare(video.value);
-      isScreenSharing.value = true;
+  // CATEGORIES VS LEVEL WORKOUT
+
+  watch(categoryOptions, (newOptions) => {
+    if (newOptions.length > 0 && !selectCategoryOptions.value) {
+      selectCategoryOptions.value = newOptions[0].value || '';
     }
-  };
-  onMounted(() => {
-    startCamera();
   });
-  watch(connectCamera, (newVal) => {
-    emit('updateConnectCamera', newVal);
+
+  watch(levelWorkoutOptions, (newOptions) => {
+    if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
+      selectLevelWorkoutOptions.value = newOptions[0].value || '';
+    }
+  });
+
+  onMounted(async () => {
+    await categoriesStore.fetchCategories();
+    await levelWorkoutStore.fetchLevelWorkout();
   });
 </script>
 <template>
   <section class="">
     <div class=" ">
       <!-- SCREEN LIVE -->
-      <div class="px-8 flex items-center flex-col">
-        <!-- CAMERA -->
-        <div v-if="isCameraSelected" class="w-full flex justify-center">
-          <!-- SCREEN -->
-          <div
-            class="flex flex-col max-w-[1028px] basis-full justify-center rounded-lg shadow-md bg-white mb-6 overflow-hidden"
-          >
-            <!-- CONNECT CAMERA SUCCESS -->
-            <div v-show="connectCamera" class="p-4">
-              <div class="relative w-full">
-                <video
-                  class="rounded-md"
-                  ref="video"
-                  width="100%"
-                  height="480"
-                  autoplay
-                  playsinline
-                ></video>
-                <div class="absolute top-3 left-3 bg-red text-white px-3 py-1 rounded-md text-sm">
-                  <span>Live</span>
-                </div>
-              </div>
-            </div>
-            <!-- CONNECT CAMERA FAIL -->
-            <div v-show="!connectCamera" class="flex w-full p-4">
-              <div class="relative bg-black h-[560px] rounded-md w-full">
-                <div class="flex justify-center items-center h-full flex-col gap-y-3">
-                  <Camera fill="#fff" width="38px" height="38px" />
-                  <span class="text-white">Allow access to camera </span>
-                  <span class="text-body text-sm"
-                    >Your browser is not allowing Live Producer access to your camera. Go to your
-                    browser settings and allow Camera permission.
-                  </span>
-                  <div
-                    @click="startCamera"
-                    class="px-4 py-2 mt-2 text-white bg-body rounded-md text-sm cursor-pointer"
-                  >
-                    Retry
-                  </div>
-                </div>
-                <div class="absolute top-3 left-3 bg-red text-white px-3 py-1 rounded-md text-sm">
-                  <span>Live</span>
-                </div>
-              </div>
-            </div>
-            <div class="pt-2 pb-6 px-8">
-              <div class="flex w-full items-center justify-between gap-x-3">
-                <p class="font-semibold">Your screen</p>
-                <div
-                  class="p-2 flex justify-center items-center rounded-full cursor-pointer hover:bg-gray-light"
-                >
-                  <i class="pi pi-arrow-down-left-and-arrow-up-right-to-center text-body"></i>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div v-if="statusLive === 'beforeLive'" class="px-8 flex items-center flex-col">
         <!-- STREAMING SOFTWARE -->
         <div v-if="isLiveStreamSelected" class="w-full flex justify-center">
           <div
             class="flex flex-col max-w-[1028px] basis-full justify-center rounded-lg shadow-md bg-white mb-6 overflow-hidden"
           >
-            <div class="flex w-full p-4">
+            <!-- SCREEN DONT" CONNET OBS -->
+            <div v-if="!props.connectOBS" class="flex w-full p-4">
               <div class="relative bg-black h-[560px] rounded-md w-full">
                 <div class="flex justify-center items-center h-full flex-col gap-y-3">
                   <LiveStream />
@@ -151,6 +114,11 @@
                 </div>
               </div>
             </div>
+            <!-- SCREEN CONNECT OBCS -->
+            <div v-if="props.connectOBS" class="flex w-full p-4">
+              <LiveStreamScreen />
+            </div>
+            <!-- YOUR SCREEN -->
             <div class="pt-2 pb-6 px-8">
               <div class="flex w-full items-center justify-between gap-x-3">
                 <p class="font-semibold">Your screen</p>
@@ -171,6 +139,7 @@
             <div class="bg-white rounded-lg shadow-md p-4 overflow-hidden">
               <h1 class="font-semibold">Select a video source</h1>
               <div class="flex justify-center gap-x-3 my-5">
+                <!-- CAMERA -->
                 <div class="w-1/2">
                   <div
                     class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
@@ -188,6 +157,7 @@
                   </div>
                   <h1 class="text-xs mt-2 text-center">Webcam</h1>
                 </div>
+                <!-- OBS -->
                 <div class="w-1/2">
                   <div
                     class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
@@ -213,40 +183,7 @@
               </p>
             </div>
             <!-- CAMERA SOFTWARE SETUP -->
-            <div v-if="isCameraSelected" class="bg-white rounded-lg shadow-md p-4 overflow-hidden">
-              <h1 class="font-semibold mb-2">Camera controls</h1>
-              <p class="text-xs text-body">
-                Check that your camera and microphone inputs are properly working before going live.
-              </p>
-              <div class="flex flex-col gap-y-3 my-4">
-                <div class="flex items-center gap-x-3">
-                  <Camera />
-                  <Dropdown
-                    optionLabel="name"
-                    class="w-full border-gray-dark py-1 custom-dropdown text-xs hover:bg-gray-light"
-                  ></Dropdown>
-                </div>
-                <div class="flex items-center gap-x-3">
-                  <Micro />
-                  <div class="flex gap-x-4 w-full">
-                    <Dropdown
-                      optionLabel="name"
-                      class="w-full border-gray-dark py-1 custom-dropdown text-xs hover:bg-gray-light"
-                    ></Dropdown>
-                  </div>
-                </div>
-                <div class="flex items-center gap-x-3">
-                  <ScreenShare />
-                  <button
-                    @click="startSharing"
-                    class="w-full text-center text-sm py-2 px-4 whitespace-nowrap border-gray-dark border rounded-md font-medium hover:bg-gray-light"
-                    :class="{ 'bg-primary text-white hover:bg-primary': isScreenSharing }"
-                  >
-                    {{ isScreenSharing ? 'Stop screen share' : 'Start share screen' }}
-                  </button>
-                </div>
-              </div>
-            </div>
+
             <!-- STREAMING SOFTWARE SETUP -->
             <div
               v-if="isLiveStreamSelected"
@@ -275,23 +212,87 @@
               </div>
             </div>
           </div>
-          <!-- RIGHT  -->
+          <!-- RIGHT - DETAIL POST -->
           <div
             class="flex flex-col max-w-[500px] self-start basis-1/2 p-4 bg-white rounded-lg shadow-md w-fit"
           >
             <h1 class="font-semibold mb-4">Add post details</h1>
             <div class="flex flex-col gap-y-4">
               <input type="text" class="input_custom" v-model="title" placeholder="Title" />
-              <input
+              <textarea
                 type="text"
-                class="input_custom"
+                class="input_custom h-32 resize-none"
                 v-model="description"
                 placeholder="Description"
+              ></textarea>
+            </div>
+            <div class="flex flex-col my-4 gap-y-3">
+              <h1 class="font-semibold">Categories</h1>
+              <Filter
+                :class="'w-full py-1 border !border-gray-dark'"
+                :options="categoryOptions"
+                @change="selectCategoryOptions = $event.title"
               />
+            </div>
+            <div class="flex flex-col mb-6 gap-y-3">
+              <h1 class="font-semibold">Level workout</h1>
+              <Filter
+                :class="'w-full py-1 !border-gray-dark'"
+                :options="levelWorkoutOptions"
+                @change="selectLevelWorkoutOptions = $event.title"
+              />
+            </div>
+            <!-- UPLOAD THUMBNAIL -->
+            <div class="flex flex-col gap-y-3">
+              <div class="flex justify-between">
+                <h1 class="font-semibold">Thumbnail</h1>
+                <input
+                  type="file"
+                  id="myFile"
+                  name="filename"
+                  ref="fileInputRef"
+                  class="hidden"
+                  @change="handleSelectedFile"
+                />
+
+                <span
+                  class="text-primary cursor-pointer text-[14px] w-fit"
+                  @click="handleFileInputClick"
+                >
+                  Upload thumbnail
+                </span>
+              </div>
+              <div class="relative">
+                <div
+                  v-show="isLoadingAvatar"
+                  class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                >
+                  <div class="custom-spinner w-8"></div>
+                </div>
+                <!-- IMAGE THUMBNAIL -->
+                <img
+                  v-if="thumbnail"
+                  :src="thumbnail"
+                  class="w-full rounded-md object-cover"
+                  :class="{ 'opacity-20': isLoadingAvatar }"
+                />
+                <!-- DONT THUMBNAIL -->
+                <div
+                  v-else
+                  class="flex flex-col items-center justify-center rounded-md py-20 bg-gray-light/40 border-2 border-dashed border-gray-dark"
+                >
+                  <EmptyImage />
+                </div>
+              </div>
             </div>
           </div>
         </div>
+        <!-- IN LIVE STREAM -->
       </div>
+      <!-- INLIVESTREAM -->
+      <InLiveStream v-if="statusLive === 'inLive'" />
+      <!-- END LIVE STREAM -->
+      <EndLiveStream v-if="statusLive === 'afterLive'" />
     </div>
   </section>
 </template>

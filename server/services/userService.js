@@ -1,5 +1,6 @@
+const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, sequelize } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 
 
@@ -100,6 +101,39 @@ const editProfile = async (id, data) => {
       data: null,
       message: error.message
     }
+  }
+}
+
+const viewUser = async(username) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: username
+      },
+      attributes: ["username", "avatar"],
+    });
+
+    if (!user) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found."
+      };
+    }
+
+    return {
+      status: 200,
+      data: {
+        profile: user,
+      },
+      message: "Get profile user successfully"
+    }
+  } catch (error) {
+     return {
+       status: 500,
+       data: null,
+       message: error.message
+     }
   }
 }
 
@@ -339,7 +373,15 @@ const listSubscribeOfUser = async(userId) => {
       include: [{
         model: Channel,
         as: "followChannel",
-        attributes: ['channelName', 'avatar', 'popularCheck', 'isLive'],
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM subscribes
+              WHERE subscribes.channelId = followChannel.id
+            )`),
+            'followCount' // Alias to store the result as followCount
+          ]],
         include: [{
           model: User,
           attributes: ['username']
@@ -352,6 +394,7 @@ const listSubscribeOfUser = async(userId) => {
       message: "Get list channel you follow successfully."
     }
   } catch (error) {
+    console.log(error)
     return {
       status: 400,
       data: null,
@@ -448,6 +491,50 @@ const isExistUsername = async(userName) => {
   }
 }
 
+const getProfileByUserName = async(username) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: username
+      },
+      include: [{
+        model: Channel,
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck',
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM subscribes
+              WHERE subscribes.channelId = Channel.id
+            )`),
+            'followCount'
+          ]
+        ],
+      }],
+      attributes: ['username', 'avatar']
+    })
+
+    if(!user) {
+      return{
+        status: 404,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    return {
+      status: 200,
+      data: user,
+      message: "Get profile successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   getProfile,
   editProfile,
@@ -457,5 +544,6 @@ module.exports = {
   listSubscribeOfUser,
   followChannel,
   getAllInforFollow,
-  isExistUsername
+  isExistUsername,
+  getProfileByUserName
 }

@@ -14,10 +14,12 @@ const getAllComments = (videoId, pageInfo) => {
   });
 };
 // GetAll comment của 1 parent
-const getAllChildComments = (parentId) => {
+const getAllChildComments = (parentId, pageInfo) => {
   return axios.get('/comment', {
     params: {
       parentId: parentId,
+      page: pageInfo.page,
+      pageSize: pageInfo.pageSize,
     },
   });
 };
@@ -32,8 +34,8 @@ const getAllCommentOfStreamer = async (streamerId, pageSize, currentPage, isResp
 
     if (isResponsed !== '') {
       params.isResponsed = isResponsed;
-    } 
-    if(sortBy !== ''){
+    }
+    if (sortBy !== '') {
       params.sortBy = sortBy;
     }
 
