@@ -1,10 +1,13 @@
-'use strict';
+"use strict";
+const { Model, Sequelize } = require("sequelize");
 
-/** @type {import('sequelize-cli').Migration} */
-module.exports = {
-  async up(queryInterface, Sequelize) {
-    // Tạo bảng Reports
-    await queryInterface.createTable('reports', {
+module.exports = (sequelize, DataTypes) => {
+  class Report extends Model {
+    static associate(models) {
+    }
+  }
+  Report.init(
+    {
       id: {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUID,
@@ -90,19 +93,12 @@ module.exports = {
         type: Sequelize.DATE,
         defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
       },
-      createdAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
-    });
-  },
-
-  async down(queryInterface, Sequelize) {
-    // Xóa bảng reports
-    await queryInterface.dropTable('reports');
-  },
+    },
+    {
+      sequelize,
+      modelName: "Report",
+      tableName: "reports",
+      timestamps: true,
+  });
+  return Report;
 };
