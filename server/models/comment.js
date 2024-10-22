@@ -89,7 +89,11 @@ module.exports = (sequelize, DataTypes) => {
         // },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
-      }
+      },
+      isBanned: {
+        type: DataTypes.Boolean,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

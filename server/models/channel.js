@@ -92,6 +92,14 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING(255),
                 allowNull: true,
             },
+            isBanned: {
+                type: DataTypes.Boolean,
+                defaultValue: false,
+            },
+            isLivestreamAble: {
+                type: DataTypes.Boolean,
+                defaultValue: false,
+            },
 
   },
   {

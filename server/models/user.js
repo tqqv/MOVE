@@ -142,7 +142,11 @@ module.exports = (sequelize, DataTypes) => {
       referralCode: {
         type: DataTypes.STRING(6),
         unique: true,
-      }
+      },
+      isBanned: {
+        type: DataTypes.Boolean,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

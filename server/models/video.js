@@ -115,6 +115,10 @@ module.exports = (sequelize, DataTypes) => {
           allowNull: false,
           defaultValue: 'private',
         },
+        isBanned: {
+          type: DataTypes.Boolean,
+          defaultValue: false,
+        },
       },
       {
         sequelize,
