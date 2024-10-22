@@ -1,6 +1,7 @@
 <script setup>
   import sendChat from '@icons/sendChat.vue';
   import '@/custom.css';
+  import { ref } from 'vue';
   const chatMessages = [
     {
       id: 1,
@@ -97,16 +98,32 @@
   const props = defineProps({
     isStreamer: Boolean,
   });
+
+  const openLiveChat = ref(true);
+  const handleOpenLiveChat = () => {
+    openLiveChat.value = !openLiveChat.value;
+  };
 </script>
 
 <template>
-  <div class="max-w-[343px] min-w-[323px] bg-white flex justify-between flex-col text-[#777777]">
+  <div
+    v-if="openLiveChat"
+    class="max-w-[343px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
+    :class="isStreamer ? 'h-full' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+  >
     <!-- TOPBAR -->
     <div
       class="flex justify-between items-center bg-black text-white px-4 py-4"
       :class="{ ' rounded-t-md': isStreamer }"
     >
-      <i class="pi pi-arrow-right text-[1.1rem] cursor-pointer"></i>
+      <div
+        v-if="!isStreamer"
+        class="flex cursor-pointer p-2 justify-center items-center hover:bg-[#FFFFFF21] rounded-md"
+        @click="handleOpenLiveChat"
+        v-tooltip="'Collapse'"
+      >
+        <i class="pi pi-arrow-right text-[1.1rem]"></i>
+      </div>
       <h2 class="uppercase text_subTitle text-white text-[13px]">live chat</h2>
       <i class="pi pi-user text-[1.1rem] cursor-pointer"></i>
     </div>
@@ -115,7 +132,7 @@
       :class="{ 'border-none shadow-md rounded-md': isStreamer }"
     >
       <!-- CONTENT -->
-      <div class="h-[539px] pb-2">
+      <div class="h-[439px] flex-grow pb-2">
         <div
           class="flex flex-col-reverse px-3 py-3 h-full overflow-y-auto overflow-x-hidden scrollbar-custom"
         >
@@ -150,5 +167,13 @@
         </form>
       </div>
     </div>
+  </div>
+  <div
+    v-else
+    class="fixed top-20 right-0 m-3 p-3 bg-transparent rounded-md flex justify-center items-center cursor-pointer hover:bg-[#FFFFFF21]"
+    v-tooltip="'Expand'"
+    @click="handleOpenLiveChat"
+  >
+    <i class="pi pi-arrow-left text-white"></i>
   </div>
 </template>

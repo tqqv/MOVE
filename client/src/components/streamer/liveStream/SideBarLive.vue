@@ -32,8 +32,8 @@
   };
 
   const menuItems = [
-    { name: 'Stream setup', icon: LiveStream, link: '/live/stream-setup' },
-    { name: 'Dashboard', icon: AnalyticsIcon, link: '/live/dashboard-live' },
+    { name: 'Stream setup', icon: LiveStream, link: '/streaming/stream-setup' },
+    { name: 'Dashboard', icon: AnalyticsIcon, link: '/streaming/dashboard-live' },
   ];
 
   const handleShow = () => {

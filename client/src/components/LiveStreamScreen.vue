@@ -1,8 +1,8 @@
 <script setup></script>
 <template>
-  <div class="relative min-h-[560px] w-full max-w-full">
+  <div class="relative min-h-[560px] w-full max-w-full bg-black flex justify-center items-center ">
     <video
-      class="w-full h-full object-cover"
+      class="w-[80%] h-full object-cover"
       src="https://www.w3schools.com/html/mov_bbb.mp4"
       controls
     ></video>
