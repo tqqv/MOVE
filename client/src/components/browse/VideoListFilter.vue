@@ -37,7 +37,8 @@
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(props.sortByOptions[0].value);
   const selectedOrder = ref(props.sortByOptions[0].order);
-
+  const categoryOptions = computed(() => categoriesStore.categoryOptions);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
   const onPageChange = (event) => {
     const newPage = event.page + 1;
     if (newPage <= totalPage.value) {
