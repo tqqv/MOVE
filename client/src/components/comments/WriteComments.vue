@@ -2,7 +2,6 @@
   import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
   import EmojiPicker from 'vue3-emoji-picker';
   import { postComments } from '@/services/comment';
-  import { getProfile } from '@/services/user';
   import { useUserStore } from '@/stores';
 
   const isPickerVisible = ref(false);
@@ -28,20 +27,26 @@
   });
 
   const parentId = ref(props.commentId || null);
-
   const showActions = ref(false);
+
   const handleCommentInput = (event) => {
-    commentText.value = event.target.value;
+    commentText.value = event.target.innerText; // Sử dụng innerText cho contenteditable
   };
+
   const addEmoji = (emoji) => {
     commentText.value += emoji.i;
+    const commentInput = document.getElementById('commentInput');
+    commentInput.innerText = commentText.value;
   };
+
   const handleFocus = () => {
     showActions.value = true;
   };
+
   const togglePicker = () => {
     isPickerVisible.value = !isPickerVisible.value;
   };
+
   const handleSend = async () => {
     const data = { content: commentText.value, parentId: parentId.value };
     console.log(data);
@@ -56,6 +61,7 @@
         console.log('Comment created successfully:', response.data.data);
 
         commentText.value = '';
+        commentInput.innerText = '';
         showActions.value = false;
         const newComment = {
           ...response.data.data,
@@ -78,8 +84,12 @@
   const handleCancel = () => {
     commentText.value = '';
     showActions.value = false;
+    const commentInput = document.getElementById('commentInput');
+    commentInput.innerText = ''; // Xóa nội dung của <div>
   };
+
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
+
   const handleClickOutside = (event) => {
     const emojiPicker = document.querySelector('.emoji-picker');
     const button = document.querySelector('.pi-face-smile');
@@ -92,25 +102,24 @@
       isPickerVisible.value = false;
     }
   };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && isCommentNotEmpty.value) {
+      event.preventDefault(); // Ngăn chặn dòng mới khi nhấn Enter
       handleSend();
     }
   };
+
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
     if (!avatar.value) {
       userStore.fetchUserProfile();
     }
   });
+
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
   });
-  // onMounted(() => {
-  //   if (props.replyToUsername) {
-  //     commentText.value = `@${props.replyToUsername} `;
-  //   }
-  // });
 </script>
 
 <template>
@@ -121,15 +130,15 @@
         <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
-        <textarea
-          type="text"
+        <div
+          id="commentInput"
+          contenteditable="true"
           placeholder="Write a comment"
-          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-9"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-9 min-h-[36px]"
           @focus="handleFocus"
           @input="handleCommentInput"
-          v-model="commentText"
           @keydown="handleKeyDown"
-        />
+        ></div>
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
           <div class="relative">
             <button
@@ -170,7 +179,9 @@
 </template>
 
 <style>
-  /* textarea {
-    resize: none;
-  } */
+  [contenteditable='true']:empty:before {
+    content: attr(placeholder);
+    pointer-events: none;
+    display: block;
+  }
 </style>

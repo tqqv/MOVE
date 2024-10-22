@@ -104,7 +104,13 @@
 </script>
 
 <template>
-  <div class="flex gap-x-4">
+  <div
+    class="flex gap-x-4"
+    :class="{
+      'pl-6 py-4 px-3 border-l-2 border-gray-dark': comment.parentId !== null,
+      'border-l-4 border-primary/60 bg-primary/10 rounded-e-lg mb-1': comment.isNew,
+    }"
+  >
     <div class="flex-shrink-0">
       <img
         :src="comment?.userComments?.avatar"
@@ -194,9 +200,8 @@
         </div>
 
         <!-- Display child comments -->
-        <div v-if="isShowMoreChild">
+        <div class="mt-2" v-if="isShowMoreChild">
           <CommentItem
-            class="my-4"
             v-for="(child, index) in childComments[comment.id]?.slice(
               0,
               currentPageChild * commentsPerPageChild,
@@ -208,7 +213,7 @@
             :totalRepliesCount="props.totalRepliesCount"
           />
           <div
-            v-if="hasMoreChildComments"
+            v-if="hasMoreChildComments && !loadingReplies"
             class="font-bold text-[13px] text-primary cursor-pointer"
             @click="loadMoreChildComments"
           >

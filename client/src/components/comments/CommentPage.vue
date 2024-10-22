@@ -63,7 +63,7 @@
 
   const fetchChildComments = async (parentId) => {
     if (!childCommentsPage.value[parentId]) {
-      childCommentsPage.value[parentId] = 1; // Khởi tạo nếu chưa có
+      childCommentsPage.value[parentId] = 1;
     }
 
     const pageInfo = {
