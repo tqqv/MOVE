@@ -499,7 +499,7 @@ const getProfileByUserName = async(username) => {
       },
       include: [{
         model: Channel,
-        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck',
           [
             sequelize.literal(`(
               SELECT COUNT(*)
@@ -512,6 +512,14 @@ const getProfileByUserName = async(username) => {
       }],
       attributes: ['username', 'avatar']
     })
+
+    if(!user) {
+      return{
+        status: 404,
+        data: null,
+        message: "User not found"
+      }
+    }
 
     return {
       status: 200,

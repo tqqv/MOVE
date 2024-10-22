@@ -24,14 +24,19 @@
       type: String,
       required: true,
     },
-    totalFollower: {
-      type: Number,
+    usernameDetails: {
+      type: String,
+      required: true,
+    },
+    avatarDetails: {
+      type: String,
       required: true,
     },
     username: {
       type: String,
     },
   });
+
   const followedChannels = ref([]);
   const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
@@ -92,38 +97,44 @@
 </script>
 
 <template>
-  <div class="flex items-center space-x-4 mb-3 w-full">
+  <div class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
       <div class="relative inline-block">
         <div
           :class="[
-            'flex items-center justify-center  w-16 h-16 rounded-full',
-            channelDetails.isLive ? 'border-[3px] border-red' : '',
+            'flex items-center justify-center w-16 h-16 rounded-full',
+            channelDetails?.isLive ? 'border-[3px] border-red' : '',
           ]"
         >
           <img
-            :src="channelDetails.avatar"
+            :src="channelDetails ? channelDetails.avatar : avatarDetails"
             alt="Avatar"
             class="w-full h-full rounded-full object-cover p-[1.5px]"
           />
           <Live
-            v-if="channelDetails.isLive"
+            v-if="channelDetails?.isLive"
             class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
           />
         </div>
       </div>
       <div>
         <p class="text-[20px] flex items-center">
-          <span class="mr-2"> {{ channelDetails.channelName }} </span>
-          <Verified v-if="channelDetails.popularCheck" class="ml-1 mb-1 mr-2 fill-blue" />
-          <span class="whitespace-nowrap" v-if="channelDetails.isLive"> is now online</span>
-          <span class="whitespace-nowrap" v-else> is now offline</span>
+          <span class="mr-2">{{
+            channelDetails ? channelDetails.channelName : usernameDetails
+          }}</span>
+          <Verified v-if="channelDetails?.popularCheck" class="ml-1 mb-1 mr-2 fill-blue" />
+          <span v-if="channelDetails" class="whitespace-nowrap">
+            {{ channelDetails.isLive ? 'is now online' : 'is now offline' }}
+          </span>
         </p>
 
-        <p class="text-[14px] text-body">{{ totalFollower ?? 0 }} followers</p>
+        <p v-if="channelDetails" class="text-[14px] text-body">
+          {{ channelDetails.followCount ?? 0 }} followers
+        </p>
       </div>
     </div>
-    <div class="flex gap-x-9 items-center">
+    <!-- User Action -->
+    <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
         v-if="userStore.user?.username !== username"
         class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"

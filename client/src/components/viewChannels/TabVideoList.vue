@@ -106,20 +106,27 @@
 
 <template>
   <div class="space-y-2">
-    <div class="flex flex-grow items-center justify-between">
+    <div class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between">
       <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
-      <div class="flex gap-x-6">
+      <div class="flex flex-col lg:flex-row gap-6 mb-3">
         <Filter
           title="LEVEL"
           :options="levelWorkoutOptions"
           @change="selectLevelWorkoutOptions = $event.value"
+          class="flex-1"
         />
         <Filter
           title="CATEGORY"
           :options="categoryOptions"
           @change="selectCategoryOptions = $event.title"
+          class="flex-1"
         />
-        <Filter title="SORT BY" :options="sortByOptions" @change="handleSortChange" />
+        <Filter
+          title="SORT BY"
+          :options="sortByOptions"
+          @change="handleSortChange"
+          class="flex-1"
+        />
       </div>
     </div>
     <div v-if="videos.length > 0">

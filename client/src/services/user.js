@@ -3,10 +3,16 @@ import axios from './axios';
 const getProfile = () => {
   return axios.get('/user/getProfile');
 };
+// const checkAccount = async (username) => {
+//   try {
+//     const response = await axios.get(`/user/${username}`);
 
+//     return { success: response.data.success };
+//   } catch (error) {}
+// };
 const getProfilebyUsername = async (username) => {
   try {
-    const response = await axios.get(`/user/viewUser/${username}`);
+    const response = await axios.get(`/user/getProfileByUsername/${username}`);
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
