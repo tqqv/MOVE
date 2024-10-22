@@ -217,6 +217,7 @@
         ref="fileInputRef"
         class="hidden"
         @change="handleSelectedFile"
+        accept="image/*"
       />
 
       <span
