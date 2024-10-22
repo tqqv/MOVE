@@ -20,6 +20,11 @@ module.exports = (sequelize, DataTypes) => {
         as: 'userComments', // Alias cho rating của người dùng
       });
 
+      this.hasMany(models.ChannelMute, { foreignKey: 'targetAccountId', as: 'targetUserChannelMute' });
+      this.hasMany(models.Report, { foreignKey: 'targetAccountId', as: 'targetUserReport' });
+      this.hasMany(models.Report, { foreignKey: 'reporterId', as: 'userReport' });
+
+
       // Many-to-many Category - CategoryFollow
       this.belongsToMany(models.Category, {
         through: models.CategoryFollow,

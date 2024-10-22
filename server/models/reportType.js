@@ -4,6 +4,8 @@ const { Model, Sequelize } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class ReportType extends Model {
     static associate(models) {
+      this.hasMany(models.ChannelMute, { foreignKey: 'reportTypeId', as: 'channelMuteReportTypeId' });
+      this.hasMany(models.Report, { foreignKey: 'reportTypeId', as: 'reportReportTypeId' });
     }
   }
   ReportType.init(

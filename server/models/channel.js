@@ -18,6 +18,11 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'channelLivestreams', // Alias cho videos của người dùng
             });
 
+            this.hasMany(models.ChannelMute, { foreignKey: 'channelId', as: 'channelChannelMute' });
+
+            this.hasMany(models.Report, { foreignKey: 'targetChannelId', as: 'channelReport' });
+
+
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
                 foreignKey: 'userId',

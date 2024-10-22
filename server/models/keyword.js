@@ -5,6 +5,7 @@ const { Sequelize } = require(".");
 module.exports = (sequelize, DataTypes) => {
   class Keyword extends Model {
     static associate(models) {
+      this.hasMany(models.VideoKeyword, { foreignKey: 'keywordId', as: 'keywordVideoKeyword' });
     }
   }
   Keyword.init(

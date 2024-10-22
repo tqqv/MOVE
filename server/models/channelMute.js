@@ -4,6 +4,10 @@ const { Model, Sequelize } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class ChannelMute extends Model {
     static associate(models) {
+      this.belongsTo(models.Channel, { foreignKey: "channelId" });
+      this.belongsTo(models.Livestream, { foreignKey: "targetLivestreamId" });
+      this.belongsTo(models.User, { foreignKey: "targetAccountId" });
+      this.belongsTo(models.ReportType, { foreignKey: "reportTypeId" });
     }
   }
   ChannelMute.init(
