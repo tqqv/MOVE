@@ -30,7 +30,7 @@
   const showActions = ref(false);
 
   const handleCommentInput = (event) => {
-    commentText.value = event.target.innerText; // Sử dụng innerText cho contenteditable
+    commentText.value = event.target.value;
   };
 
   const addEmoji = (emoji) => {
@@ -61,7 +61,6 @@
         console.log('Comment created successfully:', response.data.data);
 
         commentText.value = '';
-        commentInput.innerText = '';
         showActions.value = false;
         const newComment = {
           ...response.data.data,
@@ -130,15 +129,15 @@
         <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
-        <div
-          id="commentInput"
-          contenteditable="true"
+        <input
+          type="text"
           placeholder="Write a comment"
-          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-9 min-h-[36px]"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-normal placeholder:text-black/50 w-full h-12"
           @focus="handleFocus"
           @input="handleCommentInput"
+          v-model="commentText"
           @keydown="handleKeyDown"
-        ></div>
+        />
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
           <div class="relative">
             <button
@@ -178,10 +177,4 @@
   </div>
 </template>
 
-<style>
-  [contenteditable='true']:empty:before {
-    content: attr(placeholder);
-    pointer-events: none;
-    display: block;
-  }
-</style>
+<style></style>
