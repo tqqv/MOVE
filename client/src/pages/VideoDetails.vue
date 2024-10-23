@@ -46,6 +46,7 @@
           popularCheck: res.data.data.channel.popularCheck,
           isLive: res.data.data.channel.isLive,
           bio: res.data.data.channel.bio,
+          followCount: res.data.data.channel.followCount,
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
@@ -93,12 +94,12 @@
           </TabPanels>
         </Tabs>
         <Divider />
-        <CommentPage />
+        <CommentPage :videoId="videoId" />
       </div>
     </div>
     <div class="col-span-4">
       <div class="p-[10px]">
-        <h3 class="font-bold mb-2">WATCH ALSO</h3>
+        <h3 class="font-bold mb-2 uppercase">watch also</h3>
         <div>
           <VideoCard
             v-if="videos"
