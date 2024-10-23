@@ -25,7 +25,6 @@ export const useVideoStore = defineStore('video', () => {
   };
   const setSelectLevelWorkoutOptions = (value) => {
     selectLevelWorkoutOptions.value = value;
-    console.log(value);
   };
   const setTab = (value) => {
     tab.value = value;
