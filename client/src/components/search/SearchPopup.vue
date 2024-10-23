@@ -67,9 +67,9 @@
               :alt="user.Channel?.channelName || user.username"
               class="size-9 object-cover rounded-full flex-shrink-0"
             />
-            <div class="flex gap-x-2" v-if="user.Channel">
-              <div>
-                <h1 class="truncate">{{ user.Channel.channelName }}</h1>
+            <div class="flex gap-x-2 truncate" v-if="user.Channel">
+              <div class="overflow-hidden">
+                <h1 class="truncate text-ellipsis">{{ user.Channel.channelName }}</h1>
                 <h1 class="truncate italic text-footer text-[11px]">@{{ user.username }}</h1>
               </div>
               <verified v-if="user.Channel?.popularCheck" class="fill-blue scale-90 mr-1" />

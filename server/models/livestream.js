@@ -5,6 +5,10 @@ module.exports = (sequelize, Sequelize) => {
   class Livestream extends Model {
     static associate(models) {
 
+      this.hasMany(models.ChannelMute, { foreignKey: 'targetLivestreamId', as: 'livestreamChannelMute' });
+
+      this.hasMany(models.Report, { foreignKey: 'targetLivestreamId', as: 'livestreamReport' });
+
       // Mối quan hệ 1-n với levelWorkout
       this.belongsTo(models.LevelWorkout, {
           foreignKey: 'levelWorkoutsId',

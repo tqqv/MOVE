@@ -3,7 +3,7 @@ let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SEC
 const fs = require('fs');
 const db = require("../models/index.js");
 const { Op } = require('sequelize');
-const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe } = db;
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo } = db;
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -304,7 +304,7 @@ const getAllVideosService = async (page, pageSize) => {
                 FROM subscribes
                 WHERE subscribes.channelId = channel.id
               )`),
-              'followCount' 
+              'followCount'
             ]],
           as: 'channel',
         },
@@ -355,7 +355,7 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   }
 
   const videos = await Video.findAndCountAll({
-    where: { 
+    where: {
       channelId: channelId,
       status: "public"
     },
@@ -426,7 +426,7 @@ const getVideoByVideoIdService = async (videoId) => {
               FROM subscribes
               WHERE subscribes.channelId = channel.id
             )`),
-            'followCount' 
+            'followCount'
           ]],
         as: 'channel',
       },
@@ -536,6 +536,178 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
   }
 }
 
+const getTotalReps = async (videoId) => {
+  return await Comment.findAll({
+    where: {
+      videoId: videoId
+    },
+    attributes: [
+      [Sequelize.fn('SUM', Sequelize.col('rep')), 'totalReps']
+    ],
+    group: ['videoId'],
+    raw: true
+  });
+};
+
+const getVideoData = async (videoId) => {
+  return await Video.findOne({
+    where: {
+      id: videoId
+    },
+    attributes: {
+      include: [
+        [
+          sequelize.literal(`(
+            SELECT AVG(rating)
+            FROM ratings
+            WHERE ratings.videoId = Video.id
+          )`),
+          'ratings'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT AVG(viewTime)
+            FROM viewVideos
+            WHERE viewVideos.videoId = videoId
+          )`),
+          'avgViewTime'
+        ]
+      ]
+    },
+  });
+};
+
+const getAgeData = async (videoId) => {
+  return await ViewVideo.findAll({
+    where: {
+      videoId: videoId
+    },
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: []
+    }],
+    attributes: [
+      [Sequelize.literal(`
+        CASE
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) < 18 THEN '<18'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 18 AND 24 THEN '18-24'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 25 AND 34 THEN '25-34'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 35 AND 44 THEN '35-44'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'
+          ELSE '>64'
+        END
+      `), 'ageGroup'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['ageGroup'],
+    raw: true
+  });
+};
+
+const getCountryDataWithStates = async (videoId) => {
+  // Lấy dữ liệu quốc gia cùng với số lượng người xem
+  const countryData = await ViewVideo.findAll({
+    where: { videoId: videoId },
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: []
+    }],
+    attributes: [
+      [Sequelize.col('viewVideoUser.country'), 'country'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['viewVideoUser.country'],
+    raw: true
+  });
+
+  // Tạo một đối tượng để lưu trữ kết quả
+  const result = [];
+
+  // Lặp qua từng quốc gia và nhóm tiểu bang
+  for (const country of countryData) {
+    const countryName = country['country'];
+
+    // Lấy dữ liệu tiểu bang tương ứng cho từng quốc gia
+    const states = await ViewVideo.findAll({
+      where: {
+        videoId: videoId
+      },
+      include: [{
+        model: User,
+        as: 'viewVideoUser',
+        attributes: []
+      }],
+      attributes: [
+        [Sequelize.col('viewVideoUser.state'), 'state'],
+        [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+      ],
+      group: ['viewVideoUser.state'],
+      raw: true
+    });
+
+    // Thêm dữ liệu quốc gia và tiểu bang vào kết quả
+    result.push({
+      country: countryName,
+      viewerCount: country.viewerCount,
+      states: states.map(state => ({
+        state: state['state'],
+        viewerCount: state.viewerCount
+      }))
+    });
+  }
+
+  return result;
+};
+
+
+const analyticsVideoById = async(videoId, channelId) => {
+  try {
+    const checkExists = await Video.findOne({
+      where: {
+        channelId: channelId,
+        id: videoId
+      }
+    });
+
+    if (!checkExists) {
+      return {
+        status: 404,
+        data: null,
+        message: "Not found"
+      };
+    }
+
+    const [totalReps, videoData, ageData, countryData] = await Promise.all([
+      getTotalReps(videoId),
+      getVideoData(videoId),
+      getAgeData(videoId),
+      getCountryDataWithStates(videoId)
+    ]);
+
+    return {
+      status: 200,
+      data: {
+        totalReps,
+        videoData,
+        viewersData: {
+          ageData,
+          countryData
+        }
+      },
+      message: "Get analytics by video successfully."
+    };
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+};
+
 const getListVideoByChannel = async(channelId, page, pageSize) => {
   try {
     const listVideo =  await Video.findAndCountAll({
@@ -597,9 +769,9 @@ const getListVideoByChannel = async(channelId, page, pageSize) => {
       status: 500,
       data: null,
       message: error
-    }
+    };
   }
-}
+};
 
 module.exports = {
   generateUploadLink,
@@ -614,5 +786,6 @@ module.exports = {
   getVideoByVideoIdService,
   deleteVideoService,
   getListVideoByFilter,
+  analyticsVideoById,
   getListVideoByChannel,
 };

@@ -16,22 +16,22 @@
   };
 
   const menuItems = [
-    { name: 'Home', icon: HomeIcon, link: '/streamer' },
-    { name: 'Video', icon: VideoIcon, link: '/streamer/videos' },
-    { name: 'Comments', icon: CommentIcon, link: '/streamer/comments' },
+    { name: 'Home', icon: HomeIcon, link: '/dashboard-streamer' },
+    { name: 'Video', icon: VideoIcon, link: '/dashboard-streamer/videos' },
+    { name: 'Comments', icon: CommentIcon, link: '/dashboard-streamer/comments' },
     {
       name: 'Analytics',
       icon: AnalyticsIcon,
       link: '/streamer/analytics',
       hasDropdown: true,
       submenu: [
-        { name: 'Overview', link: '/streamer/analytics' },
-        { name: 'Video analytics', link: '/streamer/video-analytics' },
-        { name: 'Live analytics', link: '/streamer/live-analytics' },
+        { name: 'Overview', link: '/dashboard-streamer/analytics' },
+        { name: 'Video analytics', link: '/dashboard-streamer/video-analytics' },
+        { name: 'Live analytics', link: '/dashboard-streamer/live-analytics' },
       ],
     },
-    { name: 'Cashout', icon: CashoutIcon, link: '/streamer/cashout' },
-    { name: 'Channel settings', icon: SettingIcon, link: '/streamer/channel-setting' },
+    { name: 'Cashout', icon: CashoutIcon, link: '/dashboard-streamer/cashout' },
+    { name: 'Channel settings', icon: SettingIcon, link: '/dashboard-streamer/channel-setting' },
   ];
 </script>
 

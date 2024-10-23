@@ -1,3 +1,6 @@
-<script setup></script>
+<script setup>
+  import CommentPage from '@/components/comments/CommentPage.vue';
+</script>
 
-<template></template>
+<template>
+</template>

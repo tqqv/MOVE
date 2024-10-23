@@ -100,7 +100,6 @@ const resetPasswordController = async (req, res, next) => {
     data.confirmPassword
   );
 
-  res.
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 

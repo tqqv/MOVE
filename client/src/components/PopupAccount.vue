@@ -8,6 +8,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+
   const userStore = useUserStore();
   const router = useRouter();
   const handleLogout = async () => {
