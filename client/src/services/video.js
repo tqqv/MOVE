@@ -60,6 +60,14 @@ const deleteVideoById = async (videoId) => {
     return { error: true, message: error.message };
   }
 };
+const getVideoById = async (videoId) => {
+  try {
+    const response = await axios.get(`/video/${videoId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 export {
   getVideobyChannel,
   getAllCategory,
@@ -68,4 +76,5 @@ export {
   getCategoryById,
   getVideoSetting,
   deleteVideoById,
+  getVideoById,
 };

@@ -234,9 +234,13 @@ const uploadThumbnailService = async (videoUri, thumbnailPath) => {
     const path = responseData.Path;
     if (path) {
       const pictureId = path.split('/').pop();
+      const videoId = videoUri.split('/').pop();
       const patchURL = `${pictureResponse.metadata.connections.pictures.uri}/${pictureId}`;
       const thumbnailResponse = await setThumbnailActive(patchURL);
-
+      const video = await Video.update(
+        { thumbnailUrl: thumbnailResponse.data.base_link }, 
+        { where: { id: videoId } } 
+      );
       // Delete the temporary thumbnail file
       fs.unlink(thumbnailPath, (err) => {
         if (err) {
@@ -289,14 +293,14 @@ const setThumbnailActive = (picturesUri) => {
         active: true,
         time: 0
       },
-    }, (error) => {
+    }, (error, body) => {
       if (error) {
         reject(error);
       } else {
         resolve({
           status: 200,
           message: 'Thumbnail uploaded successfully.',
-          data: null
+          data: body
         });
       }
     });
