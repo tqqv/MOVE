@@ -555,7 +555,7 @@ const getVideoData = async (videoId) => {
           sequelize.literal(`(
             SELECT AVG(viewTime)
             FROM viewVideos
-            WHERE viewVideos.videoId = videoId
+            WHERE viewVideos.videoId = Video.id
           )`),
           'avgViewTime'
         ],
