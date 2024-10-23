@@ -554,6 +554,19 @@ const getVideoData = async (videoId) => {
     where: {
       id: videoId
     },
+    include: [
+
+      {
+        model: LevelWorkout,
+        attributes: ['levelWorkout'],
+        as: "levelWorkout",
+      },
+      {
+        model: Category,
+        attributes: ['title'],
+        as: 'category',
+      }
+    ],
     attributes: {
       include: [
         [

@@ -22,7 +22,7 @@
     {
       name: 'Analytics',
       icon: AnalyticsIcon,
-      link: '/streamer/analytics',
+      link: '/dashboard-streamer/analytics',
       hasDropdown: true,
       submenu: [
         { name: 'Overview', link: '/dashboard-streamer/analytics' },

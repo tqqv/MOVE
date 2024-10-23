@@ -6,12 +6,33 @@
 
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
-  import { getVideoSetting, deleteVideoById } from '@services/video';
+  import { getVideoSetting } from '@services/video';
   import { genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
   import { usePopupStore } from '@/stores';
   import Filter from '@/components/Filter.vue';
-  const popupStore = usePopupStore();
+
+  const sortByOptions = [
+    { id: 1, name: 'Most recent', sortBy: '', order: '' },
+    { id: 2, name: 'Views (High to Low)', sortBy: 'viewCount', order: 'desc' },
+    { id: 3, name: 'Views (Low to High)', sortBy: 'viewCount', order: 'asc' },
+    { id: 4, name: 'Duration (Long to Short)', sortBy: 'duration', order: 'desc' },
+    { id: 5, name: 'Duration (Short to Long)', sortBy: 'duration', order: 'asc' },
+    { id: 6, name: 'Ratings (High to Low)', sortBy: 'ratings', order: 'desc' },
+    { id: 7, name: 'Ratings (Low to High)', sortBy: 'ratings', order: 'asc' },
+  ];
+  const sortByTime = [
+    { id: 1, name: 'All time', sortBy: '', order: '' },
+    { id: 2, name: 'Last 7 days', sortBy: '', order: '' },
+    { id: 3, name: 'Last 30 days', sortBy: '', order: '' },
+    { id: 4, name: 'Last 90 days', sortBy: '', order: '' },
+    { id: 5, name: '1 year ago', sortBy: '', order: '' },
+  ];
+  const pageSizeOptions = [
+    { id: 1, name: 10, value: 10 },
+    { id: 2, name: 20, value: 20 },
+    { id: 3, name: 30, value: 30 },
+  ];
   const currentPage = ref(1);
   const totalPage = ref();
   const totalVideo = ref(0);
@@ -19,20 +40,31 @@
   const videos = ref([]);
   const showMenu = ref(false);
 
+  const selectedSortByTime = ref(sortByTime[0].sortBy);
+  const selectedSortBy = ref(sortByOptions[0].sortBy);
+  const selectedOrder = ref(sortByOptions[0].order);
+
   const toggleShowMenu = () => {
     showMenu.value = !showMenu.value;
   };
-
-  const pageSizeOptions = [
-    { id: 1, name: 10, value: 10 },
-    { id: 2, name: 20, value: 20 },
-    { id: 3, name: 30, value: 30 },
-  ];
+  const handleSortTimeChange = (newValue) => {
+    selectedSortByTime.value = newValue.sortBy || '';
+    // selectedOrder.value = newValue.order;
+  };
+  const handleSortChange = (newValue) => {
+    selectedSortBy.value = newValue.sortBy || '';
+    selectedOrder.value = newValue.order;
+  };
   const selectedPageSize = ref(pageSizeOptions[0].name);
 
   const fetchVideos = async () => {
     try {
-      const response = await getVideoSetting(currentPage.value, selectedPageSize.value);
+      const response = await getVideoSetting(
+        currentPage.value,
+        selectedPageSize.value,
+        selectedSortBy.value,
+        selectedOrder.value,
+      );
       videos.value = response.data.listVideo.rows;
       totalVideo.value = response.data.listVideo.count;
       totalPage.value = response.data.totalPages;
@@ -65,10 +97,15 @@
 <template>
   <div class="container">
     <div class="flex justify-between">
-      <h1 class="p-[16px] font-bold text-[24px]">Video analytics</h1>
-      <div class="flex gap-4">
-        <!-- <Filter :title="'SORT BY'" />
-        <Filter :title="'SHOW'" /> -->
+      <h1 class="py-8 px-4 font-bold text-[24px]">Video analytics</h1>
+      <div class="flex gap-8">
+        <Filter
+          title="SORT BY"
+          :options="sortByOptions"
+          @change="handleSortChange"
+          class="flex-1"
+        />
+        <Filter title="SHOW" :options="sortByTime" @change="handleSortTimeChange" class="flex-1" />
       </div>
     </div>
 
@@ -82,7 +119,9 @@
       >
         <Column header="Videos">
           <template #body="{ data }">
-            <img :src="data.thumbnailUrl" class="w-[180px] h-[100px] object-cover" />
+            <RouterLink :to="`/dashboard-streamer/video-analytics/${data.id}`" :key="data.id">
+              <img :src="data.thumbnailUrl" class="w-[180px] h-[100px] object-cover" />
+            </RouterLink>
           </template>
         </Column>
         <Column header="Details">
@@ -103,25 +142,25 @@
         </Column>
         <Column header="Avg. view time">
           <template #body="{ data }">
-            <span></span>
+            <span>null</span>
           </template>
         </Column>
         <Column header="Ratings">
           <template #body="{ data }">
             <div class="flex items-center gap-2">
-              <span>{{ formatRating(data.ratings) }}</span>
+              <span>{{ formatRating(data.ratings) || 0 }}</span>
               <rate class="scale-125" />
             </div>
           </template>
         </Column>
         <Column header="REPs Received" class="!text-center">
           <template #body="{ data }">
-            <div class="flex items-center gap-2"><rep /><span>500</span></div>
+            <div class="flex items-center gap-2"><rep /><span>null</span></div>
           </template></Column
         >
 
         <Column header="Viewer Gifted">
-          <template #body="{ data }"> <span>500</span> </template>
+          <template #body="{ data }"> <span>null</span> </template>
         </Column>
 
         <Column field="" header="" style="display: none"></Column>
