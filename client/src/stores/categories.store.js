@@ -7,6 +7,8 @@ export const useCategoriesStore = defineStore('categories', () => {
   const loading = ref(false);
   const categories = ref(null);
   const categoryOptions = ref([{ id: 0, name: 'All categories', title: '' }]);
+  const categoriesForSelect = ref([{ id: '0', name: 'Select a category', title: '' }]);
+
   const fetchCategories = async () => {
     loading.value = true;
     try {
@@ -20,6 +22,10 @@ export const useCategoriesStore = defineStore('categories', () => {
           title: item.title,
         }));
         categoryOptions.value = [{ id: 0, name: 'All categories', title: '' }, ...formattedData];
+        categoriesForSelect.value = [
+          { id: '0', name: 'Select a category', title: '' },
+          ...formattedData,
+        ];
       } else {
         error.value = response.message;
       }
@@ -30,5 +36,5 @@ export const useCategoriesStore = defineStore('categories', () => {
     }
   };
 
-  return { categories, categoryOptions, fetchCategories, loading, error };
+  return { categories, categoryOptions, fetchCategories, loading, error, categoriesForSelect };
 });

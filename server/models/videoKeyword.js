@@ -8,6 +8,12 @@ module.exports = (sequelize, DataTypes) => {
   }
   VideoKeyword.init(
     {
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4,
+        allowNull: false,
+      },
       videoId: {
         type: Sequelize.UUID,
         allowNull: false,

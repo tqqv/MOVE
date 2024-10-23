@@ -3,7 +3,8 @@ let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SEC
 const fs = require('fs');
 const db = require("../models/index.js");
 const { Op } = require('sequelize');
-const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo } = db;
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
+const { v4: uuidv4 } = require('uuid');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -72,6 +73,56 @@ const saveVideoService = async (videoId, userId, title, description, thumbnailUr
 };
 
 const updateVideoService = async (videoId, updateData) => {
+  const handleKeywords = async (keywords) => {
+    const keywordArray = keywords.split(',').map(k => k.trim());
+    const keywordIds = [];
+
+    for (let content of keywordArray) {
+      let keyword = await Keyword.findOne({ where: { content } });
+      if (!keyword) {
+        keyword = await Keyword.create({
+          id: uuidv4(), 
+          content
+        });
+      }
+      if (keyword && keyword.id) {
+        keywordIds.push(keyword.id);
+      } else {
+        console.warn(`Keyword not found or created for content: "${content}"`);
+      }
+    }
+    return keywordIds;
+  };
+
+  if (updateData.keywords) {
+    try {
+      console.log('Processing keywords');
+      const keywordIds = await handleKeywords(updateData.keywords);
+
+      if (keywordIds.length === 0) {
+        return {
+          status: 400,
+          message: 'No valid keywords found to associate with the video.',
+          data: null,
+        };
+      }
+
+      await VideoKeyword.destroy({ where: { videoId } });
+
+      const videoKeywordPromises = keywordIds.map(keywordId =>
+        VideoKeyword.create({ videoId, keywordId })
+      );
+      await Promise.all(videoKeywordPromises);
+      console.log('Keywords saved successfully');
+    } catch (error) {
+      console.error('Error saving keywords:', error);
+      return {
+        status: 500,
+        message: 'An error occurred while saving keywords',
+        data: null,
+      };
+    }
+  }
   try {
     const video = await Video.update(updateData, {
       where: { id: videoId }

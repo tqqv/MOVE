@@ -7,7 +7,6 @@ export const useLevelWorkoutStore = defineStore('levelWorkout', () => {
   const loading = ref(false);
   const levelWorkout = ref(null);
   const levelWorkoutOptions = ref([{ id: 1, name: 'All levels', value: '' }]);
-
   const fetchLevelWorkout = async () => {
     loading.value = true;
     try {
@@ -30,5 +29,11 @@ export const useLevelWorkoutStore = defineStore('levelWorkout', () => {
     }
   };
 
-  return { levelWorkout, levelWorkoutOptions, fetchLevelWorkout, loading, error };
+  return {
+    levelWorkout,
+    levelWorkoutOptions,
+    fetchLevelWorkout,
+    loading,
+    error,
+  };
 });

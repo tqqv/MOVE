@@ -13,7 +13,20 @@ export const useVideoStore = defineStore('video', () => {
   const duration = ref(0);
   const commentSetting = ref(true);
   const tab = ref('1');
+  const keywords = ref('');
+  const selectCategoryOptions = ref(0);
+  const selectLevelWorkoutOptions = ref(1);
 
+  const setKeywords = (value) => {
+    keywords.value = value;
+  };
+  const setSelectCategoryOptions = (value) => {
+    selectCategoryOptions.value = value;
+  };
+  const setSelectLevelWorkoutOptions = (value) => {
+    selectLevelWorkoutOptions.value = value;
+    console.log(value);
+  };
   const setTab = (value) => {
     tab.value = value;
   };
@@ -58,6 +71,9 @@ export const useVideoStore = defineStore('video', () => {
     thumbnailPreview.value = '';
     duration.value = 0;
     commentSetting.value = true;
+    keywords.value = '';
+    selectCategoryOptions.value = 0;
+    selectLevelWorkoutOptions.value = 1;
     tab.value = '1';
   };
   return {
@@ -72,6 +88,9 @@ export const useVideoStore = defineStore('video', () => {
     duration,
     commentSetting,
     tab,
+    keywords,
+    selectCategoryOptions,
+    selectLevelWorkoutOptions,
     setUploadProgress,
     setUri,
     setIsNext,
@@ -84,5 +103,8 @@ export const useVideoStore = defineStore('video', () => {
     setCommentSetting,
     clear,
     setTab,
+    setKeywords,
+    setSelectCategoryOptions,
+    setSelectLevelWorkoutOptions,
   };
 });
