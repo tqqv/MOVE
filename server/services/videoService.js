@@ -536,19 +536,6 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
   }
 }
 
-const getTotalReps = async (videoId) => {
-  return await Comment.findAll({
-    where: {
-      videoId: videoId
-    },
-    attributes: [
-      [Sequelize.fn('SUM', Sequelize.col('rep')), 'totalReps']
-    ],
-    group: ['videoId'],
-    raw: true
-  });
-};
-
 const getVideoData = async (videoId) => {
   return await Video.findOne({
     where: {
@@ -571,11 +558,44 @@ const getVideoData = async (videoId) => {
             WHERE viewVideos.videoId = videoId
           )`),
           'avgViewTime'
-        ]
+        ],
+        [
+          sequelize.literal(`(
+            SELECT Sum(rep)
+            FROM comments
+            WHERE comments.videoId = Video.id
+          )`),
+          'totalReps'
+        ],
       ]
     },
   });
 };
+
+const getGenderData = async (videoId) => {
+  return await ViewVideo.findAll({
+    where: {
+      videoId: videoId
+    },
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: [] // Không cần lấy thêm thuộc tính từ User
+    }],
+    attributes: [
+      [Sequelize.literal(`
+        CASE
+          WHEN viewVideoUser.gender = 'Male' THEN 'Male'
+          WHEN viewVideoUser.gender = 'Female' THEN 'Female'
+          ELSE 'Other'
+        END
+      `), 'genderGroup'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['genderGroup'] // Nhóm theo genderGroup để có thể đếm viewer
+  });
+};
+
 
 const getAgeData = async (videoId) => {
   return await ViewVideo.findAll({
@@ -606,7 +626,6 @@ const getAgeData = async (videoId) => {
 };
 
 const getCountryDataWithStates = async (videoId) => {
-  // Lấy dữ liệu quốc gia cùng với số lượng người xem
   const countryData = await ViewVideo.findAll({
     where: { videoId: videoId },
     include: [{
@@ -622,22 +641,18 @@ const getCountryDataWithStates = async (videoId) => {
     raw: true
   });
 
-  // Tạo một đối tượng để lưu trữ kết quả
-  const result = [];
+  return countryData;
+};
 
-  // Lặp qua từng quốc gia và nhóm tiểu bang
-  for (const country of countryData) {
-    const countryName = country['country'];
-
-    // Lấy dữ liệu tiểu bang tương ứng cho từng quốc gia
-    const states = await ViewVideo.findAll({
-      where: {
-        videoId: videoId
-      },
+const getStateByCountryAndVideoId = async(videoId, country) => {
+  try {
+    const stateData = await ViewVideo.findAll({
+      where: { videoId: videoId },
       include: [{
         model: User,
         as: 'viewVideoUser',
-        attributes: []
+        attributes: [],
+        where: {country: country}
       }],
       attributes: [
         [Sequelize.col('viewVideoUser.state'), 'state'],
@@ -647,19 +662,20 @@ const getCountryDataWithStates = async (videoId) => {
       raw: true
     });
 
-    // Thêm dữ liệu quốc gia và tiểu bang vào kết quả
-    result.push({
-      country: countryName,
-      viewerCount: country.viewerCount,
-      states: states.map(state => ({
-        state: state['state'],
-        viewerCount: state.viewerCount
-      }))
-    });
+    return {
+      status: 200,
+      data: stateData,
+      message: `Get list state of ${country} successfully.`
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
   }
-
-  return result;
-};
+}
 
 
 const analyticsVideoById = async(videoId, channelId) => {
@@ -679,20 +695,20 @@ const analyticsVideoById = async(videoId, channelId) => {
       };
     }
 
-    const [totalReps, videoData, ageData, countryData] = await Promise.all([
-      getTotalReps(videoId),
+    const [videoData, ageData, countryData, genderData] = await Promise.all([
       getVideoData(videoId),
       getAgeData(videoId),
-      getCountryDataWithStates(videoId)
+      getCountryDataWithStates(videoId),
+      getGenderData(videoId),
     ]);
 
     return {
       status: 200,
       data: {
-        totalReps,
         videoData,
         viewersData: {
           ageData,
+          genderData,
           countryData
         }
       },
@@ -708,7 +724,7 @@ const analyticsVideoById = async(videoId, channelId) => {
   }
 };
 
-const getListVideoByChannel = async(channelId, page, pageSize) => {
+const getListVideoByChannel = async(channelId, page, pageSize, sortCondition) => {
   try {
     const listVideo =  await Video.findAndCountAll({
       where: {channelId: channelId},
@@ -721,8 +737,24 @@ const getListVideoByChannel = async(channelId, page, pageSize) => {
               WHERE ratings.videoId = Video.id
             )`),
             'ratings'
-          ]
-        ]
+          ],
+          [
+            sequelize.literal(`(
+              SELECT AVG(viewTime)
+              FROM viewVideos
+              WHERE viewVideos.videoId = Video.id
+            )`),
+            'avgViewTime'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT Sum(rep)
+              FROM comments
+              WHERE comments.videoId = Video.id
+            )`),
+            'totalReps'
+          ],
+        ],
       },
       include: [
         {
@@ -743,6 +775,7 @@ const getListVideoByChannel = async(channelId, page, pageSize) => {
           // where: category ? {title: category} : {}
         }
       ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
     });
@@ -787,5 +820,6 @@ module.exports = {
   deleteVideoService,
   getListVideoByFilter,
   analyticsVideoById,
+  getStateByCountryAndVideoId,
   getListVideoByChannel,
 };
