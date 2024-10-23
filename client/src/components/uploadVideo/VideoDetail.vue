@@ -28,6 +28,9 @@
     thumbnailPreview,
     commentSetting,
     tab,
+    keywords,
+    selectCategoryOptions,
+    selectLevelWorkoutOptions,
   } = storeToRefs(videoStore);
   const { showVideoDetailPopup, showConfirmDialog } = storeToRefs(popupStore);
   const { openVideoDetailPopup, closeVideoDetailPopup, openConfirmDialog, closeConfirmDialog } =
@@ -65,6 +68,7 @@
   };
 
   const handleNextClick = async () => {
+    const videoId = uri.value.split('/').pop();
     if (tab.value === '1') {
       try {
         const response = await axios.post('video/upload-metadata', {
@@ -79,7 +83,21 @@
         toast.error('Error uploading metadata');
       }
     } else if (tab.value === '2') {
-      setTab('3');
+      try {
+        const response = await axios.patch('video/update-video', {
+          videoId,
+          updateData: {
+            categoryId: selectCategoryOptions.value,
+            levelWorkoutsId: selectLevelWorkoutOptions.value,
+            keywords: keywords.value,
+          },
+        });
+        if (response.status === 200) {
+          setTab('3');
+        }
+      } catch (error) {
+        toast.error('Error updating video data');
+      }
     }
   };
 
@@ -223,9 +241,12 @@
         </button>
         <button
           :class="[
-            isNext && uploadProgress === 100 && thumbnailPreview ? 'btn' : 'btnDisable',
+            isNext && uploadProgress === 100 && thumbnailPreview
+              ? 'btn'
+              : 'btnDisable cursor-not-allowed',
             'px-14 leading-none',
           ]"
+          :disabled="!(isNext && uploadProgress === 100 && thumbnailPreview)"
           v-if="tab !== '3'"
           @click="handleNextClick"
         >

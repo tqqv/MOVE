@@ -28,6 +28,11 @@ module.exports = (sequelize, DataTypes) => {
 
       this.hasMany(models.Rating, { foreignKey: 'videoId', as: 'ratings' });
 
+      this.hasMany(models.VideoKeyword, { foreignKey: 'videoId', as: 'videoVideoKeyword' });
+
+      this.hasMany(models.Report, { foreignKey: 'targetVideoId', as: 'videoReport' });
+
+
       // many to many video to User - view video
       this.belongsToMany(models.User, {
         through: models.ViewVideo,
@@ -43,6 +48,15 @@ module.exports = (sequelize, DataTypes) => {
         otherKey: 'userId',
         as: 'videoRating',
       });
+
+      // many to many video to video - keyword
+      this.belongsToMany(models.Keyword, {
+        through: models.VideoKeyword,
+        foreignKey: 'videoId',
+        otherKey: 'keywordId',
+        as: 'videoKeyword',
+      });
+
     }
   }
   Video.init(
@@ -100,6 +114,10 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
           allowNull: false,
           defaultValue: 'private',
+        },
+        isBanned: {
+          type: DataTypes.BOOLEAN,
+          defaultValue: false,
         },
       },
       {

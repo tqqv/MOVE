@@ -1,71 +1,128 @@
 <script setup>
-  import { ref } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
   import Verified from '@/components/icons/verified.vue';
   import Gift from '../icons/gift.vue';
   import Like from '../icons/like.vue';
   import Dislike from '../icons/dislike.vue';
   import WriteComments from './WriteComments.vue';
+  import CommentItem from './CommentItem.vue';
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
+  import SmallLoading from '@/components/icons/smallLoading.vue';
+
   dayjs.extend(relativeTime);
 
   const props = defineProps({
     comment: Object,
     fetchChildComments: Function,
-    fetchComments: Function,
     childComments: Object,
+    totalRepliesCount: Object,
+    childCommentsPage: {
+      type: Number,
+      required: true,
+    },
+    childCommentsPerPage: {
+      type: Number,
+      required: true,
+    },
+    hasMoreChildComments: Boolean,
+    loadingReplies: Boolean,
   });
-
-  // State quản lý bình luận con
-  const isShowMoreChild = ref(false); // Trạng thái để ẩn/hiển thị bình luận con
-  const isReplyChild = ref(false);
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
-
+  const isShowMoreChild = ref(false);
+  const isReplyChild = ref(false);
+  const hasFetchedChildComments = ref(false);
+  const id = ref(null);
+  const parentIdReply = ref(null);
+  // const replyToUsername = ref(null);
   const toggleLike = () => {
     props.comment.isLike = !props.comment.isLike;
     if (props.comment.isLike) props.comment.isDisLike = false;
   };
-
   const toggleDislike = () => {
     props.comment.isDisLike = !props.comment.isDisLike;
     if (props.comment.isDisLike) props.comment.isLike = false;
   };
 
-  const toggleReply = () => {
-    isReplyChild.value = !isReplyChild.value;
+  const timeFromNow = (createdAt) => {
+    return dayjs(createdAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
   };
 
-  const timeFromNow = (createAt) => {
-    return dayjs(createAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
-  };
-
-  const loadMoreChildComments = () => {
+  const loadMoreChildComments = async () => {
     currentPageChild.value++;
-  };
+    await props.fetchChildComments(props.comment.id);
 
-  // Hàm để ẩn/hiển thị bình luận con
-  const toggleShowMoreChild = () => {
-    isShowMoreChild.value = !isShowMoreChild.value;
-    if (isShowMoreChild.value) {
-      fetchChildComments(props.comment.id); // Gọi API lấy bình luận con nếu chưa có
+    if (props.totalRepliesCount[props.comment.id]) {
+      props.totalRepliesCount[props.comment.id] += commentsPerPageChild.value;
     }
   };
+  const toggleReply = (commentId, parentId, username) => {
+    isReplyChild.value = !isReplyChild.value;
+
+    if (isReplyChild.value) {
+      console.log('Replying to comment ID:', commentId, 'with parent ID:', parentId);
+      id.value = commentId;
+      parentIdReply.value = parentId;
+      console.log('Current ID:', id);
+      // replyToUsername.value = username;
+      console.log(replyToUsername.value);
+    }
+  };
+
+  const toggleShowMoreChild = async () => {
+    isShowMoreChild.value = !isShowMoreChild.value;
+
+    if (isShowMoreChild.value && !hasFetchedChildComments.value) {
+      await props.fetchChildComments(props.comment.id);
+      hasFetchedChildComments.value = true;
+    }
+  };
+  const handleSendComment = async (newComment) => {
+    if (newComment) {
+      newComment.isNew = true;
+
+      // Chỉ thêm bình luận vào tầng 2 (tầng của parentIdReply)
+      if (parentIdReply.value && props.childComments[parentIdReply.value]) {
+        props.childComments[parentIdReply.value].unshift(newComment);
+      } else {
+        // Nếu không có parentIdReply hoặc không tồn tại bình luận con cho parentId đó
+        if (!props.childComments[id.value]) {
+          props.childComments[id.value] = [];
+        }
+        props.childComments[id.value].unshift(newComment);
+      }
+
+      isReplyChild.value = false;
+      parentIdReply.value = null;
+    } else {
+      console.error('New comment is undefined or null');
+    }
+  };
+
+  console.log(props.hasMoreChildComments);
 </script>
+
 <template>
-  <div class="flex gap-x-4">
+  <div
+    class="flex gap-x-4"
+    :class="{
+      'pl-6 py-4 px-3 border-l-2 border-gray-dark': comment.parentId !== null,
+      'border-l-4 border-primary/60 bg-primary/10 rounded-e-lg mb-1': comment.isNew,
+    }"
+  >
     <div class="flex-shrink-0">
       <img
-        :src="comment.userComments.avatar"
+        :src="comment?.userComments?.avatar"
         alt="Avatar"
         class="size-10 object-cover rounded-full"
       />
     </div>
-    <div class="space-y-2">
+    <div class="space-y-2 w-full">
       <!-- USERNAME -->
       <div class="flex justify-between items-center gap-x-4 w-fit">
-        <h1 class="font-bold">{{ comment.userComments.username }}</h1>
-        <span v-if="comment.userComments.isVerified">
+        <h1 class="font-bold">{{ comment.userComments?.username }}</h1>
+        <span v-if="comment.userComments?.isVerified">
           <Verified class="fill-blue" />
         </span>
         <div v-if="comment.rep > 0" class="flex items-center whitespace-nowrap">
@@ -98,7 +155,15 @@
           />
           <span>{{ comment.dislike }}</span>
         </div>
-        <span class="font-semibold text-[13px] text-primary cursor-pointer" @click="toggleReply">
+        <span
+          class="font-semibold text-[13px] text-primary cursor-pointer"
+          @click="
+            () => {
+              toggleReply(comment.id, comment.parentId);
+              // console.log(comment.userComments.username);
+            }
+          "
+        >
           Reply
         </span>
       </div>
@@ -107,44 +172,54 @@
       <WriteComments
         v-if="isReplyChild"
         :commentId="comment.id"
-        @sendComment="
-          (parentId) => {
-            isReplyChild = false;
-            fetchChildComments(parentId);
-          }
-        "
+        @sendComment="handleSendComment"
+        :replyToUsername="replyToUsername"
       />
+      <div v-if="!isShowMoreChild">
+        <CommentItem
+          v-for="(child, index) in childComments[comment.id]?.filter((c) => c.isNew)"
+          :key="'new-' + child.id"
+          :comment="child"
+          :fetchChildComments="props.fetchChildComments"
+          :childComments="props.childComments"
+          :totalRepliesCount="props.totalRepliesCount"
+        />
+      </div>
+      <!-- Toggle to show/hide child comments -->
+      <div v-if="totalRepliesCount?.[comment.id] > 0">
+        <div
+          class="flex gap-2 font-bold text-[13px] text-primary cursor-pointer"
+          @click="toggleShowMoreChild"
+        >
+          <div>
+            <span v-if="!isShowMoreChild"> Show replies ({{ comment.totalRepliesCount }}) </span>
 
-      <!-- Nút Show/Hide bình luận con -->
-      <div v-if="childComments[comment.id]?.length > 0" class="pt-2">
-        <div class="font-bold text-[13px] text-primary cursor-pointer" @click="toggleShowMoreChild">
-          <span v-if="!isShowMoreChild">
-            Show replies ({{ childComments[comment.id].length }})
-          </span>
-          <span v-else> Hide replies </span>
+            <span v-else class="mt-4"> Hide replies </span>
+          </div>
+          <div v-if="loadingReplies"><SmallLoading /></div>
         </div>
 
-        <!-- Hiển thị bình luận con khi nút Show replies được nhấn -->
-        <div v-if="isShowMoreChild">
+        <!-- Display child comments -->
+        <div class="mt-2" v-if="isShowMoreChild">
           <CommentItem
-            v-for="(child, index) in childComments[comment.id].slice(
+            v-for="(child, index) in childComments[comment.id]?.slice(
               0,
               currentPageChild * commentsPerPageChild,
             )"
             :key="child.id"
             :comment="child"
             :fetchChildComments="props.fetchChildComments"
-            :childComments="childComments"
+            :childComments="props.childComments"
+            :totalRepliesCount="props.totalRepliesCount"
           />
-
-          <!-- Nút Load More cho bình luận con -->
           <div
-            v-if="childComments[comment.id].length > currentPageChild * commentsPerPageChild"
+            v-if="hasMoreChildComments && !loadingReplies"
             class="font-bold text-[13px] text-primary cursor-pointer"
             @click="loadMoreChildComments"
           >
             <span>Show more replies</span>
           </div>
+          <!-- Load More Child Comments -->
         </div>
       </div>
     </div>

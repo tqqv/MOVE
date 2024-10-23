@@ -10,12 +10,12 @@
   const route = useRoute();
 
   const menuItems = [
-    { name: 'Home', icon: HomeIcon, link: '/streamer' },
-    { name: 'Video', icon: VideoIcon, link: '/streamer/videos' },
-    { name: 'Comments', icon: CommentIcon, link: '/streamer/comments' },
-    { name: 'Analytics', icon: AnalyticsIcon, link: '/streamer/analytics' },
-    { name: 'Cashout', icon: CashoutIcon, link: '/streamer/cashout' },
-    { name: 'Channel settings', icon: SettingIcon, link: '/streamer/channel-setting' },
+    { name: 'Home', icon: HomeIcon, link: '/dashboard-streamer' },
+    { name: 'Video', icon: VideoIcon, link: '/dashboard-streamer/videos' },
+    { name: 'Comments', icon: CommentIcon, link: '/dashboard-streamer/comments' },
+    { name: 'Analytics', icon: AnalyticsIcon, link: '/dashboard-streamer/analytics' },
+    { name: 'Cashout', icon: CashoutIcon, link: '/dashboard-streamer/cashout' },
+    { name: 'Channel settings', icon: SettingIcon, link: '/dashboard-streamer/channel-setting' },
   ];
 </script>
 <template>

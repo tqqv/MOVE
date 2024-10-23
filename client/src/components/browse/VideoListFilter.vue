@@ -3,7 +3,7 @@
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
   import Paginator from 'primevue/paginator';
-  import NotFoundPage from '@/pages/NotFoundPage.vue';
+  import EmptyPage from '@/pages/EmptyPage.vue';
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
 
@@ -29,6 +29,9 @@
   const currentPage = ref(1);
   const totalPage = ref();
   const pageSize = ref(12);
+
+  const categoryOptions = computed(() => categoriesStore.categoryOptions);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
 
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
@@ -68,7 +71,7 @@
     }
   };
 
-watch(categoryOptions, (newOptions) => {
+  watch(categoryOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectCategoryOptions.value) {
       selectCategoryOptions.value = newOptions[0].value || '';
     }
@@ -135,7 +138,7 @@ watch(categoryOptions, (newOptions) => {
       @page="onPageChange"
     />
     <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
-      <NotFoundPage
+      <EmptyPage
         title="There are no matching videos"
         subTitle="Try different keywords or remove search filters"
       />
