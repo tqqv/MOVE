@@ -104,6 +104,39 @@ const editProfile = async (id, data) => {
   }
 }
 
+const viewUser = async(username) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: username
+      },
+      attributes: ["username", "avatar"],
+    });
+
+    if (!user) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found."
+      };
+    }
+
+    return {
+      status: 200,
+      data: {
+        profile: user,
+      },
+      message: "Get profile user successfully"
+    }
+  } catch (error) {
+     return {
+       status: 500,
+       data: null,
+       message: error.message
+     }
+  }
+}
+
 const changePassword = async (userId, oldPass, newPass, confirmPass) => {
   try {
     const user = await User.findByPk(userId);
@@ -458,6 +491,50 @@ const isExistUsername = async(userName) => {
   }
 }
 
+const getProfileByUserName = async(username) => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: username
+      },
+      include: [{
+        model: Channel,
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck',
+          [
+            sequelize.literal(`(
+              SELECT COUNT(*)
+              FROM subscribes
+              WHERE subscribes.channelId = Channel.id
+            )`),
+            'followCount'
+          ]
+        ],
+      }],
+      attributes: ['username', 'avatar']
+    })
+
+    if(!user) {
+      return{
+        status: 404,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    return {
+      status: 200,
+      data: user,
+      message: "Get profile successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   getProfile,
   editProfile,
@@ -467,5 +544,6 @@ module.exports = {
   listSubscribeOfUser,
   followChannel,
   getAllInforFollow,
-  isExistUsername
+  isExistUsername,
+  getProfileByUserName
 }

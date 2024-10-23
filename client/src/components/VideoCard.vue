@@ -30,7 +30,9 @@
           <i class="pi pi-eye mt-[0.7px] text-xs" />
           <span class="">{{ formatView(video.viewCount) }}</span>
         </div>
-        <div class="absolute bottom-2 right-4 text-white text-xs font-bold bg-black/80 px-2 py-1 rounded">
+        <div
+          class="absolute bottom-2 right-4 text-white text-xs font-bold bg-black/80 px-2 py-1 rounded"
+        >
           <span>{{ formatDuration(video.duration) }}</span>
         </div>
       </div>
@@ -71,7 +73,7 @@
 
           <div class="flex gap-2 items-center text-[10px] font-bold mb-2 text-black">
             <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
-              video.levelWorkout.levelWorkout
+              video.levelWorkout?.levelWorkout
             }}</span>
             <span class="bg-[#EEEEEE] rounded-full px-3 py-2">
               {{ genreDuration(video.duration) }}

@@ -1,17 +1,29 @@
 <script setup>
   const props = defineProps({
-    width: String,
-    height: String,
-    fill: String,
-    stroke: String,
+    width: {
+      type: String,
+      default: '37.676px',
+    },
+    height: {
+      type: String,
+      default: '52px',
+    },
+    fill: {
+      type: String,
+      default: '#666666',
+    },
+    stroke: {
+      type: String,
+      default: 'none',
+    },
   });
 </script>
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="37.676"
-    height="52"
+    :width="width"
+    :height="height"
     viewBox="0 0 37.676 52"
   >
     <defs>

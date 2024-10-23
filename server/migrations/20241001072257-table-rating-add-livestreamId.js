@@ -17,8 +17,7 @@ module.exports = {
     // Sau khi cập nhật dữ liệu, bạn có thể đổi allowNull thành false và thêm khóa ngoại
     await queryInterface.changeColumn('ratings', 'livestreamId', {
       type: Sequelize.UUID,
-      allowNull: false,
-      defaultValue: 0,
+      allowNull: true,
       references: {
         model: 'livestreams',
         key: 'id',

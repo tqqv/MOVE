@@ -11,7 +11,7 @@ import ViewChannelsContent from '@/components/viewChannels/ViewChannelsContent.v
 import BrowseContent from '@/components/browse/BrowseContent.vue';
 import CategoryDetailsContent from '@/components/CategoryDetails/CategoryDetailsContent.vue';
 import SearchContent from '@/components/search/SearchContent.vue';
-import LiveStreamPage from '@/pages/LiveStreamPage.vue';
+import LiveStreamPageByStreamer from '@/pages/LiveStreamPageByStreamer.vue';
 import SetUpLive from '@/components/streamer/liveStream/SetUpLive.vue';
 import DashboardLive from '@/components/streamer/liveStream/DashboardLive.vue';
 import VideoDetails from '@/pages/VideoDetails.vue';
@@ -21,6 +21,7 @@ import TabCategories from '@/components/browse/TabCategories.vue';
 import TabHighestRated from '@/components/browse/TabHighestRated.vue';
 import TabTopVideo from '@/components/browse/TabTopVideo.vue';
 import TabMostView from '@/components/browse/TabMostView.vue';
+import ViewLiveStreamPage from '@/pages/ViewLiveStreamPage.vue';
 
 const routes = [
   // User router
@@ -31,24 +32,28 @@ const routes = [
       { path: '', component: HomePage },
       { path: 'personal-profile', component: ProfileContent },
       { path: 'user/:username', component: ViewChannelsContent },
+
       {
         path: 'browse',
         component: BrowseContent,
         children: [
           { path: 'categories', component: TabCategories },
           { path: 'top-videos', component: TabTopVideo },
-          { path: 'most-viewed', component: TabMostView },
-          { path: 'highest-rated', component: TabHighestRated },
+          { path: 'most_viewed', component: TabMostView },
+          { path: 'highest_rated', component: TabHighestRated },
         ],
       },
       { path: 'search', component: SearchContent },
       { path: 'video/:videoId', component: VideoDetails },
     ],
   },
+  // LIVE STREAM LAYOUT
+  { path: '/live/:username', component: ViewLiveStreamPage },
+
   { path: '/reset-password/:token', component: ResetPassword },
   // Streamer router
   {
-    path: '/streamer',
+    path: '/dashboard-streamer',
     component: StreamerLayout,
     children: [
       { path: '', component: DashboardStreamer },
@@ -57,10 +62,10 @@ const routes = [
       { path: 'videos', component: VideoSetting },
     ],
   },
-  // Live stream
+  // Live stream by streamer
   {
-    path: '/live',
-    component: LiveStreamPage,
+    path: '/streaming',
+    component: LiveStreamPageByStreamer,
     children: [
       { path: 'stream-setup', component: SetUpLive },
       { path: 'dashboard-live', component: DashboardLive },
@@ -69,6 +74,7 @@ const routes = [
   {
     path: '/:pathMatch(.*)*',
     component: PageNotFound,
+    name: PageNotFound,
   },
 ];
 
