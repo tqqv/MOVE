@@ -1,5 +1,5 @@
 "use strict";
-const { Model, Sequelize } = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class ChannelMute extends Model {
@@ -13,13 +13,13 @@ module.exports = (sequelize, DataTypes) => {
   ChannelMute.init(
     {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUID,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
       },
       channelId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'channels',
@@ -29,7 +29,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetLivestreamId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'livestreams',
@@ -39,7 +39,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetAccountId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'users',
@@ -49,7 +49,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       reportTypeId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'reportTypes',
@@ -59,13 +59,13 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       status: {
-        type: Sequelize.ENUM('muted', 'unmuted'),
+        type: DataTypes.ENUM('muted', 'unmuted'),
         allowNull: false,
         defaultValue: 'muted',
       },
       mutedUntil: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
       },
     },
     {

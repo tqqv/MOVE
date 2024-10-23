@@ -1,5 +1,5 @@
 "use strict";
-const { Model, Sequelize } = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class ReportType extends Model {
@@ -11,27 +11,19 @@ module.exports = (sequelize, DataTypes) => {
   ReportType.init(
     {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUID,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
       },
       type: {
-        type: Sequelize.ENUM('comments', 'videos', 'livestreams', 'accounts', 'channels', 'streamChats'),
+        type: DataTypes.ENUM('comments', 'videos', 'livestreams', 'accounts', 'channels', 'streamChats'),
         allowNull: false,
       },
       description: {
-        type: Sequelize.STRING(255),
+        type: DataTypes.STRING(255),
         allowNull: false,
-      },
-      createdAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
-      updatedAt: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
-      },
+      }
     },
     {
       sequelize,
