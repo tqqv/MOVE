@@ -11,12 +11,12 @@ module.exports = (sequelize, DataTypes) => {
   Keyword.init(
   {
     id: {
-      type: Sequelize.UUID,
+      type: DataTypes.UUID,
       primaryKey: true,
       allowNull: false,
     },
     content: {
-      type: Sequelize.STRING(50),
+      type: DataTypes.STRING(50),
       allowNull: false,
     },
   },
