@@ -92,7 +92,6 @@
             keywords: keywords.value,
           },
         });
-        console.log(response);
         if (response.status === 200) {
           setTab('3');
         }
