@@ -93,11 +93,11 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
             },
             isBanned: {
-                type: DataTypes.Boolean,
+                type: DataTypes.BOOLEAN,
                 defaultValue: false,
             },
             isLivestreamAble: {
-                type: DataTypes.Boolean,
+                type: DataTypes.BOOLEAN,
                 defaultValue: false,
             },
 

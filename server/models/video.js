@@ -51,7 +51,7 @@ module.exports = (sequelize, DataTypes) => {
 
       // many to many video to video - keyword
       this.belongsToMany(models.Keyword, {
-        through: models.videoKeyword,
+        through: models.VideoKeyword,
         foreignKey: 'videoId',
         otherKey: 'keywordId',
         as: 'videoKeyword',
@@ -116,7 +116,7 @@ module.exports = (sequelize, DataTypes) => {
           defaultValue: 'private',
         },
         isBanned: {
-          type: DataTypes.Boolean,
+          type: DataTypes.BOOLEAN,
           defaultValue: false,
         },
       },

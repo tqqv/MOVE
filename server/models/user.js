@@ -149,7 +149,7 @@ module.exports = (sequelize, DataTypes) => {
         unique: true,
       },
       isBanned: {
-        type: DataTypes.Boolean,
+        type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
     },
