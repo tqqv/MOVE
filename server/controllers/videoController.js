@@ -165,12 +165,13 @@ const getStateByCountryAndVideoIdController = async(req, res, next) => {
 const getListVideoByChannelController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
+  const days = req.query.days
   const channelId = req.user.channelId;
   const sortCondition = {
     sortBy: req.query.sortBy || 'updatedAt',
     order: req.query.order || 'desc'
   };
-  const result = await getListVideoByChannel(channelId, page, pageSize, sortCondition)
+  const result = await getListVideoByChannel(channelId, page, pageSize, sortCondition, days)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

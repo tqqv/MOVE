@@ -606,7 +606,7 @@ const getVideoData = async (videoId) => {
           sequelize.literal(`(
             SELECT AVG(viewTime)
             FROM viewVideos
-            WHERE viewVideos.videoId = videoId
+            WHERE viewVideos.videoId = Video.id
           )`),
           'avgViewTime'
         ],
@@ -775,10 +775,19 @@ const analyticsVideoById = async(videoId, channelId) => {
   }
 };
 
-const getListVideoByChannel = async(channelId, page, pageSize, sortCondition) => {
+const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, days) => {
   try {
+    const whereCondition = {
+      channelId,
+    };
+
+    if (days) {
+      whereCondition.createdAt = {
+        [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+      };
+    }
     const listVideo =  await Video.findAndCountAll({
-      where: {channelId: channelId},
+      where: whereCondition,
       attributes: {
         include: [
           [
@@ -804,6 +813,14 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition) =>
               WHERE comments.videoId = Video.id
             )`),
             'totalReps'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT Sum(rep)
+              FROM comments
+              WHERE comments.videoId = Video.id && rep > 0
+            )`),
+            'vỉewerGift'
           ],
         ],
       },
