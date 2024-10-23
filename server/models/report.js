@@ -102,7 +102,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       suspendedUntil: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
     },
     {
