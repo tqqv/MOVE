@@ -234,9 +234,13 @@ const uploadThumbnailService = async (videoUri, thumbnailPath) => {
     const path = responseData.Path;
     if (path) {
       const pictureId = path.split('/').pop();
+      const videoId = videoUri.split('/').pop();
       const patchURL = `${pictureResponse.metadata.connections.pictures.uri}/${pictureId}`;
       const thumbnailResponse = await setThumbnailActive(patchURL);
-
+      const video = await Video.update(
+        { thumbnailUrl: thumbnailResponse.data.base_link }, 
+        { where: { id: videoId } } 
+      );
       // Delete the temporary thumbnail file
       fs.unlink(thumbnailPath, (err) => {
         if (err) {
@@ -289,14 +293,14 @@ const setThumbnailActive = (picturesUri) => {
         active: true,
         time: 0
       },
-    }, (error) => {
+    }, (error, body) => {
       if (error) {
         reject(error);
       } else {
         resolve({
           status: 200,
           message: 'Thumbnail uploaded successfully.',
-          data: null
+          data: body
         });
       }
     });
@@ -592,6 +596,19 @@ const getVideoData = async (videoId) => {
     where: {
       id: videoId
     },
+    include: [
+
+      {
+        model: LevelWorkout,
+        attributes: ['levelWorkout'],
+        as: "levelWorkout",
+      },
+      {
+        model: Category,
+        attributes: ['title'],
+        as: 'category',
+      }
+    ],
     attributes: {
       include: [
         [
@@ -609,6 +626,14 @@ const getVideoData = async (videoId) => {
             WHERE viewVideos.videoId = Video.id
           )`),
           'avgViewTime'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT Count(viewTime)
+            FROM viewVideos
+            WHERE viewVideos.videoId = Video.id
+          )`),
+          'totalViewer'
         ],
         [
           sequelize.literal(`(
@@ -816,11 +841,11 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
           ],
           [
             sequelize.literal(`(
-              SELECT Sum(rep)
+              SELECT Count(rep)
               FROM comments
               WHERE comments.videoId = Video.id && rep > 0
             )`),
-            'vỉewerGift'
+            'viewerGift'
           ],
         ],
       },

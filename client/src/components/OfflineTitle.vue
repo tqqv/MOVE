@@ -41,10 +41,6 @@
     isMenuVisible.value = false;
   };
 
-  const toggleFill = () => {
-    isFilled.value = !isFilled.value;
-  };
-
   const handleClickShareFacebook = async () => {
     const shareUrl = encodeURIComponent(window.location.href);
     const fbShareUrl = `https://www.facebook.com/dialog/share?app_id=${
@@ -93,17 +89,6 @@
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
     </div>
     <div class="flex items-center gap-9">
-      <div
-        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
-        @click="toggleFill"
-      >
-        <heart
-          :fill="isFilled ? 'fill-primary' : 'fill-white'"
-          stroke="stroke-primary"
-          class="mr-1"
-        />
-        Follow
-      </div>
       <div class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase">
         <i class="pi pi-star mr-1"></i> Rate Video
       </div>

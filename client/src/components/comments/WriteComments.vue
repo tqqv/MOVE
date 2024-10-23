@@ -23,6 +23,10 @@
       type: Function,
       required: true,
     },
+    videoId: {
+      type: Number,
+      required: true,
+    },
     replyToUsername: String,
   });
 
@@ -49,17 +53,10 @@
 
   const handleSend = async () => {
     const data = { content: commentText.value, parentId: parentId.value };
-    console.log(data);
-    console.log(commentText.value);
-    //  data test videoID
-    const videoId = 1018146045;
     try {
-      const response = await postComments(videoId, data);
-      console.log('Response data:', response.data);
+      const response = await postComments(props.videoId, data);
 
       if (response.data.success && response.data.data) {
-        console.log('Comment created successfully:', response.data.data);
-
         commentText.value = '';
         showActions.value = false;
         const newComment = {
@@ -71,7 +68,6 @@
           },
         };
         emit('sendComment', newComment);
-        console.log(newComment);
       } else {
         console.error('Failed to create comment');
       }
@@ -84,7 +80,7 @@
     commentText.value = '';
     showActions.value = false;
     const commentInput = document.getElementById('commentInput');
-    commentInput.innerText = ''; // Xóa nội dung của <div>
+    commentInput.innerText = '';
   };
 
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
@@ -104,7 +100,7 @@
 
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && isCommentNotEmpty.value) {
-      event.preventDefault(); // Ngăn chặn dòng mới khi nhấn Enter
+      event.preventDefault();
       handleSend();
     }
   };
@@ -176,5 +172,3 @@
     </div>
   </div>
 </template>
-
-<style></style>

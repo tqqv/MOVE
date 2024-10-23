@@ -4,6 +4,13 @@
   import { getAllComments, getAllChildComments } from '@/services/comment';
   import WriteComments from './WriteComments.vue';
 
+  const props = defineProps({
+    videoId: {
+      type: Number,
+      required: true,
+    },
+  });
+
   const comments = ref([]);
   const childComments = ref({});
   const currentPage = ref(1);
@@ -11,16 +18,14 @@
   const hasMoreComments = ref(true);
   const totalRepliesCount = ref({});
 
-  // Bình luận con
   const childCommentsPage = ref({});
   const childCommentsPerPage = 5;
   const hasMoreChildComments = ref({});
   const loadingRepliesForComment = ref({});
 
   const fetchComments = async () => {
-    const videoId = 1018146045;
     try {
-      const response = await getAllComments(videoId, {
+      const response = await getAllComments(props.videoId, {
         page: currentPage.value,
         pageSize: commentsPerPage.value,
       });
@@ -134,13 +139,15 @@
       console.error('New comment is undefined or null');
     }
   };
-
-  console.log('Comments data:', comments);
 </script>
 
 <template>
   <div class="space-y-8">
-    <WriteComments :fetchChildComments="fetchChildComments" @sendComment="handleSendComment" />
+    <WriteComments
+      :videoId="videoId"
+      :fetchChildComments="fetchChildComments"
+      @sendComment="handleSendComment"
+    />
 
     <CommentItem
       v-for="(comment, index) in comments"
