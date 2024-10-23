@@ -6,7 +6,7 @@
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
   import Paginator from 'primevue/paginator';
-  import NotFoundPage from '@/pages/NotFoundPage.vue';
+  import NotFoundPage from '@/pages/EmptyPage.vue';
 
   const categoriesStore = useCategoriesStore();
   const levelWorkoutStore = useLevelWorkoutStore();

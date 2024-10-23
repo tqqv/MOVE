@@ -3,5 +3,4 @@
 </script>
 
 <template>
-  <div class="p-10"><CommentPage /></div>
 </template>
