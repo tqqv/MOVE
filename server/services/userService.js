@@ -520,7 +520,6 @@ const getProfileByUserName = async(username) => {
         message: "User not found"
       }
     }
-
     return {
       status: 200,
       data: user,

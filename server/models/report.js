@@ -1,5 +1,5 @@
 "use strict";
-const { Model, Sequelize } = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class Report extends Model {
@@ -16,13 +16,13 @@ module.exports = (sequelize, DataTypes) => {
   Report.init(
     {
       id: {
-        type: Sequelize.UUID,
-        defaultValue: Sequelize.UUID,
+        type: DataTypes.UUID,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
         primaryKey: true,
       },
       reporterId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'users',
@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetCommentId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'comments',
@@ -42,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetVideoId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'videos',
@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetLivestreamId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'livestreams',
@@ -62,7 +62,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetAccountId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'users',
@@ -72,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       targetChannelId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'channels',
@@ -82,7 +82,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
       },
       reportTypeId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'reportTypes',
@@ -91,14 +91,18 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
+      chatMessagesContent: {
+        type: DataTypes.STRING,
+        allowNull: true,
+      },
       status: {
-        type: Sequelize.ENUM('pending', 'banned', 'rejected', 'suspended', 'closed'),
+        type: DataTypes.ENUM('pending', 'banned', 'rejected', 'suspended', 'closed'),
         allowNull: false,
         defaultValue: 'pending',
       },
       suspendedUntil: {
-        type: Sequelize.DATE,
-        defaultValue: Sequelize.literal('CURRENT_TIMESTAMP'),
+        type: DataTypes.DATE,
+        defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
       },
     },
     {

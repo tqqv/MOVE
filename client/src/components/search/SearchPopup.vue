@@ -32,26 +32,35 @@
           :key="category.id"
           class="p-2 flex items-center justify-between rounded-md hover:bg-gray-light cursor-pointer"
         >
-          <div class="flex items-center gap-x-2">
-            <img :src="category.imgUrl" :alt="category.title" class="h-14 w-10 object-cover" />
-            <h1>{{ category.title }}</h1>
+          <div class="flex items-center gap-x-2 truncate">
+            <img
+              :src="category.imgUrl"
+              :alt="category.title"
+              class="h-14 w-10 object-cover flex-shrink-0"
+            />
+            <h1 class="truncate text-ellipsis">{{ category.title }}</h1>
           </div>
           <span class="text-xs italic text-footer">Categories</span>
         </div>
       </div>
       <!-- VIDEO -->
       <div v-if="videos.length > 0" class="py-2 border-b border-gray-dark">
-        <div
+        <router-link
           v-for="video in videos"
+          :to="`/video/${video.id}`"
           :key="video.id"
           class="px-2 py-3 flex items-center justify-between rounded-md hover:bg-gray-light cursor-pointer"
         >
-          <div class="flex items-center gap-x-2">
-            <img :src="video.thumbnailUrl" :alt="video.title" class="h-10 w-14 object-cover" />
-            <h1>{{ video.title }}</h1>
+          <div class="flex items-center gap-x-2 truncate">
+            <img
+              :src="video.thumbnailUrl"
+              :alt="video.title"
+              class="h-10 w-14 object-cover flex-shrink-0"
+            />
+            <h1 class="truncate text-ellipsis">{{ video.title }}</h1>
           </div>
           <span class="text-xs italic text-footer">Videos</span>
-        </div>
+        </router-link>
       </div>
       <!-- USER -->
       <div v-if="users.length > 0" class="flex flex-col">

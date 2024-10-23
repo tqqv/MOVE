@@ -596,6 +596,19 @@ const getVideoData = async (videoId) => {
     where: {
       id: videoId
     },
+    include: [
+
+      {
+        model: LevelWorkout,
+        attributes: ['levelWorkout'],
+        as: "levelWorkout",
+      },
+      {
+        model: Category,
+        attributes: ['title'],
+        as: 'category',
+      }
+    ],
     attributes: {
       include: [
         [
@@ -613,6 +626,14 @@ const getVideoData = async (videoId) => {
             WHERE viewVideos.videoId = Video.id
           )`),
           'avgViewTime'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT Count(viewTime)
+            FROM viewVideos
+            WHERE viewVideos.videoId = Video.id
+          )`),
+          'totalViewer'
         ],
         [
           sequelize.literal(`(
@@ -820,11 +841,11 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
           ],
           [
             sequelize.literal(`(
-              SELECT Sum(rep)
+              SELECT Count(rep)
               FROM comments
               WHERE comments.videoId = Video.id && rep > 0
             )`),
-            'vỉewerGift'
+            'viewerGift'
           ],
         ],
       },
