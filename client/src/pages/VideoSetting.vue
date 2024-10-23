@@ -8,9 +8,10 @@
   import { getVideoSetting, deleteVideoById } from '@services/video';
   import { genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
-  import { usePopupStore } from '@/stores';
+  import { usePopupStore, useVideoStore } from '@/stores';
 
   const popupStore = usePopupStore();
+  const videoStore = useVideoStore();
   const currentPage = ref(1);
   const totalPage = ref();
   const totalVideo = ref(0);
@@ -60,6 +61,11 @@
       currentPage.value++;
     }
   };
+  const handleEditVideo = (videoId) => {
+    videoStore.setVideoIdDetail(videoId);
+    videoStore.setIsEdit(true);
+    popupStore.openVideoDetailPopup();
+  };
   watch(selectedProduct, () => {
     console.log(selectedProduct);
   });
@@ -84,7 +90,7 @@
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column header="Videos">
         <template #body="{ data }">
-          <img :src="data.thumbnailUrl" class="w-[180px] h-[100px] object-cover" />
+          <img :src="data.thumbnailUrl" class="w-[200px] h-[100px] object-cover" />
         </template>
       </Column>
       <Column header="Details">
@@ -136,7 +142,10 @@
           <div class="video-settings">
             <div class="flex justify-between">
               <button class="pi pi-upload text-primary hover:text-primary-light"></button>
-              <button class="pi pi-pencil text-primary hover:text-primary-light"></button>
+              <button
+                class="pi pi-pencil text-primary hover:text-primary-light"
+                @click="handleEditVideo(data.id)"
+              ></button>
               <div class="relative">
                 <button
                   class="pi pi-ellipsis-v text-primary hover:text-primary-light"

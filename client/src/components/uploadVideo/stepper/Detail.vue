@@ -1,31 +1,58 @@
 <script setup>
-  import { ref, watch } from 'vue';
+  import { ref, watch, computed } from 'vue';
   import VideoUpload from '@icons/videoUpload.vue';
   import { useVideoStore } from '@stores';
   import { storeToRefs } from 'pinia';
   import axios from '@/services/axios';
   import { toast } from 'vue3-toastify';
   const videoStore = useVideoStore();
-  const { thumbnailPreview } = storeToRefs(videoStore);
+  const {
+    thumbnailPreview,
+    uploadTitle,
+    uploadDescription,
+    uploadThumbnail,
+    uploadProgress,
+    isEdit,
+  } = storeToRefs(videoStore);
   const { setIsNext, setUploadTitle, setUploadDescription, setUploadThumbnail } = videoStore;
   const previewUrl = ref('');
   const isLoading = ref(false);
-  const thumbnail = ref(null);
-  const title = ref('');
-  const description = ref('');
-  const uploadProgress = ref(0);
+  const title = computed({
+    get: () => uploadTitle.value || '',
+    set: (val) => setUploadTitle(val),
+  });
+
+  const description = computed({
+    get: () => uploadDescription.value || '',
+    set: (val) => setUploadDescription(val),
+  });
+
+  const thumbnail = computed({
+    get: () => uploadThumbnail.value || null,
+    set: (val) => setUploadThumbnail(val),
+  });
+  const uploadProgress2 = ref(uploadProgress.value || 0);
 
   const checkNextStatus = () => {
-    setIsNext(
-      title.value.trim() !== '' &&
-        thumbnailPreview.value !== null &&
-        description.value.trim() !== '',
-    );
+    if (isEdit.value) {
+      setIsNext(
+        title?.value?.trim() !== '' &&
+          thumbnailPreview?.value !== null &&
+          description?.value?.trim() !== '',
+      );
+    } else {
+      setIsNext(
+        title.value.trim() !== '' &&
+          thumbnailPreview.value !== null &&
+          description.value.trim() !== '',
+      );
+    }
   };
   const onFileSelected = (event) => {
     thumbnail.value = event.target.files[0];
     isLoading.value = true;
     if (thumbnail.value) {
+      console.log(thumbnail.value);
       setUploadThumbnail(thumbnail.value);
       if (thumbnailPreview.value != '') {
         previewUrl.value = URL.createObjectURL(thumbnail.value);
@@ -52,7 +79,7 @@
   });
   const startUpload = async () => {
     if (!thumbnail.value) return;
-    uploadProgress.value = 0;
+    uploadProgress2.value = 0;
 
     try {
       const formData = new FormData();
@@ -66,10 +93,10 @@
         },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          uploadProgress.value = percentCompleted;
+          uploadProgress2.value = percentCompleted;
         },
       });
-      toast.success('Upload thumbnail successful');
+      console.log(response.data.data.base_link);
     } catch (error) {
       toast.error('Upload thumbnail failed');
     }

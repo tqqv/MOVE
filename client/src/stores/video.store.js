@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import { getVideoById } from '@/services/video';
 import { ref } from 'vue';
 
 export const useVideoStore = defineStore('video', () => {
@@ -14,9 +15,17 @@ export const useVideoStore = defineStore('video', () => {
   const commentSetting = ref(true);
   const tab = ref('1');
   const keywords = ref('');
-  const selectCategoryOptions = ref(0);
-  const selectLevelWorkoutOptions = ref(1);
+  const selectCategoryOptions = ref('0');
+  const selectLevelWorkoutOptions = ref('1');
+  const videoIdDetail = ref(0);
+  const isEdit = ref(false);
 
+  const setIsEdit = (value) => {
+    isEdit.value = value;
+  };
+  const setVideoIdDetail = (value) => {
+    videoIdDetail.value = value;
+  };
   const setKeywords = (value) => {
     keywords.value = value;
   };
@@ -59,6 +68,28 @@ export const useVideoStore = defineStore('video', () => {
   const setCommentSetting = (value) => {
     commentSetting.value = value;
   };
+  const getVideo = async (videoId) => {
+    try {
+      if (videoId !== 0) {
+        const response = await getVideoById(videoId);
+        if (response.success) {
+          uploadProgress.value = 100;
+          uri.value = `/videos/${response.data.id}`;
+          uploadTitle.value = response.data.title;
+          uploadDescription.value = response.data.description;
+          uploadCategory.value = response.data.category;
+          uploadThumbnail.value = response.data.thumbnailUrl;
+          thumbnailPreview.value = response.data.thumbnailUrl;
+          duration.value = response.data.duration;
+          commentSetting.value = response.data.isCommentable;
+          selectCategoryOptions.value = response.data.categoryId;
+          selectLevelWorkoutOptions.value = response.data.levelWorkoutsId;
+        }
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   const clear = () => {
     uploadProgress.value = 0;
     uri.value = null;
@@ -74,6 +105,8 @@ export const useVideoStore = defineStore('video', () => {
     selectCategoryOptions.value = 0;
     selectLevelWorkoutOptions.value = 1;
     tab.value = '1';
+    videoIdDetail.value = 0;
+    isEdit.value = false;
   };
   return {
     uploadProgress,
@@ -90,6 +123,8 @@ export const useVideoStore = defineStore('video', () => {
     keywords,
     selectCategoryOptions,
     selectLevelWorkoutOptions,
+    videoIdDetail,
+    isEdit,
     setUploadProgress,
     setUri,
     setIsNext,
@@ -105,5 +140,8 @@ export const useVideoStore = defineStore('video', () => {
     setKeywords,
     setSelectCategoryOptions,
     setSelectLevelWorkoutOptions,
+    getVideo,
+    setVideoIdDetail,
+    setIsEdit,
   };
 });

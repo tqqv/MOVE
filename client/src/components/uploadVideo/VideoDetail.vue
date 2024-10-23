@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import Tabs from 'primevue/tabs';
@@ -31,11 +31,12 @@
     keywords,
     selectCategoryOptions,
     selectLevelWorkoutOptions,
+    videoIdDetail,
   } = storeToRefs(videoStore);
   const { showVideoDetailPopup, showConfirmDialog } = storeToRefs(popupStore);
   const { openVideoDetailPopup, closeVideoDetailPopup, openConfirmDialog, closeConfirmDialog } =
     popupStore;
-  const { clear, setTab } = videoStore;
+  const { clear, setTab, getVideo } = videoStore;
 
   const confirm = useConfirm();
   const publish = ref(false);
@@ -136,6 +137,9 @@
     }
     confirmModal();
   };
+  watch(videoIdDetail, () => {
+    getVideo(videoIdDetail.value);
+  });
 </script>
 <template>
   <Dialog

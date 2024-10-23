@@ -2,38 +2,40 @@
   import { useVideoStore, useCategoriesStore, useLevelWorkoutStore } from '@/stores';
   import { storeToRefs } from 'pinia';
   import { onMounted, ref, watch, computed } from 'vue';
-  import Filter from '@/components/Filter.vue';
+  import Dropdown from 'primevue/dropdown';
   const videoStore = useVideoStore();
   const categoriesStore = useCategoriesStore();
   const levelWorkoutStore = useLevelWorkoutStore();
-  const { duration, tab } = storeToRefs(videoStore);
+  const { duration, tab, selectCategoryOptions, selectLevelWorkoutOptions, keywords } =
+    storeToRefs(videoStore);
   const categoryOptions = computed(() => categoriesStore.categoriesForSelect);
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkout);
-  const selectCategoryOptions = ref(0);
-  const selectLevelWorkoutOptions = ref(1);
   const durationInMinutes = ref(0);
-  const keywords = ref('');
   const errorLength = ref(false);
+  const selectCategory = computed({
+    get: () => selectCategoryOptions.value,
+    set: (val) => videoStore.setSelectCategoryOptions(val),
+  });
 
-  watch(categoryOptions, (newOptions) => {
-    if (newOptions.length > 0 && !selectCategoryOptions.value) {
-      selectCategoryOptions.value = newOptions[0].id || '';
-    }
+  const selectLevelWorkout = computed({
+    get: () => selectLevelWorkoutOptions.value,
+    set: (val) => videoStore.setSelectLevelWorkoutOptions(val),
   });
-  watch(selectLevelWorkoutOptions, (newOptions) => {
-    selectLevelWorkoutOptions.value = newOptions;
+
+  watch(selectCategory, (newOptions) => {
+    videoStore.setSelectCategoryOptions(newOptions);
+    console.log(newOptions);
+  });
+  watch(selectLevelWorkout, (newOptions) => {
+    console.log(selectLevelWorkout.value);
     videoStore.setSelectLevelWorkoutOptions(newOptions);
-  });
-  watch(levelWorkoutOptions, (newOptions) => {
-    selectLevelWorkoutOptions.value = newOptions[0].id;
   });
   watch(duration, () => {
     durationInMinutes.value = Math.floor(duration.value / 60);
   });
-  watch([tab, selectCategoryOptions, keywords], ([newTab, newSelectCategory, newKeywords]) => {
+  watch([tab, selectCategory, keywords], ([newTab, newSelectCategory, newKeywords]) => {
     if (newTab == 2) {
       const isCategoryValid = newSelectCategory !== categoryOptions.value[0].id;
-      videoStore.setSelectCategoryOptions(newSelectCategory);
       videoStore.setKeywords(newKeywords);
       const isKeywordsValid = newKeywords.length <= 50;
       const isNext = isCategoryValid && isKeywordsValid;
@@ -51,10 +53,12 @@
 <template>
   <div class="flex flex-col">
     <label class="text-[16px] font-medium">Category</label>
-    <Filter
-      class="mt-2 w-[200px]"
+    <Dropdown
+      v-model="selectCategory"
       :options="categoryOptions"
-      @change="selectCategoryOptions = $event.id"
+      optionLabel="name"
+      optionValue="id"
+      class="mt-2 w-[200px] border-primary custom-dropdown text-xs"
     />
   </div>
   <div class="flex flex-col md:flex-row justify-between mt-3 gap-x-6">
@@ -65,8 +69,8 @@
           v-for="(level, index) in levelWorkoutOptions"
           :key="index"
           class="tag mt-1"
-          :class="{ tag_active: selectLevelWorkoutOptions === level.id }"
-          @click="selectLevelWorkoutOptions = level.id"
+          :class="{ tag_active: selectLevelWorkout === level.id }"
+          @click="selectLevelWorkout = level.id"
         >
           {{ level.levelWorkout }}
         </span>
