@@ -65,7 +65,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       mutedUntil: {
         type: DataTypes.DATE,
-        defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
       },
     },
     {
