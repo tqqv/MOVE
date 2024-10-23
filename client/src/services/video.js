@@ -20,10 +20,20 @@ const getVideoAnalyticsById = async (videoId) => {
     return { error: true, message: error.message };
   }
 };
-const getVideoSetting = async (page, pageSize, sortBy, order) => {
+const getVideoSetting = async (page, pageSize, sortBy, order, days) => {
   try {
     const response = await axios.get('/video/getVideosByChannel', {
-      params: { page, pageSize, sortBy, order },
+      params: { page, pageSize, sortBy, order, days },
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const getStateByCountry = async (videoId, country) => {
+  try {
+    const response = await axios.get(`/video/getState/${videoId}`, {
+      params: { country },
     });
     return response.data;
   } catch (error) {
@@ -79,4 +89,5 @@ export {
   getVideoSetting,
   deleteVideoById,
   getVideoAnalyticsById,
+  getStateByCountry,
 };

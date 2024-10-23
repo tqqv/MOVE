@@ -11,28 +11,25 @@
   import { getVideoAnalyticsById } from '@services/video';
   import rate from '@components/icons/rate.vue';
   import { useRoute } from 'vue-router';
-  import { formatView, formatRating, formatDatePosted } from '@/utils';
+  import { formatView, formatRating, formatDatePosted, formatAvgViewTime } from '@/utils';
+  import TabAge from './TabAge.vue';
+  import TabCountry from './TabCountry.vue';
 
   const route = useRoute();
   const videoId = route.params.videoId;
   const videosDetails = ref([{}]);
-  const totalReps = ref([]);
   const viewersData = ref([]);
 
-  const overviewStats = [
-    { title: 'Total REPs earned', value: 51206 },
-    { title: 'Number of shares', value: 12040 },
-  ];
-  const genderStats = [
-    { title: 'Male', value: 51206, percent: 10 },
-    { title: 'Famale', value: 12040, percent: 100 },
-    { title: 'Unknown', value: 12040, percent: 10 },
-  ];
+  const overviewStats = [{ title: 'Total REPs earned' }, { title: 'Number of shares' }];
+  const genderStats = [{}];
+  const ageStats = ref(null);
+  const countryStats = ref(null);
+
   const scrollableTabs = [
     { title: 'Gender', value: '0', component: TabGender },
-    { title: 'Age', value: '1', component: TabGender },
-    { title: 'Nationality', value: '2', component: TabGender },
-    { title: 'Country', value: '3', component: TabGender },
+    { title: 'Age', value: '1', component: TabAge },
+    { title: 'Nationality', value: '2', component: TabCountry },
+    { title: 'Country', value: '3', component: TabCountry },
   ];
   const tabStore = useTabStore();
   const onTabChange = (event) => {
@@ -46,8 +43,12 @@
       videosDetails.value = response.data.videoData;
       console.log(videosDetails.value);
 
-      totalReps.value = response.data.totalReps;
-      viewersData.value = response.data.viewersData;
+      viewersData.value = response.data.videoData.viewersData;
+      overviewStats[0].value = response.data.videoData.totalReps;
+      overviewStats[1].value = response.data.videoData.totalShare;
+      genderStats.value = response.data.viewersData.genderData;
+      ageStats.value = response.data.viewersData.ageData;
+      countryStats.value = response.data.viewersData.countryData;
     } catch (error) {
       toast.error(error.message);
     }
@@ -55,18 +56,19 @@
 
   onMounted(() => {
     fetchVideosAnalytics(videoId);
+    console.log(overviewStats);
   });
 </script>
 <template>
   <div class="container">
     <RouterLink to="/dashboard-streamer/video-analytics">
-      <div class="flex items-center text-primary text-base pt-6">
+      <div class="flex items-center text-primary text-base pt-4">
         <i class="pi pi-angle-left"></i>
         <span class="ml-2">Back to video analytics</span>
       </div>
     </RouterLink>
     <div class="flex justify-between">
-      <h1 class="py-4 px-4 font-bold text-[24px]">In-depth analytics</h1>
+      <h1 class="py-2 px-4 font-bold text-[24px]">In-depth analytics</h1>
       <div class="flex gap-8">
         <!-- <Filter title="SHOW" :options="sortByTime" @change="handleSortTimeChange" class="flex-1" /> -->
       </div>
@@ -79,7 +81,7 @@
           <div>
             <img
               :src="videosDetails.thumbnailUrl"
-              class="rounded-lg object-cover w-full h-[129px]"
+              class="rounded-lg object-cover w-full h-[200px]"
             />
           </div>
 
@@ -93,8 +95,8 @@
               <span class="text-sm">{{ formatView(videosDetails.viewCount) }}</span>
             </div>
             <div class="flex justify-between">
-              <span class="text-sm uppercase text-[#666666]">Total REPs received</span>
-              <span class="text-sm">{{ totalReps.totalReps }} REPs</span>
+              <span class="text-sm uppercase text-[#666666]">avg. view time</span>
+              <span class="text-sm">{{ formatAvgViewTime(videosDetails.avgViewTime) }} </span>
             </div>
             <div class="flex justify-between">
               <span class="text-sm uppercase text-[#666666]">Ratings</span>
@@ -114,7 +116,7 @@
       </div>
 
       <!-- Col 2  -->
-      <div class="space-y-12">
+      <div class="space-y-8">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-2/3 pl-4">
           <StatsCard
             v-for="(stat, index) in overviewStats"
@@ -134,7 +136,14 @@
             </TabList>
             <TabPanels>
               <TabPanel v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
-                <component :is="tab.component" :genderStats="genderStats" />
+                <component
+                  v-if="ageStats"
+                  :is="tab.component"
+                  :genderStats="genderStats"
+                  :totalViewer="videosDetails.totalViewer"
+                  :ageStats="ageStats"
+                  :countryStats="countryStats"
+                />
               </TabPanel>
             </TabPanels>
           </Tabs>
