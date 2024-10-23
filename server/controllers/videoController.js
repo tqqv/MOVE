@@ -13,6 +13,7 @@ const {
   getListVideoByFilter,
   analyticsVideoById,
   getListVideoByChannel,
+  getStateByCountryAndVideoId,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -149,7 +150,15 @@ const analyticsVideoByIdController = async(req, res, next) => {
   const videoId = req.params.videoId
   const channelId = req.user.channelId
   const result = await analyticsVideoById(videoId, channelId)
-  
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getStateByCountryAndVideoIdController = async(req, res, next) => {
+  const videoId = req.params.videoId
+  const country = req.query.country
+  const result = await getStateByCountryAndVideoId(videoId, country)
+
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
@@ -157,7 +166,11 @@ const getListVideoByChannelController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
   const channelId = req.user.channelId;
-  const result = await getListVideoByChannel(channelId, page, pageSize)
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'updatedAt',
+    order: req.query.order || 'desc'
+  };
+  const result = await getListVideoByChannel(channelId, page, pageSize, sortCondition)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -177,4 +190,5 @@ module.exports = {
   getListVideoByFilterController,
   analyticsVideoByIdController,
   getListVideoByChannelController,
+  getStateByCountryAndVideoIdController,
 };
