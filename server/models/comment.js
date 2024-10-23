@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'parentId',
         as: 'replies',
       });
+      this.hasMany(models.Report, { foreignKey: 'targetCommentId', as: 'commentReport' });
     }
   }
   Comment.init(
@@ -88,7 +89,11 @@ module.exports = (sequelize, DataTypes) => {
         // },
         onDelete: 'CASCADE',
         onUpdate: 'CASCADE',
-      }
+      },
+      isBanned: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false,
+      },
     },
     {
       sequelize,

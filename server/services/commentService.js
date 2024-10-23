@@ -8,13 +8,15 @@ const checkLevelAndGetParentId = async (parentId) => {
   if (!parentCommentLevel1.parentId) {
     return parentId;
   } else {
+    // const grandParentComment = await Comment.findOne({ where: { id: parentCommentLevel1.parentId } });
+    return parentCommentLevel1.parentId
     // Nếu parent comment cũng có parentId, tức là level = 2 ( trong level 1 2 3 ), return parentId này
-    const grandParentComment = await Comment.findOne({ where: { id: parentCommentLevel1.parentId } });
-    if (grandParentComment && grandParentComment.parentId) {
-      return grandParentComment.id;
-    } else if(!grandParentComment.parentId) {
-      return parentId
-    }
+    // const grandParentComment = await Comment.findOne({ where: { id: parentCommentLevel1.parentId } });
+    // if (grandParentComment && grandParentComment.parentId) {
+    //   return grandParentComment.id;
+    // } else if(!grandParentComment.parentId) {
+    //   return parentId
+    // }
   }
 };
 
@@ -89,7 +91,7 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
 
 const getCommentsByVideo = async (videoId, page, pageSize) => {
 
-  const comments = await Comment.findAll({
+  const comments = await Comment.findAndCountAll({
     where: {
       parentId: null,
       videoId: videoId,
@@ -126,7 +128,7 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     ],
 
     order: [
-      ['updatedAt', 'ASC']
+      ['updatedAt', 'DESC']
     ],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
@@ -134,7 +136,11 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
 
   return {
     status: 200,
-    data: comments,
+    data: {
+      comments,
+      totalPages: Math.ceil(comments.count/pageSize)
+    
+    },
     message: "Get comments success"
   }
 }
@@ -256,7 +262,7 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
       {
         model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',
-        attributes: ['avatar', 'username', 'email']
+        attributes: ['avatar', 'username', 'email', 'isVerified']
       },
       {
         model: Channel,
@@ -265,7 +271,7 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
       },
     ],
     order: [
-      ['updatedAt', 'ASC']
+      ['updatedAt', 'DESC']
     ],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,

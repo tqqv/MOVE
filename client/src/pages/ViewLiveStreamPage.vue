@@ -2,7 +2,7 @@
   import LiveChat from '@/components/LiveChat.vue';
   import Navbar from '@/components/Navbar.vue';
   import SideBarFollow from '@/components/SideBarFollow.vue';
-  import ViewLiveStreamContent from '@/components/viewLiveStream/viewLiveStreamContent.vue';
+  import ViewLiveStreamContent from '@/components/viewLiveStream/ViewLiveStreamContent.vue';
 </script>
 
 <template>
