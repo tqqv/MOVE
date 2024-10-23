@@ -21,9 +21,9 @@ const corsOptions = {
   credentials: true,
 };
 
+app.use(cors(corsOptions));
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(cors(corsOptions));
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
@@ -39,7 +39,6 @@ app.use("/api/category", cateRouter);
 app.use("/api/levelWorkout", lvWorkoutRouter);
 app.use("/api/rating", ratingRouter);
 app.use("/api/report", reportRouter);
-
 
 // connect DB
 connection();
