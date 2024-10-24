@@ -14,6 +14,9 @@
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
+  import { useUserStore } from '@/stores/user.store';
+
+  const userStore = useUserStore();
 
   const route = useRoute();
   const vimeoPlayer = ref(null);
@@ -82,6 +85,7 @@
           :isButtonGiftREPsVisible="true"
           :totalFollower="totalFollower"
           :channelId="channelId"
+          @updateFollowers="fetchVideoById"
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">

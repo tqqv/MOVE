@@ -51,14 +51,14 @@
     isMenuVisible.value = false;
   };
 
-  const fetchListFollowOfUser = async () => {
-    const result = await getListFollowOfUser();
-    if (result.success) {
-      followedChannels.value = result.data;
-    } else {
-      toast.error(result.message);
-    }
-  };
+  // const fetchListFollowOfUser = async () => {
+  //   const result = await getListFollowOfUser();
+  //   if (result.success) {
+  //     followedChannels.value = result.data;
+  //   } else {
+  //     toast.error(result.message);
+  //   }
+  // };
   const followChannel = async () => {
     try {
       const response = await postFollowChannel({
@@ -69,12 +69,12 @@
         toast.success(response.message);
         isFilled.value = !isFilled.value;
         emit('updateFollowers');
-        fetchListFollowOfUser();
+        userStore.loadFollowers();
       } else {
         isFilled.value = !isFilled.value;
         toast.success(response.message);
         emit('updateFollowers');
-        fetchListFollowOfUser();
+        userStore.loadFollowers();
       }
     } catch (error) {
       toast.error(error.message);
@@ -85,13 +85,13 @@
     followChannel();
   };
   const isChannelFollowed = computed(() => {
-    return followedChannels.value.some((channel) =>
+    return userStore.followers.some((channel) =>
       channel.channelId === props.channelId ? props.channelId.toString() : null,
     );
   });
   onMounted(() => {
     if (userStore.user) {
-      fetchListFollowOfUser();
+      userStore.loadFollowers();
     }
   });
 </script>

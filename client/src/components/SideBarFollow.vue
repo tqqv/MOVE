@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { watch, ref } from 'vue';
   import { useUserStore } from '@/stores/user.store';
   import { usePopupStore } from '@/stores';
   import { useTabStore } from '@/stores/tab.store';
@@ -22,6 +22,10 @@
     popupStore.openLoginPopup();
     tabStore.setActiveTab('1');
   };
+  watch(
+    () => userStore.followers,
+    (newFollowers) => {},
+  );
 </script>
 
 <template>
