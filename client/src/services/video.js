@@ -12,9 +12,11 @@ const getVideobyChannel = (channelId, page, pageSize, sortBy, order, level, cate
     },
   });
 };
-const getVideoAnalyticsById = async (videoId) => {
+const getVideoAnalyticsById = async (videoId, days) => {
   try {
-    const response = await axios.get(`/video/getVideoAnalytics/${videoId}`);
+    const response = await axios.get(`/video/getVideoAnalytics/${videoId}`, {
+      params: { days },
+    });
     return response.data;
   } catch (error) {
     return { error: true, message: error.message };
