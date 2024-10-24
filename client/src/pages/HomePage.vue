@@ -6,8 +6,10 @@
   import CategoryImage from '@/components/CategoryImage.vue';
   import { getAllCategory, getAllVideos } from '@/services/video';
   import GirdVideo from '@/components/GirdVideo.vue';
+  import SmallLoading from '@/components/icons/smallLoading.vue';
   const categories = ref([]);
   const videos = ref([]);
+  const isLoading = ref(true);
 
   const fetchAllCategory = async () => {
     try {
@@ -28,6 +30,8 @@
       }
     } catch (error) {
       console.error(error.message);
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -44,7 +48,12 @@
         <span class="font-bold text-[24px] pr-8">Featured</span>
         <Divider class="flex-grow mt-1" />
       </div>
-      <div><Slider /></div>
+      <div class="flex justify-center items-center h-[300px]" v-if="isLoading">
+        <SmallLoading />
+      </div>
+      <div v-else>
+        <Slider :videos="videos" />
+      </div>
     </div>
   </section>
   <section>
