@@ -14,19 +14,8 @@ const {
   analyticsVideoById,
   getListVideoByChannel,
   getStateByCountryAndVideoId,
-  downloadVideoService,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
-
-const downloadVideo = async(req, res, next) => {
-  const {videoId, title } = req.body; 
-  try {
-    const result = await downloadVideoService(videoId, title);
-    responseHandler(result.status, result.data, result.message)(req, res, next);
-  } catch (error) {
-    responseHandler(error.status, error.data, error.message)(req, res,next);
-  }
-}
 
 const getUploadLink = async (req, res, next) => {
   const { fileName, fileSize } = req.body;
@@ -203,5 +192,4 @@ module.exports = {
   analyticsVideoByIdController,
   getListVideoByChannelController,
   getStateByCountryAndVideoIdController,
-  downloadVideo,
 };
