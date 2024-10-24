@@ -2,25 +2,25 @@
   import { onMounted, ref } from 'vue';
   import { useUserStore } from '@/stores/user.store';
   import { usePopupStore } from '@/stores';
+  import { useTabStore } from '@/stores/tab.store';
+
   import logoIcon from '@icons/logoIcon.vue';
   import verified from '@icons/verified.vue';
   import Button from 'primevue/button';
 
   const userStore = useUserStore();
   const popupStore = usePopupStore();
+  const tabStore = useTabStore();
+
   const isShow = ref(true);
 
   const handleShow = () => {
     isShow.value = !isShow.value;
   };
 
-  // onMounted(async () => {
-  //   if (userStore.user) {
-  //     await userStore.loadFollowers();
-  //   }
-  // });
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
+    tabStore.setActiveTab('1');
   };
 </script>
 

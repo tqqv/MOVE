@@ -90,9 +90,9 @@
     );
   });
   onMounted(() => {
-    userStore.fetchUserProfile();
-
-    fetchListFollowOfUser();
+    if (userStore.user) {
+      fetchListFollowOfUser();
+    }
   });
 </script>
 
