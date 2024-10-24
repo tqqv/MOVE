@@ -1,7 +1,7 @@
 "use strict";
 const { Model } = require("sequelize");
 
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, DataTypes) => {
   class Livestream extends Model {
     static associate(models) {
 
@@ -47,13 +47,13 @@ module.exports = (sequelize, Sequelize) => {
   Livestream.init(
     {
       id: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: Sequelize.UUID,
+        defaultValue: DataTypes.UUID,
         allowNull: false,
       },
       streamerId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'channels', // Tên bảng trong cơ sở dữ liệu
@@ -62,11 +62,11 @@ module.exports = (sequelize, Sequelize) => {
         onDelete: 'CASCADE',
       },
       streamKey: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
       },
       categoryId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
         references: {
           model: 'categories', // Tên bảng trong cơ sở dữ liệu
@@ -75,32 +75,32 @@ module.exports = (sequelize, Sequelize) => {
         onDelete: 'CASCADE', // Đặt categoryId thành NULL nếu category bị xóa
       },
       title: {
-        type: Sequelize.STRING(255),
+        type: DataTypes.STRING(255),
         allowNull: false,
       },
       description: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
         allowNull: false,
       },
       thumbnailUrl: {
-        type: Sequelize.STRING(255),
+        type: DataTypes.STRING(255),
         allowNull: true,
       },
       highestViewAtSameTime: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
       },
       totalView: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
       },
       totalShare: {
-        type: Sequelize.INTEGER,
+        type: DataTypes.INTEGER,
       },
       duration: {
-        type: Sequelize.STRING(20),
+        type: DataTypes.STRING(20),
         allowNull: true,
       },
       levelWorkoutsId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: true,
       },
     },

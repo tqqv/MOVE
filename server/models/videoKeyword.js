@@ -1,5 +1,5 @@
 "use strict";
-const { Model, Sequelize } = require("sequelize");
+const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class VideoKeyword extends Model {
@@ -15,7 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
       },
       videoId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'videos', // Tên bảng trong cơ sở dữ liệu
@@ -23,7 +23,7 @@ module.exports = (sequelize, DataTypes) => {
         },
       },
       keywordId: {
-        type: Sequelize.UUID,
+        type: DataTypes.UUID,
         allowNull: false,
         references: {
           model: 'keywords', // Tên bảng trong cơ sở dữ liệu

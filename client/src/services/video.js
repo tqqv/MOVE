@@ -12,9 +12,29 @@ const getVideobyChannel = (channelId, page, pageSize, sortBy, order, level, cate
     },
   });
 };
-const getVideoSetting = async (page, pageSize) => {
+const getVideoAnalyticsById = async (videoId) => {
   try {
-    const response = await axios.get('/video/getVideosByChannel', { params: { page, pageSize } });
+    const response = await axios.get(`/video/getVideoAnalytics/${videoId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const getVideoSetting = async (page, pageSize, sortBy, order, days) => {
+  try {
+    const response = await axios.get('/video/getVideosByChannel', {
+      params: { page, pageSize, sortBy, order, days },
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const getStateByCountry = async (videoId, country) => {
+  try {
+    const response = await axios.get(`/video/getState/${videoId}`, {
+      params: { country },
+    });
     return response.data;
   } catch (error) {
     return { error: true, message: error.message };
@@ -60,6 +80,14 @@ const deleteVideoById = async (videoId) => {
     return { error: true, message: error.message };
   }
 };
+const getVideoById = async (videoId) => {
+  try {
+    const response = await axios.get(`/video/${videoId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 export {
   getVideobyChannel,
   getAllCategory,
@@ -68,4 +96,7 @@ export {
   getCategoryById,
   getVideoSetting,
   deleteVideoById,
+  getVideoById,
+  getVideoAnalyticsById,
+  getStateByCountry,
 };

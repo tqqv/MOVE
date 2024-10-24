@@ -81,8 +81,8 @@
 </script>
 
 <template>
-  <section>
-    <div class="flex justify-between px-10">
+  <section class="container">
+    <div class="flex justify-between px-4">
       <h1 class="text_title">Comments</h1>
       <div class="flex gap-x-20">
         <Filter
@@ -97,7 +97,7 @@
         />
       </div>
     </div>
-    <div class="py-5">
+    <div class="py-4">
       <div class="relative overflow-x-auto">
         <table class="w-full text-sm text-left rtl:text-right text-gray-500 min-w-[100vh]">
           <thead class="uppercase text-footer border-b-[1px] border-gray-dark">
