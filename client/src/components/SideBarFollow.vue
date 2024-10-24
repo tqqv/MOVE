@@ -14,9 +14,11 @@
     isShow.value = !isShow.value;
   };
 
-  onMounted(async () => {
-    await userStore.loadFollowers();
-  });
+  // onMounted(async () => {
+  //   if (userStore.user) {
+  //     await userStore.loadFollowers();
+  //   }
+  // });
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
@@ -67,6 +69,7 @@
 
         <!-- HAVE FOLLOWING CHANNEL -->
         <RouterLink
+          v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
           class="flex items-center gap-x-3 cursor-pointer"
@@ -125,7 +128,7 @@
       <div v-if="!userStore.user" class="flex justify-center mt-4 rounded-md">
         <div
           v-tooltip="'Sign up'"
-           class="flex items-center w-full justify-center hover:bg-primary-light/20 rounded-md  py-5 px-3 cursor-pointer"
+          class="flex items-center w-full justify-center hover:bg-primary-light/20 rounded-md py-5 px-3 cursor-pointer"
           @click="openLoginPopup"
         >
           <i class="pi pi-sign-in"></i>

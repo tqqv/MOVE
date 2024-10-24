@@ -13,6 +13,7 @@ const cateRouter = require("./routes/categoryRoute.js");
 const lvWorkoutRouter = require("./routes/levelWorkoutRoute.js");
 const ratingRouter = require("./routes/ratingRoute.js");
 const {connectSocket} = require("./services/socketService.js");
+const reportRouter = require("./routes/reportRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -35,7 +36,6 @@ const io = require("socket.io")(server, {
 global._io = io;
 app.use(express.json());
 app.use(express.urlencoded());
-app.use(cors(corsOptions));
 app.use(cookieParser());
 
 app.get("/", (req, res) => {
@@ -52,5 +52,7 @@ app.use("/api/levelWorkout", lvWorkoutRouter);
 app.use("/api/rating", ratingRouter);
 // init socket connection
 global._io.on('connection', connectSocket);
+app.use("/api/report", reportRouter);
+
 // connect DB
 connection();

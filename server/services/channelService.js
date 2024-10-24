@@ -498,8 +498,9 @@ const endStream = async(streamKey) => {
         message: "End stream fail"
       }
     }
-    _io.to(valid.id).emit('streamReady', false);
+    valid.isLive = false;
     valid.save();
+    _io.to(valid.id).emit('streamReady', false);
     return {
       status: 200,
       message: "End stream success"

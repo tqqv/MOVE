@@ -21,7 +21,6 @@
     'handleSendCommentReply',
     'updateTotalRepliesCount',
   ]);
-  
 
   //   HANDLE CANCEL
   const handleCancel = () => {

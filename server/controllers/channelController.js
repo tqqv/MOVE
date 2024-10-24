@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { followChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel, getAllInforFollow, createStreamKey, validateStreamKey } = require("../services/channelService");
+const { followChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel, getAllInforFollow, createStreamKey, validateStreamKey, endStream } = require("../services/channelService");
 
 
 
@@ -81,7 +81,7 @@ const validateStreamKeyController = async(req, res, next) => {
 
 const endStreamController = async(req, res, next) => {
   const streamKey = req.body.streamKey;
-  const result = await validateStreamKey(streamKey);
+  const result = await endStream(streamKey);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
