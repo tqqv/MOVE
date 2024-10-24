@@ -9,6 +9,7 @@
   import { genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useVideoStore } from '@/stores';
+  import axiosInstance from '@/services/axios';
 
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
@@ -18,9 +19,13 @@
   const selectedProduct = ref();
   const videos = ref([]);
   const showMenu = ref(false);
+  const isShareVisible = ref(false);
 
   const toggleShowMenu = () => {
     showMenu.value = !showMenu.value;
+    if (showMenu.value) {
+      isShareVisible.value = false;
+    }
   };
 
   const pageSizeOptions = [
@@ -42,6 +47,7 @@
   };
   const handleDeleteVideo = async (videoId) => {
     try {
+      showMenu.value = false;
       const response = await deleteVideoById(videoId);
       if (response.status === 200) {
         toast.success('Video deleted successfully');
@@ -51,6 +57,42 @@
       toast.error(error.message);
     }
   };
+  const handleClickShareFacebook = async (videoId) => {
+    const shareUrl = encodeURIComponent(window.location.origin + '/' + 'video/' + videoId);
+    const fbShareUrl = `https://www.facebook.com/dialog/share?app_id=${
+      import.meta.env.VITE_FACEBOOK_APP_ID
+    }&href=${shareUrl}&display=popup`;
+
+    const width = 600;
+    const height = 400;
+    const left = window.screen.width / 2 - width / 2;
+    const top = window.screen.height / 2 - height / 2;
+
+    window.open(fbShareUrl, '_blank', `width=${width},height=${height},top=${top},left=${left}`);
+  };
+
+  const toggleShare = () => {
+    isShareVisible.value = !isShareVisible.value;
+    if (isShareVisible.value) {
+      showMenu.value = false;
+    }
+  };
+
+  const closeShare = () => {
+    isShareVisible.value = false;
+  };
+
+  const handleClickCopyLink = (videoId) => {
+    const currentUrl = window.location.origin + '/' + 'video/' + videoId;
+    navigator.clipboard
+      .writeText(currentUrl)
+      .then(() => {
+        toast.success('Copy link successfully');
+      })
+      .catch((err) => {
+        toast.error(`Can't copy this link: `, err);
+      });
+  };
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
@@ -59,6 +101,20 @@
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
+    }
+  };
+  const handleDownloadVideo = async (videoId, title) => {
+    try {
+      showMenu.value = false;
+      const response = await axiosInstance.post('video/download', {
+        videoId,
+        title,
+      });
+      if (response.status === 200) {
+        console.log('Video downloaded successfully:', response.data);
+      }
+    } catch (error) {
+      console.error('Error downloading video:', error);
     }
   };
   const handleEditVideo = (videoId) => {
@@ -141,7 +197,43 @@
         <template #body="{ data }">
           <div class="video-settings">
             <div class="flex justify-between">
-              <button class="pi pi-upload text-primary hover:text-primary-light"></button>
+              <div class="relative">
+                <button
+                  class="pi pi-upload text-primary hover:text-primary-light"
+                  @click="toggleShare"
+                ></button>
+                <div
+                  v-if="isShareVisible"
+                  class="absolute w-[200px] bottom-7 right-0 bg-white p-4 rounded-lg border-primary-light border-2"
+                >
+                  <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-[16px]">Share via</h3>
+                    <button @click="closeShare">
+                      <i class="pi pi-times hover:text-primary"></i>
+                    </button>
+                  </div>
+                  <ul class="flex justify-center gap-8">
+                    <li
+                      class="flex flex-col items-center text-[13px] cursor-pointer gap-2 group"
+                      @click="handleClickShareFacebook(data.id)"
+                    >
+                      <i class="pi pi-facebook text-[#1771ed] text-[40px]"></i>
+                      <h4 class="group-hover:text-primary">Facebook</h4>
+                    </li>
+                    <li
+                      class="flex flex-col items-center text-[13px] cursor-pointer gap-2 group"
+                      @click="handleClickCopyLink(data.id)"
+                    >
+                      <div
+                        class="w-[40px] h-[40px] rounded-full border-primary border-2 flex items-center justify-center"
+                      >
+                        <i class="pi pi-link text-primary text-[25px]"></i>
+                      </div>
+                      <h4 class="group-hover:text-primary">Copy link</h4>
+                    </li>
+                  </ul>
+                </div>
+              </div>
               <button
                 class="pi pi-pencil text-primary hover:text-primary-light"
                 @click="handleEditVideo(data.id)"
@@ -164,6 +256,7 @@
                   </button>
                   <button
                     class="flex gap-3 mt-3 items-center text-primary cursor-pointer hover:text-primary-light"
+                    @click="handleDownloadVideo(data.id, data.title)"
                   >
                     <button class="pi pi-download"></button>
                     <span class="text-nowrap">Download video</span>
@@ -175,7 +268,7 @@
         </template>
       </Column>
       <Column field="" header="" style="display: none"></Column>
-      <template #groupheader="{ data }">
+      <!-- <template #groupheader="{ data }">
         <div
           class="flex gap-10 justify-center border-primary border-2 rounded-lg bg-[#E6FFFB] py-3"
         >
@@ -184,7 +277,7 @@
             Select all videos.
           </button>
         </div>
-      </template>
+      </template> -->
     </DataTable>
     <div class="flex justify-end gap-x-12 items-center px-12 pt-3">
       <Filter :title="'Rows per page'" :options="pageSizeOptions" v-model="selectedPageSize" />
