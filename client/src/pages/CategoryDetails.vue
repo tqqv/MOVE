@@ -7,7 +7,6 @@
 <template>
   <Navbar />
   <div class="flex w-full pt-[72px] overflow-x-hidden">
-    <SideBarFollow />
     <CategoryDetailsContent />
   </div>
 </template>

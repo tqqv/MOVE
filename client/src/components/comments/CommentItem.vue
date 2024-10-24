@@ -27,7 +27,12 @@
     },
     hasMoreChildComments: Boolean,
     loadingReplies: Boolean,
+    videoId: {
+      type: Number,
+      required: true,
+    },
   });
+
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
   const isShowMoreChild = ref(false);
@@ -61,12 +66,8 @@
     isReplyChild.value = !isReplyChild.value;
 
     if (isReplyChild.value) {
-      console.log('Replying to comment ID:', commentId, 'with parent ID:', parentId);
       id.value = commentId;
       parentIdReply.value = parentId;
-      console.log('Current ID:', id);
-      // replyToUsername.value = username;
-      console.log(replyToUsername.value);
     }
   };
 
@@ -82,11 +83,9 @@
     if (newComment) {
       newComment.isNew = true;
 
-      // Chỉ thêm bình luận vào tầng 2 (tầng của parentIdReply)
       if (parentIdReply.value && props.childComments[parentIdReply.value]) {
         props.childComments[parentIdReply.value].unshift(newComment);
       } else {
-        // Nếu không có parentIdReply hoặc không tồn tại bình luận con cho parentId đó
         if (!props.childComments[id.value]) {
           props.childComments[id.value] = [];
         }
@@ -99,8 +98,6 @@
       console.error('New comment is undefined or null');
     }
   };
-
-  console.log(props.hasMoreChildComments);
 </script>
 
 <template>
@@ -174,6 +171,7 @@
         :commentId="comment.id"
         @sendComment="handleSendComment"
         :replyToUsername="replyToUsername"
+        :videoId="videoId"
       />
       <div v-if="!isShowMoreChild">
         <CommentItem
@@ -183,6 +181,7 @@
           :fetchChildComments="props.fetchChildComments"
           :childComments="props.childComments"
           :totalRepliesCount="props.totalRepliesCount"
+          :videoId="videoId"
         />
       </div>
       <!-- Toggle to show/hide child comments -->
@@ -211,6 +210,7 @@
             :fetchChildComments="props.fetchChildComments"
             :childComments="props.childComments"
             :totalRepliesCount="props.totalRepliesCount"
+            :videoId="videoId"
           />
           <div
             v-if="hasMoreChildComments && !loadingReplies"
