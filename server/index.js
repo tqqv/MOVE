@@ -12,6 +12,7 @@ const userRouter = require("./routes/userRoute.js");
 const cateRouter = require("./routes/categoryRoute.js");
 const lvWorkoutRouter = require("./routes/levelWorkoutRoute.js");
 const ratingRouter = require("./routes/ratingRoute.js");
+const {connectSocket} = require("./services/socketService.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -20,6 +21,18 @@ const corsOptions = {
   credentials: true,
 };
 
+let server = app.listen(port, () => {
+  console.log(`Server is running on http://localhost:${port}`);
+});
+// const server = http.createServer(app);
+const io = require("socket.io")(server, {
+  cors: {
+    origin: process.env.CLIENT_HOST,  // Allow requests from frontend
+    methods: ["GET", "POST"],
+  }
+});
+// Gán io vào biến toàn cục
+global._io = io;
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cors(corsOptions));
@@ -37,11 +50,7 @@ app.use("/api/user", userRouter);
 app.use("/api/category", cateRouter);
 app.use("/api/levelWorkout", lvWorkoutRouter);
 app.use("/api/rating", ratingRouter);
-
-
+// init socket connection
+global._io.on('connection', connectSocket);
 // connect DB
 connection();
-
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});

@@ -79,6 +79,12 @@ const validateStreamKeyController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const endStreamController = async(req, res, next) => {
+  const streamKey = req.body.streamKey;
+  const result = await validateStreamKey(streamKey);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getListSubscribeOfChannel,
   followChannelController,
@@ -89,5 +95,6 @@ module.exports = {
   searchVideoChannelController,
   getAllInforFollowController,
   createStreamKeyController,
-  validateStreamKeyController
+  validateStreamKeyController,
+  endStreamController
 }

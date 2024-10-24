@@ -29,6 +29,7 @@
     "passport-facebook": "^3.0.0",
     "passport-google-oauth20": "^2.0.0",
     "sequelize": "^6.37.3",
+    "socket.io": "^4.8.0",
     "uuid": "^10.0.0",
     "vimeo": "^2.3.1"
   },

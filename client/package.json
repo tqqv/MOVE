@@ -18,6 +18,7 @@
     "pinia": "^2.2.2",
     "primeicons": "^7.0.0",
     "primevue": "^4.0.5",
+    "socket.io-client": "^4.8.0",
     "tus-js-client": "^4.2.3",
     "vee-validate": "^4.13.2",
     "vue": "^3.4.37",

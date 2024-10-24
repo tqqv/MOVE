@@ -472,14 +472,15 @@ const validateStreamKey = async(streamKey) => {
         message: "Streaming Key is invalid"
       }
     }
-
+    valid.isLive = true;
+    valid.save();
+    _io.to(valid.id).emit('streamReady', true);
     return {
       status: 200,
       data: streamKey,
       message: "Streaming Key is valid"
     }
   } catch (error) {
-    console.log(error);
     return {
       status: 500,
       data: streamKey,
@@ -488,6 +489,28 @@ const validateStreamKey = async(streamKey) => {
   }
 }
 
+const endStream = async(streamKey) => {
+  try {
+    const valid = await Channel.findOne({where: {streamKey: streamKey}});
+    if(!valid){
+      return {
+        status: 404,
+        message: "End stream fail"
+      }
+    }
+    _io.to(valid.id).emit('streamReady', false);
+    valid.save();
+    return {
+      status: 200,
+      message: "End stream success"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
 module.exports = {
   createChannel,
   listSubscribeOfChannel,
@@ -497,5 +520,6 @@ module.exports = {
   searchVideoChannel,
   getAllInforFollow,
   createStreamKey,
-  validateStreamKey
+  validateStreamKey,
+  endStream
 }
