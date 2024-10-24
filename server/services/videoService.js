@@ -1,6 +1,8 @@
 let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
+const path = require('path');
+const youtubedl = require('youtube-dl-exec')
 const db = require("../models/index.js");
 const { Op } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
@@ -899,6 +901,23 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
   }
 };
 
+const downloadVideoService = async (videoId, title) => {
+  const videoUrl = `https://vimeo.com/${videoId}`;
+  const customName = `${title}.mp4`;
+  const outputPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Downloads', customName);
+  try {
+    const output = await youtubedl(videoUrl, {
+      output: outputPath,
+      allFormats: true,
+      noCheckCertificate: true,
+    });
+    return { status: 200, data: null, message: 'Video download successfully' };
+  } catch (err) {
+    console.error(err);
+    return { status: 500, data: null, message: 'Have something wrong when downloading!' };
+  }
+};
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -915,4 +934,5 @@ module.exports = {
   analyticsVideoById,
   getStateByCountryAndVideoId,
   getListVideoByChannel,
+  downloadVideoService,
 };
