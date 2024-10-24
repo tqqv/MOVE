@@ -4,13 +4,12 @@
   import Filter from '@components/Filter.vue';
   import Camera from '@/components/icons/camera.vue';
   import Key from '@/components/icons/key.vue';
-  import LiveStream from '@/components/icons/liveStream.vue';
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
-  import InLiveStream from './InLiveStream.vue';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
-  import EndLiveStream from './EndLiveStream.vue';
   import EmptyImage from '@/components/icons/emptyImage.vue';
+  import NotConnectScreen from './NotConnectScreen.vue';
+  import { toast } from 'vue3-toastify';
 
   const categoriesStore = useCategoriesStore();
   const levelWorkoutStore = useLevelWorkoutStore();
@@ -66,6 +65,11 @@
     }
   };
 
+  // HANDLE LIVE WEBCAM
+  const handleLiveWebCam = () => {
+    toast.info('We are developing this feature');
+  };
+
   // SELECT OPTION
   const categoryOptions = computed(() => categoriesStore.categoryOptions);
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
@@ -104,15 +108,7 @@
           >
             <!-- SCREEN DONT" CONNET OBS -->
             <div v-if="!props.connectOBS" class="flex w-full p-4">
-              <div class="relative bg-black h-[560px] rounded-md w-full">
-                <div class="flex justify-center items-center h-full flex-col gap-y-3">
-                  <LiveStream />
-                  <span class="text-white">Connect streaming software to go live</span>
-                </div>
-                <div class="absolute top-3 left-3 bg-red text-white px-3 py-1 rounded-md text-sm">
-                  <span>Live</span>
-                </div>
-              </div>
+              <NotConnectScreen />
             </div>
             <!-- SCREEN CONNECT OBCS -->
             <div v-if="props.connectOBS" class="flex w-full p-4">
@@ -140,7 +136,7 @@
               <h1 class="font-semibold">Select a video source</h1>
               <div class="flex justify-center gap-x-3 my-5">
                 <!-- CAMERA -->
-                <div class="w-1/2">
+                <div class="w-1/2" @click="handleLiveWebCam">
                   <div
                     class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
                     :class="{ 'border-primary': isCameraSelected }"
@@ -287,12 +283,7 @@
             </div>
           </div>
         </div>
-        <!-- IN LIVE STREAM -->
       </div>
-      <!-- INLIVESTREAM -->
-      <InLiveStream v-if="statusLive === 'inLive'" />
-      <!-- END LIVE STREAM -->
-      <EndLiveStream v-if="statusLive === 'afterLive'" />
     </div>
   </section>
 </template>

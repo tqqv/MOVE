@@ -1,16 +1,19 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { useRoute } from 'vue-router';
   import { useRouter } from 'vue-router';
   import LiveStream from '@/components/icons/liveStream.vue';
   import TickRight from '@/components/icons/tickRight.vue';
   import AnalyticsIcon from '@icons/analytics.vue';
   import Clock from '@/components/icons/clock.vue';
+  import { useUserStore } from '@/stores';
 
   const props = defineProps({
     statusLive: String,
     connectOBS: Boolean,
   });
+
+  const userStore = useUserStore();
 
   const router = useRouter();
   const route = useRoute();
@@ -31,11 +34,14 @@
     followers: 1000,
   };
 
-  const menuItems = [
-    { name: 'Stream setup', icon: LiveStream, link: '/streaming/stream-setup' },
-    { name: 'Dashboard', icon: AnalyticsIcon, link: '/streaming/dashboard-live' },
-  ];
-
+  const menuItems = computed(() => {
+    return props.statusLive === 'beforeLive'
+      ? [
+          { name: 'Stream setup', icon: LiveStream, link: '/streaming/stream-setup' },
+          { name: 'Dashboard', icon: AnalyticsIcon, link: '/streaming/dashboard-live' },
+        ]
+      : [{ name: 'Dashboard', icon: AnalyticsIcon, link: '/streaming/dashboard-live' }];
+  });
   const handleShow = () => {
     isShow.value = !isShow.value;
   };
@@ -44,6 +50,7 @@
     if (props.connectOBS) {
       showGoLivePopup.value = true;
       emit('updateStatusLive', 'inLive');
+      router.push('/streaming/dashboard-live');
     }
   };
 
@@ -115,9 +122,25 @@
         <hr class="h-px my-8 bg-gray-dark border-0" />
         <div class="flex flex-col gap-y-7">
           <div class="flex items-center gap-x-4">
-            <img class="size-12 object-cover rounded-full" :src="user.avatar" alt="" />
+            <RouterLink
+              class="hover:text-primary"
+              :href="`/user/${userStore.user?.username}`"
+              target="_blank"
+            >
+              <img
+                class="size-12 object-cover rounded-full"
+                :src="userStore.user?.Channel.avatar"
+                alt=""
+              />
+            </RouterLink>
             <div class="flex flex-col gap-y-1">
-              <h1 class="font-semibold">{{ user.channelName }}</h1>
+              <RouterLink
+                class="hover:text-primary"
+                :href="`/user/${userStore.user?.username}`"
+                target="_blank"
+              >
+                <h1 class="font-semibold">{{ userStore.user?.Channel.channelName }}</h1>
+              </RouterLink>
               <span class="text-sm text-body">Host - Your profile</span>
             </div>
           </div>
@@ -142,7 +165,7 @@
       </div>
       <hr class="h-px mb-4 bg-gray-dark border-0" />
       <!-- BOTTOM BUTTON -->
-       <!-- WAIT START LIVE -->
+      <!-- WAIT START LIVE -->
       <div :class="{ hidden: statusLive !== 'beforeLive' }" class="flex gap-x-3 font-semibold">
         <div class="px-4 py-2 rounded-md bg-gray-dark/80 hover:bg-gray-dark cursor-pointer">
           Back

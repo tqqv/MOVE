@@ -5,7 +5,7 @@
 
   const statusLive = ref('beforeLive');
 
-  const connectOBS = ref(true);
+  const connectOBS = ref(false);
   const updateStatusLive = (value) => {
     statusLive.value = value;
   };

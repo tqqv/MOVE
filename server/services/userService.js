@@ -7,7 +7,16 @@ const validateUsername = require("../middlewares/validateUsername.js");
 
 const getProfile = async (id) => {
   try {
-    const user = await User.findByPk(id);
+    const user = await User.findOne({
+      where: {
+        id: id
+      },
+      attributes: ['username', 'email', 'fullName', 'isVerified', 'avatar', 'gender', 'dob', 'REPs', 'country', 'state', 'city', 'isBanned'],
+      include: [{
+        model: Channel,
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+      }]
+    });
     if(!user){
       return {
         status: 400,
@@ -28,7 +37,6 @@ const getProfile = async (id) => {
     }
   }
 }
-
 const editProfile = async (id, data) => {
   try {
     const user = await User.findByPk(id);
