@@ -149,7 +149,8 @@ const getListVideoByFilterController = async(req, res, next) => {
 const analyticsVideoByIdController = async(req, res, next) => {
   const videoId = req.params.videoId
   const channelId = req.user.channelId
-  const result = await analyticsVideoById(videoId, channelId)
+  const days = req.query.days
+  const result = await analyticsVideoById(videoId, channelId, days)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -157,7 +158,9 @@ const analyticsVideoByIdController = async(req, res, next) => {
 const getStateByCountryAndVideoIdController = async(req, res, next) => {
   const videoId = req.params.videoId
   const country = req.query.country
-  const result = await getStateByCountryAndVideoId(videoId, country)
+  const days = req.query.days
+
+  const result = await getStateByCountryAndVideoId(videoId, country, days)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
