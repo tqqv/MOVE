@@ -4,28 +4,30 @@
   import Filter from '@components/Filter.vue';
   import Camera from '@/components/icons/camera.vue';
   import Key from '@/components/icons/key.vue';
-  import { useCategoriesStore } from '@/stores';
+  import { useCategoriesStore, useUserStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import EmptyImage from '@/components/icons/emptyImage.vue';
   import NotConnectScreen from './NotConnectScreen.vue';
   import { toast } from 'vue3-toastify';
-
-  const categoriesStore = useCategoriesStore();
-  const levelWorkoutStore = useLevelWorkoutStore();
-  const isLoadingAvatar = ref(false);
+  import { getStreamKey } from '@/services/streamer';
 
   const props = defineProps({
     statusLive: String,
     connectOBS: Boolean,
   });
 
-  const streamKey = ref('HE329132-32342MfS342-3rwer');
+  const userStore = useUserStore();
+  const categoriesStore = useCategoriesStore();
+  const levelWorkoutStore = useLevelWorkoutStore();
+  const isLoadingAvatar = ref(false);
+  const streamKey = ref('?streamKey=');
   const title = ref('');
   const description = ref('');
   const isCameraSelected = ref(false);
   const isLiveStreamSelected = ref(true);
   const thumbnail = ref('');
+
   // COPYTOCLIPBOARD
   const handleCopyStreamKey = () => {
     copyToClipboard(
@@ -65,6 +67,15 @@
     }
   };
 
+  // GET STREAMER KEY
+  const fetchStreamerKey = async () => {
+    try {
+      const response = await getStreamKey();
+      streamKey.value = userStore.user.username + streamKey.value + response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
   // HANDLE LIVE WEBCAM
   const handleLiveWebCam = () => {
     toast.info('We are developing this feature');
@@ -94,6 +105,7 @@
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
+    // await fetchStreamerKey();
   });
 </script>
 <template>

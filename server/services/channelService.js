@@ -450,6 +450,7 @@ const createStreamKey = async(channelId) => {
     await channel.save();
     return {
       status: 200,
+      data: channel.streamKey,
       message: "Create stream key successfully."
     }
   } catch (error) {
@@ -464,6 +465,7 @@ const createStreamKey = async(channelId) => {
 
 const validateStreamKey = async(streamKey) => {
   try {
+    console.log(streamKey);
     const valid = await Channel.findOne({where: {streamKey: streamKey}});
     if(!valid){
       return {
@@ -472,6 +474,8 @@ const validateStreamKey = async(streamKey) => {
         message: "Streaming Key is invalid"
       }
     }
+    console.log(valid);
+    
     valid.isLive = true;
     valid.save();
     _io.to(valid.id).emit('streamReady', true);
@@ -481,6 +485,7 @@ const validateStreamKey = async(streamKey) => {
       message: "Streaming Key is valid"
     }
   } catch (error) {
+    console.log(error);
     return {
       status: 500,
       data: streamKey,

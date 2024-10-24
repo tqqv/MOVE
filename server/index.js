@@ -21,7 +21,7 @@ const corsOptions = {
   origin: process.env.CLIENT_HOST,
   credentials: true,
 };
-
+app.use(cors(corsOptions));
 let server = app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });

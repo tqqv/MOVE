@@ -3,7 +3,7 @@
   import Hls from 'hls.js';
 
   const video2 = ref(null);
-  const videoSrcHieune = 'http://40.81.16.208:8080/hls/vune.m3u8';
+  const videoSrcHieune = 'http://localhost:8080/hls/thehoang.17.m3u8';
 
   const initializeHLS = (videoElement, source) => {
     if (Hls.isSupported()) {

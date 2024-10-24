@@ -124,7 +124,7 @@
           <div class="flex items-center gap-x-4">
             <RouterLink
               class="hover:text-primary"
-              :href="`/user/${userStore.user?.username}`"
+              :to="`/user/${userStore.user?.username}`"
               target="_blank"
             >
               <img
@@ -136,7 +136,7 @@
             <div class="flex flex-col gap-y-1">
               <RouterLink
                 class="hover:text-primary"
-                :href="`/user/${userStore.user?.username}`"
+                :to="`/user/${userStore.user?.username}`"
                 target="_blank"
               >
                 <h1 class="font-semibold">{{ userStore.user?.Channel.channelName }}</h1>
