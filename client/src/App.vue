@@ -31,6 +31,7 @@
 
     if (isLogin === 'true') {
       userStore.fetchUserProfile();
+      userStore.loadFollowers();
     }
   });
 </script>

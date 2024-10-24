@@ -6,7 +6,7 @@ const cateRouter = express.Router();
 
 cateRouter.post('/', verifyAdmin, createCategoryController);
 cateRouter.get('/', getAllCategoryController);
-cateRouter.get('/getAllwView', getAllCategoryWithViewController);
+cateRouter.get('/getAllView', getAllCategoryWithViewController);
 cateRouter.get('/getCateById/:cateId', getCateByIdController);
 cateRouter.patch('/', verifyAdmin, editCategoryController);
 cateRouter.delete('/:cateId', verifyAdmin, deleteCategoryController);

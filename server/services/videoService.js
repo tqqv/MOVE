@@ -3,7 +3,8 @@ let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SEC
 const fs = require('fs');
 const db = require("../models/index.js");
 const { Op } = require('sequelize');
-const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe } = db;
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
+const { v4: uuidv4 } = require('uuid');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -72,6 +73,56 @@ const saveVideoService = async (videoId, userId, title, description, thumbnailUr
 };
 
 const updateVideoService = async (videoId, updateData) => {
+  const handleKeywords = async (keywords) => {
+    const keywordArray = keywords.split(',').map(k => k.trim());
+    const keywordIds = [];
+
+    for (let content of keywordArray) {
+      let keyword = await Keyword.findOne({ where: { content } });
+      if (!keyword) {
+        keyword = await Keyword.create({
+          id: uuidv4(),
+          content
+        });
+      }
+      if (keyword && keyword.id) {
+        keywordIds.push(keyword.id);
+      } else {
+        console.warn(`Keyword not found or created for content: "${content}"`);
+      }
+    }
+    return keywordIds;
+  };
+
+  if (updateData.keywords) {
+    try {
+      console.log('Processing keywords');
+      const keywordIds = await handleKeywords(updateData.keywords);
+
+      if (keywordIds.length === 0) {
+        return {
+          status: 400,
+          message: 'No valid keywords found to associate with the video.',
+          data: null,
+        };
+      }
+
+      await VideoKeyword.destroy({ where: { videoId } });
+
+      const videoKeywordPromises = keywordIds.map(keywordId =>
+        VideoKeyword.create({ videoId, keywordId })
+      );
+      await Promise.all(videoKeywordPromises);
+      console.log('Keywords saved successfully');
+    } catch (error) {
+      console.error('Error saving keywords:', error);
+      return {
+        status: 500,
+        message: 'An error occurred while saving keywords',
+        data: null,
+      };
+    }
+  }
   try {
     const video = await Video.update(updateData, {
       where: { id: videoId }
@@ -183,9 +234,13 @@ const uploadThumbnailService = async (videoUri, thumbnailPath) => {
     const path = responseData.Path;
     if (path) {
       const pictureId = path.split('/').pop();
+      const videoId = videoUri.split('/').pop();
       const patchURL = `${pictureResponse.metadata.connections.pictures.uri}/${pictureId}`;
       const thumbnailResponse = await setThumbnailActive(patchURL);
-
+      const video = await Video.update(
+        { thumbnailUrl: thumbnailResponse.data.base_link },
+        { where: { id: videoId } }
+      );
       // Delete the temporary thumbnail file
       fs.unlink(thumbnailPath, (err) => {
         if (err) {
@@ -238,14 +293,14 @@ const setThumbnailActive = (picturesUri) => {
         active: true,
         time: 0
       },
-    }, (error) => {
+    }, (error, body) => {
       if (error) {
         reject(error);
       } else {
         resolve({
           status: 200,
           message: 'Thumbnail uploaded successfully.',
-          data: null
+          data: body
         });
       }
     });
@@ -304,7 +359,7 @@ const getAllVideosService = async (page, pageSize) => {
                 FROM subscribes
                 WHERE subscribes.channelId = channel.id
               )`),
-              'followCount' 
+              'followCount'
             ]],
           as: 'channel',
         },
@@ -355,7 +410,7 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   }
 
   const videos = await Video.findAndCountAll({
-    where: { 
+    where: {
       channelId: channelId,
       status: "public"
     },
@@ -363,14 +418,19 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
     attributes: attributes,
     include: [
       {
+        model: Channel,
+        as: 'channel',
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+      },
+      {
         model: LevelWorkout,
-        attributes: [],
+        attributes: ['levelWorkout'],
         as: "levelWorkout",
         where: level ? {levelWorkout: level} : {}
       },
       {
         model: Category,
-        attributes: [],
+        attributes: ['title'],
         as: 'category',
         where: category ? {title: category} : {}
       }
@@ -421,7 +481,7 @@ const getVideoByVideoIdService = async (videoId) => {
               FROM subscribes
               WHERE subscribes.channelId = channel.id
             )`),
-            'followCount' 
+            'followCount'
           ]],
         as: 'channel',
       },
@@ -477,7 +537,7 @@ const deleteVideoService = async (videoId) => {
 
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
-    const listVideo = await Video.findAll({
+    const listVideo = await Video.findAndCountAll({
       attributes: {
         include: [
           [
@@ -516,7 +576,10 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
 
     return {
       status: 200,
-      data: listVideo,
+      data: {
+        listVideo,
+        totalPages: Math.ceil(listVideo.count/pageSize)
+      },
       message: "Get list video successfully"
     }
   } catch (error) {
@@ -527,6 +590,363 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
     }
   }
 }
+
+const getVideoData = async (videoId, days) => {
+  // Tạo điều kiện thời gian linh hoạt
+  const ratingsCondition = days
+    ? `AND ratings.createdAt >= NOW() - INTERVAL ${days} DAY`
+    : '';
+
+  const viewVideosCondition = days
+    ? `AND viewVideos.createdAt >= NOW() - INTERVAL ${days} DAY`
+    : '';
+
+  const commentsCondition = days
+    ? `AND comments.createdAt >= NOW() - INTERVAL ${days} DAY`
+    : '';
+
+  return await Video.findOne({
+    where: {
+      id: videoId
+    },
+    include: [
+      {
+        model: LevelWorkout,
+        attributes: ['levelWorkout'],
+        as: "levelWorkout",
+      },
+      {
+        model: Category,
+        attributes: ['title'],
+        as: 'category',
+      }
+    ],
+    attributes: {
+      include: [
+        [
+          sequelize.literal(`(
+            SELECT AVG(rating)
+            FROM ratings
+            WHERE ratings.videoId = Video.id
+            ${ratingsCondition}
+          )`),
+          'ratings'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT AVG(viewTime)
+            FROM viewVideos
+            WHERE viewVideos.videoId = Video.id
+            ${viewVideosCondition}
+          )`),
+          'avgViewTime'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(viewTime)
+            FROM viewVideos
+            WHERE viewVideos.videoId = Video.id
+            ${viewVideosCondition}
+          )`),
+          'totalViewer'
+        ],
+        [
+          sequelize.literal(`(
+            SELECT SUM(rep)
+            FROM comments
+            WHERE comments.videoId = Video.id
+            ${commentsCondition}
+          )`),
+          'totalReps'
+        ],
+      ]
+    },
+  });
+};
+
+const getGenderData = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+
+  return await ViewVideo.findAll({
+    where: whereCondition,
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: [] // Không cần lấy thêm thuộc tính từ User
+    }],
+    attributes: [
+      [Sequelize.literal(`
+        CASE
+          WHEN viewVideoUser.gender = 'Male' THEN 'Male'
+          WHEN viewVideoUser.gender = 'Female' THEN 'Female'
+          ELSE 'Other'
+        END
+      `), 'genderGroup'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['genderGroup'] // Nhóm theo genderGroup để có thể đếm viewer
+  });
+};
+
+
+const getAgeData = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+  return await ViewVideo.findAll({
+    where: whereCondition,
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: []
+    }],
+    attributes: [
+      [Sequelize.literal(`
+        CASE
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) < 18 THEN '<18'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 18 AND 24 THEN '18-24'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 25 AND 34 THEN '25-34'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 35 AND 44 THEN '35-44'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'
+          ELSE '>64'
+        END
+      `), 'ageGroup'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['ageGroup'],
+    raw: true
+  });
+};
+
+const getCountryDataWithStates = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+  const countryData = await ViewVideo.findAll({
+    where: whereCondition,
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: []
+    }],
+    attributes: [
+      [Sequelize.col('viewVideoUser.country'), 'country'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['viewVideoUser.country'],
+    raw: true
+  });
+
+  return countryData;
+};
+
+const getStateByCountryAndVideoId = async(videoId, country, days) => {
+  try {
+    const whereCondition = {
+      videoId,
+    };
+
+    if (days) {
+      whereCondition.createdAt = {
+        [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+      };
+    }
+
+    const stateData = await ViewVideo.findAll({
+      where: whereCondition,
+      include: [{
+        model: User,
+        as: 'viewVideoUser',
+        attributes: [],
+        where: {country: country}
+      }],
+      attributes: [
+        [Sequelize.col('viewVideoUser.state'), 'state'],
+        [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+      ],
+      group: ['viewVideoUser.state'],
+      raw: true
+    });
+
+    return {
+      status: 200,
+      data: stateData,
+      message: `Get list state of ${country} successfully.`
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+}
+
+const analyticsVideoById = async(videoId, channelId, days) => {
+  try {
+    const checkExists = await Video.findOne({
+      where: {
+        channelId: channelId,
+        id: videoId
+      }
+    });
+
+    if (!checkExists) {
+      return {
+        status: 404,
+        data: null,
+        message: "Not found"
+      };
+    }
+
+    const [videoData, ageData, countryData, genderData] = await Promise.all([
+      getVideoData(videoId, days),
+      getAgeData(videoId, days),
+      getCountryDataWithStates(videoId, days),
+      getGenderData(videoId, days),
+    ]);
+
+    return {
+      status: 200,
+      data: {
+        videoData,
+        viewersData: {
+          ageData,
+          genderData,
+          countryData
+        }
+      },
+      message: "Get analytics by video successfully."
+    };
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+};
+
+const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, days) => {
+  try {
+    const whereCondition = {
+      channelId,
+    };
+
+    if (days) {
+      whereCondition.createdAt = {
+        [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+      };
+    }
+    const listVideo =  await Video.findAndCountAll({
+      where: whereCondition,
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT AVG(viewTime)
+              FROM viewVideos
+              WHERE viewVideos.videoId = Video.id
+            )`),
+            'avgViewTime'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT Sum(rep)
+              FROM comments
+              WHERE comments.videoId = Video.id
+            )`),
+            'totalReps'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT Count(rep)
+              FROM comments
+              WHERE comments.videoId = Video.id && rep > 0
+            )`),
+            'viewerGift'
+          ],
+        ],
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: LevelWorkout,
+          attributes: ['levelWorkout'],
+          as: "levelWorkout",
+          // where: level ? {levelWorkout: level} : {}
+        },
+        {
+          model: Category,
+          attributes: ['title'],
+          as: 'category',
+          // where: category ? {title: category} : {}
+        }
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    if(!listVideo) {
+      return {
+        status: 404,
+        data: null,
+        message: "Videos of channel not found."
+      }
+    }
+
+    return {
+      status: 200,
+      message: 'Videos fetched successfully',
+      data: {
+        listVideo,
+        totalPages: Math.ceil(listVideo.count/pageSize)
+      }
+    };
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+};
 
 module.exports = {
   generateUploadLink,
@@ -541,4 +961,7 @@ module.exports = {
   getVideoByVideoIdService,
   deleteVideoService,
   getListVideoByFilter,
+  analyticsVideoById,
+  getStateByCountryAndVideoId,
+  getListVideoByChannel,
 };

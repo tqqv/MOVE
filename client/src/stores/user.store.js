@@ -28,7 +28,7 @@ export const useUserStore = defineStore('user', () => {
     try {
       const response = await viewFollowChannel();
       if (!response.error) {
-        followers.value = response.data;        
+        followers.value = response.data;
       } else {
         error.value = response.message;
       }

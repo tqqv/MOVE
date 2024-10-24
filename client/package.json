@@ -12,6 +12,7 @@
     "@primevue/themes": "^4.0.5",
     "@vimeo/player": "^2.24.0",
     "axios": "^1.7.7",
+    "chart.js": "^4.4.5",
     "dayjs": "^1.11.13",
     "js-cookie": "^3.0.5",
     "moment": "^2.30.1",

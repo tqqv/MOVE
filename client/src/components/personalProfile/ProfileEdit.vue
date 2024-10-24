@@ -13,6 +13,7 @@
   import { checkDataChanged, getChangedFields } from '@/utils/compareData';
   import { updateProfileSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
+  import DatePicker from 'primevue/datepicker';
 
   const userStore = useUserStore();
   const profileData = ref({
@@ -217,6 +218,7 @@
         ref="fileInputRef"
         class="hidden"
         @change="handleSelectedFile"
+        accept="image/*"
       />
 
       <span
@@ -327,7 +329,7 @@
           <!-- DATE OF BIRTH -->
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
-            <div
+            <!-- <div
               class="relative text-[14px] rounded-lg"
               :class="errors.dob ? 'error_password' : 'normal_password'"
             >
@@ -337,7 +339,13 @@
                 type="date"
                 name=""
               />
-            </div>
+            </div> -->
+            <DatePicker
+              v-model="profileData.dob"
+              dateFormat="yy-mm-dd"
+              :class="{ 'error-border': errors.dob }"
+              :model-value="new Date(profileData.dob)"
+            />
             <span v-if="errors.dob" class="error_message">{{ errors.dob }}</span>
           </div>
           <!-- COUNTRY VS STATE -->
@@ -402,3 +410,17 @@
     <ChangePasswordSuccessPopup />
   </form>
 </template>
+
+<style scoped>
+  :deep(.p-inputtext) {
+    border: 1.6px solid #dee3e9 !important;
+  }
+  :deep(.p-inputtext:focus) {
+    border-color: #13d0b4 !important;
+  }
+  .error-border :deep(.p-inputtext) {
+    background-color: #ffe0e4;
+    border: 1.7px solid red !important;
+    color: red;
+  }
+</style>

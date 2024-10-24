@@ -10,7 +10,10 @@ const {
   getVideoByUserIdService,
   getVideoByVideoIdService,
   deleteVideoService,
-  getListVideoByFilter
+  getListVideoByFilter,
+  analyticsVideoById,
+  getListVideoByChannel,
+  getStateByCountryAndVideoId,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -115,18 +118,21 @@ const getVideoByVideoId = async (req, res, next) => {
 };
 
 const deleteVideo = async (req, res, next) => {
-  const { videoId } = req.body;
+  const { videoId } = req.params;
+  console.log(videoId);
   try {
     const result = await deleteVideoService(videoId);
+    console.log(result);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
+    console.log(error);
     responseHandler(error.status, error.data, error.message)(req, res, next);
   }
 }
 
 const getListVideoByFilterController = async(req, res, next) => {
   const page = req.query.page || 1;
-  const pageSize = req.query.pageSize || 10;
+  const pageSize = req.query.pageSize || 12;
   const level = req.query.level;
   const category = req.query.category;
   // updateAt = desc same as Most recent
@@ -135,6 +141,40 @@ const getListVideoByFilterController = async(req, res, next) => {
     order: req.query.order || 'desc'
   };
   const result = await getListVideoByFilter(page, pageSize, level, category, sortCondition)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+
+const analyticsVideoByIdController = async(req, res, next) => {
+  const videoId = req.params.videoId
+  const channelId = req.user.channelId
+  const days = req.query.days
+  const result = await analyticsVideoById(videoId, channelId, days)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getStateByCountryAndVideoIdController = async(req, res, next) => {
+  const videoId = req.params.videoId
+  const country = req.query.country
+  const days = req.query.days
+
+  const result = await getStateByCountryAndVideoId(videoId, country, days)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListVideoByChannelController = async(req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const days = req.query.days
+  const channelId = req.user.channelId;
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'updatedAt',
+    order: req.query.order || 'desc'
+  };
+  const result = await getListVideoByChannel(channelId, page, pageSize, sortCondition, days)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -151,5 +191,8 @@ module.exports = {
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
-  getListVideoByFilterController
+  getListVideoByFilterController,
+  analyticsVideoByIdController,
+  getListVideoByChannelController,
+  getStateByCountryAndVideoIdController,
 };

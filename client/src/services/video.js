@@ -20,6 +20,34 @@ const getAllVideos = (page, pageSize) => {
     },
   });
 };
+const getVideoAnalyticsById = async (videoId) => {
+  try {
+    const response = await axios.get(`/video/getVideoAnalytics/${videoId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const getVideoSetting = async (page, pageSize, sortBy, order, days) => {
+  try {
+    const response = await axios.get('/video/getVideosByChannel', {
+      params: { page, pageSize, sortBy, order, days },
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const getStateByCountry = async (videoId, country) => {
+  try {
+    const response = await axios.get(`/video/getState/${videoId}`, {
+      params: { country },
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 const getAllCategory = async () => {
   try {
     const response = await axios.get('/category');
@@ -52,6 +80,22 @@ const getCategoryById = async (cateId) => {
     return { error: true, message: error.response.data.message };
   }
 };
+const deleteVideoById = async (videoId) => {
+  try {
+    const response = await axios.delete(`video/delete-video/${videoId}`);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const getVideoById = async (videoId) => {
+  try {
+    const response = await axios.get(`/video/${videoId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 export {
   getVideobyChannel,
   getAllCategory,
@@ -59,4 +103,9 @@ export {
   getLevelWorkoutById,
   getCategoryById,
   getAllVideos,
+  getVideoSetting,
+  deleteVideoById,
+  getVideoById,
+  getVideoAnalyticsById,
+  getStateByCountry,
 };
