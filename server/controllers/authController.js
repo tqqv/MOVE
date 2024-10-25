@@ -123,7 +123,6 @@ const googleCallbackController = (req, res, next) => {
       if (error || !user) {
         return res.redirect(process.env.CLIENT_HOST);
       }
-
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {

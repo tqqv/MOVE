@@ -52,7 +52,7 @@
           }
         });
 
-        // Cập nhật tổng số bình luận con cho     bình luận đã có
+        // Cập nhật tổng số bình luận con cho bình luận đã có
         comments.value.forEach((comment) => {
           if (!totalRepliesCount.value[comment.id]) {
             totalRepliesCount.value[comment.id] = comment.totalRepliesCount || 0;
@@ -90,7 +90,6 @@
 
         childComments.value[parentId].push(...uniqueNewComments);
 
-        // Cập nhật tổng số bình luận con cho bình luận cha
         totalRepliesCount.value[parentId] =
           (totalRepliesCount.value[parentId] || 0) + uniqueNewComments.length;
 
@@ -108,7 +107,6 @@
     }
   };
 
-  // Hàm tải thêm bình luận (Load More)
   const loadMoreComments = () => {
     if (hasMoreComments.value) {
       currentPage.value++;
@@ -158,6 +156,7 @@
       :totalRepliesCount="totalRepliesCount"
       :hasMoreChildComments="hasMoreChildComments[comment.id]"
       :loadingReplies="loadingRepliesForComment[comment.id]"
+      :videoId="videoId"
     />
 
     <div

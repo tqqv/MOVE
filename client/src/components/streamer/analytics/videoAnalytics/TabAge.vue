@@ -15,15 +15,33 @@
 
   const chartData = ref(null);
   const chartOptions = ref(null);
+
+  // Danh sách nhóm tuổi mặc định với viewerCount là 0
+  const defaultAgeGroups = [
+    { ageGroup: 'Under 18', viewerCount: 0 },
+    { ageGroup: '18-24', viewerCount: 0 },
+    { ageGroup: '25-34', viewerCount: 0 },
+    { ageGroup: '35-44', viewerCount: 0 },
+    { ageGroup: '45-54', viewerCount: 0 },
+    { ageGroup: '55-64', viewerCount: 0 },
+    { ageGroup: '64 above', viewerCount: 0 },
+    { ageGroup: 'Unknown', viewerCount: 0 },
+  ];
+
   const test = computed(() => props.ageStats);
 
   const setChartData = () => {
-    let labels;
-    let data;
-    if (props.ageStats) {
-      labels = props.ageStats.map((stat) => stat.ageGroup);
-      data = props.ageStats.map((stat) => stat.viewerCount);
-    }
+    const mergedStats = defaultAgeGroups.map((defaultGroup) => {
+      const foundStat = props.ageStats.find((stat) => stat.ageGroup === defaultGroup.ageGroup);
+      return {
+        ...defaultGroup,
+        viewerCount: foundStat ? foundStat.viewerCount || 0 : 0,
+      };
+    });
+
+    const labels = mergedStats.map((stat) => stat.ageGroup);
+    const data = mergedStats.map((stat) => stat.viewerCount);
+
     return {
       labels: labels,
       datasets: [
@@ -87,20 +105,14 @@
     chartOptions.value = setChartOptions();
   });
 
-  watch(test, (newValue) => {
+  watch(test, () => {
     chartData.value = setChartData();
     chartOptions.value = setChartOptions();
   });
 </script>
 
 <template>
-  <div
-    v-if="chartData && chartOptions && chartData.datasets[0].data.length > 0"
-    class="card shadow-lg rounded-lg p-3"
-  >
+  <div v-if="chartData && chartOptions" class="card shadow-lg rounded-lg p-3 w-full">
     <Chart type="bar" :data="chartData" :options="chartOptions" class="h-[13rem]" />
-  </div>
-  <div v-else>
-    <p>No data available</p>
   </div>
 </template>

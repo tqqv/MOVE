@@ -96,7 +96,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         viewCount: {
           type: DataTypes.INTEGER,
-          allowNull: true,
+          defaultValue: 1,
         },
         totalShare: {
           type: DataTypes.INTEGER,
