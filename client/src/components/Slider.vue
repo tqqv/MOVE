@@ -29,11 +29,12 @@
             <!-- Cột hình ảnh -->
 
             <div class="w-2/3 h-full">
-              <img
-                :src="slide.thumbnailUrl"
-                alt="Live Session"
-                class="h-[300px] object-cover relative"
-              />
+              <RouterLink :to="`/video/${slide.id}`" :key="slide.id">
+                <img
+                  :src="slide.thumbnailUrl"
+                  alt="Live Session"
+                  class="h-[300px] object-cover relative"
+              /></RouterLink>
               <span
                 v-if="liveData !== null"
                 class="absolute top-0 left-0 m-2 bg-red text-white text-xs font-bold px-2 py-1 rounded"
