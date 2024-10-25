@@ -11,6 +11,7 @@
   import TabAbout from './TabAbout.vue';
   import { useRoute, useRouter } from 'vue-router';
   import { getProfilebyUsername } from '@/services/user';
+  import { useUserStore } from '@/stores/user.store';
 
   import { getListFollowOfChannel } from '@/services/streamer';
   const tabs = ref([
@@ -19,6 +20,7 @@
   ]);
   const route = useRoute();
   const router = useRouter();
+  const userStore = useUserStore();
 
   const username = ref(route.params.username);
   const channelId = ref(null);
@@ -61,6 +63,7 @@
   onMounted(async () => {
     await fetchChannelData();
     if (channelDetails.value !== null) {
+      channelId.value = channelDetails.value.id;
       await fetchListFollowOfChannel(channelId.value);
     }
   });
@@ -71,6 +74,7 @@
       username.value = newUsername;
       await fetchChannelData();
       if (channelDetails.value !== null) {
+        channelId.value = channelDetails.value.id;
         await fetchListFollowOfChannel(channelId.value);
       }
     },
@@ -87,7 +91,7 @@
       :username="username"
       :usernameDetails="usernameDetails"
       :avatarDetails="avatarDetails"
-      @updateFollowers="fetchChannelData"
+      @updateFollowers="userStore.followers"
       class="pl-3"
     />
     <div>

@@ -5,3 +5,5 @@ export { formatDatePosted } from './formatDatePosted';
 export { formatDate } from './calculatorDate';
 export { debounce } from './debounce';
 export { formatAvgViewTime } from './formatAvgViewTime';
+export { truncateDescripton } from './truncateDescripton';
+export { formatPercentage } from './formatPercentage';

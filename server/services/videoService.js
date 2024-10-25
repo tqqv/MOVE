@@ -1,8 +1,6 @@
 let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
-const path = require('path');
-const youtubedl = require('youtube-dl-exec')
 const db = require("../models/index.js");
 const { Op } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
@@ -83,7 +81,7 @@ const updateVideoService = async (videoId, updateData) => {
       let keyword = await Keyword.findOne({ where: { content } });
       if (!keyword) {
         keyword = await Keyword.create({
-          id: uuidv4(), 
+          id: uuidv4(),
           content
         });
       }
@@ -240,8 +238,8 @@ const uploadThumbnailService = async (videoUri, thumbnailPath) => {
       const patchURL = `${pictureResponse.metadata.connections.pictures.uri}/${pictureId}`;
       const thumbnailResponse = await setThumbnailActive(patchURL);
       const video = await Video.update(
-        { thumbnailUrl: thumbnailResponse.data.base_link }, 
-        { where: { id: videoId } } 
+        { thumbnailUrl: thumbnailResponse.data.base_link },
+        { where: { id: videoId } }
       );
       // Delete the temporary thumbnail file
       fs.unlink(thumbnailPath, (err) => {
@@ -593,13 +591,25 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
   }
 }
 
-const getVideoData = async (videoId) => {
+const getVideoData = async (videoId, days) => {
+  // Tạo điều kiện thời gian linh hoạt
+  const ratingsCondition = days
+    ? `AND ratings.createdAt >= NOW() - INTERVAL ${days} DAY`
+    : '';
+
+  const viewVideosCondition = days
+    ? `AND viewVideos.createdAt >= NOW() - INTERVAL ${days} DAY`
+    : '';
+
+  const commentsCondition = days
+    ? `AND comments.createdAt >= NOW() - INTERVAL ${days} DAY`
+    : '';
+
   return await Video.findOne({
     where: {
       id: videoId
     },
     include: [
-
       {
         model: LevelWorkout,
         attributes: ['levelWorkout'],
@@ -618,6 +628,7 @@ const getVideoData = async (videoId) => {
             SELECT AVG(rating)
             FROM ratings
             WHERE ratings.videoId = Video.id
+            ${ratingsCondition}
           )`),
           'ratings'
         ],
@@ -626,22 +637,25 @@ const getVideoData = async (videoId) => {
             SELECT AVG(viewTime)
             FROM viewVideos
             WHERE viewVideos.videoId = Video.id
+            ${viewVideosCondition}
           )`),
           'avgViewTime'
         ],
         [
           sequelize.literal(`(
-            SELECT Count(viewTime)
+            SELECT COUNT(viewTime)
             FROM viewVideos
             WHERE viewVideos.videoId = Video.id
+            ${viewVideosCondition}
           )`),
           'totalViewer'
         ],
         [
           sequelize.literal(`(
-            SELECT Sum(rep)
+            SELECT SUM(rep)
             FROM comments
             WHERE comments.videoId = Video.id
+            ${commentsCondition}
           )`),
           'totalReps'
         ],
@@ -650,11 +664,19 @@ const getVideoData = async (videoId) => {
   });
 };
 
-const getGenderData = async (videoId) => {
+const getGenderData = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+
   return await ViewVideo.findAll({
-    where: {
-      videoId: videoId
-    },
+    where: whereCondition,
     include: [{
       model: User,
       as: 'viewVideoUser',
@@ -675,11 +697,18 @@ const getGenderData = async (videoId) => {
 };
 
 
-const getAgeData = async (videoId) => {
+const getAgeData = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
   return await ViewVideo.findAll({
-    where: {
-      videoId: videoId
-    },
+    where: whereCondition,
     include: [{
       model: User,
       as: 'viewVideoUser',
@@ -703,9 +732,18 @@ const getAgeData = async (videoId) => {
   });
 };
 
-const getCountryDataWithStates = async (videoId) => {
+const getCountryDataWithStates = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
   const countryData = await ViewVideo.findAll({
-    where: { videoId: videoId },
+    where: whereCondition,
     include: [{
       model: User,
       as: 'viewVideoUser',
@@ -722,10 +760,20 @@ const getCountryDataWithStates = async (videoId) => {
   return countryData;
 };
 
-const getStateByCountryAndVideoId = async(videoId, country) => {
+const getStateByCountryAndVideoId = async(videoId, country, days) => {
   try {
+    const whereCondition = {
+      videoId,
+    };
+
+    if (days) {
+      whereCondition.createdAt = {
+        [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+      };
+    }
+
     const stateData = await ViewVideo.findAll({
-      where: { videoId: videoId },
+      where: whereCondition,
       include: [{
         model: User,
         as: 'viewVideoUser',
@@ -755,8 +803,7 @@ const getStateByCountryAndVideoId = async(videoId, country) => {
   }
 }
 
-
-const analyticsVideoById = async(videoId, channelId) => {
+const analyticsVideoById = async(videoId, channelId, days) => {
   try {
     const checkExists = await Video.findOne({
       where: {
@@ -774,10 +821,10 @@ const analyticsVideoById = async(videoId, channelId) => {
     }
 
     const [videoData, ageData, countryData, genderData] = await Promise.all([
-      getVideoData(videoId),
-      getAgeData(videoId),
-      getCountryDataWithStates(videoId),
-      getGenderData(videoId),
+      getVideoData(videoId, days),
+      getAgeData(videoId, days),
+      getCountryDataWithStates(videoId, days),
+      getGenderData(videoId, days),
     ]);
 
     return {
@@ -843,6 +890,14 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
           ],
           [
             sequelize.literal(`(
+              SELECT COUNT(viewTime)
+              FROM viewVideos
+              WHERE viewVideos.videoId = Video.id
+            )`),
+            'totalViewer'
+          ],
+          [
+            sequelize.literal(`(
               SELECT Count(rep)
               FROM comments
               WHERE comments.videoId = Video.id && rep > 0
@@ -901,23 +956,6 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
   }
 };
 
-const downloadVideoService = async (videoId, title) => {
-  const videoUrl = `https://vimeo.com/${videoId}`;
-  const customName = `${title}.mp4`;
-  const outputPath = path.join(process.env.HOME || process.env.USERPROFILE, 'Downloads', customName);
-  try {
-    const output = await youtubedl(videoUrl, {
-      output: outputPath,
-      allFormats: true,
-      noCheckCertificate: true,
-    });
-    return { status: 200, data: null, message: 'Video download successfully' };
-  } catch (err) {
-    console.error(err);
-    return { status: 500, data: null, message: 'Have something wrong when downloading!' };
-  }
-};
-
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -934,5 +972,4 @@ module.exports = {
   analyticsVideoById,
   getStateByCountryAndVideoId,
   getListVideoByChannel,
-  downloadVideoService,
 };
