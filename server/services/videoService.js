@@ -592,17 +592,16 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
 }
 
 const getVideoData = async (videoId, days) => {
-  // Tạo điều kiện thời gian linh hoạt
   const ratingsCondition = days
-    ? `AND ratings.createdAt >= NOW() - INTERVAL ${days} DAY`
+    ? 'AND ratings.createdAt >= NOW() - INTERVAL :days DAY'
     : '';
 
   const viewVideosCondition = days
-    ? `AND viewVideos.createdAt >= NOW() - INTERVAL ${days} DAY`
+    ? 'AND viewVideos.createdAt >= NOW() - INTERVAL :days DAY'
     : '';
 
   const commentsCondition = days
-    ? `AND comments.createdAt >= NOW() - INTERVAL ${days} DAY`
+    ? 'AND comments.createdAt >= NOW() - INTERVAL :days DAY'
     : '';
 
   return await Video.findOne({
@@ -661,6 +660,8 @@ const getVideoData = async (videoId, days) => {
         ],
       ]
     },
+    // Sequelize có hổ trợ dùng thêm bind để tránh sql injection
+    bind: { days }
   });
 };
 
