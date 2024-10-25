@@ -12,6 +12,15 @@ const getVideobyChannel = (channelId, page, pageSize, sortBy, order, level, cate
     },
   });
 };
+const getAllVideos = (page, pageSize) => {
+  return axios.get('/video', {
+    params: {
+      page,
+      pageSize,
+    },
+  });
+};
+
 const getVideoAnalyticsById = async (videoId, days) => {
   try {
     const response = await axios.get(`/video/getVideoAnalytics/${videoId}`, {
@@ -96,6 +105,7 @@ export {
   getAllLevelWorkout,
   getLevelWorkoutById,
   getCategoryById,
+  getAllVideos,
   getVideoSetting,
   deleteVideoById,
   getVideoById,
