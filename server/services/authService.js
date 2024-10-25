@@ -469,7 +469,7 @@ const statusRequestChannel = async(userId, status) => {
 }
 
 // Facebook send mail and verify account - START
-const sendMailVerifyFacebook = async (email, fullName) => {
+const sendMailVerifyFacebook = async (email) => {
   try {
     // generate secret 6 digit - then store in token,
     const sixDigitCode = randomFixedInteger(6)
@@ -481,7 +481,7 @@ const sendMailVerifyFacebook = async (email, fullName) => {
       subject: "Email Verification With MOVE Login By Facebook",
       html: `
         <h2 style="color: #04ddb2;">Confirmation code</h2>
-        <p>Dear ${fullName},</p>
+        <p>Dear ${email},</p>
         <p>Here is your 6-digit code: ${sixDigitCode} </p>
         <p>Thank you,<br> Move Team</p>
       `,
@@ -493,8 +493,7 @@ const sendMailVerifyFacebook = async (email, fullName) => {
     return {
       cookie: {
         cookieName: "digitVerificationToken",
-        token: verificationToken,
-        expires: new Date(Date.now() + 15 * 60 * 1000),
+        token: verificationToken
       },
       status: 200,
       message: "Verification email sent successfully",

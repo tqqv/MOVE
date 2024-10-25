@@ -25,6 +25,8 @@ import Overview from '@/components/streamer/analytics/Overview.vue';
 import VideoAnalytics from '@/components/streamer/analytics/videoAnalytics/VideoAnalytics.vue';
 import ViewLiveStreamPage from '@/pages/ViewLiveStreamPage.vue';
 import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InDepthAnalytics.vue';
+import CategoryDetails from '@/pages/CategoryDetails.vue';
+import PageNotFoundLayout from '@/layouts/PageNotFoundLayout.vue';
 
 const routes = [
   // User router
@@ -40,7 +42,16 @@ const routes = [
         path: 'browse',
         component: BrowseContent,
         children: [
-          { path: 'categories', component: TabCategories },
+          {
+            path: 'categories',
+            component: TabCategories,
+            children: [
+              {
+                path: ':category',
+                component: CategoryDetails,
+              },
+            ],
+          },
           { path: 'top-videos', component: TabTopVideo },
           { path: 'most_viewed', component: TabMostView },
           { path: 'highest_rated', component: TabHighestRated },
@@ -79,7 +90,7 @@ const routes = [
   },
   {
     path: '/:pathMatch(.*)*',
-    component: PageNotFound,
+    component: PageNotFoundLayout,
     name: PageNotFound,
   },
 ];

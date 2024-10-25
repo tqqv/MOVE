@@ -12,7 +12,6 @@
 </script>
 
 <template>
-  <Navbar />
   <div class="flex pt-[72px] bg-[#f0f2f5]">
     <SideBarLive
       :connectOBS="connectOBS"

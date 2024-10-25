@@ -1,6 +1,8 @@
 <script setup>
-  import CommentPage from '@/components/comments/CommentPage.vue';
+  import { computed, ref } from 'vue';
+
+  import { usePopupStore, useUserStore } from '@/stores';
+  import VerificationPopup from '@/components/popup/VerificationPopup.vue';
 </script>
 
-<template>
-</template>
+<template><VerificationPopup /></template>

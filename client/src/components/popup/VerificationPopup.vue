@@ -1,15 +1,11 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted } from 'vue';
   import Dialog from 'primevue/dialog';
-  import Button from 'primevue/button';
+  import { usePopupStore, useUserStore } from '@/stores';
 
-  const data = {
-    email: 'abc@gmail.com',
-  };
-
+  const popupStore = usePopupStore();
+  const userStore = useUserStore();
   const code = ref('');
-  const showVerificationPopup = ref(false);
-
   const buttonColor = computed(() => {
     return code.value.trim() ? 'btn' : 'btnDisable';
   });
@@ -17,21 +13,20 @@
   const isButtonDisabled = computed(() => {
     return !code.value.trim();
   });
+  const user = computed(() => userStore.getUser());
 </script>
 
 <template>
   <div>
-    <Button label="Show Verification Popup" @click="showVerificationPopup = true" />
-
     <Dialog
-      v-model:visible="showVerificationPopup"
+      v-model:visible="popupStore.showVerifyPopup"
       header="Verify your email to keep account secure"
       class="w-[568px]"
       :draggable="false"
     >
       <div class="space-y-4">
         <span class="text_para">
-          We sent a 6-digit code to <span class="font-bold">{{ data.email }}</span
+          We sent a 6-digit code to <span class="font-bold">{{ user.email }}</span
           >. Enter the code below to confirm your account. You may also tap on the link in the email
           we sent you.
         </span>

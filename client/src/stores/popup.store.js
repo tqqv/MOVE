@@ -3,6 +3,8 @@ import { ref } from 'vue';
 
 export const usePopupStore = defineStore('popup', () => {
   const showLoginPopup = ref(false);
+  const showVerifyPopup = ref(false);
+
   const showSignupPopup = ref(false);
   const showForgotPasswordPopup = ref(false);
   const showChangePassword = ref(false);
@@ -18,7 +20,13 @@ export const usePopupStore = defineStore('popup', () => {
   const closeConfirmDialog = () => {
     showConfirmDialog.value = false;
   };
+  const openVerifyPopup = () => {
+    showVerifyPopup.value = true;
+  };
 
+  const closeVerifyPopup = () => {
+    showVerifyPopup.value = false;
+  };
   const openVideoDetailPopup = () => {
     showVideoDetailPopup.value = true;
   };
@@ -71,6 +79,7 @@ export const usePopupStore = defineStore('popup', () => {
     showChangePasswordSuccess.value = false;
   };
   return {
+    showVerifyPopup,
     showLoginPopup,
     showForgotPasswordPopup,
     showChangePassword,
@@ -93,5 +102,7 @@ export const usePopupStore = defineStore('popup', () => {
     openConfirmDialog,
     closeConfirmDialog,
     openSignupPopup,
+    openVerifyPopup,
+    closeVerifyPopup,
   };
 });

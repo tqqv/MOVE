@@ -4,7 +4,6 @@
 </script>
 
 <template>
-  <Navbar />
   <div class="flex w-full pt-[72px]">
     <BrowseContent />
   </div>

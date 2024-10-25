@@ -166,15 +166,21 @@
 
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
-  });
-
-  onMounted(() => {
     document.addEventListener('click', handleClickOutside);
+    console.log(isUserMenuOpen);
   });
 
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+  watch(
+    () => userStore.user,
+    (newUser) => {
+      if (newUser) {
+        closeAllPopups();
+      }
+    },
+  );
 </script>
 <template>
   <nav class="bg-black text-white fixed w-full z-[100]">

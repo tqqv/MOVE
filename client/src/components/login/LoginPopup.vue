@@ -13,13 +13,6 @@
   const showLoginWithEmail = ref(false);
   const showPassword = ref(false);
   const popupStore = usePopupStore();
-
-  // const buttonColor = computed(() => {
-  //   return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
-  // });
-  // const isButtonDisabled = computed(() => {
-  //   return !(email.value.trim() && password.value.trim());
-  // });
   const handleLoginWithEmail = () => {
     showLoginWithEmail.value = true;
   };
@@ -30,16 +23,21 @@
     const data = { email, password };
     try {
       const response = await postLogin(data);
-      if (response.error) {
-        toast.error(response.message || 'Login failed');
-      } else {
-        userStore.fetchUserProfile();
+
+      if (response && response.success) {
+        await userStore.fetchUserProfile();
         userStore.loadFollowers();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
+
+        if (!userStore.user.isVerified) {
+          popupStore.openVerifyPopup();
+        }
+      } else {
+        toast.error(response.message || 'Login failed');
       }
     } catch (error) {
-      toast.error(error.response?.data.message || 'Login failed');
+      toast.error(error?.message || 'Login failed ne');
     }
   };
 
@@ -52,17 +50,6 @@
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.open(url, '_self');
   };
-
-  // onMounted(async () => {
-  //   try {
-  //     await userStore.fetchUserProfile();
-  //     if (!userStore.user) {
-  //       toast.error('Failed to fetch user profile');
-  //     }
-  //   } catch (error) {
-  //     toast.error('Failed to fetch user profile');
-  //   }
-  // });
 </script>
 
 <template>

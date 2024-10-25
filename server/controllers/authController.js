@@ -171,10 +171,11 @@ const facebookCallback = (req, res, next) => {
 // facebook verify account
 const sendMailVerifyFacebookController = async (req, res, next) => {
   const email = req.body.email;
-  const fullName = req.body.displayName;
-  const result = await sendMailVerifyFacebook(email, fullName );
-  if (result.cookie) {
-    res.cookie(result.cookie.cookieName, result.cookie.token);
+  const result = await sendMailVerifyFacebook(email);
+  if (loginResult.cookie) {
+    setCookies([
+      {name: result.cookie.cookieName, value: result.cookie.token, days: 0.01, options: { httpOnly: true }},
+    ])(req, res);
   }
   responseHandler(result.status, null, result.message)(req, res, next);
 };

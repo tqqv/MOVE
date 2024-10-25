@@ -42,6 +42,15 @@ export const useUserStore = defineStore('user', () => {
   const clearUserData = () => {
     user.value = null;
   };
-
-  return { user, loading, error, followers, loadFollowers, fetchUserProfile, clearUserData };
+  const getUser = () => user.value;
+  return {
+    user,
+    loading,
+    error,
+    followers,
+    loadFollowers,
+    fetchUserProfile,
+    clearUserData,
+    getUser,
+  };
 });
