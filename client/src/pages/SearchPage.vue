@@ -6,8 +6,7 @@
 
 <template>
   <Navbar />
-  <div class="flex w-full pt-[72px] ">
-    <SideBarFollow />
+  <div class="flex w-full pt-[72px]">
     <SearchContent />
   </div>
 </template>

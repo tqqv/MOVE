@@ -86,7 +86,12 @@
       selectLevelWorkoutOptions.value = newOptions[0].value || '';
     }
   });
-
+  watch(
+    () => props.channelId,
+    (newId) => {
+      fetchVideos();
+    },
+  );
   watch(
     [selectLevelWorkoutOptions, selectCategoryOptions, selectedSortBy, selectedOrder],
     (newValues, oldValues) => {

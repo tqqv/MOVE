@@ -24,8 +24,11 @@
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
   import GoLive from './icons/goLive.vue';
+  import { useTabStore } from '@/stores/tab.store';
+
   const popupStore = usePopupStore();
   const userStore = useUserStore();
+  const tabStore = useTabStore();
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
@@ -67,6 +70,7 @@
 
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
+    tabStore.setActiveTab('0');
   };
   const isElementOutside = (element, target) => {
     return element && !element.contains(target);

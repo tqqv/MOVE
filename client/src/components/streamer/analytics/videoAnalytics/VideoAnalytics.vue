@@ -1,6 +1,6 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue';
-  import { formatRating, formatDatePosted, formatAvgViewTime } from '@/utils';
+  import { formatRating, formatDatePosted, formatAvgViewTime, formatView } from '@/utils';
   import rate from '@/components/icons/rate.vue';
   import rep from '@/components/icons/rep.vue';
 
@@ -36,7 +36,6 @@
   const totalVideo = ref(0);
   const selectedProduct = ref();
   const videos = ref([]);
-  const showMenu = ref(false);
 
   const selectedSortByTime = ref(sortByTime[0].days);
   const selectedSortBy = ref(sortByOptions[0].sortBy);
@@ -78,9 +77,7 @@
       currentPage.value++;
     }
   };
-  watch(selectedProduct, () => {
-    console.log(selectedProduct);
-  });
+
   watch([selectedPageSize, selectedSortBy, selectedOrder, selectedSortByTime], () => {
     currentPage.value = 1;
     fetchVideos();
@@ -133,7 +130,7 @@
         </Column>
         <Column header="Views" class="text-center">
           <template #body="{ data }">
-            <span>{{ data.viewCount || 0 }}</span>
+            <span>{{ formatView(data.viewCount + data.totalViewer) || 0 }}</span>
           </template>
         </Column>
         <Column header="Avg. view time" class="text-center">

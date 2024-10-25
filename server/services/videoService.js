@@ -890,6 +890,14 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
           ],
           [
             sequelize.literal(`(
+              SELECT COUNT(viewTime)
+              FROM viewVideos
+              WHERE viewVideos.videoId = Video.id
+            )`),
+            'totalViewer'
+          ],
+          [
+            sequelize.literal(`(
               SELECT Count(rep)
               FROM comments
               WHERE comments.videoId = Video.id && rep > 0
