@@ -108,7 +108,7 @@
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
           alt="avatar"
-          class="size-14 object-cover rounded-full"
+          class="size-14 object-cover rounded-full flex-shrink-0"
         />
         <!-- RIGHT COMMENT -->
         <div class="flex flex-col flex-grow gap-y-1">
