@@ -19,6 +19,11 @@
   onMounted(() => {
     if (video2.value) {
       initializeHLS(video2.value, videoSrcHieune);
+
+      video2.value.addEventListener('error', () => {
+        console.log('Reloading video due to error');
+        initializeHLS(video2.value, videoSrcHieune);
+      });
     }
   });
 </script>
