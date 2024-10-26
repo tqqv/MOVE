@@ -10,6 +10,7 @@
   import { getReplyCommentOfVideo } from '@/services/comment';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { formatDate } from '@/utils/calculatorDate';
+  import { formatDuration } from '@/utils';
 
   const props = defineProps({
     comment: Object,
@@ -107,7 +108,7 @@
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
           alt="avatar"
-          class="size-14 object-cover rounded-full"
+          class="size-14 object-cover rounded-full flex-shrink-0"
         />
         <!-- RIGHT COMMENT -->
         <div class="flex flex-col flex-grow gap-y-1">
@@ -210,14 +211,18 @@
               class="object-cover w-full h-full"
             />
             <div class="absolute bottom-2 right-2 p-2 bg-title/60 rounded-md text-xs text-white">
-              {{ comment.Video.duration }}
+              {{ formatDuration(comment.Video.duration) }}
             </div>
           </div>
         </div>
         <div class="w-1/2">
           <h1 class="font-semibold mb-2 line-clamp-2">{{ comment.Video.title }}</h1>
           <h2 class="text-xs mb-4 text-body">{{ comment.Video.category.title }}</h2>
-          <p class="text-sm text-primary cursor-pointer font-semibold">View comment</p>
+          <RouterLink
+            :to="`/video/${comment.Video.id}#comment-${comment.id}`"
+            class="text-sm text-primary cursor-pointer font-semibold"
+            >View comment</RouterLink
+          >
         </div>
       </div>
     </td>

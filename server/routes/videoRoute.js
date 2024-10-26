@@ -33,7 +33,7 @@ router.post('/check-video-status', checkVideoStatus);
 router.patch('/update-video', verifyStreamer, updateVideo);
 router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
-router.get('/channel/:channelId', verifyUser, getVideoByUserId);
+router.get('/channel/:channelId', getVideoByUserId);
 router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
 
 module.exports = router;

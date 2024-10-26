@@ -62,7 +62,7 @@
         <Divider class="flex-grow mt-1" />
         <div class="flex justify-between">
           <span class="font-bold text-[24px]">Categories</span>
-          <RouterLink to="/browse"
+          <RouterLink to="/browse/categories"
             ><span class="text-sm text-primary cursor-pointer">View all</span></RouterLink
           >
         </div>

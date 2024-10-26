@@ -4,7 +4,7 @@
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
-  import { postFollowChannel, getListFollowOfUser } from '@/services/user';
+  import { postFollowChannel } from '@/services/user';
   import { toast } from 'vue3-toastify';
   import { useUserStore } from '@/stores';
   const props = defineProps({
@@ -37,28 +37,17 @@
     },
   });
 
-  const followedChannels = ref([]);
   const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const userStore = useUserStore();
-
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
-
   const closeMenu = () => {
     isMenuVisible.value = false;
   };
 
-  // const fetchListFollowOfUser = async () => {
-  //   const result = await getListFollowOfUser();
-  //   if (result.success) {
-  //     followedChannels.value = result.data;
-  //   } else {
-  //     toast.error(result.message);
-  //   }
-  // };
   const followChannel = async () => {
     try {
       const response = await postFollowChannel({
@@ -153,9 +142,7 @@
       >
         <share class="mr-1" /> Share
       </div>
-      <button v-if="userStore.user?.username !== username" class="btn whitespace-nowrap">
-        Gift REPs <i class="pi pi-angle-right text-white" />
-      </button>
+
       <div class="relative">
         <button
           v-if="isUserAction"

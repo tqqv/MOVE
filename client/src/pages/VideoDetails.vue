@@ -76,7 +76,7 @@
   <div class="grid grid-cols-12">
     <div class="col-span-8">
       <div ref="vimeoPlayer" class="video-player"></div>
-      <div class="p-[10px]">
+      <div class="p-[20px]">
         <OfflineTitle v-if="video" :video="video" />
         <Divider />
         <VideoDetail

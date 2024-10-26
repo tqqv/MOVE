@@ -27,4 +27,20 @@ const getListFollowOfChannel = async (channelId) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-export { getProfileChannel, updateChannelProfile, getListFollowOfChannel, getViewChannel };
+
+const getStreamKey = async () => {
+  try {
+    const response = await axios.get('/channel/createStreamKey');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  getProfileChannel,
+  updateChannelProfile,
+  getListFollowOfChannel,
+  getViewChannel,
+  getStreamKey,
+};
