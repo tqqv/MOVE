@@ -98,7 +98,7 @@
           <span class="text-[18px] font-bold">Latest video</span>
           <div>
             <img
-              src="https://scontent.fsgn5-6.fna.fbcdn.net/v/t1.6435-1/157961237_1328089080905245_5171334421315568845_n.jpg?stp=dst-jpg_s160x160&_nc_cat=108&ccb=1-7&_nc_sid=e4545e&_nc_eui2=AeF99CmdNvNFHeSE2X2oAF2bSiHTP0RPzcdKIdM_RE_Nx8FryIGP6oPYsu-I6EnZ7dnlIf60FJas0IwShb7FDy2G&_nc_ohc=R7o8ZaA7qe0Q7kNvgGhkJ2a&_nc_ht=scontent.fsgn5-6.fna&_nc_gid=AbguhOHWXnz-oDgDmc80nqY&oh=00_AYCgNpWVU1ViwiO7_54uJKtQ726owW3E4U9AY87TAc9t8A&oe=673740F0"
+              src="https://i.vimeocdn.com/video/1941683458-d4300a0c841dadba7870e288c4b6b59fcdd96af6d7a87dd2664eea2bf2e6a921-d"
               class="rounded-lg object-cover w-full h-auto"
             />
           </div>
