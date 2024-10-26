@@ -37,7 +37,6 @@
   const { openVideoDetailPopup, closeVideoDetailPopup, openConfirmDialog, closeConfirmDialog } =
     popupStore;
   const { clear, setTab, getVideo } = videoStore;
-
   const confirm = useConfirm();
   const publish = ref(false);
 
