@@ -98,11 +98,22 @@
       console.error('New comment is undefined or null');
     }
   };
+
+  onMounted(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      const target = document.querySelector(hash);
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  });
 </script>
 
 <template>
   <div
     class="flex gap-x-4"
+    :id="`comment-${comment.id}`"
     :class="{
       'pl-6 py-4 px-3 border-l-2 border-gray-dark': comment.parentId !== null,
       'border-l-4 border-primary/60 bg-primary/10 rounded-e-lg mb-1': comment.isNew,
