@@ -35,6 +35,10 @@ export const usePopupStore = defineStore('popup', () => {
     showUploadVideoPopup.value = false;
   };
 
+  const openSignupPopup = () => {
+    showSignupPopup.value = true;
+  };
+
   const openLoginPopup = () => {
     showLoginPopup.value = true;
   };
@@ -88,5 +92,6 @@ export const usePopupStore = defineStore('popup', () => {
     closeUploadVideoPopup,
     openConfirmDialog,
     closeConfirmDialog,
+    openSignupPopup,
   };
 });

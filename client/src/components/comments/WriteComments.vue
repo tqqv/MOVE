@@ -3,12 +3,18 @@
   import EmojiPicker from 'vue3-emoji-picker';
   import { postComments } from '@/services/comment';
   import { useUserStore } from '@/stores';
+  import Login from '@/pages/Login.vue';
+  import { usePopupStore } from '@/stores';
 
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
   const userStore = useUserStore();
-  const avatar = computed(() => userStore.user?.avatar || '');
+  const popupStore = usePopupStore();
+
+  const avatar = computed(
+    () => userStore.user?.avatar || 'https://img.upanh.tv/2024/06/18/user-avatar.png',
+  );
 
   const props = defineProps({
     fetchComments: {
@@ -32,11 +38,12 @@
 
   const parentId = ref(props.commentId || null);
   const showActions = ref(false);
-
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
   };
-
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+  };
   const addEmoji = (emoji) => {
     commentText.value += emoji.i;
     const commentInput = document.getElementById('commentInput');
@@ -52,6 +59,10 @@
   };
 
   const handleSend = async () => {
+    if (!userStore.user) {
+      openLoginPopup();
+      return;
+    }
     const data = { content: commentText.value, parentId: parentId.value };
     try {
       const response = await postComments(props.videoId, data);
@@ -171,4 +182,5 @@
       </div>
     </div>
   </div>
+  <Login v-model:visible="popupStore.showLoginPopup" />
 </template>

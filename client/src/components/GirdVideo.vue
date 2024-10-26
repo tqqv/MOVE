@@ -6,6 +6,16 @@
       type: Array,
       required: true,
     },
+
+    page: {
+      type: Number,
+    },
+    pageSize: {
+      type: Number,
+    },
+    totalPages: {
+      type: Number,
+    },
   });
 </script>
 <template>
