@@ -7,6 +7,8 @@ import PrimeVue from 'primevue/config';
 import Aura from '@primevue/themes/aura';
 import ConfirmationService from 'primevue/confirmationservice';
 import App from './App.vue';
+import Carousel3d from 'vue3-carousel-3d';
+import 'vue3-carousel-3d/dist/index.css';
 import router from './router';
 import i18n from './i18n';
 import 'vue3-toastify/dist/index.css';
@@ -18,6 +20,8 @@ const pinia = createPinia();
 const app = createApp(App);
 
 app.directive('tooltip', Tooltip);
+app.use(Carousel3d);
+
 app.use(pinia);
 app.use(router);
 app.use(i18n);
@@ -38,5 +42,4 @@ app.use(Vue3Toastify, {
   position: toast.POSITION.BOTTOM_LEFT,
 });
 app.use(ConfirmationService);
-
 app.mount('#app');

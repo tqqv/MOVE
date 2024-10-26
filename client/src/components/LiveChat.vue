@@ -109,7 +109,7 @@
   <div
     v-if="openLiveChat"
     class="max-w-[343px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
-    :class="isStreamer ? 'h-full' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+    :class="isStreamer ? 'h-full rounded-md' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -132,7 +132,7 @@
       :class="{ 'border-none shadow-md rounded-md': isStreamer }"
     >
       <!-- CONTENT -->
-      <div class="h-[439px] flex-grow pb-2">
+      <div class="h-[509px] flex-grow pb-2">
         <div
           class="flex flex-col-reverse px-3 py-3 h-full overflow-y-auto overflow-x-hidden scrollbar-custom"
         >
@@ -149,7 +149,7 @@
         </div>
       </div>
       <!-- INPUT -->
-      <div class="py-3 px-3 border-t-2 border-gray-dark">
+      <div class="py-3 px-3 border-t-2 border-gray-dark" :class="{ 'rounded-b-md': isStreamer }">
         <!-- HIDDEN AFTER FOLLOW -->
         <div v-if="!isStreamer" class="flex justify-start items-center gap-x-3">
           <p class="font-bold text-[13px]">Follow to chat</p>
