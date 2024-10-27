@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, defineEmits } from 'vue';
+  import { ref, computed } from 'vue';
   import Dialog from 'primevue/dialog';
   import { usePopupStore } from '@/stores';
   import { postForgotPassword } from '@/services/auth';

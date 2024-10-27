@@ -1,8 +1,7 @@
 <script setup>
-  import { ref, computed } from 'vue';
   import verified from '@icons/verified.vue';
   import rate from '@icons/rate.vue';
-  import { formatDate, genreDuration } from '@/functions/calculatorDate';
+  import { formatDate, genreDuration } from '@/utils';
 
   const props = defineProps({
     videos: {
@@ -13,7 +12,7 @@
 </script>
 <template>
   <div class="w-full py-4">
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
       <div
         v-for="video in videos"
         :key="video.id"

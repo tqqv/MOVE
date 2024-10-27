@@ -39,7 +39,8 @@ passport.use(
             })
             if(!existingEmailAccount) {
                 console.log("come")
-                const newAccount = await User.create(await getProfile(profile))
+                const referralCode = await generateUniqueReferralCode();
+                const newAccount = await User.create({...(await getProfile(profile)), username: "user_" + referralCode})
                 return done(null, newAccount)
             }
             return done(null, existingEmailAccount)

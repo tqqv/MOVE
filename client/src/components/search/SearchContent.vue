@@ -8,7 +8,9 @@
   import { onMounted, ref } from 'vue';
   import notFound from '../icons/not-found.vue';
   import SearchVideo from './SearchVideo.vue';
-  
+  import VideoCard from '../VideoCard.vue';
+  import EmptyPage from '@/pages/EmptyPage.vue';
+
   const route = useRoute();
   const query = ref(route.query.q || '');
   const categories = ref([]);
@@ -39,7 +41,7 @@
     v-if="query && (categories.length || users.length || videos.length) && !loading"
     class="flex-grow"
   >
-   <div class="container">
+    <div class="container">
       <div>
         <div class="flex items-center gap-x-[30px]">
           <h1 class="text_title flex-shrink-0">Search results for {{ query }}</h1>
@@ -49,7 +51,11 @@
           <!-- CATEGORIES -->
           <div v-if="categories.length" class="">
             <h1 class="text_subTitle mb-2">Categories</h1>
-            <CategoryImage :categories="categories" />
+            <div
+              class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+            >
+              <CategoryImage :categories="categories" />
+            </div>
           </div>
           <hr v-if="categories.length" class="h-px my-10 bg-gray-dark border-0" />
           <!-- CHANNELS -->
@@ -61,20 +67,25 @@
           <!-- VIDEOS -->
           <div v-if="videos.length">
             <h1 class="text_subTitle mb-4">Videos</h1>
-            <SearchVideo :videos="videos" />
+            <div class="w-full py-4">
+              <div
+                class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8"
+              >
+                <VideoCard :videos="videos" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
-   </div>
+    </div>
   </section>
   <div
     v-if="!query || (query && !categories.length && !videos.length && !users.length && !loading)"
-    class="flex flex-col justify-center items-center w-full h-[382px] mt-32"
+    class="h-full flex justify-center items-center"
   >
-    <notFound class="scale-75" />
-    <div class="flex items-center flex-col text-center gap-y-3">
-      <h1 class="font-semibold text-xl">No results found</h1>
-      <p class="text-sm">Try different keywords or remove search filters</p>
-    </div>
+    <EmptyPage
+      title="No results found"
+      subTitle="Try different keywords or remove search filters"
+    />
   </div>
 </template>

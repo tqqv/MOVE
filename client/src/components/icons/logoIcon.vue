@@ -2,11 +2,11 @@
   const props = defineProps({
     width: {
       type: String,
-      default: '19px',
+      default: '48px',
     },
     height: {
       type: String,
-      default: '25px',
+      default: '48px',
     },
     fill: {
       type: String,
@@ -20,7 +20,7 @@
 </script>
 
 <template>
-  <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 18 18">
+  <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="height" viewBox="0 0 18 18">
     <g id="Group_2017" data-name="Group 2017" transform="translate(-341 -187)">
       <circle
         id="Ellipse_47"

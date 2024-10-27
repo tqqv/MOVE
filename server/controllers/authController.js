@@ -100,7 +100,6 @@ const resetPasswordController = async (req, res, next) => {
     data.confirmPassword
   );
 
-  res.
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
@@ -124,7 +123,6 @@ const googleCallbackController = (req, res, next) => {
       if (error || !user) {
         return res.redirect(process.env.CLIENT_HOST);
       }
-
       const loginResult = await loginByGoogle(error, user);
 
       if (loginResult.cookie) {

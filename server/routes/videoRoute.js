@@ -10,13 +10,20 @@ const { getUploadLink,
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
-  getListVideoByFilterController} = require('../controllers/videoController');
+  getListVideoByFilterController,
+  analyticsVideoByIdController,
+  getListVideoByChannelController,
+  getStateByCountryAndVideoIdController,
+} = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
+router.get('/getState/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
+router.get('/getVideoAnalytics/:videoId', verifyStreamer, analyticsVideoByIdController)
 router.get('/getVideosByFilter', getListVideoByFilterController);
+router.get('/getVideosByChannel', verifyStreamer, getListVideoByChannelController);
 router.post('/upload-video', verifyStreamer, getUploadLink);
 router.post('/upload-thumbnail',verifyStreamer, upload.single('thumbnailPath'), uploadThumbnail);
 router.post('/upload-metadata', verifyStreamer, uploadMetadata);
@@ -26,7 +33,7 @@ router.post('/check-video-status', checkVideoStatus);
 router.patch('/update-video', verifyStreamer, updateVideo);
 router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
-router.get('/channel/:channelId', verifyUser, getVideoByUserId);
-router.delete('/', verifyStreamer, deleteVideo);
+router.get('/channel/:channelId', getVideoByUserId);
+router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
 
 module.exports = router;

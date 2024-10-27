@@ -73,17 +73,14 @@ const createStreamKeyController = async(req, res, next) => {
 }
 
 const validateStreamKeyController = async(req, res, next) => {
-  const userName = req.body.name;
   const streamKey = req.body.streamKey;
-  const result = await validateStreamKey(streamKey, userName);
+  const result = await validateStreamKey(streamKey);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-
 const endStreamController = async(req, res, next) => {
-  const userName = req.body.name;
   const streamKey = req.body.streamKey;
-  const result = await endStream(streamKey, userName);
+  const result = await endStream(streamKey);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 

@@ -450,6 +450,7 @@ const createStreamKey = async(channelId) => {
     await channel.save();
     return {
       status: 200,
+      data: channel.streamKey,
       message: "Create stream key successfully."
     }
   } catch (error) {
@@ -462,74 +463,57 @@ const createStreamKey = async(channelId) => {
   }
 }
 
-const validateStreamKey = async (streamKey, userName) => {
+const validateStreamKey = async (streamKey) => {
   try {
-    const valid = await Channel.findOne({where: { streamKey: streamKey },
-      include: [{
-        model: User, // Giả sử bạn đã định nghĩa mối quan hệ giữa Channel và User
-        where: { username: userName }, // Thêm điều kiện lọc username
-      }],
-    });
-
-    if (!valid) {
+    const valid = await Channel.findOne({where: {streamKey: streamKey}});
+    if(!valid){
       return {
         status: 404,
-        data: { streamKey, userName },
+        data: streamKey,
         message: "Streaming Key is invalid or does not belong to the specified user."
       };
     }
-    if(valid.isLive) {
-      return {
-        status: 400,
-        data: { streamKey, userName },
-        message: "Existing streaming thread by provided streamkey."
-      };
-    }
-
     valid.isLive = true;
     valid.save();
-
+    _io.to(valid.id).emit('streamReady', true);
     return {
       status: 200,
-      data: { streamKey, userName },
+      data: streamKey,
       message: "Streaming Key is valid"
     }
   } catch (error) {
     console.log(error);
     return {
       status: 500,
-      data: { streamKey, userName },
+      data: streamKey,
       message: error.message
     }
   }
 }
 
-const endStream = async (streamKey, userName) => {
+const endStream = async(streamKey) => {
   try {
-    const valid = await Channel.findOne({where: { streamKey: streamKey },
-      include: [{
-        model: User, // Giả sử bạn đã định nghĩa mối quan hệ giữa Channel và User
-        where: { username: userName }, // Thêm điều kiện lọc username
-      }],
-    });
-
+    const valid = await Channel.findOne({where: {streamKey: streamKey}});
+    if(!valid){
+      return {
+        status: 404,
+        message: "End stream fail"
+      }
+    }
     valid.isLive = false;
     valid.save();
+    _io.to(valid.id).emit('streamReady', false);
     return {
       status: 200,
-      data: { streamKey, userName },
-      message: "Streaming stopped"
+      message: "End stream success"
     }
   } catch (error) {
-    console.log(error);
     return {
       status: 500,
-      data: { streamKey, userName },
       message: error.message
     }
   }
 }
-
 module.exports = {
   createChannel,
   listSubscribeOfChannel,

@@ -1,12 +1,11 @@
 <script setup>
   import { ref, computed } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
-  import facebook from '@/components/icons/facebookLogin.vue';
   import { toast } from 'vue3-toastify';
   import { postSignup } from '@/services/auth';
   import { usePopupStore } from '@/stores';
   import { Form, Field } from 'vee-validate';
-  import { signUpSchema } from '@/functions/vadilation';
+  import { signUpSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
 
   const popupStore = usePopupStore();
@@ -14,6 +13,10 @@
   const showPassword = ref(false);
   const showConfirmPassword = ref(false);
 
+  const handleGoogleLogin = () => {
+    const url = `${import.meta.env.VITE_API_URL}auth/google`;
+    window.open(url, '_self');
+  };
   const submitSignupForm = async (values) => {
     const { email, password, confirmPassword } = values;
 
@@ -34,6 +37,7 @@
 <template>
   <div class="items-center space-y-4">
     <button
+      @click="handleGoogleLogin"
       class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
     >
       <span class="flex-shrink-0">
@@ -41,14 +45,7 @@
       </span>
       <span class="flex-grow text-center">Sign up with Google</span>
     </button>
-    <button
-      class="w-full bg-white text-black text-[16px] font-bold border border-[#CCCCCC] flex items-center px-4 py-2 rounded"
-    >
-      <span class="flex-shrink-0">
-        <facebook class="mr-3" />
-      </span>
-      <span class="flex-grow text-center">Sign up with Facebook</span>
-    </button>
+
     <div class="flex items-center w-full">
       <hr class="flex-grow border-t border-[#CCCCCC]" />
       <span class="mx-2 text-gray-500">or</span>
@@ -73,7 +70,7 @@
               />
               <Warning
                 v-if="errors.length"
-                class="absolute top-1/2 right-4 transform -translate-y-1/2 "
+                class="absolute top-1/2 right-4 transform -translate-y-1/2"
               />
             </div>
             <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
@@ -136,7 +133,7 @@
         </div>
         <div class="flex flex-col gap-y-1">
           <label for="code" class="text_para">Referral code (<em>Optional</em>)</label>
-          <input v-model="referralCode" type="number" class="input_custom" />
+          <input v-model="referralCode" type="text" class="input_custom" />
         </div>
         <div>
           <span class="text-sm text-[#777777]"

@@ -14,6 +14,9 @@
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
+  import { useUserStore } from '@/stores/user.store';
+
+  const userStore = useUserStore();
 
   const route = useRoute();
   const vimeoPlayer = ref(null);
@@ -46,6 +49,7 @@
           popularCheck: res.data.data.channel.popularCheck,
           isLive: res.data.data.channel.isLive,
           bio: res.data.data.channel.bio,
+          followCount: res.data.data.channel.followCount,
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
@@ -72,7 +76,7 @@
   <div class="grid grid-cols-12">
     <div class="col-span-8">
       <div ref="vimeoPlayer" class="video-player"></div>
-      <div class="p-[10px]">
+      <div class="p-[20px]">
         <OfflineTitle v-if="video" :video="video" />
         <Divider />
         <VideoDetail
@@ -81,6 +85,7 @@
           :isButtonGiftREPsVisible="true"
           :totalFollower="totalFollower"
           :channelId="channelId"
+          @updateFollowers="fetchVideoById"
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">
@@ -93,12 +98,12 @@
           </TabPanels>
         </Tabs>
         <Divider />
-        <CommentPage />
+        <CommentPage :videoId="videoId" />
       </div>
     </div>
     <div class="col-span-4">
       <div class="p-[10px]">
-        <h3 class="font-bold mb-2">WATCH ALSO</h3>
+        <h3 class="font-bold mb-2 uppercase">watch also</h3>
         <div>
           <VideoCard
             v-if="videos"

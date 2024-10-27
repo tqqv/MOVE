@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import Tabs from 'primevue/tabs';
@@ -28,12 +28,15 @@
     thumbnailPreview,
     commentSetting,
     tab,
+    keywords,
+    selectCategoryOptions,
+    selectLevelWorkoutOptions,
+    videoIdDetail,
   } = storeToRefs(videoStore);
   const { showVideoDetailPopup, showConfirmDialog } = storeToRefs(popupStore);
   const { openVideoDetailPopup, closeVideoDetailPopup, openConfirmDialog, closeConfirmDialog } =
     popupStore;
-  const { clear, setTab } = videoStore;
-
+  const { clear, setTab, getVideo } = videoStore;
   const confirm = useConfirm();
   const publish = ref(false);
 
@@ -65,6 +68,7 @@
   };
 
   const handleNextClick = async () => {
+    const videoId = uri.value.split('/').pop();
     if (tab.value === '1') {
       try {
         const response = await axios.post('video/upload-metadata', {
@@ -79,7 +83,21 @@
         toast.error('Error uploading metadata');
       }
     } else if (tab.value === '2') {
-      setTab('3');
+      try {
+        const response = await axios.patch('video/update-video', {
+          videoId,
+          updateData: {
+            categoryId: selectCategoryOptions.value,
+            levelWorkoutsId: selectLevelWorkoutOptions.value,
+            keywords: keywords.value,
+          },
+        });
+        if (response.status === 200) {
+          setTab('3');
+        }
+      } catch (error) {
+        toast.error('Error updating video data');
+      }
     }
   };
 
@@ -118,6 +136,9 @@
     }
     confirmModal();
   };
+  watch(videoIdDetail, () => {
+    getVideo(videoIdDetail.value);
+  });
 </script>
 <template>
   <Dialog
@@ -223,9 +244,12 @@
         </button>
         <button
           :class="[
-            isNext && uploadProgress === 100 && thumbnailPreview ? 'btn' : 'btnDisable',
+            isNext && uploadProgress === 100 && thumbnailPreview
+              ? 'btn'
+              : 'btnDisable cursor-not-allowed',
             'px-14 leading-none',
           ]"
+          :disabled="!(isNext && uploadProgress === 100 && thumbnailPreview)"
           v-if="tab !== '3'"
           @click="handleNextClick"
         >

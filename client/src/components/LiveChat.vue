@@ -1,6 +1,7 @@
 <script setup>
   import sendChat from '@icons/sendChat.vue';
-  import '@/custom.css'
+  import '@/custom.css';
+  import { ref } from 'vue';
   const chatMessages = [
     {
       id: 1,
@@ -93,19 +94,45 @@
       createdAt: '2024-08-30T00:14:00Z',
     },
   ];
+
+  const props = defineProps({
+    isStreamer: Boolean,
+  });
+
+  const openLiveChat = ref(true);
+  const handleOpenLiveChat = () => {
+    openLiveChat.value = !openLiveChat.value;
+  };
 </script>
 
 <template>
-  <div class="h-[704px] w-[323px] bg-gray-light flex justify-between flex-col text-[#777777]">
+  <div
+    v-if="openLiveChat"
+    class="max-w-[343px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
+    :class="isStreamer ? 'h-full rounded-md' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+  >
     <!-- TOPBAR -->
-    <div class="flex justify-between items-center bg-black text-white px-4 py-4">
-      <i class="pi pi-arrow-right text-[1.1rem] cursor-pointer"></i>
+    <div
+      class="flex justify-between items-center bg-black text-white px-4 py-4"
+      :class="{ ' rounded-t-md': isStreamer }"
+    >
+      <div
+        v-if="!isStreamer"
+        class="flex cursor-pointer p-2 justify-center items-center hover:bg-[#FFFFFF21] rounded-md"
+        @click="handleOpenLiveChat"
+        v-tooltip="'Collapse'"
+      >
+        <i class="pi pi-arrow-right text-[1.1rem]"></i>
+      </div>
       <h2 class="uppercase text_subTitle text-white text-[13px]">live chat</h2>
       <i class="pi pi-user text-[1.1rem] cursor-pointer"></i>
     </div>
-    <div class="flex flex-col flex-grow justify-between border-l-2 border-gray-dark">
+    <div
+      class="flex flex-col flex-grow justify-between border-l-2 border-gray-dark"
+      :class="{ 'border-none shadow-md rounded-md': isStreamer }"
+    >
       <!-- CONTENT -->
-      <div class="h-[539px]">
+      <div class="h-[509px] flex-grow pb-2">
         <div
           class="flex flex-col-reverse px-3 py-3 h-full overflow-y-auto overflow-x-hidden scrollbar-custom"
         >
@@ -122,9 +149,9 @@
         </div>
       </div>
       <!-- INPUT -->
-      <div class="py-3 px-3 border-t-2 border-gray-dark">
+      <div class="py-3 px-3 border-t-2 border-gray-dark" :class="{ 'rounded-b-md': isStreamer }">
         <!-- HIDDEN AFTER FOLLOW -->
-        <div class="flex justify-start items-center gap-x-3">
+        <div v-if="!isStreamer" class="flex justify-start items-center gap-x-3">
           <p class="font-bold text-[13px]">Follow to chat</p>
           <i class="pi pi-question-circle text-[1.1rem]"></i>
         </div>
@@ -132,15 +159,21 @@
           <input
             type="text"
             placeholder="Send a message"
-            class="w-full text-white bg-black py-[14px] pr-11 px-4 rounded-[28px] text-[13px] placeholder:text-[13px] placeholder:text-footer focus:caret-primary"
+            class="w-full text-black bg-gray-light py-[14px] pr-11 px-4 rounded-[28px] text-[13px] placeholder:text-[13px] placeholder:text-footer"
           />
           <div class="flex items-center absolute px-3 rounded-r-[28px] right-0 top-0 bottom-0">
-            <sendChat class="mb-1 fill-footer cursor-pointer group-focus-within:fill-white" />
+            <sendChat class="mb-1 fill-footer cursor-pointer group-focus-within:fill-body" />
           </div>
         </form>
       </div>
     </div>
   </div>
+  <div
+    v-else
+    class="fixed top-20 right-0 m-3 p-3 bg-transparent rounded-md flex justify-center items-center cursor-pointer hover:bg-[#FFFFFF21]"
+    v-tooltip="'Expand'"
+    @click="handleOpenLiveChat"
+  >
+    <i class="pi pi-arrow-left text-white"></i>
+  </div>
 </template>
-
-

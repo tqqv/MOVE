@@ -7,10 +7,11 @@
   import { useStreamerStore } from '@/stores/streamer.store';
   import { updateChannelProfile } from '@/services/streamer';
   import { toast } from 'vue3-toastify';
-  import { checkDataChanged, getChangedFields } from '@/functions/compareData';
+  import { checkDataChanged, getChangedFields } from '@/utils/compareData';
   import { uploadAvatar } from '@/services/cloudinary';
-  import { updateChannelSchema } from '@/functions/vadilation';
+  import { updateChannelSchema } from '@/utils/vadilation';
   import Warning from '@/components/icons/warning.vue';
+  import { copyToClipboard } from '@/utils/copyToClipboard';
 
   const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
@@ -44,15 +45,13 @@
   };
 
   // COPY STREAMKEY
-  const copyToClipboard = () => {
-    if (profileData.value.streamKey) {
-      navigator.clipboard.writeText(profileData.value.streamKey);
-      toast.success('Copy stream key successfully');
-    } else {
-      toast.error('No Stream Key to copy!');
-    }
+  const handleCopyStreamKey = () => {
+    copyToClipboard(
+      profileData.value.streamKey,
+      'Successfully copied to clipboard',
+      'Failed copied to clipboard',
+    );
   };
-
   //   UPDATE AVATAR
   const isLoadingAvatar = ref(false);
   const fileInputRef = ref(null);
@@ -154,7 +153,7 @@
         <div
           v-tooltip.top="'copy stream key'"
           class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
-          @click="copyToClipboard"
+          @click="handleCopyStreamKey"
         >
           <i class="pi pi-link text-2xl"></i>
         </div>
@@ -190,6 +189,7 @@
           ref="fileInputRef"
           class="hidden"
           @change="handleSelectedFile"
+          accept="image/*"
         />
 
         <span
