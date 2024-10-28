@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Report, ReportType, User, Video, Livestream, Comment } = db;
+const { Report, ReportType, User, Video, Livestream, Comment, Channel } = db;
 
 const reportVideo = async(userId, videoId, reportTypeId) => {
   try {
@@ -241,10 +241,69 @@ const getListReportByType = async(type) => {
   }
 }
 
+const reportChannel = async(userId, channelId, reportTypeId) => {
+  try {
+    if (!userId || !channelId || !reportTypeId) {
+      return {
+        status: 400,
+        data: null,
+        message: "Not null"
+      }
+    }
+
+    const checkUser = await User.findOne({
+      where: {
+        id: userId
+      }
+    })
+
+    if(!checkUser) {
+      return {
+        status: 404,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    const checkChannel = await Channel.findOne({
+      where: {
+        id: channelId
+      }
+    })
+
+    if(!checkChannel) {
+      return {
+        status: 404,
+        data: null,
+        message: "Channel not found"
+      }
+    }
+
+    const newReport = await Report.create({
+      reporterId: userId,
+      targetChannelId: channelId,
+      reportTypeId: reportTypeId
+    })
+
+    return {
+      status: 200,
+      data: newReport,
+      message: "Report has been created successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   reportVideo,
   reportLivestream,
   reportComment,
   reportChatMessages,
-  getListReportByType
+  getListReportByType,
+  reportChannel,
 }
