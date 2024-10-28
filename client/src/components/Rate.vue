@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted, watch } from 'vue';
+  import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
   import RatePopup from './popup/RatePopup.vue';
   import { getRateOfUser } from '@/services/rate';
   import { useUserStore } from '@/stores';
@@ -54,6 +54,29 @@
   };
   const iconClass = computed(() => {
     return isRated.value ? 'pi pi-star-fill' : 'pi pi-star';
+  });
+
+  const isElementOutside = (element, target) => {
+    return element && !element.contains(target);
+  };
+  const handleClickOutside = (event) => {
+    const rateMenu = document.getElementById('rate-menu');
+    const rateMenuButton = document.getElementById('rate-menu-button');
+
+    const clickOutsideRateMenu =
+      isElementOutside(rateMenu, event.target) && isElementOutside(rateMenuButton, event.target);
+
+    if (clickOutsideRateMenu) {
+      isRatePopupOpen.value = false;
+    }
+  };
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
   });
   onMounted(() => {
     if (props.videoId && userStore.user) {
