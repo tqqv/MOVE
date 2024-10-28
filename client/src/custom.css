@@ -215,6 +215,17 @@ input::placeholder {
   margin-bottom: 5px;
 }
 
+
+.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #39393a;
+  margin-top: 5px;
+}
+
+.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #39393a;
+  margin-right: 5px;
+}
+
 /* Custom animation */
 .p-tooltip {
   transition: transform 0.2s ease-in-out;
@@ -227,4 +238,11 @@ input::placeholder {
 
 .p-tooltip[data-position="bottom"] {
   margin-top: 10px;
+}
+
+/* CUSTOM DIALOG PRIMEVUE */
+.p-dialog-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

@@ -138,7 +138,7 @@
         />
         <div
           v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-50"
+          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
         >
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
