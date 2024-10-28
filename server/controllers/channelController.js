@@ -75,7 +75,6 @@ const createStreamKeyController = async(req, res, next) => {
 const validateStreamKeyController = async(req, res, next) => {
   const streamKey = req.body.streamKey;
   const result = await validateStreamKey(streamKey);
-
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 

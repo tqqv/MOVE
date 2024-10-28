@@ -18,5 +18,6 @@ channelRouter.get("/searchVideoChannel", searchVideoChannelController)
 channelRouter.post("/validateStreamKey", validateStreamKeyController)
 channelRouter.post("/endStream", endStreamController)
 channelRouter.get("/createStreamKey", verifyStreamer, createStreamKeyController)
+channelRouter.post("/endStream",  endStreamController)
 
 module.exports = channelRouter;
