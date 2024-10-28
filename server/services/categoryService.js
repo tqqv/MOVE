@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Category, Video, sequelize } = db;
+const { Category, CategoryFollow, Video, sequelize } = db;
 
 const createCategory = async(data) => {
   try {
@@ -167,11 +167,51 @@ const getAllCategoryWithView = async() => {
   }
 }
 
+const getCateByTitle = async(title) => {
+  try {
+    const cate = await Category.findOne({
+      where: {title: title},
+      attributes: [
+        'imgUrl',
+        'title',
+        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews'],
+        [sequelize.fn('COUNT', sequelize.col('followers.categoryId')), 'followerCount']
+      ],
+      include: [
+        {
+          model: Video,
+          as: 'categoryVideos',
+          attributes: [],
+        },
+        {
+          model: CategoryFollow,
+          as: 'followers',
+          attributes: [],
+        },
+      ],
+      group: ['Category.id'],
+    })
+
+    return {
+      status: 200,
+      data: cate,
+      message: "Get infor cate successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createCategory,
   getAllCategory,
   getCateById,
   editCategory,
   deleteCategory,
-  getAllCategoryWithView
+  getAllCategoryWithView,
+  getCateByTitle
 }
