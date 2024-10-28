@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { reportVideo, reportLivestream, reportComment, reportChatMessages, getListReportByType } = require("../services/reportService");
+const { reportVideo, reportLivestream, reportComment, reportChatMessages, getListReportByType, reportChannel } = require("../services/reportService");
 
 const reportVideoController = async(req, res, next) => {
   const userId  = req.user.id;
@@ -44,10 +44,20 @@ const getListReportByTypeController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const reportChannelController = async(req, res, next) => {
+  const userId  = req.user.id;
+  const channelId = req.body.channelId;
+  const reportTypeId = req.body.reportTypeId;
+  const result = await reportChannel(userId, channelId, reportTypeId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   reportVideoController,
   reportLivestreamController,
   reportCommentController,
   reportChatMessagesController,
-  getListReportByTypeController
+  getListReportByTypeController,
+  reportChannelController,
 }

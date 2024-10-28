@@ -47,6 +47,9 @@ module.exports = (sequelize, DataTypes) => {
       viewTime: {
         type:DataTypes.INTEGER,
         defaultValue: 0
+      },
+      ip: {
+        type:DataTypes.STRING,
       }
     },
     {

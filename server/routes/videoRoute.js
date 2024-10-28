@@ -14,6 +14,8 @@ const { getUploadLink,
   analyticsVideoByIdController,
   getListVideoByChannelController,
   getStateByCountryAndVideoIdController,
+  increaseViewController,
+  updateViewtimeController,
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
@@ -35,5 +37,11 @@ router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
 router.get('/channel/:channelId', getVideoByUserId);
 router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
+
+// Tăng View ở đây
+router.post('/increaseView', increaseViewController);
+
+router.post('/increaseView', verifyUser, updateViewtimeController);
+
 
 module.exports = router;
