@@ -475,7 +475,9 @@ const validateStreamKey = async (streamKey) => {
     }
     valid.isLive = true;
     valid.save();
-    _io.to(valid.id).emit('streamReady', true);
+    setTimeout(
+      () => _io.to(valid.id).emit('streamReady', true), 10000
+    )
     return {
       status: 200,
       data: streamKey,
