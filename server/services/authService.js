@@ -507,39 +507,66 @@ const sendMailVerifyFacebook = async (email) => {
   }
 };
 
-const verifyAccountFacebook = async (accountInfor, token) => {
+const verifyAccountFacebook = async (userId, accountInfor, token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    const isValid = (accountInfor.code == decoded.code) && (accountInfor.email == decoded.email);
-    const existEmailAccount = await User.findOne({ where: { email: accountInfor.email } });
-    // Check if the email already exists
-    if (existEmailAccount) {
+    const isValid = (accountInfor.code == decoded.code);
+    const user = await User.findOne({ where: { id: userId } });
+
+    if (!user) {
       return {
-        status: 400,
-        message: "Email already exists",
-      };
-    } else if (isValid) {
-        const user = await User.create(accountInfor)
-        const token = jwt.sign(
-          { id: user.id, role: user.role },
-          process.env.JWT_SECRET_KEY,
-          { expiresIn: "15d" }
-        );
-        return {
-          cookie: {
-            cookieName: "accessToken",
-            token: token,
-            expires: new Date(Date.now() + 15 * 60 * 1000),
-          },
-          status: 200,
-          message: "Email verified successfully",
-        };
-    } else if (!isValid) {
-      return {
-        status: 400,
-        message: "Invalid 6-digit code or Email",
+        status: 404,
+        message: "User not found",
       };
     }
+
+    if (!isValid) {
+      return {
+        status: 400,
+        message: "User not found",
+      };
+    }
+
+    // Nếu user đổi email
+    if (user.email !== decoded.email) {
+      user.email = decoded.email;
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    return {
+      status: 200,
+      message: "Email verified successfully",
+    };
+    // Check if the email already exists
+    // if (existEmailAccount) {
+    //   return {
+    //     status: 400,
+    //     message: "Email already exists",
+    //   };
+    // } else if (isValid) {
+    //     const user = await User.create(accountInfor)
+    //     const token = jwt.sign(
+    //       { id: user.id, role: user.role },
+    //       process.env.JWT_SECRET_KEY,
+    //       { expiresIn: "15d" }
+    //     );
+    //     return {
+    //       cookie: {
+    //         cookieName: "accessToken",
+    //         token: token,
+    //         expires: new Date(Date.now() + 15 * 60 * 1000),
+    //       },
+    //       status: 200,
+    //       message: "Email verified successfully",
+    //     };
+    // } else if (!isValid) {
+    //   return {
+    //     status: 400,
+    //     message: "Invalid 6-digit code or Email",
+    //   };
+    // }
   } catch (error) {
     if (error instanceof jwt.JsonWebTokenError) {
       return {

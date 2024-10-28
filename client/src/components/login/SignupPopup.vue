@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, watch } from 'vue';
   import gmail from '@/components/icons/gmail.vue';
   import { toast } from 'vue3-toastify';
   import { postSignup } from '@/services/auth';
@@ -7,33 +7,61 @@
   import { Form, Field } from 'vee-validate';
   import { signUpSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
+  import VerificationPopup from '../popup/VerificationPopup.vue';
+  import { postSendMail } from '@/services/auth';
 
   const popupStore = usePopupStore();
   const referralCode = ref('');
   const showPassword = ref(false);
   const showConfirmPassword = ref(false);
+  const dataSignup = ref({});
 
   const handleGoogleLogin = () => {
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.open(url, '_self');
   };
+
   const submitSignupForm = async (values) => {
     const { email, password, confirmPassword } = values;
 
-    const data = { email, password, confirmPassword, referralCode: referralCode.value };
+    dataSignup.value = {
+      email,
+      password,
+      confirmPassword,
+      referralCode: referralCode.value,
+    };
+
     try {
-      const response = await postSignup(data);
-      if (response.error) {
-        toast.error(response.message || 'Signup failed');
-      } else {
-        popupStore.closeLoginPopup();
-        toast.success(response.message || 'Signup successful!');
-      }
+      // const response = await postSignup(data);
+      popupStore.closeLoginPopup();
+      popupStore.openVerifyPopup();
+
+      await postSendMail({ email: data.email });
     } catch (error) {
       toast.error(error.response?.data.message || 'Signup failed');
     }
   };
+  const postSignupForm = async (values) => {
+    const { email, password, confirmPassword } = values;
+
+    dataSignup.value = {
+      email,
+      password,
+      confirmPassword,
+      referralCode: referralCode.value,
+    };
+
+    try {
+      const response = await postSignup(data);
+    } catch (error) {
+      toast.error(error.response?.data.message || 'Signup failed');
+    }
+  };
+  watch(dataSignup, (newValue) => {
+    console.log('Updated dataSignup:', newValue);
+  });
 </script>
+
 <template>
   <div class="items-center space-y-4">
     <button
@@ -91,7 +119,6 @@
                 placeholder="Enter password"
                 required
               />
-
               <button
                 @click="showPassword = !showPassword"
                 type="button"
@@ -136,8 +163,8 @@
           <input v-model="referralCode" type="text" class="input_custom" />
         </div>
         <div>
-          <span class="text-sm text-[#777777]"
-            >By clicking Sign Up, you are indicating that you have read and acknowledge the
+          <span class="text-sm text-[#777777]">
+            By clicking Sign Up, you are indicating that you have read and acknowledge the
             <a href="#" class="text-primary">Terms of Service</a> and
             <a href="#" class="text-primary">Privacy Notice</a>.
           </span>
@@ -148,4 +175,9 @@
       </div>
     </Form>
   </div>
+  <VerificationPopup
+    v-if="popupStore.showVerifyPopup && dataSignup"
+    :dataSignup="dataSignup"
+    @postSignupForm="postSignupForm"
+  />
 </template>

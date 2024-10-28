@@ -24,18 +24,25 @@ const getLogout = () => {
   return axios.get('/auth/logout');
 };
 
-const getLoginGoogle = () => {
-  return axios.get('/auth/google');
-};
 //Forgot
 const getVerifyToken = (token) => {
   return axios.get(`/auth/verify-token/${token}`);
 };
-
+const postSendMail = (data) => {
+  return axios.post('/auth/mail-otp', data);
+};
 const postForgotPassword = (data) => {
   return axios.post('/auth/forgot-password', data);
 };
 const postResetPassword = (data) => {
   return axios.post('/auth/reset-password', data);
 };
-export { postSignup, postLogin, getLogout, getVerifyToken, postForgotPassword, postResetPassword };
+export {
+  postSignup,
+  postLogin,
+  getLogout,
+  getVerifyToken,
+  postForgotPassword,
+  postResetPassword,
+  postSendMail,
+};

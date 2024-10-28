@@ -172,7 +172,7 @@ const facebookCallback = (req, res, next) => {
 const sendMailVerifyFacebookController = async (req, res, next) => {
   const email = req.body.email;
   const result = await sendMailVerifyFacebook(email);
-  if (loginResult.cookie) {
+  if (result.cookie) {
     setCookies([
       {name: result.cookie.cookieName, value: result.cookie.token, days: 0.01, options: { httpOnly: true }},
     ])(req, res);

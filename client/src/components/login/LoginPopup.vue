@@ -30,9 +30,9 @@
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
 
-        if (!userStore.user.isVerified) {
-          popupStore.openVerifyPopup();
-        }
+        // if (!userStore.user.isVerified) {
+        //   popupStore.openVerifyPopup();
+        // }
       } else {
         toast.error(response.message || 'Login failed');
       }

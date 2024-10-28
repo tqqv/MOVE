@@ -33,6 +33,8 @@ authRouter.post("/forgot-password", sendMailForgotPass);
 authRouter.post("/reset-password", resetPasswordController);
 
 authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
+//otp
+authRouter.post("/mail-otp", sendMailVerifyFacebookController);
 
 // SSO google
 authRouter.get("/google", googleLogin);
@@ -41,7 +43,7 @@ authRouter.get("/google/callback", googleCallbackController);
 // SSO facebook
 authRouter.get("/facebook", facebookLogin);
 authRouter.get("/facebook/callback", facebookCallback);
-authRouter.post("/facebook/mail-verify", sendMailVerifyFacebookController);
+authRouter.post("/mail-otp", sendMailVerifyFacebookController);
 authRouter.post("/facebook/verify-account/:token", verifyAccountFacebookController);
 
 module.exports = authRouter;

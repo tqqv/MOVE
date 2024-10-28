@@ -25,6 +25,7 @@
   import VideoDetail from './uploadVideo/VideoDetail.vue';
   import GoLive from './icons/goLive.vue';
   import { useTabStore } from '@/stores/tab.store';
+  import VerificationPopup from '@/components/popup/VerificationPopup.vue';
 
   const popupStore = usePopupStore();
   const userStore = useUserStore();
@@ -458,5 +459,5 @@
   <Login v-model:visible="popupStore.showLoginPopup" />
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
   <UploadVideo />
-  <VideoDetail />
+  <VideoDetail /> <VerificationPopup />
 </template>

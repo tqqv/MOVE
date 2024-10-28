@@ -1,6 +1,4 @@
 <script setup>
-  import VerificationPopup from '@/components/popup/VerificationPopup.vue';
-
   import { onMounted, ref } from 'vue';
   import Slider from '@/components/Slider.vue';
 
@@ -85,5 +83,4 @@
       <GirdVideo :videos="videos.slice(0, 6)" />
     </div>
   </section>
-  <VerificationPopup />
 </template>
