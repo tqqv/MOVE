@@ -232,7 +232,7 @@
       <div class="flex flex-col gap-y-4">
         <!-- USERNAME -->
         <div class="flex flex-col gap-y-2">
-          <label for="username" class="text_para">Full name</label>
+          <label for="username" class="text_para">Username</label>
           <div
             class="relative text-[14px] rounded-lg"
             :class="errors.username ? 'error_password' : 'normal_password'"
@@ -277,7 +277,7 @@
         </div>
         <!-- FULLNAME -->
         <div class="flex flex-col gap-y-2">
-          <label for="username" class="text_para">Username</label>
+          <label for="username" class="text_para">Full name</label>
           <div
             class="relative text-[14px] rounded-lg"
             :class="errors.fullName ? 'error_password' : 'normal_password'"
@@ -367,7 +367,7 @@
             <div class="flex flex-col gap-y-2 w-full md:w-1/2">
               <label for="district" class="text_para">State</label>
               <select v-model="profileData.state" class="select_custom">
-                <option v-if="!profileData.state" disabled value="null">Select country</option>
+                <option v-if="!profileData.state" disabled value="null">Select state</option>
                 <option v-else selected>{{ profileData.state }}</option>
                 <option v-for="state in states" :key="state.code" :value="state.name">
                   {{ state.name }}
@@ -387,7 +387,6 @@
                 type="text"
                 placeholder="Enter city"
                 class="password_custom capitalize"
-                required
                 @input="(e) => capitalizeInput(e, 'city')"
               />
               <Warning

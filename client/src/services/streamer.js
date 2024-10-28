@@ -28,7 +28,7 @@ const getListFollowOfChannel = async (channelId) => {
   }
 };
 
-const getStreamKey = async () => {
+const changeStreamKey = async () => {
   try {
     const response = await axios.get('/channel/createStreamKey');
     return response.data;
@@ -42,5 +42,5 @@ export {
   updateChannelProfile,
   getListFollowOfChannel,
   getViewChannel,
-  getStreamKey,
+  changeStreamKey,
 };
