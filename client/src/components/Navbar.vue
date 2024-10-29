@@ -166,9 +166,6 @@
 
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
-  });
-
-  onMounted(() => {
     document.addEventListener('click', handleClickOutside);
   });
 

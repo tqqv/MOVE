@@ -11,6 +11,11 @@ module.exports = (sequelize, DataTypes) => {
           as: 'categoryVideos',
         });
 
+        this.hasMany(models.CategoryFollow, {
+          foreignKey: 'categoryId',
+          as: 'cateFollow',
+        });
+
         // One-to-many  - livestream
         this.hasMany(models.Livestream, {
           foreignKey: 'categoryId',

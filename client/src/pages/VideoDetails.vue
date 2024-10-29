@@ -50,6 +50,7 @@
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
+        console.log('rating ne:', video.value.ratings);
       }
     } catch (error) {
       toast.error(error.message);
@@ -74,7 +75,7 @@
     <div class="col-span-8">
       <div ref="vimeoPlayer" class="video-player"></div>
       <div class="p-[20px]">
-        <OfflineTitle v-if="video" :video="video" />
+        <OfflineTitle v-if="video" :video="video" @updateRate="fetchVideoById" />
         <Divider />
         <VideoDetail
           v-if="channelDetails"

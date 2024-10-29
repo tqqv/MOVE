@@ -154,7 +154,7 @@ const getRatingOfVideo = async(userId, videoId) => {
       }
     }
 
-    const rate = Rating.findOne({where: {videoId: videoId, userId: userId}})
+    const rate = await Rating.findOne({where: {videoId: videoId, userId: userId}})
 
     return {
       status: 200,
@@ -180,7 +180,8 @@ const getRatingOfStream = async(userId, livestreamId) => {
       }
     }
 
-    const rate = Rating.findOne({where: {livestreamId: livestreamId, userId: userId}})
+    const rate = await Rating.findOne({where: {livestreamId: livestreamId, userId: userId}})
+
 
     return {
       status: 200,
