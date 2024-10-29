@@ -77,7 +77,7 @@
     <div class="col-span-8">
       <div ref="vimeoPlayer" class="video-player"></div>
       <div class="p-[20px]">
-        <OfflineTitle v-if="video" :video="video" />
+        <OfflineTitle v-if="video" :video="video" @updateRate="fetchVideoById" />
         <Divider />
         <VideoDetail
           v-if="channelDetails"

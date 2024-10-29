@@ -2,9 +2,10 @@
   import { computed, ref } from 'vue';
   import { formatRating, formatDuration, formatView } from '@/utils';
   import { toast } from 'vue3-toastify';
-  import rate from '@icons/rate.vue';
+  import Rate from '@components/Rate.vue';
   import heart from '@icons/heart.vue';
   import share from '@icons/share.vue';
+  import rateIcon from '@icons/rate.vue';
 
   const props = defineProps({
     video: {
@@ -12,7 +13,7 @@
       required: true,
     },
   });
-
+  const emit = defineEmits(['updateRate']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const isShareVisible = ref(false);
@@ -32,7 +33,9 @@
     isShareVisible.value = !isShareVisible.value;
     isMenuVisible.value = false;
   };
-
+  const toggleRateVideo = () => {
+    isMenuVisible.value = false;
+  };
   const closeShare = () => {
     isShareVisible.value = false;
   };
@@ -40,7 +43,9 @@
   const closeMenu = () => {
     isMenuVisible.value = false;
   };
-
+  const updateRate = () => {
+    emit('updateRate');
+  };
   const handleClickShareFacebook = async () => {
     const shareUrl = encodeURIComponent(window.location.href);
     const fbShareUrl = `https://www.facebook.com/dialog/share?app_id=${
@@ -72,7 +77,7 @@
   <div class="flex items-center justify-between">
     <h3 class="text-[20px] whitespace-nowrap text-black">{{ video.title }}</h3>
     <div class="flex items-center">
-      <rate class="mr-2 scale-125" />
+      <rateIcon class="mr-2 scale-125" />
       <span class="text-[20px] font-bold">{{ formatRating(video.ratings) }}</span>
     </div>
   </div>
@@ -89,9 +94,12 @@
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
     </div>
     <div class="flex items-center gap-9">
-      <div class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase">
-        <i class="pi pi-star mr-1"></i> Rate Video
-      </div>
+      <Rate
+        title="Rate Video"
+        @rate="toggleRateVideo"
+        :videoId="video.id"
+        @updateRate="updateRate"
+      />
       <div class="relative">
         <button
           class="text-primary text-[13px] font-bold flex items-center uppercase"

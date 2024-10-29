@@ -6,7 +6,7 @@
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
   import { toast } from 'vue3-toastify';
-  import { useUserStore } from '@/stores';
+  import { usePopupStore, useUserStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
   const props = defineProps({
     isButtonGiftREPsVisible: {
@@ -42,6 +42,8 @@
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const userStore = useUserStore();
+  const popupStore = usePopupStore();
+
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
@@ -72,6 +74,10 @@
   };
 
   const toggleFollow = () => {
+    if (!userStore.user) {
+      popupStore.openLoginPopup();
+      return;
+    }
     followChannel();
   };
   const isChannelFollowed = computed(() => {
@@ -124,7 +130,6 @@
     <!-- User Action -->
     <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
-        v-if="userStore.user?.username !== username"
         class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
         @click="toggleFollow"
       >

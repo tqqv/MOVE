@@ -155,13 +155,6 @@ const getRatingOfVideo = async(userId, videoId) => {
     }
 
     const rate = await Rating.findOne({where: {videoId: videoId, userId: userId}})
-    if(!rate) {
-      return {
-        status: 404,
-        data: null,
-        message: "null"
-      }
-    }
 
     return {
       status: 200,
@@ -188,13 +181,7 @@ const getRatingOfStream = async(userId, livestreamId) => {
     }
 
     const rate = await Rating.findOne({where: {livestreamId: livestreamId, userId: userId}})
-    if(!rate) {
-      return {
-        status: 404,
-        data: null,
-        message: "null"
-      }
-    }
+
 
     return {
       status: 200,
