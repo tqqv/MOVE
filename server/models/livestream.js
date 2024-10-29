@@ -49,11 +49,11 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       streamerId: {
-        type: DataTypes.UUID,
+        type: DataTypes.UUIDV4,
         allowNull: true,
         references: {
           model: 'channels', // Tên bảng trong cơ sở dữ liệu
