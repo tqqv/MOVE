@@ -124,7 +124,7 @@
             </div>
             <!-- SCREEN CONNECT OBCS -->
             <div v-if="props.connectOBS" class="flex w-full p-4">
-              <LiveStreamScreen />
+              <LiveStreamScreen :username="userStore.user.username" />
             </div>
             <!-- YOUR SCREEN -->
             <div class="pt-2 pb-6 px-8">

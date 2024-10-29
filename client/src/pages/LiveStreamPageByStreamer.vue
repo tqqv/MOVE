@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref } from 'vue';
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
   import { useUserStore } from '@/stores';
@@ -8,21 +8,24 @@
   const userStore = useUserStore();
   const statusLive = ref('beforeLive');
   const connectOBS = ref(false);
+
   const updateStatusLive = (value) => {
     statusLive.value = value;
   };
 
   const handleConnectOBS = () => {
-    joinRoom(userStore.user.Channel.id);
+    if (userStore.user?.Channel?.id) {
+      joinRoom(userStore.user.Channel.id);
 
-    listenStreamReady((isReady) => {
-      connectOBS.value = isReady;
-    });
+      listenStreamReady((isReady) => {
+        connectOBS.value = isReady;
+      });
+    }
   };
 
   onMounted(async () => {
     await userStore.fetchUserProfile();
-    await handleConnectOBS();
+    handleConnectOBS();
   });
 </script>
 

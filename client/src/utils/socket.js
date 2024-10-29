@@ -1,9 +1,12 @@
 import { io } from 'socket.io-client';
 
-const socket = io(import.meta.env.VITE_SOCKET_API_URL);
-
-socket.on('connect', () => {
-  console.log('Connected to server with ID:', socket.id);
+const livestreamSocket = io(import.meta.env.VITE_SOCKET_API_URL, {
+  autoConnect: false, // Chỉ kết nối khi cần
+  reconnection: true,
 });
 
-export default socket;
+livestreamSocket.on('connect', () => {
+  console.log('Livestream socket connected with ID:', livestreamSocket.id);
+});
+
+export default livestreamSocket;
