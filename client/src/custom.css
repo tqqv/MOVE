@@ -152,11 +152,13 @@
 
 .video-player {
   position: relative;
-  padding-bottom: 56.25%; /* 16:9 */
+  padding-bottom: 56.25%;
+  /* 16:9 */
   width: 100%;
   overflow: hidden;
   height: 0;
 }
+
 .video-player iframe {
   position: absolute;
   top: 0;
@@ -166,18 +168,23 @@
   background-color: black;
   border: none;
 }
+
 .video-settings {
   display: none;
 }
+
 .p-row-even:hover {
   background: #e6fffb;
 }
+
 .p-row-odd:hover {
   background: #e6fffb;
 }
+
 .p-datatable-tbody tr:hover .video-settings {
   display: block;
 }
+
 .p-checkbox .p-checkbox-icon {
   color: white;
 }
@@ -185,4 +192,39 @@
 input::placeholder {
   all: unset !important;
   color: #a9a9a9 !important;
+}
+
+/* CUSTOM TOOLTIPS */
+.p-tooltip .p-tooltip-text {
+  background-color: #39393a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin: 5px;
+}
+
+.p-tooltip-right .p-tooltip-arrow {
+  border-right-color: #39393a;
+  margin-left: 5px;
+
+}
+
+.p-tooltip-top .p-tooltip-arrow {
+  border-top-color: #39393a;
+  margin-bottom: 5px;
+}
+
+/* Custom animation */
+.p-tooltip {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Custom position */
+.p-tooltip[data-position="top"] {
+  margin-bottom: 10px;
+}
+
+.p-tooltip[data-position="bottom"] {
+  margin-top: 10px;
 }
