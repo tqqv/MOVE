@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia';
 import { getProfile, viewFollowChannel } from '@/services/user';
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 export const useUserStore = defineStore('user', () => {
   const user = ref(null);
@@ -42,6 +42,16 @@ export const useUserStore = defineStore('user', () => {
   const clearUserData = () => {
     user.value = null;
   };
+  const getUser = computed(() => user.value);
 
-  return { user, loading, error, followers, loadFollowers, fetchUserProfile, clearUserData };
+  return {
+    user,
+    loading,
+    error,
+    followers,
+    loadFollowers,
+    fetchUserProfile,
+    clearUserData,
+    getUser,
+  };
 });

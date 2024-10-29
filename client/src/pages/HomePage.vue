@@ -1,6 +1,8 @@
 <script setup>
   import { onMounted, ref } from 'vue';
   import Slider from '@/components/Slider.vue';
+  import VerificationPopup from '@components/popup/VerificationPopup.vue';
+  import { useUserStore } from '@/stores';
 
   import Divider from '@/components/Divider.vue';
   import CategoryImage from '@/components/CategoryImage.vue';
@@ -10,6 +12,7 @@
   const categories = ref([]);
   const videos = ref([]);
   const isLoading = ref(true);
+  const userStore = useUserStore();
 
   const fetchAllCategory = async () => {
     try {
@@ -83,4 +86,5 @@
       <GirdVideo :videos="videos.slice(0, 6)" />
     </div>
   </section>
+  <VerificationPopup v-if="userStore.user" :email="userStore.user.email" />
 </template>

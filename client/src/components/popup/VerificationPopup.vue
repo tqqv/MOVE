@@ -1,14 +1,17 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
   import Dialog from 'primevue/dialog';
-  import Button from 'primevue/button';
+  import { usePopupStore } from '@/stores';
+  import { postSendMail } from '@/services/auth';
+  import { toast } from 'vue3-toastify';
 
-  const data = {
-    email: 'abc@gmail.com',
-  };
-
+  const popupStore = usePopupStore();
+  const props = defineProps({
+    email: String,
+  });
   const code = ref('');
-  const showVerificationPopup = ref(false);
+  const countdown = ref(0);
+  const timer = ref(null);
 
   const buttonColor = computed(() => {
     return code.value.trim() ? 'btn' : 'btnDisable';
@@ -17,21 +20,49 @@
   const isButtonDisabled = computed(() => {
     return !code.value.trim();
   });
+
+  const sendMail = async () => {
+    try {
+      const response = await postSendMail({ email: props.email });
+      // if (response.data.data.success) {
+      //   toast.success(response.data.data.message);
+      // }
+      console.log(response);
+
+      startCountdown();
+    } catch (error) {
+      console.error(error?.message || 'Login failed');
+    }
+  };
+
+  const startCountdown = () => {
+    countdown.value = 60;
+    clearInterval(timer.value);
+    timer.value = setInterval(() => {
+      if (countdown.value > 0) {
+        countdown.value--;
+      } else {
+        clearInterval(timer.value);
+      }
+    }, 1000);
+  };
+
+  onBeforeUnmount(() => {
+    clearInterval(timer.value);
+  });
 </script>
 
 <template>
   <div>
-    <Button label="Show Verification Popup" @click="showVerificationPopup = true" />
-
     <Dialog
-      v-model:visible="showVerificationPopup"
+      v-model:visible="popupStore.showVerifyPopup"
       header="Verify your email to keep account secure"
       class="w-[568px]"
       :draggable="false"
     >
       <div class="space-y-4">
         <span class="text_para">
-          We sent a 6-digit code to <span class="font-bold">{{ data.email }}</span
+          We sent a 6-digit code to <span class="font-bold">{{ email }}</span
           >. Enter the code below to confirm your account. You may also tap on the link in the email
           we sent you.
         </span>
@@ -40,7 +71,11 @@
           <div class="space-y-2">
             <div class="relative">
               <label for="code" class="text_para">
-                Verification Code (<span class="text-primary cursor-pointer">Resend code</span>)
+                Verification Code
+                <span v-if="countdown === 0" @click="sendMail" class="text-primary cursor-pointer">
+                  (Resend code)
+                </span>
+                <span class="text-primary" v-if="countdown > 0">({{ countdown }} seconds)</span>
               </label>
               <input v-model="code" type="text" class="input_custom" required />
             </div>
@@ -55,5 +90,3 @@
     </Dialog>
   </div>
 </template>
-
-<style scoped></style>

@@ -12,7 +12,14 @@ export const usePopupStore = defineStore('popup', () => {
   const showConfirmDialog = ref(false);
   const showReportChannel = ref(false);
   const showReportSuccess = ref(false);
+  const showVerifyPopup = ref(false);
+  const openVerifyPopup = () => {
+    showVerifyPopup.value = true;
+  };
 
+  const closeVerifyPopup = () => {
+    showVerifyPopup.value = false;
+  };
   const openConfirmDialog = () => {
     showConfirmDialog.value = true;
   };
@@ -90,6 +97,7 @@ export const usePopupStore = defineStore('popup', () => {
   };
 
   return {
+    showVerifyPopup,
     showLoginPopup,
     showForgotPasswordPopup,
     showChangePassword,
@@ -118,5 +126,7 @@ export const usePopupStore = defineStore('popup', () => {
     closeReportChannel,
     openReportSuccess,
     closeReportSuccess,
+    openVerifyPopup,
+    closeVerifyPopup,
   };
 });

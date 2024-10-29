@@ -23,10 +23,11 @@ const postLogin = async (data) => {
 const getLogout = () => {
   return axios.get('/auth/logout');
 };
-
-const getLoginGoogle = () => {
-  return axios.get('/auth/google');
+//send mail
+const postSendMail = (data) => {
+  return axios.post('/auth/mail-otp', data);
 };
+
 //Forgot
 const getVerifyToken = (token) => {
   return axios.get(`/auth/verify-token/${token}`);
@@ -38,4 +39,12 @@ const postForgotPassword = (data) => {
 const postResetPassword = (data) => {
   return axios.post('/auth/reset-password', data);
 };
-export { postSignup, postLogin, getLogout, getVerifyToken, postForgotPassword, postResetPassword };
+export {
+  postSignup,
+  postLogin,
+  getLogout,
+  getVerifyToken,
+  postForgotPassword,
+  postResetPassword,
+  postSendMail,
+};
