@@ -4,7 +4,6 @@
   import logout from '@icons/logout.vue';
   import dashboard from '@icons/dashboard.vue';
   import setting from '@icons/setting.vue';
-  import LiveStream from '@/components/icons/liveStream.vue';
   import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
@@ -30,6 +29,10 @@
       default: () => ({}),
     },
   });
+
+  const showToast = () => {
+    toast.info('You are not a streamer');
+  };
 </script>
 
 <template>
@@ -51,12 +54,21 @@
       <div class="flex flex-col justify-start text-[13px]">
         <div class="flex flex-col gap-y-4 px-1">
           <RouterLink
+            v-if="userStore.user.role === 'streamer'"
             to="/dashboard-streamer"
             class="flex flex-row items-center gap-x-2 group cursor-pointer"
           >
             <dashboard class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
           </RouterLink>
+          <div
+            v-else
+            @click="showToast"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer"
+          >
+            <dashboard class="fill-black group-hover:fill-primary" />
+            <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
+          </div>
           <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
             <wallet class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Wallet ({{ props.user?.REPs ?? 0 }} REPs)</h1>

@@ -207,7 +207,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
       },
       {
         model: Video,
-        attributes: ['thumbnailUrl', 'title', 'duration', 'updatedAt'],
+        attributes: ['thumbnailUrl', 'title', 'duration', 'updatedAt', 'id'],
         where: {
           channelId: channelId,
         },

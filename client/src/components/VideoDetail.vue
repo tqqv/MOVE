@@ -4,9 +4,10 @@
   import Live from './icons/live.vue';
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
-  import { postFollowChannel, getListFollowOfUser } from '@/services/user';
+  import { postFollowChannel } from '@/services/user';
   import { toast } from 'vue3-toastify';
   import { useUserStore } from '@/stores';
+  import ReportChannel from './ReportChannel.vue';
   const props = defineProps({
     isButtonGiftREPsVisible: {
       type: Boolean,
@@ -37,28 +38,17 @@
     },
   });
 
-  const followedChannels = ref([]);
   const emit = defineEmits(['updateFollowers']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const userStore = useUserStore();
-
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
-
   const closeMenu = () => {
     isMenuVisible.value = false;
   };
 
-  // const fetchListFollowOfUser = async () => {
-  //   const result = await getListFollowOfUser();
-  //   if (result.success) {
-  //     followedChannels.value = result.data;
-  //   } else {
-  //     toast.error(result.message);
-  //   }
-  // };
   const followChannel = async () => {
     try {
       const response = await postFollowChannel({
@@ -118,11 +108,9 @@
         </div>
       </div>
       <div>
-        <p class="text-[20px] flex items-center">
-          <span class="mr-2">{{
-            channelDetails ? channelDetails.channelName : usernameDetails
-          }}</span>
-          <Verified v-if="channelDetails?.popularCheck" class="ml-1 mb-1 mr-2 fill-blue" />
+        <p class="text-[20px] flex items-center gap-x-4">
+          <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>
+          <Verified v-if="channelDetails?.popularCheck" class="fill-blue" />
           <span v-if="channelDetails" class="whitespace-nowrap">
             {{ channelDetails.isLive ? 'is now online' : 'is now offline' }}
           </span>
@@ -153,31 +141,8 @@
       >
         <share class="mr-1" /> Share
       </div>
-      <button v-if="userStore.user?.username !== username" class="btn whitespace-nowrap">
-        Gift REPs <i class="pi pi-angle-right text-white" />
-      </button>
-      <div class="relative">
-        <button
-          v-if="isUserAction"
-          aria-expanded="false"
-          aria-controls="menu"
-          class="pi pi-ellipsis-v text-primary text-[20px]"
-          @click="toggleMenu"
-        />
-        <div
-          v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-50"
-        >
-          <ul class="flex items-center justify-center h-full m-0 p-0">
-            <li
-              class="flex items-center justify-center text-[13px] cursor-pointer text-center"
-              @click="closeMenu"
-            >
-              Report video
-            </li>
-          </ul>
-        </div>
-      </div>
+
+      <ReportChannel :channelName="channelDetails.channelName" />
     </div>
   </div>
 </template>

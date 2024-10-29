@@ -128,12 +128,12 @@
             </div>
           </template>
         </Column>
-        <Column header="Views" class="text-center">
+        <Column header="Views">
           <template #body="{ data }">
             <span>{{ formatView(data.viewCount + data.totalViewer) || 0 }}</span>
           </template>
         </Column>
-        <Column header="Avg. view time" class="text-center">
+        <Column header="Avg. view time">
           <template #body="{ data }">
             <span>
               {{ formatAvgViewTime(data.avgViewTime) || '0:00' }}

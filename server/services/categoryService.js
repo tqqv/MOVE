@@ -193,8 +193,6 @@ const getCateByTitle = async (title) => {
       group: ['Category.id'],
     });
 
-    console.log(cate);
-
     if (!cate || cate.length < 1) {
       return {
         status: 404,
