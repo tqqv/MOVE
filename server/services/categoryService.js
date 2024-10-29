@@ -167,15 +167,16 @@ const getAllCategoryWithView = async() => {
   }
 }
 
-const getCateByTitle = async(title) => {
+const getCateByTitle = async (title) => {
   try {
-    const cate = await Category.findOne({
-      where: {title: title},
+    const cate = await Category.findAll({
+      where: { title: title },
       attributes: [
+        'id',
         'imgUrl',
         'title',
         [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews'],
-        [sequelize.fn('COUNT', sequelize.col('followers.categoryId')), 'followerCount']
+        [sequelize.fn('COUNT', sequelize.col('cateFollow.categoryId')), 'followerCount'],
       ],
       include: [
         {
@@ -185,12 +186,20 @@ const getCateByTitle = async(title) => {
         },
         {
           model: CategoryFollow,
-          as: 'followers',
+          as: 'cateFollow',
           attributes: [],
         },
       ],
       group: ['Category.id'],
-    })
+    });
+
+    if (!cate || cate.length < 1) {
+      return {
+        status: 404,
+        data: null,
+        message: "Category not found."
+      };
+    }
 
     return {
       status: 200,
