@@ -10,6 +10,8 @@ export const usePopupStore = defineStore('popup', () => {
   const showVideoDetailPopup = ref(false);
   const showUploadVideoPopup = ref(false);
   const showConfirmDialog = ref(false);
+  const showReportChannel = ref(false);
+  const showReportSuccess = ref(false);
 
   const openConfirmDialog = () => {
     showConfirmDialog.value = true;
@@ -70,6 +72,23 @@ export const usePopupStore = defineStore('popup', () => {
   const closeChangePasswordSuccess = () => {
     showChangePasswordSuccess.value = false;
   };
+
+  const openReportChannel = () => {
+    showReportChannel.value = true;
+  };
+
+  const closeReportChannel = () => {
+    showReportChannel.value = false;
+  };
+
+  const openReportSuccess = () => {
+    showReportSuccess.value = true;
+  };
+
+  const closeReportSuccess = () => {
+    showReportSuccess.value = false;
+  };
+
   return {
     showLoginPopup,
     showForgotPasswordPopup,
@@ -78,6 +97,8 @@ export const usePopupStore = defineStore('popup', () => {
     showVideoDetailPopup,
     showUploadVideoPopup,
     showConfirmDialog,
+    showReportChannel,
+    showReportSuccess,
     openLoginPopup,
     closeLoginPopup,
     openForgotPasswordPopup,
@@ -93,5 +114,9 @@ export const usePopupStore = defineStore('popup', () => {
     openConfirmDialog,
     closeConfirmDialog,
     openSignupPopup,
+    openReportChannel,
+    closeReportChannel,
+    openReportSuccess,
+    closeReportSuccess,
   };
 });
