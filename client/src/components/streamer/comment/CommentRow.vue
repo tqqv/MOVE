@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted, onBeforeUnmount } from 'vue';
   import rep from '@icons/rep.vue';
   import rep2500 from '@icons/reps25000.vue';
   import dislike from '@/components/icons/dislike.vue';
@@ -26,12 +26,14 @@
   const currentPage = ref(1);
   const totalPage = ref();
   const hasInitialFetch = ref(false);
-
+  const openReportComment = ref(false);
   // HANDLE COMMENT FIELD
   const handleOpenCommentField = () => {
     openCommentField.value = !openCommentField.value;
   };
-
+  const toggleReportComment = () => {
+    openReportComment.value = !openReportComment.value;
+  };
   // OPEN COMMENT REPLY
   const handleOpenCommentReply = (commentId) => {
     openViewAllComment.value = !openViewAllComment.value;
@@ -98,6 +100,29 @@
       loadingReplies.value = false;
     }
   };
+  const isElementOutside = (element, target) => {
+    return element && !element.contains(target);
+  };
+  const handleClickOutside = (event) => {
+    const reportMenu = document.getElementById('report-menu');
+    const reportMenuButton = document.getElementById('report-menu-button');
+
+    const clickOutsideReportMenu =
+      isElementOutside(reportMenu, event.target) &&
+      isElementOutside(reportMenuButton, event.target);
+
+    if (clickOutsideReportMenu) {
+      openReportComment.value = false;
+    }
+  };
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
 </script>
 
 <template>
@@ -149,7 +174,27 @@
                   stroke="#13ceb3"
                 />
               </div>
-              <i class="pi pi-ellipsis-v text-md cursor-pointer"></i>
+              <div class="relative">
+                <div>
+                  <button
+                    class="text-primary text-[13px] font-bold flex items-center cursor-pointer"
+                    @click="handleRate"
+                    id="report-menu-button"
+                  >
+                    <i @click="toggleReportComment" class="pi pi-ellipsis-v"></i>
+                  </button>
+                </div>
+
+                <div
+                  v-if="openReportComment"
+                  id="report-menu"
+                  class="absolute left-0 z-10 mt-5 top-3 p-2 border border-primary origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                >
+                  <span @click="openPopupReport" class="text-primary text-xs whitespace-nowrap">
+                    Report comment
+                  </span>
+                </div>
+              </div>
               <p @click="handleOpenCommentField" class="cursor-pointer font-medium">Reply</p>
 
               <div
