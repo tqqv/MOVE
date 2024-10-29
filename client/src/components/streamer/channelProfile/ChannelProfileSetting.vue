@@ -5,13 +5,14 @@
   import InstagramIcon from '@/components/icons/instagramIcon.vue';
   import Button from 'primevue/button';
   import { useStreamerStore } from '@/stores/streamer.store';
-  import { updateChannelProfile } from '@/services/streamer';
+  import { changeStreamKey, updateChannelProfile } from '@/services/streamer';
   import { toast } from 'vue3-toastify';
   import { checkDataChanged, getChangedFields } from '@/utils/compareData';
   import { uploadAvatar } from '@/services/cloudinary';
   import { updateChannelSchema } from '@/utils/vadilation';
   import Warning from '@/components/icons/warning.vue';
   import { copyToClipboard } from '@/utils/copyToClipboard';
+  import Random from '@/components/icons/random.vue';
 
   const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
@@ -113,6 +114,17 @@
     }
   };
 
+  // CHANGE STREAM KEY
+  const handleChangeStreamKey = async () => {
+    try {
+      const response = await changeStreamKey();
+      profileData.value.streamKey = response.data;
+      toast.success('Stream key updated successfully');
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   onMounted(async () => {
     await streamerStore.fetchProfileChannel();
     if (streamerStore.streamerChannel) {
@@ -143,13 +155,21 @@
         Your stream key connects your stream to MOVE. Never share your stream key with anyone or
         show it on stream!
       </p>
-      <div class="flex justify-center mt-6 mb-2 gap-x-8">
+      <div class="flex justify-center mt-6 mb-2 gap-x-4">
         <input
           v-model="profileData.streamKey"
           :type="showStreamKey ? 'text' : 'password'"
           class="input_custom"
           autocomplete="false"
+          disabled
         />
+        <div
+          v-tooltip.top="'change stream key'"
+          class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
+          @click="handleChangeStreamKey"
+        >
+          <Random />
+        </div>
         <div
           v-tooltip.top="'copy stream key'"
           class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"

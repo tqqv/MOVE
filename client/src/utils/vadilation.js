@@ -63,7 +63,6 @@ export const updateProfileSchema = yup.object({
     .matches(/^[\p{L}\s_.]*$/u, 'Full name cannot contain special characters'),
   city: yup
     .string()
-    .required('City is required')
     .matches(/^[\p{L}\s_.]*$/u, 'City cannot contain numbers or special characters'),
   dob: yup
     .string()
