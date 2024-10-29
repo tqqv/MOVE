@@ -16,6 +16,7 @@ const {
   getStateByCountryAndVideoId,
   increaseView,
   updateViewtime,
+  getVideoWatchAlso,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -199,6 +200,15 @@ const updateViewtimeController = async(req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 }
 
+const getVideoWatchAlsoController = async(req, res, next) => {
+  const videoId= req.query.videoId;
+  const category = req.query.category;
+  const levelWorkout = req.query.levelWorkout;
+  const result = await getVideoWatchAlso(category, levelWorkout, videoId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -217,4 +227,5 @@ module.exports = {
   getStateByCountryAndVideoIdController,
   increaseViewController,
   updateViewtimeController,
+  getVideoWatchAlsoController,
 };
