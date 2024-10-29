@@ -53,6 +53,7 @@
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
+        console.log('rating ne:', video.value.ratings);
       }
     } catch (error) {
       toast.error(error.message);

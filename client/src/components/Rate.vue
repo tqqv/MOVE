@@ -16,20 +16,21 @@
     },
   });
   const dataRate = ref(null);
-  const emit = defineEmits(['rate']);
+  const emit = defineEmits(['rate', 'updateRate']);
   const isRated = ref(false);
   const isRatePopupOpen = ref(false);
-
+  //fetch data đã rate
   const fetchUserRating = async () => {
     const result = await getRateOfUser(props.videoId);
 
     if (result && result.data) {
       dataRate.value = result.data.rating;
-      console.log(dataRate.value);
-
+      console.log('data Rate neeee', dataRate.value);
       isRated.value = dataRate.value > 0;
     }
   };
+
+  // đóng mở popup và fetch data đã rate
   const handleRate = () => {
     if (!isRatePopupOpen.value) {
       isRatePopupOpen.value = true;
@@ -42,42 +43,23 @@
     }
     emit('rate');
   };
-
+  //close popup
   const closePopup = () => {
     isRatePopupOpen.value = false;
   };
+  //fill màu
   const fillRate = () => {
     isRated.value = true;
   };
+  //fetch lại video lấy avg rate
   const updateRate = () => {
     emit('updateRate');
   };
+
   const iconClass = computed(() => {
     return isRated.value ? 'pi pi-star-fill' : 'pi pi-star';
   });
 
-  const isElementOutside = (element, target) => {
-    return element && !element.contains(target);
-  };
-  const handleClickOutside = (event) => {
-    const rateMenu = document.getElementById('rate-menu');
-    const rateMenuButton = document.getElementById('rate-menu-button');
-
-    const clickOutsideRateMenu =
-      isElementOutside(rateMenu, event.target) && isElementOutside(rateMenuButton, event.target);
-
-    if (clickOutsideRateMenu) {
-      isRatePopupOpen.value = false;
-    }
-  };
-  onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('click', handleClickOutside);
-  });
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
-  });
   onMounted(() => {
     if (props.videoId && userStore.user) {
       fetchUserRating(props.videoId);
