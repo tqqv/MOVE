@@ -1,6 +1,6 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, sequelize } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 
 
@@ -371,6 +371,60 @@ const followChannel = async (userId, channelId) => {
   }
 }
 
+const followCategory = async (userId, cateId) => {
+  try {
+    const checkCateExist = await Category.findOne({
+      where: {
+        id: cateId
+      }
+    })
+
+    if(!checkCateExist) {
+      return {
+        status: 400,
+        data: null,
+        message: "Category not found"
+      }
+    }
+
+    // Nếu mà có giá trị thì sẽ là unFollow
+    const checkFollow = await CategoryFollow.destroy({
+      where: {
+        userId: userId,
+        categoryId: cateId
+      }})
+    if(checkFollow) {
+      return {
+        status: 200,
+        data: null,
+        message: "Unfollow successful."
+      }
+    }
+
+    const follow = await CategoryFollow.create({userId: userId, categoryId: cateId})
+
+    if(!follow) {
+      return {
+          status: 400,
+          data: null,
+          message: "You follow failed."
+      }
+    }
+
+    return {
+      status: 200,
+      data: null,
+      message: "Follow category successful."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 const listSubscribeOfUser = async(userId) => {
   try {
 
@@ -552,5 +606,6 @@ module.exports = {
   followChannel,
   getAllInforFollow,
   isExistUsername,
-  getProfileByUserName
+  getProfileByUserName,
+  followCategory
 }
