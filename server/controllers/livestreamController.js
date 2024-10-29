@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createLivestream } = require("../services/livestreamService.js");
+const { createLivestream, getLivestreamStatistics } = require("../services/livestreamService.js");
 
 
 const createLivestreamController = async (req, res, next) => {
@@ -8,6 +8,13 @@ const createLivestreamController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getLivestreamStatisticController = async (req, res, next) => {
+  const streamId = req.body.streamId;
+  const result = await getLivestreamStatistics(streamId);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
-  createLivestreamController
+  createLivestreamController,
+  getLivestreamStatisticController
 }

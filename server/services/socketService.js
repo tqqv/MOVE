@@ -13,11 +13,20 @@ const getNumOfConnectInAllRooms = () => {
     console.log("-----END----- \n");
 };
 
+const getNumOfConnectInRoom = (roomId) => {
+    const room = _io.sockets.adapter.rooms.get(roomId);
+    if (room) {
+        const numberOfConnections = room.size;
+        return numberOfConnections;
+    } else {
+        return 0;
+    }
+};
+
 const logClientCount = () => {
     const clientCount = _io.engine.clientsCount;
     console.log(`Total connected clients: ${clientCount}`);
 };
-
 
 const connectSocket = (socket) => {
     socket.on('disconnect', () => {
@@ -36,8 +45,7 @@ const connectSocket = (socket) => {
     })
 }
 
-
-
 module.exports = {
-    connectSocket
+    connectSocket,
+    getNumOfConnectInRoom
 }

@@ -8,6 +8,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.ChannelMute, { foreignKey: 'targetLivestreamId', as: 'livestreamChannelMute' });
 
       this.hasMany(models.Report, { foreignKey: 'targetLivestreamId', as: 'livestreamReport' });
+      this.hasMany(models.Donation, { foreignKey: 'livestreamId', as: 'streamDonator' });
+      this.hasMany(models.Rating, { foreignKey: 'livestreamId', as: 'streamRator' });
 
       // Mối quan hệ 1-n với levelWorkout
       this.belongsTo(models.LevelWorkout, {
