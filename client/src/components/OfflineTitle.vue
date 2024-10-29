@@ -1,9 +1,12 @@
 <script setup>
-  import { computed, ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import { formatRating, formatDuration, formatView } from '@/utils';
   import { toast } from 'vue3-toastify';
+  import share from '@icons/share.vue';
+  import axiosInstance from '@/services/axios';
+  import { watch } from 'vue';
+  import ReportDialog from './ReportDialog.vue';
   import Rate from '@components/Rate.vue';
-  import heart from '@icons/heart.vue';
   import share from '@icons/share.vue';
   import rateIcon from '@icons/rate.vue';
 
@@ -17,6 +20,11 @@
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const isShareVisible = ref(false);
+  const isReportVisible = ref(false);
+  const isReportSuccessVisible = ref(false);
+  const reportTypeVideos = ref([]);
+
+  const selectedReportVideo = ref(null);
 
   const duration = computed(() => {
     if (formatDuration(props.video?.duration) < 30) return '< 30 mins';
@@ -40,12 +48,63 @@
     isShareVisible.value = false;
   };
 
-  const closeMenu = () => {
+  const showDialogReportVideo = () => {
+    isReportVisible.value = true;
+  };
+
+  const closeReport = () => {
+    isReportVisible.value = false;
+  };
+
+  const closeSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+
+  const handleSubmitReportVideo = async () => {
+    if (selectedReportVideo.value.id) {
+      try {
+        const response = await axiosInstance.post('report/video', {
+          videoId: props.video.id,
+          reportTypeId: selectedReportVideo.value.id,
+        });
+        if (response.status === 200) {
+          isReportVisible.value = false;
+          isReportSuccessVisible.value = true;
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+
+  const closeReportSuccess = () => {
+    isReportSuccessVisible.value = false;
     isMenuVisible.value = false;
   };
+
+  const getAllReportTypes = async () => {
+    try {
+      const response = await axiosInstance.get('report/getListReport?type=videos');
+      if (response.status === 200) {
+        reportTypeVideos.value = response.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  watch(
+    selectedReportVideo,
+    (newVal) => {
+      selectedReportVideo.value = newVal;
+    },
+    { deep: true },
+  );
+
   const updateRate = () => {
     emit('updateRate');
   };
+  
   const handleClickShareFacebook = async () => {
     const shareUrl = encodeURIComponent(window.location.href);
     const fbShareUrl = `https://www.facebook.com/dialog/share?app_id=${
@@ -71,6 +130,10 @@
         toast.error(`Can't copy this link: `, err);
       });
   };
+
+  onMounted(() => {
+    getAllReportTypes();
+  });
 </script>
 
 <template>
@@ -151,11 +214,22 @@
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
               class="flex items-center justify-center text-[13px] cursor-pointer text-center"
-              @click="closeMenu"
+              @click="showDialogReportVideo"
             >
               Report video
             </li>
           </ul>
+          <ReportDialog
+            :isReportVisible="isReportVisible"
+            :isReportSuccessVisible="isReportSuccessVisible"
+            :reportType="reportTypeVideos"
+            :selectedReport="selectedReportVideo"
+            @update:selectedReport="selectedReportVideo = $event"
+            @close="closeReportSuccess"
+            @submit="handleSubmitReportVideo"
+            @hide="closeReport"
+            @hideSuccess="closeSuccess"
+          />
         </div>
       </div>
     </div>
