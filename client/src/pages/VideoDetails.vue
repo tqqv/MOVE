@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import Player from '@vimeo/player';
   import VideoDetail from '@/components/VideoDetail.vue';
@@ -14,9 +14,6 @@
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
-  import { useUserStore } from '@/stores/user.store';
-
-  const userStore = useUserStore();
 
   const route = useRoute();
   const vimeoPlayer = ref(null);
@@ -59,7 +56,7 @@
     }
   };
 
-  onMounted(() => {
+  onMounted(async () => {
     const player = new Player(vimeoPlayer.value, {
       id: videoId,
       loop: true,
@@ -68,8 +65,8 @@
       byline: false,
       portrait: false,
     });
-    fetchVideoById();
-    fetchAllVideo();
+    await fetchVideoById();
+    await fetchAllVideo();
   });
 </script>
 <template>
