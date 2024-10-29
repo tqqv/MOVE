@@ -155,7 +155,6 @@ const getRatingOfVideo = async(userId, videoId) => {
     }
 
     const rate = await Rating.findOne({where: {videoId: videoId, userId: userId}})
-   
 
     return {
       status: 200,
