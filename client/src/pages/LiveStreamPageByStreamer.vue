@@ -1,12 +1,12 @@
 <script setup>
-  import { onMounted, onUnmounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref, watch } from 'vue';
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
-  import { useUserStore } from '@/stores';
+  import { useStreamerStore, useUserStore } from '@/stores';
   import { joinRoom, listenStreamReady } from '@/services/socketService';
 
-  const userStore = useUserStore();
-  const statusLive = ref('inLive');
+  const streamerStore = useStreamerStore();
+  const statusLive = ref('beforeLive');
   const connectOBS = ref(false);
   const time = ref(0);
   let timer = null;
@@ -16,8 +16,8 @@
   };
 
   const handleConnectOBS = () => {
-    if (userStore.user?.Channel?.id) {
-      joinRoom(userStore.user.Channel.id);
+    if (streamerStore.streamerChannel?.id) {
+      joinRoom(streamerStore.streamerChannel.id);
 
       listenStreamReady((isReady) => {
         connectOBS.value = isReady;
@@ -31,18 +31,18 @@
     }, 1000);
   };
 
-  const handleEndLive = () => {
-    clearInterval(timer);
-    statusLive.value = 'offline';
-  };
-
-  onMounted(() => {
-    if (statusLive.value === 'inLive') startTimer();
+  watch(statusLive, (newStatus) => {
+    if (newStatus === 'inLive') {
+      startTimer();
+    } else {
+      clearInterval(timer);
+      time.value = 0;
+    }
   });
   onUnmounted(() => clearInterval(timer));
 
   onMounted(async () => {
-    await userStore.fetchUserProfile();
+    await streamerStore.fetchProfileChannel();
     handleConnectOBS();
   });
 </script>

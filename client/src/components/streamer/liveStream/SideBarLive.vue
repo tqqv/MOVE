@@ -6,7 +6,7 @@
   import TickRight from '@/components/icons/tickRight.vue';
   import AnalyticsIcon from '@icons/analytics.vue';
   import Clock from '@/components/icons/clock.vue';
-  import { useLiveStreamStore, useUserStore } from '@/stores';
+  import { useLiveStreamStore, useStreamerStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { createLiveStream } from '@/services/liveStream';
   import { formatTime } from '@/utils';
@@ -17,7 +17,7 @@
     time: Number,
   });
 
-  const userStore = useUserStore();
+  const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
 
   const router = useRouter();
@@ -25,7 +25,7 @@
   const isShow = ref(true);
   const showGoLivePopup = ref(false);
 
-  const emit = defineEmits(['updateStatusLive', 'handleEndLive']);
+  const emit = defineEmits(['handleEndLive', 'updateStatusLive']);
 
   // SETUP STEP
   const setUpSteps = ref([
@@ -169,22 +169,22 @@
           <div class="flex items-center gap-x-4">
             <RouterLink
               class="hover:text-primary"
-              :to="`/user/${userStore.user?.username}`"
+              :to="`/user/${streamerStore.streamerChannel?.User?.username}`"
               target="_blank"
             >
               <img
                 class="size-12 object-cover rounded-full"
-                :src="userStore.user?.Channel.avatar"
+                :src="streamerStore.streamerChannel?.avatar"
                 alt=""
               />
             </RouterLink>
             <div class="flex flex-col gap-y-1">
               <RouterLink
                 class="hover:text-primary"
-                :to="`/user/${userStore.user?.username}`"
+                :to="`/user/${streamerStore.streamerChannel?.User.username}`"
                 target="_blank"
               >
-                <h1 class="font-semibold">{{ userStore.user?.Channel.channelName }}</h1>
+                <h1 class="font-semibold">{{ streamerStore.streamerChannel?.channelName }}</h1>
               </RouterLink>
               <span class="text-sm text-body">Host - Your profile</span>
             </div>
