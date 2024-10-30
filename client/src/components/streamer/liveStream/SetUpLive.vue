@@ -10,7 +10,7 @@
   import EmptyImage from '@/components/icons/emptyImage.vue';
   import NotConnectScreen from './NotConnectScreen.vue';
   import { toast } from 'vue3-toastify';
-  import { getStreamKey } from '@/services/streamer';
+  import { changeStreamKey } from '@/services/streamer';
 
   const props = defineProps({
     statusLive: String,
@@ -70,7 +70,7 @@
   // GET STREAMER KEY
   const fetchStreamerKey = async () => {
     try {
-      const response = await getStreamKey();
+      const response = await changeStreamKey();
       streamKey.value = userStore.user.username + streamKey.value + response.data;
     } catch (error) {
       console.log(error);

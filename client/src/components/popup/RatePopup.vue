@@ -18,7 +18,7 @@
   });
 
   const value = ref(props.dataRate);
-  const emit = defineEmits(['toggleRate', 'fillRate']);
+  const emit = defineEmits(['toggleRate', 'fillRate', 'updateRate']);
 
   const closePopup = () => {
     emit('closePopup');
@@ -35,6 +35,9 @@
   );
 
   const handleRatingChange = async (newValue) => {
+    console.log('gia tri moi ', newValue);
+    console.log('gia tri truoc ', previousValue.value);
+
     if (newValue !== null && newValue !== previousValue.value) {
       const data = { rating: newValue, videoId: props.videoId };
 
@@ -44,11 +47,16 @@
       }
 
       const result = await postRateVideo(data);
-      if (result && result.success) {
+      if (result.success) {
         toast.success('Thank you for your ratings!');
 
+        //đóng mở popup và fetch data đã rate
         emit('toggleRate');
+
+        // fill star
         emit('fillRate');
+
+        //fetch lại avg rate
         emit('updateRate');
         closePopup();
       } else {
@@ -73,10 +81,11 @@
             @click="closePopup"
           ></i>
         </h1>
+
         <span class="text-sm"> Tell us what you think about this session. </span>
       </div>
       <div class="flex justify-start">
-        <Rating v-model="value" />
+        <Rating v-model="value" :min="1" :max="5" />
       </div>
     </div>
   </div>
