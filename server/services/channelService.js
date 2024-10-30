@@ -473,8 +473,6 @@ const validateStreamKey = async (streamKey) => {
         message: "Streaming Key is invalid or does not belong to the specified user."
       };
     }
-    valid.isLive = true;
-    valid.save();
     setTimeout(
       () => _io.to(valid.id).emit('streamReady', true), 10000
     )
@@ -505,6 +503,7 @@ const endStream = async(streamKey) => {
     valid.isLive = false;
     valid.save();
     _io.to(valid.id).emit('streamReady', false);
+    _io.to(valid.id).emit('streamPublished', false);
     return {
       status: 200,
       message: "End stream success"
