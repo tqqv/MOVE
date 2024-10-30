@@ -17,7 +17,6 @@ const createLivestream = async(data) => {
       where: {id: newLiveStream.streamerId}
     })
     channel.isLive = true;
-    valid.livestreamStatus = 'published';
     channel.save();
 
     _io.to(data.streamerId).emit('streamPublished', true);
@@ -66,8 +65,6 @@ const endLivestream = async(livestreamId) => {
     }
 
     liveStream.livestreamChannel.isLive = false;
-    liveStream.livestreamChannel.livestreamStatus = 'beforePublished';
-
     await liveStream.livestreamChannel.save();
 
     ///
