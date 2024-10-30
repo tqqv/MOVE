@@ -67,7 +67,6 @@
       'Failed copied to clipboard',
     );
   };
-  
 
   // UPLOAD IMAGE
   const fileInputRef = ref(null);

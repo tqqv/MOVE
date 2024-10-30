@@ -7,7 +7,7 @@
 
   const streamerStore = useStreamerStore();
   const statusLive = ref('beforeLive');
-  const connectOBS = ref(false);
+  const connectOBS = ref();
   const time = ref(0);
   let timer = null;
 
