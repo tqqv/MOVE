@@ -12,7 +12,7 @@ const createLivestream = async(data) => {
         message: 'Cannot be empty'
       }
     }
-    const newLiveStream = await Livestream.create(data)
+    const newLiveStream = await Livestream.create(data);
     const channel = await Channel.findOne({
       where: {id: newLiveStream.streamerId}
     })
@@ -20,6 +20,7 @@ const createLivestream = async(data) => {
     channel.save();
 
     _io.to(data.streamerId).emit('streamPublished', true);
+    await _redis.set(`channel_${channel.id}_live_status`, 'streamPublished');
     return {
       status: 200,
       data: newLiveStream,
@@ -66,6 +67,7 @@ const endLivestream = async(livestreamId) => {
 
     liveStream.livestreamChannel.isLive = false;
     await liveStream.livestreamChannel.save();
+    await _redis.set(`channel_${liveStream.livestreamChannel.id}_live_status`, 'streamReady');
 
     ///
     // Logic update stats from redis here
