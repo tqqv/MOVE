@@ -956,6 +956,168 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
   }
 };
 
+const increaseView = async(userId, videoId, ip) => {
+  try {
+    const video = await Video.findOne({where: {id: videoId}})
+    if(!video) {
+      return {
+        status: 404,
+        message: "Video not found."
+      }
+    }
+
+    const user = await User.findOne({where: {id: userId}})
+    const checkView = await ViewVideo.findOne({where: {viewerId: userId, videoId: videoId}})
+    if(!user || (user && checkView)){
+      video.viewCount += 1;
+      await video.save()
+      return {
+        status: 200,
+        message: "+1 view"
+      }
+    }
+
+    if(user && !checkView){
+      const viewData = await ViewVideo.create({viewerId: userId, videoId: videoId, ip: ip})
+      if(viewData) {
+        return {
+          status: 200,
+          message: "Add viewer data successfully."
+        }
+      }
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const updateViewtime = async(userId, videoId, viewTime) => {
+  try {
+    const video = await Video.findOne({where: {id: videoId}})
+    if(!video) {
+      return {
+        status: 404,
+        message: "Video not found."
+      }
+    }
+
+    const checkView = await ViewVideo.findOne({where: {viewerId: userId, videoId: videoId}})
+
+    if(checkView) {
+      checkView.viewTime = Math.min(checkView.viewTime + viewTime, video.duration);
+      await userVideoView.save();
+    }
+
+    return {
+      status: 200,
+      message: "Update view time successfully"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const getVideoWatchAlso = async (category, level, videoId) => {
+  try {
+    const videos = await Video.findAll({
+      where: {
+        id: {
+          [Op.not]: videoId,
+        },
+        status: 'public',
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [
+            {
+              model: User,
+              attributes: ['username']
+            }
+          ]
+        },
+        {
+          model: LevelWorkout,
+          attributes: ['levelWorkout'],
+          as: 'levelWorkout',
+          where: level ? { levelWorkout: level } : {},
+        },
+        {
+          model: Category,
+          attributes: ['title'],
+          as: 'category',
+          where: category ? { title: category } : {},
+        },
+      ],
+      limit: 13
+    });
+
+
+    if (videos.length < 14) {
+      const existingVideoIds = videos.map(video => video.id);
+
+      const additionalVideos = await Video.findAll({
+        where: {
+          id: {
+            [Op.notIn]: [...existingVideoIds, videoId],
+          },
+          status: 'public',
+        },
+        limit: 20 - videos.length,
+        include: [
+          {
+            model: Channel,
+            as: 'channel',
+            attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+            include: [
+              {
+                model: User,
+                attributes: ['username']
+              }
+            ]
+          },
+          {
+            model: LevelWorkout,
+            attributes: ['levelWorkout'],
+            as: 'levelWorkout',
+          },
+          {
+            model: Category,
+            attributes: ['title'],
+            as: 'category',
+          },
+        ],
+      });
+
+      videos.push(...additionalVideos);
+    }
+
+    return {
+      status: 200,
+      data: videos,
+      message: 'Get video what also successfully.'
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -972,4 +1134,7 @@ module.exports = {
   analyticsVideoById,
   getStateByCountryAndVideoId,
   getListVideoByChannel,
+  increaseView,
+  updateViewtime,
+  getVideoWatchAlso,
 };

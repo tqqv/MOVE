@@ -1,6 +1,7 @@
 <script setup>
   import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
+  import { toast } from 'vue3-toastify';
   import Player from '@vimeo/player';
   import VideoDetail from '@/components/VideoDetail.vue';
   import OfflineTitle from '@/components/OfflineTitle.vue';
@@ -14,9 +15,6 @@
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
-  import { useUserStore } from '@/stores/user.store';
-
-  const userStore = useUserStore();
 
   const route = useRoute();
   const vimeoPlayer = ref(null);
@@ -25,11 +23,15 @@
   const channelDetails = ref(null);
   const totalFollower = ref(null);
   const channelId = ref(null);
+  const categoryId = ref(null);
+  const levelworkoutsId = ref(null);
   const videos = ref([]);
 
-  const fetchAllVideo = async () => {
+  const fetchWatchAlso = async () => {
     try {
-      const res = await axiosInstance.get('video');
+      const res = await axiosInstance.get(
+        `video/getVideoWatchAlso?videoId=${videoId}&category=${categoryId}&levelWorkout=${levelworkoutsId}`,
+      );
       if (res.status === 200) {
         videos.value = res.data.data;
       }
@@ -43,6 +45,8 @@
       const res = await axiosInstance.get(`video/${videoId}`);
       if (res.status === 200) {
         video.value = res.data.data;
+        categoryId.value = res.data.data.categoryId;
+        levelworkoutsId.value = res.data.data.levelWorkoutsId;
         channelDetails.value = {
           channelName: res.data.data.channel.channelName,
           avatar: res.data.data.channel.avatar,
@@ -59,7 +63,7 @@
     }
   };
 
-  onMounted(() => {
+  onMounted(async () => {
     const player = new Player(vimeoPlayer.value, {
       id: videoId,
       loop: true,
@@ -68,8 +72,8 @@
       byline: false,
       portrait: false,
     });
-    fetchVideoById();
-    fetchAllVideo();
+    await fetchVideoById();
+    await fetchWatchAlso();
   });
 </script>
 <template>
@@ -77,7 +81,7 @@
     <div class="col-span-8">
       <div ref="vimeoPlayer" class="video-player"></div>
       <div class="p-[20px]">
-        <OfflineTitle v-if="video" :video="video" />
+        <OfflineTitle v-if="video" :video="video" @updateRate="fetchVideoById" />
         <Divider />
         <VideoDetail
           v-if="channelDetails"
@@ -105,13 +109,7 @@
       <div class="p-[10px]">
         <h3 class="font-bold mb-2 uppercase">watch also</h3>
         <div>
-          <VideoCard
-            v-if="videos"
-            v-for="(video, index) in videos"
-            :key="index"
-            :video="video"
-            :channelDetails="video.channel"
-          />
+          <VideoCard v-if="videos" :videos="videos" />
         </div>
       </div>
     </div>

@@ -14,6 +14,9 @@ const {
   analyticsVideoById,
   getListVideoByChannel,
   getStateByCountryAndVideoId,
+  increaseView,
+  updateViewtime,
+  getVideoWatchAlso,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -179,6 +182,33 @@ const getListVideoByChannelController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const increaseViewController = async(req, res, next) => {
+  const userId = req.user.id;
+  const videoId = req.body.videoId;
+  const ip = req.body.ip;
+  const result = await increaseView(userId, videoId, ip)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const updateViewtimeController = async(req, res, next) => {
+  const userId = req.user.id;
+  const videoId = req.body.videoId;
+  const viewTime = req.body.viewTime;
+  const result = await updateViewtime(userId, videoId, viewTime)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
+const getVideoWatchAlsoController = async(req, res, next) => {
+  const videoId= req.query.videoId;
+  const category = req.query.category;
+  const levelWorkout = req.query.levelWorkout;
+  const result = await getVideoWatchAlso(category, levelWorkout, videoId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -195,4 +225,7 @@ module.exports = {
   analyticsVideoByIdController,
   getListVideoByChannelController,
   getStateByCountryAndVideoIdController,
+  increaseViewController,
+  updateViewtimeController,
+  getVideoWatchAlsoController,
 };

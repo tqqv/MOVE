@@ -122,7 +122,7 @@
   >
     <div class="flex flex-col px-2">
       <div
-        class="flex items-center justify-center hover:bg-gray-light rounded-md my-2 py-3 px-3 cursor-pointer"
+        class="flex items-center justify-center hover:bg-gray-light rounded-md my-2 py-5 px-3 cursor-pointer"
         v-tooltip="'Expand sidebar '"
         @click="handleShow"
       >

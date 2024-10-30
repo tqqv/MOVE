@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Category, Video, sequelize } = db;
+const { Category, CategoryFollow, Video, sequelize } = db;
 
 const createCategory = async(data) => {
   try {
@@ -167,11 +167,60 @@ const getAllCategoryWithView = async() => {
   }
 }
 
+const getCateByTitle = async (title) => {
+  try {
+    const cate = await Category.findAll({
+      where: { title: title },
+      attributes: [
+        'id',
+        'imgUrl',
+        'title',
+        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews'],
+        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('cateFollow.categoryId'))), 'followerCount']
+      ],
+      include: [
+        {
+          model: Video,
+          as: 'categoryVideos',
+          attributes: [],
+        },
+        {
+          model: CategoryFollow,
+          as: 'cateFollow',
+          attributes: [],
+        },
+      ],
+      group: ['Category.id', 'Category.imgUrl', 'Category.title'],
+    });
+
+    if (!cate || cate.length < 1) {
+      return {
+        status: 404,
+        data: null,
+        message: "Category not found."
+      };
+    }
+
+    return {
+      status: 200,
+      data: cate,
+      message: "Get infor cate successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createCategory,
   getAllCategory,
   getCateById,
   editCategory,
   deleteCategory,
-  getAllCategoryWithView
+  getAllCategoryWithView,
+  getCateByTitle
 }
