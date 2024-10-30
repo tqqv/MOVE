@@ -219,6 +219,9 @@
             </li>
           </ul>
           <ReportDialog
+            title="video"
+            groupName="reportTypeVideos"
+            titleReport="Report Video"
             :isReportVisible="isReportVisible"
             :isReportSuccessVisible="isReportSuccessVisible"
             :reportType="reportTypeVideos"

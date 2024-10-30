@@ -4,6 +4,9 @@
   import Dialog from 'primevue/dialog';
 
   const props = defineProps({
+    title: String,
+    groupName: String,
+    titleReport: String,
     isReportVisible: Boolean,
     isReportSuccessVisible: Boolean,
     reportType: Array,
@@ -53,7 +56,7 @@
     :visible="isReportVisible"
     :modal="true"
     :draggable="false"
-    header="Report video"
+    :header="props.titleReport"
     :style="{ width: '40rem' }"
     @update:visible="hideReport"
   >
@@ -61,7 +64,7 @@
       <CheckboxReport
         :label="reportType.description"
         :value="reportType.id"
-        groupName="reportTypeVideos"
+        :groupName="groupName"
         @change="(event) => updateSelectedReport(reportType)"
       />
       <i class="pi pi-question-circle text-[#CCCCCC]"></i>
@@ -94,7 +97,7 @@
     @show="lockScroll"
     @hide="unlockScroll"
   >
-    <p class="text-[14px] text-footer">You reported the video for:</p>
+    <p class="text-[14px] text-footer">You reported the {{ title }} for:</p>
     <h2>{{ selectedReport.description }}</h2>
     <p class="text-[14px] text-footer mt-4">
       If we find this channel violated
