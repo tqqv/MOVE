@@ -1,39 +1,49 @@
 <script setup>
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import { useRouter } from 'vue-router';
   import LiveStream from '@/components/icons/liveStream.vue';
   import TickRight from '@/components/icons/tickRight.vue';
   import AnalyticsIcon from '@icons/analytics.vue';
   import Clock from '@/components/icons/clock.vue';
-  import { useUserStore } from '@/stores';
+  import { useLiveStreamStore, useUserStore } from '@/stores';
+  import { toast } from 'vue3-toastify';
+  import { createLiveStream } from '@/services/liveStream';
+  import { formatTime } from '@/utils';
 
   const props = defineProps({
     statusLive: String,
     connectOBS: Boolean,
+    time: Number,
   });
 
   const userStore = useUserStore();
+  const liveStreamStore = useLiveStreamStore();
 
   const router = useRouter();
   const route = useRoute();
   const isShow = ref(true);
   const showGoLivePopup = ref(false);
 
-  const emit = defineEmits(['updateStatusLive']);
+  const emit = defineEmits(['updateStatusLive', 'handleEndLive']);
 
-  const setUpSteps = [
+  // SETUP STEP
+  const setUpSteps = ref([
+    { id: 3, name: 'Select a video source ', tick: true },
     { id: 1, name: 'Connect video source', tick: false },
-    { id: 2, name: 'Complete post detail', tick: true },
-    { id: 3, name: 'Go live', tick: false },
-  ];
-  const user = {
-    avatar:
-      'https://images.pexels.com/photos/1040880/pexels-photo-1040880.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    channelName: 'Nguyen Phuoc Minh Hieu',
-    followers: 1000,
-  };
+    { id: 2, name: 'Complete post detail', tick: false },
+  ]);
+  const totalSteps = setUpSteps.value.length;
 
+  const completedSteps = computed(() => {
+    return setUpSteps.value.filter((step) => step.tick).length;
+  });
+
+  const progressPercentage = computed(() => {
+    return (completedSteps.value / totalSteps) * 100;
+  });
+
+  // ROUTER SIDEBAR
   const menuItems = computed(() => {
     return props.statusLive === 'beforeLive'
       ? [
@@ -46,15 +56,22 @@
     isShow.value = !isShow.value;
   };
 
-  const handleGoLive = () => {
-    if (props.connectOBS) {
-      showGoLivePopup.value = true;
-      emit('updateStatusLive', 'inLive');
-      router.push('/streaming/dashboard-live');
+  const handleGoLive = async () => {
+    if (props.connectOBS && liveStreamStore.complete) {
+      // showGoLivePopup.value = true;
+      try {
+        const response = await createLiveStream(liveStreamStore.liveStreamData);
+        console.log(response);
+        emit('updateStatusLive', 'inLive');
+        router.push('/streaming/dashboard-live');
+      } catch (error) {
+        toast.error('Failed to update profile');
+      }
     }
   };
 
   const handleEndLive = () => {
+    emit('handleEndLive');
     emit('updateStatusLive', 'afterLive');
   };
 
@@ -62,6 +79,29 @@
     emit('updateStatusLive', 'beforeLive');
     // router.push('/');
   };
+
+  watch(
+    () => liveStreamStore.complete,
+    (newValue) => {
+      if (newValue) {
+        setUpSteps.value[2].tick = true;
+      }
+    },
+  );
+
+  watch(
+    () => props.connectOBS,
+    (newValue) => {
+      if (newValue) {
+        setUpSteps.value[1].tick = true;
+      }
+    },
+  );
+
+  watch(() => {
+    console.log(liveStreamStore.complete);
+    console.log(props.connectOBS);
+  });
 </script>
 <template>
   <section
@@ -93,9 +133,14 @@
         <div :class="{ hidden: statusLive !== 'beforeLive' }" class="flex flex-col gap-y-4">
           <div class="flex items-center gap-x-3">
             <div class="w-full bg-gray-dark rounded-full h-2.5">
-              <div class="bg-primary h-2.5 rounded-full" style="width: 30%"></div>
+              <div
+                class="bg-primary h-2.5 rounded-full"
+                :style="{ width: progressPercentage + '%' }"
+              ></div>
             </div>
-            <span class="whitespace-nowrap text-sm text-primary font-medium">1 / 3</span>
+            <span class="whitespace-nowrap text-sm text-primary font-medium"
+              >{{ completedSteps }} / {{ totalSteps }}</span
+            >
           </div>
           <div class="flex flex-col mt-3 gap-y-5">
             <div v-for="step in setUpSteps" class="flex gap-x-4 items-center">
@@ -173,8 +218,8 @@
         <!-- START LIVE -->
         <div
           class="flex items-center justify-center gap-x-2 px-3 py-2 rounded-md bg-primary/90 hover:bg-primary text-white text-center w-full cursor-pointer"
-          :class="{ '!cursor-not-allowed opacity-50': !props.connectOBS }"
-          :disabled="!connectOBS"
+          :class="{ '!cursor-not-allowed opacity-50': !liveStreamStore.complete || !connectOBS }"
+          :disabled="!liveStreamStore.complete && !connectOBS"
           @click="handleGoLive"
         >
           <LiveStream />
@@ -184,9 +229,9 @@
       <!-- IN LIVE -->
       <div :class="{ hidden: statusLive !== 'inLive' }" class="flex flex-col gap-y-3 font-semibold">
         <!-- TIME -->
-        <div class="flex gap-x-2 items-center">
+        <div class="flex gap-x-4 items-center">
           <Clock />
-          <span class="text-xl text-body mr-3">00:00:00</span>
+          <span class="text-xl text-body w-[77px]">{{ formatTime(time) }}</span>
           <div class="relative size-4 border border-red rounded-full">
             <div
               class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 size-3 bg-red rounded-full"
