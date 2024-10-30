@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, where } = require("sequelize");
 const db = require("../models/index.js");
 const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
@@ -596,6 +596,36 @@ const getProfileByUserName = async(username) => {
   }
 }
 
+const checkUserFollowCate = async(userId, cateId) => {
+  try {
+    const follow = await CategoryFollow.findOne({where: {
+      userId: userId,
+      categoryId: cateId
+    }})
+
+    if(follow) {
+      return {
+        status: 200,
+        data: {follow: true},
+        message: "Followed."
+      }
+    }else {
+      return {
+        status: 200,
+        data: {follow: false},
+        message: "Not yet."
+      }
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   getProfile,
   editProfile,
@@ -607,5 +637,6 @@ module.exports = {
   getAllInforFollow,
   isExistUsername,
   getProfileByUserName,
-  followCategory
+  followCategory,
+  checkUserFollowCate,
 }
