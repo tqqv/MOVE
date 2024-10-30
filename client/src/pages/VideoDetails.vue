@@ -1,6 +1,7 @@
 <script setup>
-  import { ref, onMounted, watch } from 'vue';
+  import { ref, onMounted } from 'vue';
   import { useRoute } from 'vue-router';
+  import { toast } from 'vue3-toastify';
   import Player from '@vimeo/player';
   import VideoDetail from '@/components/VideoDetail.vue';
   import OfflineTitle from '@/components/OfflineTitle.vue';
@@ -22,11 +23,15 @@
   const channelDetails = ref(null);
   const totalFollower = ref(null);
   const channelId = ref(null);
+  const categoryId = ref(null);
+  const levelworkoutsId = ref(null);
   const videos = ref([]);
 
-  const fetchAllVideo = async () => {
+  const fetchWatchAlso = async () => {
     try {
-      const res = await axiosInstance.get('video');
+      const res = await axiosInstance.get(
+        `video/getVideoWatchAlso?videoId=${videoId}&category=${categoryId}&levelWorkout=${levelworkoutsId}`,
+      );
       if (res.status === 200) {
         videos.value = res.data.data;
       }
@@ -40,6 +45,8 @@
       const res = await axiosInstance.get(`video/${videoId}`);
       if (res.status === 200) {
         video.value = res.data.data;
+        categoryId.value = res.data.data.categoryId;
+        levelworkoutsId.value = res.data.data.levelWorkoutsId;
         channelDetails.value = {
           channelName: res.data.data.channel.channelName,
           avatar: res.data.data.channel.avatar,
@@ -50,7 +57,6 @@
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
-        console.log('rating ne:', video.value.ratings);
       }
     } catch (error) {
       toast.error(error.message);
@@ -67,7 +73,7 @@
       portrait: false,
     });
     await fetchVideoById();
-    await fetchAllVideo();
+    await fetchWatchAlso();
   });
 </script>
 <template>
@@ -103,13 +109,7 @@
       <div class="p-[10px]">
         <h3 class="font-bold mb-2 uppercase">watch also</h3>
         <div>
-          <VideoCard
-            v-if="videos"
-            v-for="(video, index) in videos"
-            :key="index"
-            :video="video"
-            :channelDetails="video.channel"
-          />
+          <VideoCard v-if="videos" :videos="videos" />
         </div>
       </div>
     </div>
