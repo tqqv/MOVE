@@ -501,6 +501,7 @@ const endStream = async(streamKey) => {
       }
     }
     valid.isLive = false;
+    valid.livestreamStatus = 'ended';
     valid.save();
     _io.to(valid.id).emit('streamReady', false);
     _io.to(valid.id).emit('streamPublished', false);

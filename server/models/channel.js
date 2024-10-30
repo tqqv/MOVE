@@ -101,7 +101,7 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: false,
             },
             livestreamStatus: {
-                type: DataTypes.ENUM('beforePublished', 'published', 'streamChats'),
+                type: DataTypes.ENUM('beforePublished', 'published', 'ended'),
                 defaultValue: 'beforePublished',
             },
 
