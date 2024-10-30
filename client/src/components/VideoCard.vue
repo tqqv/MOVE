@@ -1,7 +1,14 @@
 <script setup>
   import verified from './icons/verified.vue';
   import rate from './icons/rate.vue';
-  import { formatDate, formatDuration, formatRating, formatView, genreDuration } from '@/utils';
+  import {
+    formatDate,
+    formatDuration,
+    formatRating,
+    formatView,
+    genreDuration,
+    truncateDescripton,
+  } from '@/utils';
 
   const props = defineProps({
     videos: {
@@ -28,7 +35,7 @@
           class="text-xs absolute bottom-2 left-4 flex items-center font-bold text-white bg-black/80 px-2 py-1 gap-x-1 rounded"
         >
           <i class="pi pi-eye mt-[0.7px] text-xs" />
-          <span class="">{{ formatView(video.viewCount) }}</span>
+          <span>{{ formatView(video.viewCount) }}</span>
         </div>
         <div
           class="absolute bottom-2 right-4 text-white text-xs font-bold bg-black/80 px-2 py-1 rounded"
@@ -50,34 +57,44 @@
         </div>
 
         <div class="pl-4 flex-1">
-          <div class="flex items-center mb-2 justify-between">
-            <h3 class="text-base font-bold whitespace-nowrap text-black">{{ video.title }}</h3>
+          <div class="flex items-center w-full justify-between">
+            <!-- Tiêu đề chiếm 2/3 không gian -->
+            <h3 class="text-base font-bold text-black" :title="video.title">
+              {{ truncateDescripton(video.title, 30) }}
+            </h3>
+
+            <!-- Phần rate và rating nằm ở cuối bên phải -->
             <div class="flex items-center">
               <rate class="mr-1 mb-[0.5px]" />
-              <span class="text-sm font-bold">{{ formatRating(video.ratings) }}</span>
+              <span class="text-sm font-bold">{{ formatRating(video.ratings || 0) }}</span>
             </div>
           </div>
-          <div class="flex items-center gap-x-3">
-            <span class="text_secondary whitespace-nowrap">{{ video.channel.channelName }}</span>
-            <span v-if="video.channel.popularCheck" class="mb-1">
+
+          <!-- Truncate channelName with tooltip -->
+          <div class="flex items-center">
+            <span class="text_secondary whitespace-nowrap" :title="video.channel.channelName">{{
+              truncateDescripton(video.channel.channelName, 12)
+            }}</span>
+            <span v-if="video.channel.popularCheck" class="mb-1 ml-3">
               <verified fill="fill-blue" />
             </span>
           </div>
+
           <div class="flex items-center space-x-1 text_secondary my-2">
             <span v-if="video.category.title" class="flex items-center">
               {{ video.category.title }}
             </span>
             <span class="font-bold text-xl px-1 mb-[0.5px] leading-none">•</span>
-            <span>Post {{ formatDate(video.createdAt) }} </span>
+            <span>Post {{ formatDate(video.createdAt) }}</span>
           </div>
 
           <div class="flex gap-2 items-center text-[10px] font-bold mb-2 text-black">
             <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
               video.levelWorkout?.levelWorkout
             }}</span>
-            <span class="bg-[#EEEEEE] rounded-full px-3 py-2">
-              {{ genreDuration(video.duration) }}
-            </span>
+            <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
+              genreDuration(video.duration)
+            }}</span>
           </div>
         </div>
       </div>

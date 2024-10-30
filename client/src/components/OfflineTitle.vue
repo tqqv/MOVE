@@ -7,7 +7,6 @@
   import { watch } from 'vue';
   import ReportDialog from './ReportDialog.vue';
   import Rate from '@components/Rate.vue';
-  import share from '@icons/share.vue';
   import rateIcon from '@icons/rate.vue';
 
   const props = defineProps({
@@ -104,7 +103,7 @@
   const updateRate = () => {
     emit('updateRate');
   };
-  
+
   const handleClickShareFacebook = async () => {
     const shareUrl = encodeURIComponent(window.location.href);
     const fbShareUrl = `https://www.facebook.com/dialog/share?app_id=${

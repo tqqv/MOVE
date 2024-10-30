@@ -7,13 +7,15 @@
   import { getAllCategory, getAllVideos } from '@/services/video';
   import GirdVideo from '@/components/GirdVideo.vue';
   import SmallLoading from '@/components/icons/smallLoading.vue';
+  import { getAllCategoriesHaveView } from '@/services/browse';
+
   const categories = ref([]);
   const videos = ref([]);
   const isLoading = ref(true);
 
-  const fetchAllCategory = async () => {
+  const fetchAllCategoriesHaveView = async () => {
     try {
-      const res = await getAllCategory();
+      const res = await getAllCategoriesHaveView();
       if (res.success) {
         categories.value = res.data;
       }
@@ -36,7 +38,7 @@
   };
 
   onMounted(async () => {
-    fetchAllCategory();
+    fetchAllCategoriesHaveView();
     fetchAllVideos();
   });
 </script>
