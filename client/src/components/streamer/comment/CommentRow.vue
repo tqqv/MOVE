@@ -11,12 +11,15 @@
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { formatDate } from '@/utils/calculatorDate';
   import { formatDuration } from '@/utils';
+  import ReportDialog from '@/components/ReportDialog.vue';
+  import axiosInstance from '@/services/axios';
+  import { toast } from 'vue3-toastify';
 
   const props = defineProps({
     comment: Object,
     fetchAllCommentStreamer: Function,
   });
-
+  //comment
   const openCommentField = ref(false);
   const openCommentReply = ref(false);
   const openViewAllComment = ref(false);
@@ -26,13 +29,25 @@
   const currentPage = ref(1);
   const totalPage = ref();
   const hasInitialFetch = ref(false);
+  //report
   const openReportComment = ref(false);
+  const isReportVisible = ref(false);
+  const isReportSuccessVisible = ref(false);
+  const reportTypeVideos = ref([]);
+  const selectedReportComment = ref(null);
+  const selectedCommentId = ref(null);
+
   // HANDLE COMMENT FIELD
   const handleOpenCommentField = () => {
     openCommentField.value = !openCommentField.value;
   };
-  const toggleReportComment = () => {
+  const toggleReportComment = (commentId) => {
+    selectedCommentId.value = commentId;
     openReportComment.value = !openReportComment.value;
+  };
+  const openPopupReport = () => {
+    isReportVisible.value = !isReportVisible.value;
+    getAllReportTypes();
   };
   // OPEN COMMENT REPLY
   const handleOpenCommentReply = (commentId) => {
@@ -115,6 +130,44 @@
       openReportComment.value = false;
     }
   };
+
+  ///REPORT
+  const getAllReportTypes = async () => {
+    try {
+      const response = await axiosInstance.get('report/getListReport?type=videos');
+      if (response.status === 200) {
+        reportTypeVideos.value = response.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const handleSubmitReportComment = async () => {
+    if (selectedReportComment.value.id) {
+      try {
+        const response = await axiosInstance.post('report/comment', {
+          commentId: selectedCommentId.value,
+          reportTypeId: selectedReportComment.value.id,
+        });
+        if (response.status === 200) {
+          isReportVisible.value = false;
+          isReportSuccessVisible.value = true;
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+  const closeReportSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+  const closeReport = () => {
+    isReportVisible.value = false;
+  };
+  const closeSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+  //------///
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('click', handleClickOutside);
@@ -178,10 +231,9 @@
                 <div>
                   <button
                     class="text-primary text-[13px] font-bold flex items-center cursor-pointer"
-                    @click="handleRate"
                     id="report-menu-button"
                   >
-                    <i @click="toggleReportComment" class="pi pi-ellipsis-v"></i>
+                    <i @click="toggleReportComment(comment.id)" class="pi pi-ellipsis-v"></i>
                   </button>
                 </div>
 
@@ -190,7 +242,10 @@
                   id="report-menu"
                   class="absolute left-0 z-10 mt-5 top-3 p-2 border border-primary origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
                 >
-                  <span @click="openPopupReport" class="text-primary text-xs whitespace-nowrap">
+                  <span
+                    @click="openPopupReport"
+                    class="text-primary text-xs whitespace-nowrap cursor-pointer"
+                  >
                     Report comment
                   </span>
                 </div>
@@ -272,4 +327,18 @@
       </div>
     </td>
   </tr>
+  <ReportDialog
+    title="comment"
+    groupName="reportTypeComments"
+    titleReport="Report Comment"
+    :isReportVisible="isReportVisible"
+    :isReportSuccessVisible="isReportSuccessVisible"
+    :reportType="reportTypeVideos"
+    :selectedReport="selectedReportComment"
+    @update:selectedReport="selectedReportComment = $event"
+    @close="closeReportSuccess"
+    @submit="handleSubmitReportComment"
+    @hide="closeReport"
+    @hideSuccess="closeSuccess"
+  />
 </template>
