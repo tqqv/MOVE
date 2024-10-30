@@ -1,19 +1,30 @@
 <script setup>
   import { usePopupStore } from '@/stores';
-  import { onMounted, onUnmounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref, watch } from 'vue';
   import ReportChannelPopup from './reportUser/ReportChannelPopup.vue';
+  import { getAllReportChannelTypes, reportChannel } from '@/services/report';
+  import ReportDialog from './ReportDialog.vue';
+  import { toast } from 'vue3-toastify';
 
   const props = defineProps({
     channelName: String,
+    channelId: Number,
   });
 
   const popupStore = usePopupStore();
-
+  const listReportChannel = ref([]);
   const isMenuVisible = ref(false);
-  const handleOpenReportChannelDialog = () => {
-    popupStore.openReportChannel();
-    isMenuVisible.value = false;
+  const selectReportChannel = ref(null);
+  const handleOpenReportChannelDialog = async () => {
+    try {
+      await fetchListReportChannel();
+      popupStore.openReportChannel();
+      isMenuVisible.value = false;
+    } catch (error) {
+      console.log('Failed to fetch report channels:', error);
+    }
   };
+
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
@@ -30,6 +41,39 @@
   onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+
+  // GET ALL REPORT
+  const fetchListReportChannel = async () => {
+    try {
+      const response = await getAllReportChannelTypes();
+      listReportChannel.value = response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // HANDLE SUBMIT REPORT CHANNEL
+  const handleSubmitReportChannel = async () => {
+    if (selectReportChannel.value.id) {
+      try {
+        const response = await reportChannel(props.channelId, selectReportChannel.value.id);
+        toast.success('Report channel sent successfully');
+        popupStore.closeReportChannel();
+        popupStore.openReportSuccess();
+        return response.data;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
+  watch(
+    selectReportChannel,
+    (newVal) => {
+      selectReportChannel.value = newVal;
+    },
+    { deep: true },
+  );
 </script>
 
 <template>
@@ -55,5 +99,18 @@
       </ul>
     </div>
   </div>
-  <ReportChannelPopup :channelName="props.channelName" />
+  <ReportDialog
+    title="channels"
+    groupName="reportTypeChannel"
+    :reportType="listReportChannel"
+    :titleReport="`Report ${channelName}`"
+    :selectedReport="selectReportChannel"
+    :isReportVisible="popupStore.showReportChannel"
+    :isReportSuccessVisible="popupStore.showReportSuccess"
+    @update:selectedReport="selectReportChannel = $event"
+    @hide="popupStore.closeReportChannel"
+    @submit="handleSubmitReportChannel"
+    @close="popupStore.closeReportSuccess"
+    @hideSuccess="popupStore.closeReportSuccess"
+  />
 </template>

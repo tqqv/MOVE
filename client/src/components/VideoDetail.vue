@@ -147,7 +147,7 @@
         <share class="mr-1" /> Share
       </div>
 
-      <ReportChannel :channelName="channelDetails.channelName" />
+      <ReportChannel :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
     </div>
   </div>
 </template>
