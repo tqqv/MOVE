@@ -1,7 +1,7 @@
 var express = require("express");
 const userRouter = express.Router();
 
-const { getProfileController, editProfileController, changePasswordController, requestChannelController, getRequestChannelController, getListSubscribeOfUser, followChannelController, getAllInforFollowController, checkExistUsername, getProfileByUserNameController, followCategoryController } = require("../controllers/userController")
+const { getProfileController, editProfileController, changePasswordController, requestChannelController, getRequestChannelController, getListSubscribeOfUser, followChannelController, getAllInforFollowController, checkExistUsername, getProfileByUserNameController, followCategoryController, checkUserFollowCateController } = require("../controllers/userController")
 const { verifyUser } = require("../middlewares/verifyToken")
 
 userRouter.get("/getProfileByUsername/:username", getProfileByUserNameController)
@@ -20,5 +20,7 @@ userRouter.get("/:username", verifyUser, checkExistUsername)
 userRouter.post("/followChannel", verifyUser, followChannelController)
 userRouter.post("/followCategory", verifyUser, followCategoryController)
 userRouter.get("/getAllInforFollow", verifyUser, getAllInforFollowController)
+
+userRouter.get("/checkUserFollowCate/:cateId", verifyUser, checkUserFollowCateController)
 
 module.exports = userRouter;
