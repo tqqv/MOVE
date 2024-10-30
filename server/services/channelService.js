@@ -86,10 +86,11 @@ const getProfileChannel = async(userId) =>{
         message: "Channel not found."
       };
     }
+    const liveStatus = await _redis.get(`channel_${channel.id}_live_status`);
 
     return {
       status: 200,
-      data: channel,
+      data: {...channel.toJSON(), liveStatus},
       message: "Get profile channel successfully."
     }
 
@@ -465,8 +466,8 @@ const createStreamKey = async(channelId) => {
 
 const validateStreamKey = async (streamKey) => {
   try {
-    const valid = await Channel.findOne({where: {streamKey: streamKey}});
-    if(!valid){
+    const channel = await Channel.findOne({where: {streamKey: streamKey}});
+    if(!channel){
       return {
         status: 404,
         data: streamKey,
@@ -474,8 +475,9 @@ const validateStreamKey = async (streamKey) => {
       };
     }
     setTimeout(
-      () => _io.to(valid.id).emit('streamReady', true), 10000
+      () => _io.to(channel.id).emit('streamReady', true), 10000
     )
+    await _redis.set(`channel_${channel.id}_live_status`, 'streamReady');
     return {
       status: 200,
       data: streamKey,
@@ -493,18 +495,19 @@ const validateStreamKey = async (streamKey) => {
 
 const endStream = async(streamKey) => {
   try {
-    const valid = await Channel.findOne({where: {streamKey: streamKey}});
-    if(!valid){
+    const channel = await Channel.findOne({where: {streamKey: streamKey}});
+    if(!channel){
       return {
         status: 404,
         message: "End stream fail"
       }
     }
-    valid.isLive = false;
-    valid.livestreamStatus = 'ended';
-    valid.save();
-    _io.to(valid.id).emit('streamReady', false);
-    _io.to(valid.id).emit('streamPublished', false);
+    channel.isLive = false;
+    // delete channelLivestatus
+    channel.save();
+    _io.to(channel.id).emit('streamReady', false);
+    _io.to(channel.id).emit('streamPublished', false);
+    await _redis.del(`channel_${channel.id}_live_status`);
     return {
       status: 200,
       message: "End stream success"
