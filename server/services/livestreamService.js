@@ -1,7 +1,7 @@
 const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
-const { Livestream, Donation, Rating, Sequelize } = db;
+const { Livestream, Donation, Rating, Channel, Sequelize } = db;
 
 const createLivestream = async(data) => {
   try {
@@ -13,6 +13,12 @@ const createLivestream = async(data) => {
       }
     }
     const newLiveStream = await Livestream.create(data)
+    const channel = await Channel.findOne({
+      where: {id: newLiveStream.streamerId}
+    })
+    channel.isLive = true;
+    channel.save();
+
     _io.to(data.streamerId).emit('streamPublished', true);
     return {
       status: 200,
@@ -40,16 +46,35 @@ const endLivestream = async(livestreamId) => {
     const liveStream = await Livestream.findOne(
       {
         where: { id: livestreamId },
+        include: [
+          {
+            model: Channel,
+            as: 'livestreamChannel',
+            attributes: ['id', 'isLive', 'channelName']
+          },
+        ]
       }
     )
-    liveStream.isLive('false');
+
+    if (!liveStream) {
+      return {
+        status: 404,
+        data: null,
+        message: 'Livestream not found'
+      };
+    }
+
+    liveStream.livestreamChannel.isLive = false;
+    await liveStream.livestreamChannel.save();
+
     ///
     // Logic update stats from redis here
     ///
     liveStream.save();
-    _io.to(data.streamerId).emit('streamPublished', false);
+    _io.to(liveStream.streamerId).emit('streamPublished', false);
     return {
       status: 200,
+      data: liveStream,
       message: 'End livestream successfully'
     }
   } catch (error) {
