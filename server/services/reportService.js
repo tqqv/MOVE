@@ -39,6 +39,21 @@ const reportVideo = async(userId, videoId, reportTypeId) => {
       }
     }
 
+    const checkReport = await Report.findOne({
+      where: {
+        targetVideoId: videoId,
+        reporterId: userId
+      }
+    })
+
+    if(checkReport){
+      return {
+        status: 200,
+        data: null,
+        message: "You reported this video"
+      }
+    }
+
     const newReport = await Report.create({
       reporterId: userId,
       targetVideoId: videoId,
@@ -94,6 +109,21 @@ const reportLivestream = async(userId, livestreamId, reportTypeId) => {
         status: 404,
         data: null,
         message: "Livestream not found"
+      }
+    }
+
+    const checkReport = await Report.findOne({
+      where: {
+        targetLivestreamId: livestreamId,
+        reporterId: userId
+      }
+    })
+
+    if(checkReport){
+      return {
+        status: 200,
+        data: null,
+        message: "You reported this livestream"
       }
     }
 
@@ -155,6 +185,21 @@ const reportComment = async(userId, commentId, reportTypeId) => {
       }
     }
 
+    const checkReport = await Report.findOne({
+      where: {
+        targetCommentId: commentId,
+        reporterId: userId
+      }
+    })
+
+    if(checkReport){
+      return {
+        status: 200,
+        data: null,
+        message: "You reported this comment"
+      }
+    }
+
     const newReport = await Report.create({
       reporterId: userId,
       targetCommentId: commentId,
@@ -175,9 +220,9 @@ const reportComment = async(userId, commentId, reportTypeId) => {
   }
 }
 
-const reportChatMessages = async(userId, content, reportTypeId) => {
+const reportChatMessages = async(userId, content, reportTypeId, accountId) => {
   try {
-    if (!userId || !content || !reportTypeId) {
+    if (!userId || !content || !reportTypeId, accountId) {
       return {
         status: 400,
         data: null,
@@ -202,6 +247,7 @@ const reportChatMessages = async(userId, content, reportTypeId) => {
     const newReport = await Report.create({
       reporterId: userId,
       chatMessagesContent: content,
+      targetAccountId: accountId,
       reportTypeId: reportTypeId
     })
 
@@ -276,6 +322,21 @@ const reportChannel = async(userId, channelId, reportTypeId) => {
         status: 404,
         data: null,
         message: "Channel not found"
+      }
+    }
+
+    const checkReport = await Report.findOne({
+      where: {
+        targetChannelId: channelId,
+        reporterId: userId
+      }
+    })
+
+    if(checkReport){
+      return {
+        status: 200,
+        data: null,
+        message: "You reported this channel"
       }
     }
 

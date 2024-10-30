@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel } = db;
+const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, Report } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -125,6 +125,11 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
         as: 'channelComments',
         attributes: ['avatar','channelName', 'popularCheck']
       },
+      {
+        model: Report,
+        as: 'commentReport',
+        attributes: ['status']
+      },
     ],
 
     order: [
@@ -139,7 +144,7 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     data: {
       comments,
       totalPages: Math.ceil(comments.count/pageSize)
-    
+
     },
     message: "Get comments success"
   }
