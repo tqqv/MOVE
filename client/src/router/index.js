@@ -40,7 +40,10 @@ const routes = [
         path: 'browse',
         component: BrowseContent,
         children: [
-          { path: 'categories', component: TabCategories },
+          {
+            path: 'categories',
+            component: TabCategories,
+          },
           { path: 'top-videos', component: TabTopVideo },
           { path: 'most_viewed', component: TabMostView },
           { path: 'highest_rated', component: TabHighestRated },
@@ -48,6 +51,7 @@ const routes = [
       },
       { path: 'search', component: SearchContent },
       { path: 'video/:videoId', component: VideoDetails },
+      { path: 'browse/categories/:category', component: CategoryDetailsContent },
     ],
   },
   // LIVE STREAM LAYOUT
