@@ -228,7 +228,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
             attributes: ['id', 'levelWorkout']
           }
         ]
-      }
+      },
     ],
     order: [[sortCondition.sortBy, sortCondition.order]],
     offset: (page - 1) * pageSize,
@@ -264,6 +264,11 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
       ]
     },
     include: [
+      {
+        model: Report,
+        as: 'commentReport',
+        attributes: ['status']
+      },
       {
         model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',

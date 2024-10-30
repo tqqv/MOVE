@@ -14,12 +14,17 @@
   import ReportDialog from '@/components/ReportDialog.vue';
   import axiosInstance from '@/services/axios';
   import { toast } from 'vue3-toastify';
+  import { useReadMore } from '@/utils';
 
   const props = defineProps({
     comment: Object,
     fetchAllCommentStreamer: Function,
   });
   //comment
+  const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
+    props.comment.content,
+    300,
+  );
   const openCommentField = ref(false);
   const openCommentReply = ref(false);
   const openViewAllComment = ref(false);
@@ -47,6 +52,7 @@
   };
   const openPopupReport = () => {
     isReportVisible.value = !isReportVisible.value;
+    openReportComment.value = false;
     getAllReportTypes();
   };
   // OPEN COMMENT REPLY
@@ -115,21 +121,6 @@
       loadingReplies.value = false;
     }
   };
-  const isElementOutside = (element, target) => {
-    return element && !element.contains(target);
-  };
-  const handleClickOutside = (event) => {
-    const reportMenu = document.getElementById('report-menu');
-    const reportMenuButton = document.getElementById('report-menu-button');
-
-    const clickOutsideReportMenu =
-      isElementOutside(reportMenu, event.target) &&
-      isElementOutside(reportMenuButton, event.target);
-
-    if (clickOutsideReportMenu) {
-      openReportComment.value = false;
-    }
-  };
 
   ///REPORT
   const getAllReportTypes = async () => {
@@ -152,6 +143,7 @@
         if (response.status === 200) {
           isReportVisible.value = false;
           isReportSuccessVisible.value = true;
+          toast.success(response.data.message);
         }
       } catch (error) {
         toast.error(error.message);
@@ -168,14 +160,6 @@
     isReportSuccessVisible.value = false;
   };
   //------///
-  onMounted(() => {
-    document.addEventListener('click', handleClickOutside);
-    document.addEventListener('click', handleClickOutside);
-  });
-
-  onBeforeUnmount(() => {
-    document.removeEventListener('click', handleClickOutside);
-  });
 </script>
 
 <template>
@@ -209,8 +193,13 @@
             <p class="text-xs text-footer">{{ formatDate(comment.updatedAt) }}</p>
           </div>
           <!-- COMMENT -->
-          <p class="text-sm break-words">
-            {{ comment.content }}
+          <p class="break-words text-sm text-black">
+            {{ displayedText() }}
+            <span v-if="isLongText">
+              <button @click="toggleText" class="text-primary font-semibold ml-1">
+                {{ showFullText ? 'Show less' : 'Read more' }}
+              </button>
+            </span>
           </p>
           <!-- REPLY COMMENT -->
           <div class="flex mt-2 gap-x-6 text-sm">
@@ -232,8 +221,9 @@
                   <button
                     class="text-primary text-[13px] font-bold flex items-center cursor-pointer"
                     id="report-menu-button"
+                    @click="toggleReportComment(comment.id)"
                   >
-                    <i @click="toggleReportComment(comment.id)" class="pi pi-ellipsis-v"></i>
+                    <i class="pi pi-ellipsis-v"></i>
                   </button>
                 </div>
 

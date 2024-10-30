@@ -80,7 +80,7 @@
           />
           <span>{{ reply.dislike }}</span>
         </div>
-        <i class="pi pi-ellipsis-v text-md text-primary cursor-pointer"></i>
+        <!-- <i class="pi pi-ellipsis-v text-md text-primary cursor-pointer"></i> -->
 
         <span
           class="font-semibold text-[13px] text-primary cursor-pointer"
