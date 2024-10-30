@@ -1033,6 +1033,7 @@ const getVideoWatchAlso = async (category, level, videoId) => {
         id: {
           [Op.not]: videoId,
         },
+        status: 'public',
       },
       include: [
         {
@@ -1071,6 +1072,7 @@ const getVideoWatchAlso = async (category, level, videoId) => {
           id: {
             [Op.notIn]: [...existingVideoIds, videoId],
           },
+          status: 'public',
         },
         limit: 20 - videos.length,
         include: [
