@@ -505,18 +505,9 @@ const endStream = async(streamKey) => {
     channel.isLive = false;
     // delete channelLivestatus
     channel.save();
-    let liveStatus = await redis.get(`channel${channel.id}_live_status`);
-    console.log("liveStatus: ", liveStatus );
-    
-    if(liveStatus == 'streamPublished') {
-      _io.to(channel.id).emit('socketLiveStatus', 'streamEnded');
-      // await _redis.del(channel_${channel.id}_live_status);
-      await _redis.set(`channel_${channel.id}_live_status`, 'streamEnded', 'EX', 20);
-    } else {
-      _io.to(channel.id).emit('socketLiveStatus', 'null');
-      // await _redis.del(channel_${channel.id}_live_status);
-      await _redis.set(`channel_${channel.id}_live_status`, 'null', 'EX', 20);
-    }
+    _io.to(channel.id).emit('socketLiveStatus', 'streamEnded');
+    // await _redis.del(`channel_${channel.id}_live_status`);
+    await _redis.set(`channel_${channel.id}_live_status`, 'streamEnded', 'EX', 20);
     return {
       status: 200,
       message: "End stream success"
@@ -528,7 +519,6 @@ const endStream = async(streamKey) => {
     }
   }
 }
-
 module.exports = {
   createChannel,
   listSubscribeOfChannel,

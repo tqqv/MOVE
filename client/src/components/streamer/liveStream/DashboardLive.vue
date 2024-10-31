@@ -10,7 +10,7 @@
   <section>
     <!-- INLIVESTREAM -->
     <InLiveStream
-      v-if="props.connectOBS === 'streamPublished' || props.liveStatus === 'streamPublished'"
+      v-if="props.connectOBS === 'streamPublished' || props.liveStatus === 'streamPublished' ||  props.liveStatus === 'streamReady'"
       :connectOBS="connectOBS"
       :liveStatus="liveStatus"
     />
