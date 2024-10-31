@@ -1,12 +1,12 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
+  import { ref, onMounted, watch } from 'vue';
   import CommentItem from './CommentItem.vue';
   import { getAllComments, getAllChildComments } from '@/services/comment';
   import WriteComments from './WriteComments.vue';
 
   const props = defineProps({
     videoId: {
-      type: Number,
+      type: [Number, String],
       required: true,
     },
   });
@@ -113,6 +113,15 @@
       fetchComments();
     }
   };
+
+  const resetComments = () => {
+    comments.value = [];
+    currentPage.value = 1;
+    hasMoreComments.value = true;
+    fetchComments();
+  };
+
+  watch(() => props.videoId, resetComments);
 
   onMounted(() => {
     fetchComments();

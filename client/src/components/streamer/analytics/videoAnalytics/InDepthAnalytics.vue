@@ -91,8 +91,8 @@
       <!-- Col 1 -->
 
       <div class="space-y-4">
-        <div>
-          <img :src="videosDetails.thumbnailUrl" class="rounded-lg object-cover w-full" />
+        <div class="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
+          <img :src="videosDetails.thumbnailUrl" class="object-cover w-full h-full" />
         </div>
 
         <div>

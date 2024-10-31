@@ -175,8 +175,15 @@ const getCateByTitle = async (title) => {
         'id',
         'imgUrl',
         'title',
-        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews'],
-        [sequelize.fn('COUNT', sequelize.fn('DISTINCT', sequelize.col('cateFollow.categoryId'))), 'followerCount']
+        [sequelize.fn('SUM', sequelize.fn('DISTINCT', sequelize.col('categoryVideos.viewCount'))), 'totalViews'],
+        [
+          sequelize.literal(`(
+            SELECT Count(categoryId)
+            FROM categoryFollows
+            WHERE categoryFollows.categoryId = Category.id
+          )`),
+          'followerCount'
+        ],
       ],
       include: [
         {

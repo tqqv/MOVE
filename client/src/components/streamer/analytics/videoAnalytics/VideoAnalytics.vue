@@ -166,7 +166,11 @@
         <Column field="" header="" style="display: none"></Column>
       </DataTable>
       <div class="flex justify-end gap-x-12 items-center px-12 py-3">
-        <Filter :title="'Rows per page'" :options="pageSizeOptions" v-model="selectedPageSize" />
+        <Filter
+          :title="'Rows per page'"
+          :options="pageSizeOptions"
+          @change="selectedPageSize = $event.value"
+        />
         <div class="">
           <span>
             {{ (currentPage - 1) * selectedPageSize + 1 }}
