@@ -42,8 +42,7 @@ router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
 
 // Tăng View ở đây
 router.post('/increaseView', increaseViewController);
-
-router.post('/increaseViewWithUser', verifyUser, updateViewtimeController);
+router.post('/updateViewTime', verifyUser, updateViewtimeController);
 
 
 module.exports = router;
