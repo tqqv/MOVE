@@ -23,16 +23,14 @@
     totalRepliesCount: Object,
     childCommentsPage: {
       type: Number,
-      required: true,
     },
     childCommentsPerPage: {
       type: Number,
-      required: true,
     },
     hasMoreChildComments: Boolean,
     loadingReplies: Boolean,
     videoId: {
-      type: Number,
+      type: [Number, String],
       required: true,
     },
   });
