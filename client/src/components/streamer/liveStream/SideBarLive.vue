@@ -14,6 +14,7 @@
   const props = defineProps({
     statusLive: String,
     connectOBS: Boolean,
+    liveStatus: String,
     time: Number,
   });
 
@@ -57,7 +58,7 @@
   };
 
   const handleGoLive = async () => {
-    if (props.connectOBS && liveStreamStore.complete) {
+    if (props.liveStatus === 'streamReady' && liveStreamStore.complete) {
       // showGoLivePopup.value = true;
       try {
         const response = await createLiveStream(liveStreamStore.liveStreamData);
@@ -65,7 +66,7 @@
         emit('updateStatusLive', 'inLive');
         router.push('/streaming/dashboard-live');
       } catch (error) {
-        toast.error('Failed to update profile');
+        toast.error('Failed to ');
       }
     }
   };
@@ -90,18 +91,20 @@
   );
 
   watch(
-    () => props.connectOBS,
+    () => props.liveStatus,
     (newValue) => {
-      if (newValue) {
+      if (newValue === 'streamReady') {
         setUpSteps.value[1].tick = true;
+      } else if (newValue == null) {
+        setUpSteps.value[1].tick = false;
       }
     },
   );
 
-  watch(() => {
-    console.log(liveStreamStore.complete);
-    console.log(props.connectOBS);
-  });
+  // watch(() => {
+  //   console.log(liveStreamStore.complete);
+  //   console.log(props.connectOBS);
+  // });
 </script>
 <template>
   <section
@@ -218,8 +221,10 @@
         <!-- START LIVE -->
         <div
           class="flex items-center justify-center gap-x-2 px-3 py-2 rounded-md bg-primary/90 hover:bg-primary text-white text-center w-full cursor-pointer"
-          :class="{ '!cursor-not-allowed opacity-50': !liveStreamStore.complete || !connectOBS }"
-          :disabled="!liveStreamStore.complete && !connectOBS"
+          :class="{
+            '!cursor-not-allowed opacity-50': !liveStreamStore.complete || props.liveStatus == null,
+          }"
+          :disabled="!liveStreamStore.complete && props.liveStatus == null"
           @click="handleGoLive"
         >
           <LiveStream />

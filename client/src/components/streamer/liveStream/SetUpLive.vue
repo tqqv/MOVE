@@ -16,6 +16,7 @@
   const props = defineProps({
     statusLive: String,
     connectOBS: Boolean,
+    liveStatus: String,
   });
 
   const userStore = useUserStore();
@@ -139,18 +140,24 @@
   <section class="">
     <div class=" ">
       <!-- SCREEN LIVE -->
-      <div v-if="statusLive === 'beforeLive'" class="px-8 flex items-center flex-col">
+      <div
+        v-if="!props.connectOBS || props.liveStatus === 'streamReady'"
+        class="px-8 flex items-center flex-col"
+      >
         <!-- STREAMING SOFTWARE -->
         <div v-if="isLiveStreamSelected" class="w-full flex justify-center">
           <div
             class="flex flex-col max-w-[1028px] basis-full justify-center rounded-lg shadow-md bg-white mb-6 overflow-hidden"
           >
             <!-- SCREEN DONT" CONNET OBS -->
-            <div v-if="!props.connectOBS" class="flex w-full p-4">
+            <div v-if="!props.connectOBS && props.liveStatus == null" class="flex w-full p-4">
               <NotConnectScreen />
             </div>
             <!-- SCREEN CONNECT OBCS -->
-            <div v-if="props.connectOBS" class="flex w-full p-4">
+            <div
+              v-if="props.connectOBS || props.liveStatus === 'streamReady'"
+              class="flex w-full p-4"
+            >
               <LiveStreamScreen :username="userStore.user.username" />
             </div>
             <!-- YOUR SCREEN -->

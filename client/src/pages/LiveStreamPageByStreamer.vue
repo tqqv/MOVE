@@ -7,7 +7,9 @@
 
   const streamerStore = useStreamerStore();
   const statusLive = ref('beforeLive');
-  const connectOBS = ref();
+  const connectOBS = ref(false);
+  const liveStatus = ref(null);
+
   const time = ref(0);
   let timer = null;
 
@@ -15,11 +17,13 @@
     statusLive.value = value;
   };
 
+  // CONNECT OBS
   const handleConnectOBS = () => {
     if (streamerStore.streamerChannel?.id) {
       joinRoom(streamerStore.streamerChannel.id);
 
       listenStreamReady((isReady) => {
+        streamerStore.fetchProfileChannel();
         connectOBS.value = isReady;
       });
     }
@@ -45,6 +49,17 @@
     await streamerStore.fetchProfileChannel();
     handleConnectOBS();
   });
+
+  watch(
+    () => streamerStore.streamerChannel?.liveStatus,
+    (newLiveStatus) => {
+      liveStatus.value = newLiveStatus;
+    },
+  );
+  watch(() => {
+    console.log('livestatus: ', liveStatus.value);
+    console.log('connectobs: ', connectOBS.value);
+  });
 </script>
 
 <template>
@@ -54,11 +69,12 @@
       :time="time"
       :connectOBS="connectOBS"
       :statusLive="statusLive"
+      :liveStatus="liveStatus"
       @updateStatusLive="updateStatusLive"
       @handleEndLive="handleEndLive"
     />
     <div class="flex-1 overflow-y-auto">
-      <router-view :statusLive="statusLive" :connectOBS="connectOBS" />
+      <router-view :statusLive="statusLive" :connectOBS="connectOBS" :liveStatus="liveStatus" />
     </div>
   </div>
 </template>
