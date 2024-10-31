@@ -1008,8 +1008,8 @@ const updateViewtime = async(userId, videoId, viewTime) => {
 
     const checkView = await ViewVideo.findOne({where: {viewerId: userId, videoId: videoId}})
 
-    if(checkView) {
-      checkView.viewTime = Math.min(checkView.viewTime + viewTime, video.duration);
+    if(checkView && checkView.viewTime < viewTime) {
+      checkView.viewTime = viewTime
       await userVideoView.save();
     }
 

@@ -183,7 +183,7 @@ const getListVideoByChannelController = async(req, res, next) => {
 }
 
 const increaseViewController = async(req, res, next) => {
-  const userId = req.user.id;
+  const userId = req.body.id;
   const videoId = req.body.videoId;
   const ip = req.body.ip;
   const result = await increaseView(userId, videoId, ip)

@@ -11,7 +11,7 @@ const getProfile = async (id) => {
       where: {
         id: id
       },
-      attributes: ['username', 'email', 'fullName', 'isVerified', 'avatar', 'gender', 'dob', 'REPs', 'country', 'state', 'city', 'isBanned','role'],
+      attributes: ['id', 'username', 'email', 'fullName', 'isVerified', 'avatar', 'gender', 'dob', 'REPs', 'country', 'state', 'city', 'isBanned','role'],
       include: [{
         model: Channel,
         attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck']
