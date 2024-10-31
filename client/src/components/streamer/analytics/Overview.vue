@@ -96,13 +96,13 @@
         <!-- Latest Video Card -->
         <div class="bg-white shadow-lg p-6 rounded-md mt-6 space-y-6">
           <span class="text-[18px] font-bold">Latest video</span>
-          <div>
+
+          <div class="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
             <img
               src="https://i.vimeocdn.com/video/1941683458-d4300a0c841dadba7870e288c4b6b59fcdd96af6d7a87dd2664eea2bf2e6a921-d"
-              class="rounded-lg object-cover w-full h-auto"
+              class="object-cover w-full h-full"
             />
           </div>
-
           <div class="text-base font-bold">Leg days</div>
           <div>
             <div class="flex justify-between">
