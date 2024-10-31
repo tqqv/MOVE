@@ -475,7 +475,7 @@ const validateStreamKey = async (streamKey) => {
       };
     }
     setTimeout(
-      () => _io.to(channel.id).emit('streamReady', true), 10000
+      () => _io.to(channel.id).emit('socketLiveStatus', 'streamReady'), 10000
     )
     await _redis.set(`channel_${channel.id}_live_status`, 'streamReady');
     return {
@@ -505,9 +505,9 @@ const endStream = async(streamKey) => {
     channel.isLive = false;
     // delete channelLivestatus
     channel.save();
-    _io.to(channel.id).emit('streamReady', false);
-    _io.to(channel.id).emit('streamPublished', false);
-    await _redis.del(`channel_${channel.id}_live_status`);
+    _io.to(channel.id).emit('socketLiveStatus', 'streamEnded');
+    // await _redis.del(`channel_${channel.id}_live_status`);
+    await _redis.set(`channel_${channel.id}_live_status`, 'streamEnded', 'EX', 20);
     return {
       status: 200,
       message: "End stream success"

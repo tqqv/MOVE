@@ -19,7 +19,7 @@ const createLivestream = async(data) => {
     channel.isLive = true;
     channel.save();
 
-    _io.to(data.streamerId).emit('streamPublished', true);
+    _io.to(channel.id).emit('socketLiveStatus', 'streamPublished');
     await _redis.set(`channel_${channel.id}_live_status`, 'streamPublished');
     return {
       status: 200,
@@ -67,13 +67,12 @@ const endLivestream = async(livestreamId) => {
 
     liveStream.livestreamChannel.isLive = false;
     await liveStream.livestreamChannel.save();
-    await _redis.set(`channel_${liveStream.livestreamChannel.id}_live_status`, 'streamReady');
-
+    await _redis.set(`channel_${liveStream.livestreamChannel.id}_live_status`, 'streamEnded', 'EX', 20);
     ///
     // Logic update stats from redis here
     ///
     liveStream.save();
-    _io.to(liveStream.streamerId).emit('streamPublished', false);
+      _io.to(liveStream.streamerId).emit('socketLiveStatus', 'streamPublished');
     return {
       status: 200,
       data: liveStream,
