@@ -27,11 +27,9 @@
     },
     usernameDetails: {
       type: String,
-      required: true,
     },
     avatarDetails: {
       type: String,
-      required: true,
     },
     username: {
       type: String,
