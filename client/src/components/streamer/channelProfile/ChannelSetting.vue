@@ -8,10 +8,11 @@
   import TabPanel from 'primevue/tabpanel';
   import ChannelProfileSetting from './ChannelProfileSetting.vue';
   import ChannelNotificationSetting from './ChannelNotificationSetting.vue';
+  import NotificationEdit from '@/components/personalProfile/NotificationEdit.vue';
 
   const tabs = ref([
     { title: 'Channel', component: markRaw(ChannelProfileSetting), value: '0' },
-    { title: 'Notification', component: markRaw(ChannelNotificationSetting), value: '1' },
+    { title: 'Notification', component: markRaw(NotificationEdit), value: '1' },
   ]);
 </script>
 <template>
