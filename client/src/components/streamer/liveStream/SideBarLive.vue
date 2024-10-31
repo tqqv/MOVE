@@ -12,7 +12,6 @@
   import { formatTime } from '@/utils';
 
   const props = defineProps({
-    statusLive: String,
     connectOBS: Boolean,
     liveStatus: String,
     time: Number,
@@ -46,7 +45,7 @@
 
   // ROUTER SIDEBAR
   const menuItems = computed(() => {
-    return props.statusLive === 'beforeLive'
+    return props.liveStatus == null || props.liveStatus === 'streamReady'
       ? [
           { name: 'Stream setup', icon: LiveStream, link: '/streaming/stream-setup' },
           { name: 'Dashboard', icon: AnalyticsIcon, link: '/streaming/dashboard-live' },
@@ -116,11 +115,13 @@
       <div class="flex justify-between items-center">
         <p class="text_subTitle text-2xl">
           {{
-            statusLive === 'beforeLive'
+            liveStatus == null || liveStatus === 'streamReady'
               ? 'Create live video'
-              : statusLive === 'inLive'
+              : liveStatus === 'streamPublished'
               ? 'Live dashboard'
-              : 'End of live stream'
+              : liveStatus === 'streamEnded '
+              ? 'End of live stream'
+              : ''
           }}
         </p>
         <button
@@ -133,7 +134,10 @@
       <!-- MAIN -->
       <div class="my-6 pr-1 flex-1 overflow-auto scrollbar-custom">
         <!-- SET UP STEP-->
-        <div :class="{ hidden: statusLive !== 'beforeLive' }" class="flex flex-col gap-y-4">
+        <div
+          v-if="liveStatus === null || liveStatus === 'streamReady'"
+          class="flex flex-col gap-y-4"
+        >
           <div class="flex items-center gap-x-3">
             <div class="w-full bg-gray-dark rounded-full h-2.5">
               <div
@@ -155,12 +159,15 @@
             </div>
           </div>
         </div>
-        <div :class="{ hidden: statusLive === 'beforeLive' }" class="flex flex-col gap-y-4">
+        <div
+          v-if="liveStatus === 'streamPublished' || liveStatus === 'streamEnded'"
+          class="flex flex-col gap-y-4"
+        >
           <span class="text-body text-sm">
             {{
-              statusLive === 'inLive'
+              liveStatus === 'streamPublished'
                 ? 'Now that you are live, you can see your real-time insights or add tools to increase distribution or engagement.'
-                : statusLive === 'afterLive'
+                : statusLive === 'streamEnded'
                 ? 'Your live stream has ended. Review your performance metrics and plan your next steps for future broadcasts.'
                 : ''
             }}</span
@@ -214,7 +221,10 @@
       <hr class="h-px mb-4 bg-gray-dark border-0" />
       <!-- BOTTOM BUTTON -->
       <!-- WAIT START LIVE -->
-      <div :class="{ hidden: statusLive !== 'beforeLive' }" class="flex gap-x-3 font-semibold">
+      <div
+        v-if="liveStatus == null || liveStatus === 'streamReady'"
+        class="flex gap-x-3 font-semibold"
+      >
         <div class="px-4 py-2 rounded-md bg-gray-dark/80 hover:bg-gray-dark cursor-pointer">
           Back
         </div>
@@ -232,7 +242,7 @@
         </div>
       </div>
       <!-- IN LIVE -->
-      <div :class="{ hidden: statusLive !== 'inLive' }" class="flex flex-col gap-y-3 font-semibold">
+      <div v-if="liveStatus === 'streamPublished'" class="flex flex-col gap-y-3 font-semibold">
         <!-- TIME -->
         <div class="flex gap-x-4 items-center">
           <Clock />

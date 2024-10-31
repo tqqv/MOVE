@@ -14,7 +14,6 @@
   import { uploadAvatar } from '@/services/cloudinary';
 
   const props = defineProps({
-    statusLive: String,
     connectOBS: Boolean,
     liveStatus: String,
   });
@@ -141,7 +140,7 @@
     <div class=" ">
       <!-- SCREEN LIVE -->
       <div
-        v-if="!props.connectOBS || props.liveStatus === 'streamReady'"
+        v-if="props.connectOBS == null || props.liveStatus === 'streamReady'"
         class="px-8 flex items-center flex-col"
       >
         <!-- STREAMING SOFTWARE -->
@@ -150,12 +149,15 @@
             class="flex flex-col max-w-[1028px] basis-full justify-center rounded-lg shadow-md bg-white mb-6 overflow-hidden"
           >
             <!-- SCREEN DONT" CONNET OBS -->
-            <div v-if="!props.connectOBS && props.liveStatus == null" class="flex w-full p-4">
+            <div
+              v-if="props.connectOBS == null && props.liveStatus == null"
+              class="flex w-full p-4"
+            >
               <NotConnectScreen />
             </div>
             <!-- SCREEN CONNECT OBCS -->
             <div
-              v-if="props.connectOBS || props.liveStatus === 'streamReady'"
+              v-if="props.connectOBS === 'streamReady' || props.liveStatus === 'streamReady'"
               class="flex w-full p-4"
             >
               <LiveStreamScreen :username="userStore.user.username" />

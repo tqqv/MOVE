@@ -10,9 +10,9 @@ const joinRoom = (channelId) => {
 };
 
 const listenStreamReady = (callback) => {
-  livestreamSocket.off('streamReady');
-  livestreamSocket.on('streamReady', (arg) => {
-    console.log('Received streamReady event with arg:', arg);
+  livestreamSocket.off('socketLiveStatus');
+  livestreamSocket.on('socketLiveStatus', (arg) => {
+    console.log('Received socketLiveStatus  event with arg:', arg);
     callback(arg);
   });
 };
