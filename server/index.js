@@ -37,7 +37,7 @@ const io = require("socket.io")(server, {
 // Gán io vào biến toàn cục
 global._io = io;
 global._redis = new Redis({
-    host: 'localhost',  // Địa chỉ Redis container trên Docker Desktop
+    host: process.env.REDIS_HOST,   // Địa chỉ Redis container trên Docker Desktop
     port: 6379,         // Cổng mặc định của Redis
 });
 app.use(express.json());

@@ -529,5 +529,6 @@ module.exports = {
   getAllInforFollow,
   createStreamKey,
   validateStreamKey,
-  endStream
+  endStream,
+  generatedStreamKey
 }

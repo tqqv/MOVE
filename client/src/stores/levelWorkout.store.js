@@ -7,6 +7,8 @@ export const useLevelWorkoutStore = defineStore('levelWorkout', () => {
   const loading = ref(false);
   const levelWorkout = ref(null);
   const levelWorkoutOptions = ref([{ id: 1, name: 'All levels', value: '' }]);
+  const levelWorkoutForSelect = ref([{ id: '0', name: 'Select a level workout', title: '' }]);
+
   const fetchLevelWorkout = async () => {
     loading.value = true;
     try {
@@ -19,6 +21,10 @@ export const useLevelWorkoutStore = defineStore('levelWorkout', () => {
           value: item.levelWorkout,
         }));
         levelWorkoutOptions.value = [{ id: 1, name: 'All levels', value: '' }, ...formattedData];
+        levelWorkoutForSelect.value = [
+          { id: '0', name: 'Select a level workout', title: '' },
+          ...formattedData,
+        ];
       } else {
         error.value = response.message;
       }
@@ -35,5 +41,6 @@ export const useLevelWorkoutStore = defineStore('levelWorkout', () => {
     fetchLevelWorkout,
     loading,
     error,
+    levelWorkoutForSelect,
   };
 });

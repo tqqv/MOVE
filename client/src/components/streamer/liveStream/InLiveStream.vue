@@ -4,10 +4,13 @@
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import InformationLiveStream from './InformationLiveStream.vue';
   import NotConnectScreen from './NotConnectScreen.vue';
+  import { useUserStore } from '@/stores';
   const props = defineProps({
-    statusLive: String,
+    liveStatus: String,
     connectOBS: Boolean,
   });
+
+  const userStore = useUserStore();
 </script>
 <template>
   <div class="px-10 flex items-center flex-col">
@@ -26,12 +29,15 @@
       >
         <div class="flex flex-col w-full p-4">
           <!-- SCREEN DONT" CONNET OBS -->
-          <div v-if="!props.connectOBS" class="flex w-full">
+          <div v-if="props.connectOBS == null && props.liveStatus == null" class="flex w-full">
             <NotConnectScreen />
           </div>
           <!-- SCREEN CONNECT OBCS -->
-          <div v-if="props.connectOBS" class="flex w-full">
-            <LiveStreamScreen />
+          <div
+            v-if="props.connectOBS === 'streamPublished' || props.liveStatus === 'streamPublished'"
+            class="flex w-full"
+          >
+            <LiveStreamScreen :username="userStore.user.username" />
           </div>
           <div class="mt-5 px-2">
             <div class="flex w-full items-center justify-between gap-x-3">
