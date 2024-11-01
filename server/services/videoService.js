@@ -904,6 +904,14 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
             )`),
             'viewerGift'
           ],
+          [
+            sequelize.literal(`(
+              SELECT Count(videoId)
+              FROM comments
+              WHERE comments.videoId = Video.id
+            )`),
+            'totalComment'
+          ],
         ],
       },
       include: [
