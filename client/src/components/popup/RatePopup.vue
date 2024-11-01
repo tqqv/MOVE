@@ -35,9 +35,6 @@
   );
 
   const handleRatingChange = async (newValue) => {
-    console.log('gia tri moi ', newValue);
-    console.log('gia tri truoc ', previousValue.value);
-
     if (newValue !== null && newValue !== previousValue.value) {
       const data = { rating: newValue, videoId: props.videoId };
 
@@ -85,7 +82,7 @@
         <span class="text-sm"> Tell us what you think about this session. </span>
       </div>
       <div class="flex justify-start">
-        <Rating v-model="value" :min="1" :max="5" />
+        <Rating v-model="value" :max="5" />
       </div>
     </div>
   </div>
