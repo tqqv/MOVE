@@ -35,9 +35,6 @@
   );
 
   const handleRatingChange = async (newValue) => {
-    console.log('gia tri moi ', newValue);
-    console.log('gia tri truoc ', previousValue.value);
-
     if (newValue !== null && newValue !== previousValue.value) {
       const data = { rating: newValue, videoId: props.videoId };
 
