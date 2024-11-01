@@ -1043,6 +1043,18 @@ const getVideoWatchAlso = async (category, level, videoId) => {
         },
         status: 'public',
       },
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+            SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ]
+        ]
+      },
       include: [
         {
           model: Channel,
@@ -1059,13 +1071,13 @@ const getVideoWatchAlso = async (category, level, videoId) => {
           model: LevelWorkout,
           attributes: ['levelWorkout'],
           as: 'levelWorkout',
-          where: level ? { levelWorkout: level } : {},
+          where: level ? { id: level } : {},
         },
         {
           model: Category,
           attributes: ['title'],
           as: 'category',
-          where: category ? { title: category } : {},
+          where: category ? { id: category } : {},
         },
       ],
       limit: 13
@@ -1081,6 +1093,18 @@ const getVideoWatchAlso = async (category, level, videoId) => {
             [Op.notIn]: [...existingVideoIds, videoId],
           },
           status: 'public',
+        },
+        attributes: {
+          include: [
+            [
+              Sequelize.literal(`(
+              SELECT AVG(rating) as ratings
+                  FROM ratings
+                  WHERE ratings.videoId = Video.id
+              )`),
+              'ratings'
+            ]
+          ]
         },
         limit: 20 - videos.length,
         include: [
