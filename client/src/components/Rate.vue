@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, computed, onMounted, watch } from 'vue';
   import RatePopup from './popup/RatePopup.vue';
   import { getRateOfUser } from '@/services/rate';
   import { useUserStore } from '@/stores';
@@ -27,6 +27,8 @@
       dataRate.value = result.data.rating;
       console.log('data Rate neeee', dataRate.value);
       isRated.value = dataRate.value > 0;
+    } else {
+      isRated.value = false;
     }
   };
 
@@ -59,6 +61,14 @@
   const iconClass = computed(() => {
     return isRated.value ? 'pi pi-star-fill' : 'pi pi-star';
   });
+  watch(
+    () => props.videoId,
+    (newVideoId, oldVideoId) => {
+      if (newVideoId !== oldVideoId) {
+        fetchUserRating();
+      }
+    },
+  );
 
   onMounted(() => {
     if (props.videoId && userStore.user) {
