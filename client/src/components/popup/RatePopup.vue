@@ -82,7 +82,7 @@
         <span class="text-sm"> Tell us what you think about this session. </span>
       </div>
       <div class="flex justify-start">
-        <Rating v-model="value" :min="1" :max="5" />
+        <Rating v-model="value" :max="5" />
       </div>
     </div>
   </div>

@@ -28,6 +28,7 @@
       console.log('data Rate neeee', dataRate.value);
       isRated.value = dataRate.value > 0;
     } else {
+      dataRate.value = null;
       isRated.value = false;
     }
   };
@@ -61,15 +62,16 @@
   const iconClass = computed(() => {
     return isRated.value ? 'pi pi-star-fill' : 'pi pi-star';
   });
+
   watch(
     () => props.videoId,
     (newVideoId, oldVideoId) => {
       if (newVideoId !== oldVideoId) {
         fetchUserRating();
+        closePopup();
       }
     },
   );
-
   onMounted(() => {
     if (props.videoId && userStore.user) {
       fetchUserRating(props.videoId);
