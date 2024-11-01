@@ -233,10 +233,7 @@
         <!-- USERNAME -->
         <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <div
-            class="relative text-[14px] rounded-lg"
-            :class="errors.username ? 'error_password' : 'normal_password'"
-          >
+          <div class="relative text-[14px] rounded-lg">
             <input
               v-model="profileData.username"
               type="text"

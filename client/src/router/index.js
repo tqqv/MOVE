@@ -25,6 +25,9 @@ import Overview from '@/components/streamer/analytics/Overview.vue';
 import VideoAnalytics from '@/components/streamer/analytics/videoAnalytics/VideoAnalytics.vue';
 import ViewLiveStreamPage from '@/pages/ViewLiveStreamPage.vue';
 import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InDepthAnalytics.vue';
+import WalletContent from '@/components/wallet/WalletContent.vue';
+import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
+import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
 
 const routes = [
   // User router
@@ -47,6 +50,14 @@ const routes = [
           { path: 'top-videos', component: TabTopVideo },
           { path: 'most_viewed', component: TabMostView },
           { path: 'highest_rated', component: TabHighestRated },
+        ],
+      },
+      {
+        path: 'wallet',
+        component: WalletContent,
+        children: [
+          { path: 'payment-method', component: TabPaymentMethod },
+          { path: 'payment-history', component: TabPaymentHistory },
         ],
       },
       { path: 'search', component: SearchContent },

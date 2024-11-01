@@ -1,10 +1,10 @@
 <script setup>
-  import BrowseContent from '@/components/browse/BrowseContent.vue';
+  import WalletContent from '@/components/wallet/WalletContent.vue';
 </script>
 
 <template>
   <div class="flex w-full pt-[72px]">
-    <BrowseContent />
+    <WalletContent />
   </div>
 </template>
 <style scoped></style>
