@@ -131,7 +131,6 @@
           <template #body="{ data }">
             <span>
               {{ formatAvgViewTime(data.avgViewTime) || '0:00' }}
-              ({{ ((data.avgViewTime / data.duration) * 100).toFixed(0) }}%)
             </span>
           </template>
         </Column>
