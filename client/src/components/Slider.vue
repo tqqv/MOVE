@@ -18,7 +18,7 @@
   <div class="box rounded-lg">
     <carousel-3d
       height="300"
-      width="1100"
+      width="1400"
       controlsVisible="true"
       autoplay="true"
       autoplayTimeout="5000"

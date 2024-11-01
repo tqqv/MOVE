@@ -28,7 +28,7 @@
       <div class="relative">
         <img
           :src="video.thumbnailUrl"
-          class="rounded-md object-cover w-full h-[180px] sm:h-[210px] md:h-[230px] lg:h-[200px]"
+          class="aspect-[9/16] rounded-md object-cover w-full h-[180px] sm:h-[210px] md:h-[230px] lg:h-[200px]"
         />
         <div
           v-if="video.viewCount > 0"
@@ -59,8 +59,8 @@
         <div class="pl-4 flex-1">
           <div class="flex items-center w-full justify-between">
             <!-- Tiêu đề chiếm 2/3 không gian -->
-            <h3 class="text-base font-bold text-black" :title="video.title">
-              {{ truncateDescripton(video.title, 30) }}
+            <h3 class="text-sm md:text-base lg:text-lg font-bold text-black" :title="video.title">
+              {{ truncateDescripton(video.title, 28) }}
             </h3>
 
             <!-- Phần rate và rating nằm ở cuối bên phải -->
@@ -84,8 +84,10 @@
             <span v-if="video.category.title" class="flex items-center">
               {{ video.category.title }}
             </span>
-            <span class="font-bold text-xl px-1 mb-[0.5px] leading-none">•</span>
-            <span>Post {{ formatDate(video.createdAt) }}</span>
+            <div class="flex items-center">
+              <span class="font-bold text-xl px-1 mb-[0.5px] leading-none">•</span>
+            </div>
+            <span class="whitespace-nowrap">Post {{ formatDate(video.createdAt) }}</span>
           </div>
 
           <div class="flex gap-2 items-center text-[10px] font-bold mb-2 text-black">
