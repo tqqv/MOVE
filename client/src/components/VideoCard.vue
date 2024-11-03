@@ -64,8 +64,8 @@
             </span>
           </div>
           <div class="flex items-center space-x-1 text_secondary my-2">
-            <span v-if="video.category.title" class="flex items-center">
-              {{ video.category.title }}
+            <span v-if="video.category?.title" class="flex items-center">
+              {{ video.category?.title }}
             </span>
             <span class="font-bold text-xl px-1 mb-[0.5px] leading-none">•</span>
             <span>Post {{ formatDate(video.createdAt) }} </span>

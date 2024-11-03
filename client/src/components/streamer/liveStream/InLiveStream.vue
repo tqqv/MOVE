@@ -29,12 +29,21 @@
       >
         <div class="flex flex-col w-full p-4">
           <!-- SCREEN DONT" CONNET OBS -->
-          <div v-if="props.connectOBS == null && props.liveStatus == null" class="flex w-full">
+          <div
+            v-if="
+              (props.connectOBS == null || props.connectOBS == 'null') && props.liveStatus == null
+            "
+            class="flex w-full"
+          >
             <NotConnectScreen />
           </div>
           <!-- SCREEN CONNECT OBCS -->
           <div
-            v-if="props.connectOBS === 'streamPublished' || props.liveStatus === 'streamPublished'"
+            v-if="
+              props.connectOBS === 'streamPublished' ||
+              props.liveStatus === 'streamPublished' ||
+              props.liveStatus === 'streamReady'
+            "
             class="flex w-full"
           >
             <LiveStreamScreen :username="userStore.user.username" />

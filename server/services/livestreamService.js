@@ -141,8 +141,44 @@ const getLivestreamStatistics = async (streamId) => {
   }
 };
 
+const updateLivestream = async(data) => {
+  try {
+    const livestream = await Livestream.findByPk(data.livestreamId)
+    if(!livestream) {
+      return {
+        status: 400,
+        data: null,
+        message: "Livestream not found"
+      }
+    }
+    const updateLivestream = await livestream.update(data)
+    if(!updateLivestream) {
+      return {
+        status: 400,
+        data: null,
+        message: "Edit failed." // update fail
+      }
+    }
+
+    return {
+      status: 200,
+      data: updateLivestream,
+      message: "Livestream edit successfully."
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+
 module.exports = {
   createLivestream,
   getLivestreamStatistics,
-  endLivestream
+  endLivestream,
+  updateLivestream
 }

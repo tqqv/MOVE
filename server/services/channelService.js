@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { listSubscribeOfUser } = require("./userService.js");
-const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
+const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, Livestream, sequelize } = db;
 const { v4: uuidv4 } = require('uuid');
 
 // Function này để lúc admin accept request live sẽ gọi
@@ -493,9 +493,9 @@ const validateStreamKey = async (streamKey) => {
   }
 }
 
-const endStream = async(streamKey) => {
+const endStream = async(data) => {
   try {
-    const channel = await Channel.findOne({where: {streamKey: streamKey}});
+    const channel = await Channel.findOne({where: {streamKey: data.streamKey}});
     if(!channel){
       return {
         status: 404,
@@ -505,9 +505,23 @@ const endStream = async(streamKey) => {
     channel.isLive = false;
     // delete channelLivestatus
     channel.save();
-    _io.to(channel.id).emit('socketLiveStatus', 'streamEnded');
-    // await _redis.del(`channel_${channel.id}_live_status`);
-    await _redis.set(`channel_${channel.id}_live_status`, 'streamEnded', 'EX', 20);
+
+    const livestream = await Livestream.findOne({where: { isLive: true, streamerId: channel.id }});
+    // const statsData = await getStreamStats(channel.id);
+    // await livestream.update({...data, statsData, isLive: false});
+    await livestream.update({...data, isLive: false});
+
+    let liveStatus = await _redis.get(`channel_${channel.id}_live_status`);
+    
+    if(liveStatus == 'streamPublished') {
+      _io.to(channel.id).emit('socketLiveStatus', 'streamEnded');
+      // await _redis.del(channel_${channel.id}_live_status);
+      await _redis.set(`channel_${channel.id}_live_status`, 'streamEnded', 'EX', 20);
+    } else if(liveStatus == 'streamReady') {
+      _io.to(channel.id).emit('socketLiveStatus', 'null');
+      // await _redis.del(channel_${channel.id}_live_status);
+      await _redis.del(`channel_${channel.id}_live_status`);
+    }
     return {
       status: 200,
       message: "End stream success"

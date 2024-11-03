@@ -1,10 +1,11 @@
 <script setup>
   import Clapper from '@/components/icons/clapper.vue';
   import Clock from '@/components/icons/clock.vue';
-  import LiveStream from '@/components/icons/liveStream.vue';
   import InformationLiveStream from './InformationLiveStream.vue';
   import TopDonates from './TopDonates.vue';
-  var currentdate = new Date();
+
+
+  
 </script>
 <template>
   <div class="px-10 flex items-center flex-col">

@@ -10,11 +10,11 @@
   <section>
     <!-- INLIVESTREAM -->
     <InLiveStream
-      v-if="props.connectOBS === 'streamPublished' || props.liveStatus === 'streamPublished' ||  props.liveStatus === 'streamReady'"
+      v-if="props.connectOBS === 'streamPublished' || props.liveStatus === 'streamPublished' ||  props.liveStatus === 'streamReady' || props.liveStatus == null"
       :connectOBS="connectOBS"
       :liveStatus="liveStatus"
     />
     <!-- END LIVE STREAM -->
-    <EndLiveStream v-if="props.statusLive === 'afterLive'" />
+    <EndLiveStream v-if="props.liveStatus === 'streamEnded'" />
   </section>
 </template>
