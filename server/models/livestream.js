@@ -105,6 +105,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         allowNull: true,
       },
+      isLive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
+      },
     },
       {
         sequelize,

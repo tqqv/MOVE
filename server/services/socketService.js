@@ -1,3 +1,4 @@
+const { updateStreamStats, getStreamStats, filterRoomsForDeletion } = require("../utils/redis/stream/redisStreamService");
 
 const getNumOfConnectInAllRooms = () => {
     const rooms = _io.sockets.adapter.rooms;
@@ -29,19 +30,28 @@ const logClientCount = () => {
 };
 
 const connectSocket = (socket) => {
-    socket.on('disconnect', () => {
-        console.log(`User disconnect socket-id is: ${socket.id}`);
+    socket.on('disconnecting', () => {
+        const rooms = Array.from(socket.rooms);
+        let validRoom = filterRoomsForDeletion(rooms);
+
+        validRoom.forEach(async (key) => {
+            const parts = key.split(':');
+            const [, channelId, fields] = parts;
+            await updateStreamStats(channelId, 'decrement', fields, 1)
+        })
+    });
+    socket.on('disconnect', async () => {
         getNumOfConnectInAllRooms();
     })
-    console.log("New user connect socket-id is: ", socket.id)
     getNumOfConnectInAllRooms();
     // Gửi tin nhắn
     _io.emit('receiveMessage', 'Welcome to the socket!');
     // Thông báo cho admin rằng user đã join vào room
-    socket.on('joinRoom', (room) => {
-        // specify socket join the room
+    socket.on('joinRoom', async (room) => {
+        await updateStreamStats(room, 'increment', 'currentViews', 1)
+        await updateStreamStats(room, 'increment', 'totalViews', 1)
+        await updateStreamStats(room, 'increment', 'totalReps', 1000)
         socket.join(room);
-        // getNumOfConnectInRooms(room)
     })
 }
 

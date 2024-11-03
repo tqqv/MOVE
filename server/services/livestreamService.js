@@ -1,5 +1,6 @@
 const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
+const { set } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
 const { Livestream, Donation, Rating, Channel, Sequelize } = db;
 
@@ -20,7 +21,7 @@ const createLivestream = async(data) => {
     channel.save();
 
     _io.to(channel.id).emit('socketLiveStatus', 'streamPublished');
-    await _redis.set(`channel_${channel.id}_live_status`, 'streamPublished');
+    await set(`channel_${channel.id}_live_status`, 'streamPublished');
     return {
       status: 200,
       data: newLiveStream,
@@ -35,49 +36,31 @@ const createLivestream = async(data) => {
   }
 }
 
-const endLivestream = async(livestreamId) => {
+const updateLivestream = async(data) => {
   try {
-    if(!livestreamId){
+    const livestream = await Livestream.findByPk(data.livestreamId)
+    if(!livestream) {
       return {
         status: 400,
         data: null,
-        message: 'Invalid livestreamId'
+        message: "Livestream not found"
       }
     }
-    const liveStream = await Livestream.findOne(
-      {
-        where: { id: livestreamId },
-        include: [
-          {
-            model: Channel,
-            as: 'livestreamChannel',
-            attributes: ['id', 'isLive', 'channelName']
-          },
-        ]
-      }
-    )
-
-    if (!liveStream) {
+    const updateLivestream = await livestream.update(data)
+    if(!updateLivestream) {
       return {
-        status: 404,
+        status: 400,
         data: null,
-        message: 'Livestream not found'
-      };
+        message: "Edit failed." // update fail
+      }
     }
 
-    liveStream.livestreamChannel.isLive = false;
-    await liveStream.livestreamChannel.save();
-    await _redis.set(`channel_${liveStream.livestreamChannel.id}_live_status`, 'streamEnded', 'EX', 20);
-    ///
-    // Logic update stats from redis here
-    ///
-    liveStream.save();
-      _io.to(liveStream.streamerId).emit('socketLiveStatus', 'streamPublished');
     return {
       status: 200,
-      data: liveStream,
-      message: 'End livestream successfully'
+      data: updateLivestream,
+      message: "Livestream edit successfully."
     }
+
   } catch (error) {
     return {
       status: 500,
@@ -86,6 +69,29 @@ const endLivestream = async(livestreamId) => {
     }
   }
 }
+
+const getLivestreamService = async (streamId) => {
+  try {
+    const livestream = await Livestream.findOne({
+      where: { id: streamId }
+    });
+    const channel = await Channel.findOne({
+      where: { id: livestream.streamerId },
+    });
+    // get view count
+    return {
+      status: 200,
+      data: {channel, livestream},
+      message: 'Retrieve data success'
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
 
 const getLivestreamStatistics = async (streamId) => {
   try {
@@ -142,7 +148,8 @@ const getLivestreamStatistics = async (streamId) => {
 };
 
 module.exports = {
+  getLivestreamService,
   createLivestream,
   getLivestreamStatistics,
-  endLivestream
+  updateLivestream
 }

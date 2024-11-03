@@ -15,7 +15,6 @@ const ratingRouter = require("./routes/ratingRoute.js");
 const {connectSocket} = require("./services/socketService.js");
 const reportRouter = require("./routes/reportRoute.js");
 const livestreamRouter = require("./routes/livestreamRoute.js");
-const Redis = require('ioredis');
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -36,10 +35,6 @@ const io = require("socket.io")(server, {
 });
 // Gán io vào biến toàn cục
 global._io = io;
-global._redis = new Redis({
-    host: process.env.REDIS_HOST,   // Địa chỉ Redis container trên Docker Desktop
-    port: 6379,         // Cổng mặc định của Redis
-});
 app.use(express.json());
 app.use(express.urlencoded());
 app.use(cookieParser());
