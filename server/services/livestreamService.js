@@ -2,7 +2,7 @@ const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
-const { Livestream, Donation, Rating, Channel, Sequelize } = db;
+const { Livestream, Donation, Rating, Channel, User, Sequelize } = db;
 
 const createLivestream = async(data) => {
   try {
@@ -19,6 +19,8 @@ const createLivestream = async(data) => {
     })
     channel.isLive = true;
     channel.save();
+    newLiveStream.isLive = true;
+    newLiveStream.save();
 
     _io.to(channel.id).emit('socketLiveStatus', 'streamPublished');
     await set(`channel_${channel.id}_live_status`, 'streamPublished');
@@ -93,6 +95,36 @@ const getLivestreamService = async (streamId) => {
   }
 };
 
+const getLivestreamByUserNameService = async (username) => {
+  try {
+    const user = await User.findOne({
+      where: { username: username }
+    });
+    const channel = await Channel.findOne({
+      where: { userId: user.id}
+    });
+    if(channel.isLive) {
+      const livestream = await Livestream.findOne({where: {streamerId: channel.id, isLive: true}})
+      return {
+        status: 200,
+        data: {channel, livestream},
+        message: 'Retrieve data success'
+      };
+    }
+    return {
+      status: 200,
+      data: {channel},
+      message: 'Retrieve data success'
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
 const getLivestreamStatistics = async (streamId) => {
   try {
     // get total REPs
@@ -149,6 +181,7 @@ const getLivestreamStatistics = async (streamId) => {
 
 module.exports = {
   getLivestreamService,
+  getLivestreamByUserNameService,
   createLivestream,
   getLivestreamStatistics,
   updateLivestream
