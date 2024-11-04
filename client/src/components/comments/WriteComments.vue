@@ -19,18 +19,16 @@
   const props = defineProps({
     fetchComments: {
       type: Function,
-      required: true,
     },
     commentId: {
       type: Number,
-      required: true,
     },
     fetchChildComments: {
       type: Function,
       required: true,
     },
     videoId: {
-      type: Number,
+      type: [Number, String],
       required: true,
     },
     replyToUsername: String,

@@ -60,7 +60,7 @@
     { id: 2, name: 20, value: 20 },
     { id: 3, name: 30, value: 30 },
   ];
-  const selectedPageSize = ref(pageSizeOptions[0].name);
+  const selectedPageSize = ref(pageSizeOptions[0].value);
 
   const fetchVideos = async () => {
     try {
@@ -136,7 +136,7 @@
   watch(selectedProduct, () => {
     console.log(selectedProduct);
   });
-  watch([selectedPageSize], () => {
+  watch(selectedPageSize, () => {
     currentPage.value = 1;
     fetchVideos();
   });
@@ -154,7 +154,7 @@
       dataKey="id"
       tableStyle="min-width: 50rem"
     >
-      <!-- <Column selectionMode="multiple" headerStyle="width: 3rem"></Column> -->
+      <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column header="Videos">
         <template #body="{ data }">
           <img :src="data.thumbnailUrl" class="w-[200px] h-[100px] object-cover" />
@@ -184,7 +184,11 @@
           <span>{{ data.viewCount || 0 }}</span>
         </template>
       </Column>
-      <Column field="comments" header="Comments" class="!text-center"></Column>
+      <Column header="Comments" class="!text-center">
+        <template #body="{ data }">
+          <span>{{ data.viewCount || 0 }}</span>
+        </template>
+      </Column>
       <Column header="Ratings">
         <template #body="{ data }">
           <div class="flex items-center gap-2">
@@ -290,7 +294,11 @@
       </template> -->
     </DataTable>
     <div class="flex justify-end gap-x-12 items-center px-12 pt-3">
-      <Filter :title="'Rows per page'" :options="pageSizeOptions" v-model="selectedPageSize" />
+      <Filter
+        :title="'Rows per page'"
+        :options="pageSizeOptions"
+        @change="selectedPageSize = $event.value"
+      />
       <div class="">
         <span>
           {{ (currentPage - 1) * selectedPageSize + 1 }}

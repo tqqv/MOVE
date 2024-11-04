@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createCategory, getAllCategory, getCateById, editCategory, deleteCategory, getAllCategoryWithView } = require("../services/categoryService");
+const { createCategory, getAllCategory, getCateById, editCategory, deleteCategory, getAllCategoryWithView, getCateByTitle } = require("../services/categoryService");
 
 
 const createCategoryController = async (req, res, next) => {
@@ -42,6 +42,13 @@ const getAllCategoryWithViewController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getCateByTitleController = async(req, res, next) => {
+  const title = req.params.title
+  const result = await getCateByTitle(title)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   createCategoryController,
   getAllCategoryController,
@@ -49,4 +56,5 @@ module.exports = {
   editCategoryController,
   deleteCategoryController,
   getAllCategoryWithViewController,
+  getCateByTitleController,
 }

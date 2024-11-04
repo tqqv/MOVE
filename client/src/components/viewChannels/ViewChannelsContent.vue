@@ -91,7 +91,7 @@
       :username="username"
       :usernameDetails="usernameDetails"
       :avatarDetails="avatarDetails"
-      @updateFollowers="userStore.followers"
+      @updateFollowers="fetchChannelData"
       class="pl-3"
     />
     <div>

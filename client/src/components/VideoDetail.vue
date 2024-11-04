@@ -6,7 +6,8 @@
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
   import { toast } from 'vue3-toastify';
-  import { useUserStore } from '@/stores';
+  import { usePopupStore, useUserStore } from '@/stores';
+  import ReportChannel from './ReportChannel.vue';
   const props = defineProps({
     isButtonGiftREPsVisible: {
       type: Boolean,
@@ -26,11 +27,9 @@
     },
     usernameDetails: {
       type: String,
-      required: true,
     },
     avatarDetails: {
       type: String,
-      required: true,
     },
     username: {
       type: String,
@@ -41,6 +40,8 @@
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const userStore = useUserStore();
+  const popupStore = usePopupStore();
+
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
@@ -71,6 +72,10 @@
   };
 
   const toggleFollow = () => {
+    if (!userStore.user) {
+      popupStore.openLoginPopup();
+      return;
+    }
     followChannel();
   };
   const isChannelFollowed = computed(() => {
@@ -107,11 +112,9 @@
         </div>
       </div>
       <div>
-        <p class="text-[20px] flex items-center">
-          <span class="mr-2">{{
-            channelDetails ? channelDetails.channelName : usernameDetails
-          }}</span>
-          <Verified v-if="channelDetails?.popularCheck" class="ml-1 mb-1 mr-2 fill-blue" />
+        <p class="text-[20px] flex items-center gap-x-4">
+          <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>
+          <Verified v-if="channelDetails?.popularCheck" class="fill-blue" />
           <span v-if="channelDetails" class="whitespace-nowrap">
             {{ channelDetails.isLive ? 'is now online' : 'is now offline' }}
           </span>
@@ -125,7 +128,6 @@
     <!-- User Action -->
     <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
-        v-if="userStore.user?.username !== username"
         class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
         @click="toggleFollow"
       >
@@ -143,28 +145,7 @@
         <share class="mr-1" /> Share
       </div>
 
-      <div class="relative">
-        <button
-          v-if="isUserAction"
-          aria-expanded="false"
-          aria-controls="menu"
-          class="pi pi-ellipsis-v text-primary text-[20px]"
-          @click="toggleMenu"
-        />
-        <div
-          v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-50"
-        >
-          <ul class="flex items-center justify-center h-full m-0 p-0">
-            <li
-              class="flex items-center justify-center text-[13px] cursor-pointer text-center"
-              @click="closeMenu"
-            >
-              Report video
-            </li>
-          </ul>
-        </div>
-      </div>
+      <ReportChannel :channelName="channelDetails.channelName" />
     </div>
   </div>
 </template>

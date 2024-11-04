@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { ref, onMounted, onBeforeUnmount } from 'vue';
   import rep from '@icons/rep.vue';
   import rep2500 from '@icons/reps25000.vue';
   import dislike from '@/components/icons/dislike.vue';
@@ -11,12 +11,20 @@
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { formatDate } from '@/utils/calculatorDate';
   import { formatDuration } from '@/utils';
+  import ReportDialog from '@/components/ReportDialog.vue';
+  import axiosInstance from '@/services/axios';
+  import { toast } from 'vue3-toastify';
+  import { useReadMore } from '@/utils';
 
   const props = defineProps({
     comment: Object,
     fetchAllCommentStreamer: Function,
   });
-
+  //comment
+  const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
+    props.comment.content,
+    300,
+  );
   const openCommentField = ref(false);
   const openCommentReply = ref(false);
   const openViewAllComment = ref(false);
@@ -26,12 +34,27 @@
   const currentPage = ref(1);
   const totalPage = ref();
   const hasInitialFetch = ref(false);
+  //report
+  const openReportComment = ref(false);
+  const isReportVisible = ref(false);
+  const isReportSuccessVisible = ref(false);
+  const reportTypeVideos = ref([]);
+  const selectedReportComment = ref(null);
+  const selectedCommentId = ref(null);
 
   // HANDLE COMMENT FIELD
   const handleOpenCommentField = () => {
     openCommentField.value = !openCommentField.value;
   };
-
+  const toggleReportComment = (commentId) => {
+    selectedCommentId.value = commentId;
+    openReportComment.value = !openReportComment.value;
+  };
+  const openPopupReport = () => {
+    isReportVisible.value = !isReportVisible.value;
+    openReportComment.value = false;
+    getAllReportTypes();
+  };
   // OPEN COMMENT REPLY
   const handleOpenCommentReply = (commentId) => {
     openViewAllComment.value = !openViewAllComment.value;
@@ -98,6 +121,45 @@
       loadingReplies.value = false;
     }
   };
+
+  ///REPORT
+  const getAllReportTypes = async () => {
+    try {
+      const response = await axiosInstance.get('report/getListReport?type=videos');
+      if (response.status === 200) {
+        reportTypeVideos.value = response.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const handleSubmitReportComment = async () => {
+    if (selectedReportComment.value.id) {
+      try {
+        const response = await axiosInstance.post('report/comment', {
+          commentId: selectedCommentId.value,
+          reportTypeId: selectedReportComment.value.id,
+        });
+        if (response.status === 200) {
+          isReportVisible.value = false;
+          isReportSuccessVisible.value = true;
+          toast.success(response.data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+  const closeReportSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+  const closeReport = () => {
+    isReportVisible.value = false;
+  };
+  const closeSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+  //------///
 </script>
 
 <template>
@@ -131,8 +193,13 @@
             <p class="text-xs text-footer">{{ formatDate(comment.updatedAt) }}</p>
           </div>
           <!-- COMMENT -->
-          <p class="text-sm break-words">
-            {{ comment.content }}
+          <p class="break-words text-sm text-black">
+            {{ displayedText() }}
+            <span v-if="isLongText">
+              <button @click="toggleText" class="text-primary font-semibold ml-1">
+                {{ showFullText ? 'Show less' : 'Read more' }}
+              </button>
+            </span>
           </p>
           <!-- REPLY COMMENT -->
           <div class="flex mt-2 gap-x-6 text-sm">
@@ -149,7 +216,30 @@
                   stroke="#13ceb3"
                 />
               </div>
-              <i class="pi pi-ellipsis-v text-md cursor-pointer"></i>
+              <div class="relative">
+                <div>
+                  <button
+                    class="text-primary text-[13px] font-bold flex items-center cursor-pointer"
+                    id="report-menu-button"
+                    @click="toggleReportComment(comment.id)"
+                  >
+                    <i class="pi pi-ellipsis-v"></i>
+                  </button>
+                </div>
+
+                <div
+                  v-if="openReportComment"
+                  id="report-menu"
+                  class="absolute left-0 z-10 mt-5 top-3 p-2 border border-primary origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                >
+                  <span
+                    @click="openPopupReport"
+                    class="text-primary text-xs whitespace-nowrap cursor-pointer"
+                  >
+                    Report comment
+                  </span>
+                </div>
+              </div>
               <p @click="handleOpenCommentField" class="cursor-pointer font-medium">Reply</p>
 
               <div
@@ -227,4 +317,18 @@
       </div>
     </td>
   </tr>
+  <ReportDialog
+    title="comment"
+    groupName="reportTypeComments"
+    titleReport="Report Comment"
+    :isReportVisible="isReportVisible"
+    :isReportSuccessVisible="isReportSuccessVisible"
+    :reportType="reportTypeVideos"
+    :selectedReport="selectedReportComment"
+    @update:selectedReport="selectedReportComment = $event"
+    @close="closeReportSuccess"
+    @submit="handleSubmitReportComment"
+    @hide="closeReport"
+    @hideSuccess="closeSuccess"
+  />
 </template>
