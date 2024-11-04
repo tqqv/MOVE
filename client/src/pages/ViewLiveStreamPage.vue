@@ -33,8 +33,9 @@
     if (liveStreamData.value?.channel?.id) {
       joinRoom(liveStreamData.value?.channel?.id);
       listenStreamReady((isReady) => {
-        fetchUserViewLive(username);
+        console.log('Received streamReady:', isReady);
         connectOBS.value = isReady;
+        fetchUserViewLive(username);
       });
     }
   };

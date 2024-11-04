@@ -34,6 +34,10 @@
     username: {
       type: String,
     },
+    hiddenReport: {
+      type: Boolean,
+      default: false,
+    },
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -145,7 +149,7 @@
         <share class="mr-1" /> Share
       </div>
 
-      <ReportChannel :channelName="channelDetails.channelName" />
+      <ReportChannel v-if="hiddenReport" :channelName="channelDetails.channelName" />
     </div>
   </div>
 </template>
