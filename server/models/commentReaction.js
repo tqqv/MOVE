@@ -24,6 +24,16 @@ module.exports = (sequelize, DataTypes) => {
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
       },
+      commentId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'comments',
+          key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
+      },
       reactionType: {
         type: DataTypes.ENUM('like', 'dislike'),
         allowNull: false,
@@ -32,7 +42,7 @@ module.exports = (sequelize, DataTypes) => {
     {
       sequelize,
       modelName: "CommentReaction",
-      tableName: "commentReactions",
+      tableName: "reactionComments",
       timestamps: true,
   });
   return CommentReaction;
