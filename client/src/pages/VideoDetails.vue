@@ -26,6 +26,7 @@
   const channelId = ref(null);
   const categoryId = ref(null);
   const levelworkoutsId = ref(null);
+  const usernameDetails = ref(null);
   const videos = ref([]);
   let playerInstance = null;
   const isLoading = ref(true);
@@ -50,6 +51,7 @@
         video.value = res.data.data;
         categoryId.value = res.data.data.categoryId;
         levelworkoutsId.value = res.data.data.levelWorkoutsId;
+        usernameDetails.value = res.data.data.channel.User.username;
         channelDetails.value = {
           channelName: res.data.data.channel.channelName,
           avatar: res.data.data.channel.avatar,
@@ -128,6 +130,7 @@
           :isButtonGiftREPsVisible="true"
           :totalFollower="totalFollower"
           :channelId="channelId"
+          :usernameDetails="usernameDetails"
           @updateFollowers="fetchVideoById"
         />
         <Tabs value="about" class="p-0">

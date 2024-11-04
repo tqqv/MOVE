@@ -3,7 +3,7 @@ var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
-const { createChannel } = require("./channelService.js");
+const { createChannel, generatedStreamKey } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
 
@@ -450,7 +450,8 @@ const statusRequestChannel = async(userId, status) => {
     await request.save()
 
     if(status === "approved") {
-      await createChannel(userId, user.username, user.avatar);
+      const streamKey = await generatedStreamKey();
+      await createChannel(userId, user.username, user.avatar, streamKey);
       user.role = "streamer";
       await user.save();
     }

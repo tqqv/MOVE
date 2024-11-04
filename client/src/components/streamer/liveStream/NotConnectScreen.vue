@@ -7,8 +7,5 @@
       <LiveStream />
       <span class="text-white">Connect streaming software to go live</span>
     </div>
-    <div class="absolute top-3 left-3 bg-red text-white px-3 py-1 rounded-md text-sm">
-      <span>Live</span>
-    </div>
   </div>
 </template>
