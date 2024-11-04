@@ -17,6 +17,7 @@ const {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
@@ -134,6 +135,17 @@ const deleteVideo = async (req, res, next) => {
   }
 }
 
+const deleteMultipleVideos = async (req, res, next) => {
+  const { videoIds } = req.query;
+  try {
+    const results = await deleteMultipleVideosService(videoIds);
+    responseHandler(200, results, 'Videos processed')(req, res, next);
+  } catch (error) {
+    console.log(error);
+    responseHandler(error.status || 500, error.data, error.message)(req, res, next);
+  }
+};
+
 const getListVideoByFilterController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 12;
@@ -233,6 +245,7 @@ module.exports = {
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
+  deleteMultipleVideos,
   getListVideoByFilterController,
   analyticsVideoByIdController,
   getListVideoByChannelController,

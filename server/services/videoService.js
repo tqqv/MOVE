@@ -114,9 +114,7 @@ const updateVideoService = async (videoId, updateData) => {
         VideoKeyword.create({ videoId, keywordId })
       );
       await Promise.all(videoKeywordPromises);
-      console.log('Keywords saved successfully');
     } catch (error) {
-      console.error('Error saving keywords:', error);
       return {
         status: 500,
         message: 'An error occurred while saving keywords',
@@ -518,6 +516,18 @@ const deleteVideoService = async (videoId) => {
   const video = await Video.findOne({
     where: { id: videoId }
   });
+
+  if (!video) {
+    return {
+      status: 404,
+      message: 'Video not found',
+      data: null
+    };
+  }
+
+  const videoKeywords = await VideoKeyword.findAll({ where: { videoId } });
+  const keywordIds = videoKeywords.map(vk => vk.keywordId);
+
   return new Promise((resolve, reject) => {
     client.request({
       method: 'DELETE',
@@ -526,19 +536,63 @@ const deleteVideoService = async (videoId) => {
       if (error) {
         reject({ status: 500, message: error.message });
       } else {
-        if(!video) {
-          return {
-            status: 404,
-            message: 'Video not found',
-            data: null
-          };
+        await VideoKeyword.destroy({ where: { videoId } });
+
+        if (keywordIds.length > 0) {
+          await Keyword.destroy({ where: { id: keywordIds } });
         }
+
         await video.destroy();
-        resolve({ status: 200, message: 'Video deleted successfully', data: null });
+        resolve({ status: 200, message: 'Video and related keywords deleted successfully', data: null });
       }
     });
   });
-}
+};
+
+const deleteMultipleVideosService = async (videoIds) => {
+  const results = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findOne({ where: { id: videoId } });
+      if (!video) {
+        results.push({ status: 404, message: `Video ID ${videoId} not found`, data: null });
+        continue; 
+      }
+
+      const videoKeywords = await VideoKeyword.findAll({ where: { videoId } });
+      const keywordIds = videoKeywords.map(vk => vk.keywordId);
+
+      await VideoKeyword.destroy({ where: { videoId } });
+
+      if (keywordIds.length > 0) {
+        await Keyword.destroy({ where: { id: keywordIds } });
+      }
+
+      await video.destroy();
+
+      results.push({ status: 200, message: `Video ID ${videoId} and related keywords deleted successfully`, data: null });
+
+      await new Promise((resolve, reject) => {
+        client.request({
+          method: 'DELETE',
+          path: `videos/${videoId}`,
+        }, (error) => {
+          if (error) {
+            reject({ status: 500, message: `Error deleting video ID ${videoId} from client: ${error.message}` });
+          } else {
+            resolve();
+          }
+        });
+      });
+
+    } catch (error) {
+      results.push({ status: 500, message: `Error processing video ID ${videoId}: ${error.message}` });
+    }
+  }
+
+  return results;
+};
 
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
@@ -1260,5 +1314,6 @@ module.exports = {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  deleteMultipleVideosService
   getStateByCountryAndVideoIdFromIp,
 };

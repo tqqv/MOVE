@@ -17,6 +17,7 @@ const { getUploadLink,
   increaseViewController,
   updateViewtimeController,
   getVideoWatchAlsoController,
+  deleteMultipleVideos,
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
@@ -40,6 +41,7 @@ router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
 router.get('/channel/:channelId', getVideoByUserId);
 router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
+router.delete('/delete-videos', verifyStreamer, deleteMultipleVideos);
 
 // Tăng View ở đây
 router.post('/increaseView', increaseViewController);
