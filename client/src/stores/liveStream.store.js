@@ -1,4 +1,4 @@
-import { fetchLiveStream } from '@/services/liveStream';
+import { fetchLiveStreamByStreamer } from '@/services/liveStream';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -15,7 +15,7 @@ export const useLiveStreamStore = defineStore('liveStream', () => {
 
   const fetchLiveStreamData = async (username) => {
     try {
-      const response = await fetchLiveStream(username);
+      const response = await fetchLiveStreamByStreamer(username);
       liveStreamData.value = response.data.livestream;
       return response.data;
     } catch (error) {

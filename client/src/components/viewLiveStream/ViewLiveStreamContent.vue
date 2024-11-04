@@ -8,41 +8,41 @@
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
-  const videoData = {
-    title: 'Hướng Dẫn Làm Bánh',
-    ratings: 4.5,
-    viewCount: 1500,
-    category: {
-      title: 'Nấu Ăn',
-    },
-    levelWorkout: {
-      levelWorkout: 'Dễ',
-    },
-    duration: 3600,
-  };
-  const channelDetails = {
-    avatar:
-      'https://images.pexels.com/photos/415829/pexels-photo-415829.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-    channelName: 'Streamer Channel',
-    isLive: true,
-    popularCheck: true,
-    totalFollower: 1500,
-    isChannelFollowed: false,
-  };
+  import NoneLiveStream from './NoneLiveStream.vue';
+  import { onMounted, watch } from 'vue';
+
+  const props = defineProps({
+    username: String,
+    connectOBS: String,
+    liveStatus: String,
+    liveStreamData: Array,
+  });
+
+  onMounted(() => {
+    console.log(props.liveStreamData.livestream);
+  });
 </script>
 <template>
-  <div class="flex"><LiveStreamScreen /></div>
+  <div class="flex">
+    <LiveStreamScreen v-if="props.connectOBS === 'streamPublished'" :username="username" />
+    <NoneLiveStream v-if="props.connectOBS === 'streamEnded'" />
+  </div>
   <div class="container py-6">
-    <OfflineTitle :video="videoData" />
+    <OfflineTitle :video="props.liveStreamData?.livestream" />
     <hr class="h-[2px] my-7 bg-gray-dark border-0" />
-    <VideoDetail :channelDetails="channelDetails" :video="videoData" />
+    <VideoDetail
+      v-if="props.liveStreamData.channel"
+      :channelDetails="props.liveStreamData?.channel"
+    />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">
         <Tab value="about">About</Tab>
       </TabList>
       <TabPanels class="p-0">
         <TabPanel class="mt-3" value="about">
-          <TabAbout :channelDetails="channelDetails"
+          <TabAbout
+            v-if="props.liveStreamData.channel"
+            :channelDetails="props.liveStreamData?.channel"
         /></TabPanel>
       </TabPanels>
     </Tabs>

@@ -83,10 +83,32 @@ const getLivestreamByUserNameService = async (username) => {
       where: { username: username }
     });
     const channel = await Channel.findOne({
-      where: { userId: user.id}
+      where: { userId: user.id},
     });
+    console.log("channel.isLive: ", channel.isLive);
+    
     if(channel.isLive) {
-      const livestream = await Livestream.findOne({where: {streamerId: channel.id, isLive: true}})
+      const livestream = await Livestream.findOne(
+        {where: 
+          {
+            streamerId: channel.id,
+            isLive: true
+          },
+          include: [
+          {
+          model: Category,
+          attributes: ["title"],
+          as: 'category'
+          },
+          {
+            model: LevelWorkout,
+            attributes: ["levelWorkout"],
+            as: 'livestreamLevelWorkout'
+          },
+          
+        ]
+        },
+      )
       return {
         status: 200,
         data: {channel, livestream},
