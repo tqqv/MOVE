@@ -8,6 +8,8 @@ module.exports = (sequelize, DataTypes) => {
       this.hasMany(models.ChannelMute, { foreignKey: 'targetLivestreamId', as: 'livestreamChannelMute' });
 
       this.hasMany(models.Report, { foreignKey: 'targetLivestreamId', as: 'livestreamReport' });
+      this.hasMany(models.Donation, { foreignKey: 'livestreamId', as: 'streamDonator' });
+      this.hasMany(models.Rating, { foreignKey: 'livestreamId', as: 'streamRator' });
 
       // Mối quan hệ 1-n với levelWorkout
       this.belongsTo(models.LevelWorkout, {
@@ -49,11 +51,11 @@ module.exports = (sequelize, DataTypes) => {
       id: {
         type: DataTypes.UUID,
         primaryKey: true,
-        defaultValue: DataTypes.UUID,
+        defaultValue: DataTypes.UUIDV4,
         allowNull: false,
       },
       streamerId: {
-        type: DataTypes.UUID,
+        type: DataTypes.UUIDV4,
         allowNull: true,
         references: {
           model: 'channels', // Tên bảng trong cơ sở dữ liệu
@@ -102,6 +104,10 @@ module.exports = (sequelize, DataTypes) => {
       levelWorkoutsId: {
         type: DataTypes.UUID,
         allowNull: true,
+      },
+      isLive: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: true,
       },
     },
       {

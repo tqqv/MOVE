@@ -2,8 +2,12 @@
   import { onMounted, ref } from 'vue';
   import Hls from 'hls.js';
 
-  const video2 = ref(null);
-  const videoSrcHieune = 'http://localhost:8080/hls/thehoang.17.m3u8';
+  const props = defineProps({
+    username: String,
+  });
+
+  const frameVideo = ref(null);
+  const urlHls = `${import.meta.env.VITE_HLS_STREAM_URL}/${props.username || 'default'}.m3u8`;
 
   const initializeHLS = (videoElement, source) => {
     if (Hls.isSupported()) {
@@ -11,18 +15,16 @@
       hls.loadSource(source);
       hls.attachMedia(videoElement);
     } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-      // For Safari which has built-in HLS support
       videoElement.src = source;
     }
   };
 
   onMounted(() => {
-    if (video2.value) {
-      initializeHLS(video2.value, videoSrcHieune);
-
-      video2.value.addEventListener('error', () => {
+    if (frameVideo.value) {
+      initializeHLS(frameVideo.value, urlHls);
+      frameVideo.value.addEventListener('error', () => {
         console.log('Reloading video due to error');
-        initializeHLS(video2.value, videoSrcHieune);
+        initializeHLS(frameVideo.value, urlHls);
       });
     }
   });
@@ -32,8 +34,9 @@
     <!-- Second Video Player -->
     <div class="relative min-h-[560px] w-full max-w-full bg-black flex justify-center items-center">
       <video
-        ref="video2"
+        ref="frameVideo"
         class="w-full h-full object-cover"
+        playsinline
         controls
         autoplay
         muted
@@ -49,5 +52,6 @@
   video::-webkit-media-controls-timeline,
   video::-webkit-media-controls-current-time-display,
   video::-webkit-media-controls-time-remaining-display {
+    display: none;
   }
 </style>
