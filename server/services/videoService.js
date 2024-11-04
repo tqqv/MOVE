@@ -475,6 +475,10 @@ const getVideoByVideoIdService = async (videoId) => {
     include: [
       {
         model: Channel,
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
         attributes: ['channelName', 'bio', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
           [
             sequelize.literal(`(
@@ -493,7 +497,7 @@ const getVideoByVideoIdService = async (videoId) => {
       {
         model: LevelWorkout,
         as: "levelWorkout",
-      },
+      }
     ]
   });
   if (!video) {

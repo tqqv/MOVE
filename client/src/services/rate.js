@@ -2,7 +2,7 @@ import axios from './axios';
 const postRateVideo = async (data) => {
   try {
     const response = await axios.post('/rating/rateVideo', data);
-    return response.data;
+    return response;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
