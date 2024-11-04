@@ -5,3 +5,5 @@ export { useUserStore } from './user.store';
 export { useStreamerStore } from './streamer.store';
 export { useCategoriesStore } from './categories.store';
 export { useLevelWorkoutStore } from './levelWorkout.store';
+export { useGetRepsStore } from './getReps.store';
+export { useContryStore } from './country.store';

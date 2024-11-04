@@ -25,13 +25,18 @@
   import VideoDetail from './uploadVideo/VideoDetail.vue';
   import GoLive from './icons/goLive.vue';
   import { useTabStore } from '@/stores/tab.store';
-
+  import GetREPS from './getReps/GetREPS.vue';
+  import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
+  import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
+  import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
+  import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
+  const isGetREPsMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
 
@@ -44,28 +49,30 @@
   const users = ref([]);
   // SEARCH
 
+  const isHaveInfo = ref(true);
+
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
   };
   const toggleUserMenu = () => {
-    closeAllPopups();
     isUserMenuOpen.value = !isUserMenuOpen.value;
   };
 
   const toggleCreateMenu = () => {
-    closeAllPopups();
     isCreateMenuOpen.value = !isCreateMenuOpen.value;
   };
 
   const toogleNotiMenu = () => {
-    closeAllPopups();
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
-
+  const toogleGetREPsMenu = () => {
+    isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+  };
   const closeAllPopups = () => {
     isUserMenuOpen.value = false;
     isNotiMenuOpen.value = false;
     isSearchPopupOpen.value = false;
+    isGetREPsMenuOpen.value = false;
   };
 
   const openLoginPopup = () => {
@@ -84,7 +91,8 @@
     const searchMenuButton = document.getElementById('search-menu-button');
     const createMenu = document.getElementById('create-menu');
     const createMenuButton = document.getElementById('create-menu-button');
-
+    const repsMenu = document.getElementById('reps-menu');
+    const repsMenuButton = document.getElementById('reps-menu-button');
     const clickOutsideUserMenu =
       isElementOutside(userMenu, event.target) && isElementOutside(userMenuButton, event.target);
     const clickOutsideNotiMenu =
@@ -96,6 +104,8 @@
       isElementOutside(createMenu, event.target) &&
       isElementOutside(createMenuButton, event.target);
 
+    const clickOutsideREPsMenu =
+      isElementOutside(repsMenu, event.target) && isElementOutside(repsMenuButton, event.target);
     if (clickOutsideUserMenu) {
       isUserMenuOpen.value = false;
     }
@@ -110,6 +120,9 @@
 
     if (clickOutsideCreateMenu) {
       isCreateMenuOpen.value = false;
+    }
+    if (clickOutsideREPsMenu) {
+      isGetREPsMenuOpen.value = false;
     }
   };
 
@@ -315,13 +328,30 @@
           </template>
 
           <!-- User -->
-          <template v-else
-            ><RouterLink
-              v-if="userStore.user?.role == 'user'"
-              class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
-            >
-              Get REP$
-            </RouterLink>
+          <template v-else>
+            <div v-if="userStore.user?.role == 'user'" class="relative">
+              <div
+                @click="toogleGetREPsMenu"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
+                id="reps-menu-button"
+              >
+                Get REP$
+              </div>
+              <div
+                id="reps-menu"
+                class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                role="menu"
+                aria-orientation="vertical"
+                aria-labelledby="reps-menu-button"
+                tabindex="-1"
+              >
+                <GetREPS
+                  v-if="isGetREPsMenuOpen"
+                  @toogleGetREPsMenu="toogleGetREPsMenu"
+                  @toggleBuyREPs="popupStore.toggleBuyREPs"
+                />
+              </div>
+            </div>
 
             <div class="relative">
               <OverlayBadge
@@ -450,4 +480,23 @@
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
   <UploadVideo />
   <VideoDetail />
+  <!-- POPUP GET REPS -->
+  <CompletePurchaseNoInfo
+    v-if="!isHaveInfo"
+    title="Complete Purchase"
+    :isOpenBuyREPs="popupStore.showOpenBuyREPs"
+  />
+  <CompletePurchaseHaveInfo
+    v-else
+    title="Complete Purchase"
+    :isOpenBuyREPs="popupStore.showOpenBuyREPs"
+  />
+  <ProcessingPayment />
+  <!-- <OrderStatusPopup
+    :isOpenOrder="isOpenOrder"
+    :money="purchaseOptions.money"
+    :reps="purchaseOptions.reps"
+    :isOrderSuccessful="isOrderSuccessful"
+    @toggleOrder="toggleOrder"
+  /> -->
 </template>

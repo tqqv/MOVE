@@ -12,6 +12,15 @@ export const usePopupStore = defineStore('popup', () => {
   const showConfirmDialog = ref(false);
   const showReportChannel = ref(false);
   const showReportSuccess = ref(false);
+  const showOpenBuyREPs = ref(false);
+  const showLoadingPayment = ref(false);
+
+  const toggleLoadingPayment = () => {
+    showLoadingPayment.value = !showLoadingPayment.value;
+  };
+  const toggleBuyREPs = () => {
+    showOpenBuyREPs.value = !showOpenBuyREPs.value;
+  };
 
   const openConfirmDialog = () => {
     showConfirmDialog.value = true;
@@ -90,6 +99,7 @@ export const usePopupStore = defineStore('popup', () => {
   };
 
   return {
+    showOpenBuyREPs,
     showLoginPopup,
     showForgotPasswordPopup,
     showChangePassword,
@@ -118,5 +128,8 @@ export const usePopupStore = defineStore('popup', () => {
     closeReportChannel,
     openReportSuccess,
     closeReportSuccess,
+    toggleBuyREPs,
+    showLoadingPayment,
+    toggleLoadingPayment,
   };
 });
