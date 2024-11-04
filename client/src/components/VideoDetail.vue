@@ -34,6 +34,10 @@
     username: {
       type: String,
     },
+    hiddenReport: {
+      type: Boolean,
+      default: false,
+    },
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -160,7 +164,7 @@
         Gift REPs <i class="pi pi-angle-right" />
       </div>
 
-      <ReportChannel :channelName="channelDetails.channelName" />
+      <ReportChannel v-if="hiddenReport" :channelName="channelDetails.channelName" />
     </div>
   </div>
 </template>
