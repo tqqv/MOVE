@@ -25,6 +25,7 @@ const router = express.Router();
 
 router.get('/getVideoWatchAlso', getVideoWatchAlsoController);
 router.get('/getState/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
+router.get('/getStateFromIP/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
 router.get('/getVideoAnalytics/:videoId', verifyStreamer, analyticsVideoByIdController)
 router.get('/getVideosByFilter', getListVideoByFilterController);
 router.get('/getVideosByChannel', verifyStreamer, getListVideoByChannelController);
