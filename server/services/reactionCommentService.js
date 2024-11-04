@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { CommentReaction, Comment, User} = db;
+const { ReactionComment, Comment, User} = db;
 
 const reactionComment = async(userId, commentId, reactionType) => {
   try {
@@ -19,7 +19,7 @@ const reactionComment = async(userId, commentId, reactionType) => {
       }
     }
 
-    const reactComment = await CommentReaction.findOne({
+    const reactComment = await ReactionComment.findOne({
       where: {
         userId: userId,
         commentId: commentId
@@ -27,7 +27,7 @@ const reactionComment = async(userId, commentId, reactionType) => {
     });
 
     if(!reactComment) {
-      await CommentReaction.create({
+      await ReactionComment.create({
         userId: userId,
         commentId: commentId,
         reactionType: reactionType

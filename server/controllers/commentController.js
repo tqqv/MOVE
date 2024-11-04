@@ -19,7 +19,8 @@ const getVideoCommentController = async (req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
   const videoId = req.params.videoId;
-  const videoComments = await getCommentsByVideo(videoId, page, pageSize);
+  const userId = req.body.userId || null;
+  const videoComments = await getCommentsByVideo(videoId, page, pageSize, userId);
 
   responseHandler(videoComments.status, videoComments.data, videoComments.message)(
     req,
@@ -32,7 +33,8 @@ const getChildCommentsByParentIdController = async (req, res, next) => {
   const parentId = req.query.parentId;
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const videoComments = await getChildCommentsByParentId(parentId, page, pageSize);
+  const userId = req.body.userId || null;
+  const videoComments = await getChildCommentsByParentId(parentId, page, pageSize, userId);
 
   responseHandler(videoComments.status, videoComments.data, videoComments.message)(
     req,
