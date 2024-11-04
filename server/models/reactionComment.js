@@ -2,11 +2,11 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class CommentReaction extends Model {
+  class ReactionComment extends Model {
     static associate(models) {
     }
   }
-  CommentReaction.init(
+  ReactionComment.init(
     {
       id: {
         type: DataTypes.UUID,
@@ -41,9 +41,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "CommentReaction",
+      modelName: "ReactionComment",
       tableName: "reactionComments",
       timestamps: true,
   });
-  return CommentReaction;
+  return ReactionComment;
 };
