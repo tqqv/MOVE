@@ -7,7 +7,8 @@
   import { useUserStore } from '@/stores';
   const props = defineProps({
     liveStatus: String,
-    connectOBS: Boolean,
+    connectOBS: String,
+    elapsedTime: Number,
   });
 
   const userStore = useUserStore();
@@ -19,7 +20,7 @@
         class="flex flex-col p-4 rounded-md basis-full justify-center shadow-md bg-white overflow-hidden max-w-full"
       >
         <div class="flex justify-center gap-x-16 py-4">
-          <InformationLiveStream />
+          <InformationLiveStream :elapsedTime="elapsedTime" />
         </div>
       </div>
     </div>

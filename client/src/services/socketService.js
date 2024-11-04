@@ -19,6 +19,7 @@ const listenStreamReady = (callback) => {
 
 const disconnectLivestream = () => {
   if (livestreamSocket.connected) {
+    livestreamSocket.emit('disconnecting');
     livestreamSocket.disconnect();
   }
 };

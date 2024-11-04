@@ -14,7 +14,7 @@
   import { uploadAvatar } from '@/services/cloudinary';
 
   const props = defineProps({
-    connectOBS: Boolean,
+    connectOBS: String,
     liveStatus: String,
   });
 

@@ -80,7 +80,6 @@ const validateStreamKeyController = async(req, res, next) => {
 
 const endStreamController = async(req, res, next) => {
   const data = req.body;
-  
   const result = await endStream(data);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

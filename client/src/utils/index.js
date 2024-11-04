@@ -7,4 +7,4 @@ export { debounce } from './debounce';
 export { formatAvgViewTime } from './formatAvgViewTime';
 export { truncateDescripton } from './truncateDescripton';
 export { formatPercentage } from './formatPercentage';
-export { formatTimeInStream } from './formatTimeInStream';
+export { formatTimeInStream, formatTimeEndLive } from './formatTimeInStream';

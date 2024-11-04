@@ -27,4 +27,13 @@ const updateLiveStream = async (data) => {
   }
 };
 
-export { createLiveStream, endLiveStream, updateLiveStream };
+const fetchLiveStream = async (username) => {
+  try {
+    const response = await axios.get(`/livestream/info/${username}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export { createLiveStream, endLiveStream, updateLiveStream, fetchLiveStream };

@@ -1,3 +1,4 @@
+import { fetchLiveStream } from '@/services/liveStream';
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
@@ -12,10 +13,22 @@ export const useLiveStreamStore = defineStore('liveStream', () => {
     Object.assign(liveStreamData.value, newData);
   };
 
+  const fetchLiveStreamData = async (username) => {
+    try {
+      const response = await fetchLiveStream(username);
+      liveStreamData.value = response.data.livestream;
+      return response.data;
+    } catch (error) {
+      error.value = 'Failed to load followers';
+    } finally {
+    }
+  };
+
   return {
     complete,
     liveStreamData,
     setCompleteStatus,
     updateLiveStreamData,
+    fetchLiveStreamData,
   };
 });

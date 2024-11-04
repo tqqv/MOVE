@@ -1,7 +1,8 @@
 const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
+const { set } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
-const { Livestream, Donation, Rating, Channel, Sequelize } = db;
+const { Livestream, Donation, Rating, Channel, User, Category, LevelWorkout, Sequelize } = db;
 
 const createLivestream = async(data) => {
   try {
@@ -18,9 +19,11 @@ const createLivestream = async(data) => {
     })
     channel.isLive = true;
     channel.save();
+    newLiveStream.isLive = true;
+    newLiveStream.save();
 
     _io.to(channel.id).emit('socketLiveStatus', 'streamPublished');
-    await _redis.set(`channel_${channel.id}_live_status`, 'streamPublished');
+    await set(`channel_${channel.id}_live_status`, 'streamPublished');
     return {
       status: 200,
       data: newLiveStream,
@@ -35,57 +38,74 @@ const createLivestream = async(data) => {
   }
 }
 
-const endLivestream = async(livestreamId) => {
+const getLivestreamService = async (username) => {
   try {
-    if(!livestreamId){
-      return {
-        status: 400,
-        data: null,
-        message: 'Invalid livestreamId'
-      }
-    }
-    const liveStream = await Livestream.findOne(
-      {
-        where: { id: livestreamId },
-        include: [
-          {
-            model: Channel,
-            as: 'livestreamChannel',
-            attributes: ['id', 'isLive', 'channelName']
-          },
-        ]
-      }
-    )
-
-    if (!liveStream) {
-      return {
-        status: 404,
-        data: null,
-        message: 'Livestream not found'
-      };
-    }
-
-    liveStream.livestreamChannel.isLive = false;
-    await liveStream.livestreamChannel.save();
-    await _redis.set(`channel_${liveStream.livestreamChannel.id}_live_status`, 'streamEnded', 'EX', 20);
-    ///
-    // Logic update stats from redis here
-    ///
-    liveStream.save();
-      _io.to(liveStream.streamerId).emit('socketLiveStatus', 'streamPublished');
+    const user = await User.findOne({
+      where: { username: username }
+    });
+    const channel = await Channel.findOne({
+      where: { userId: user.id}
+    });
+    const livestream = await Livestream.findOne({
+      where: { streamerId: channel.id },
+      order: [['createdAt', 'DESC']],
+      include: [
+        {
+        model: Category,
+        attributes: ["title"],
+        as: 'category'
+        },
+        {
+          model: LevelWorkout,
+          attributes: ["levelWorkout"],
+          as: 'livestreamLevelWorkout'
+        },
+        
+      ]
+    });
     return {
       status: 200,
-      data: liveStream,
-      message: 'End livestream successfully'
-    }
+      data: {channel, livestream},
+      message: 'Retrieve data success'
+    };
   } catch (error) {
     return {
       status: 500,
       data: null,
       message: error.message
-    }
+    };
   }
-}
+};
+
+const getLivestreamByUserNameService = async (username) => {
+  try {
+    const user = await User.findOne({
+      where: { username: username }
+    });
+    const channel = await Channel.findOne({
+      where: { userId: user.id}
+    });
+    if(channel.isLive) {
+      const livestream = await Livestream.findOne({where: {streamerId: channel.id, isLive: true}})
+      return {
+        status: 200,
+        data: {channel, livestream},
+        message: 'Retrieve data success'
+      };
+    }
+    return {
+      status: 200,
+      data: {channel},
+      message: 'Retrieve data success'
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
 
 const getLivestreamStatistics = async (streamId) => {
   try {
@@ -175,10 +195,10 @@ const updateLivestream = async(data) => {
   }
 }
 
-
 module.exports = {
+  getLivestreamService,
+  getLivestreamByUserNameService,
   createLivestream,
   getLivestreamStatistics,
-  endLivestream,
   updateLivestream
 }

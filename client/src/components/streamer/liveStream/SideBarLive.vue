@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, ref, watch, watchEffect } from 'vue';
   import { useRoute } from 'vue-router';
   import { useRouter } from 'vue-router';
   import LiveStream from '@/components/icons/liveStream.vue';
@@ -12,7 +12,7 @@
   import { formatTimeInStream } from '@/utils';
 
   const props = defineProps({
-    connectOBS: Boolean,
+    connectOBS: String,
     liveStatus: String,
     elapsedTime: Number,
   });
@@ -61,9 +61,9 @@
     if (props.liveStatus === 'streamReady' && liveStreamStore.complete) {
       try {
         const response = await createLiveStream(liveStreamStore.liveStreamData);
-        console.log(response);
+        // console.log(response);
         liveStreamStore.updateLiveStreamData(response.data);
-        emit('startTimer');
+        // emit('startTimer');
         router.push('/streaming/dashboard-live');
         setUpSteps.value[2].tick = false;
       } catch (error) {
@@ -75,7 +75,7 @@
   const handleEndLive = async () => {
     try {
       const response = await endLiveStream({ streamKey: streamerStore.streamerChannel.streamKey });
-      console.log(response);
+      // console.log(response);
       // router.push('/streaming/dashboard-live');
     } catch (error) {
       console.log(error);
@@ -98,15 +98,14 @@
 
   watch(
     () => props.liveStatus,
-    (newValue) => {
+    async (newValue) => {
       if (newValue === 'streamEnded') {
-        const response = updateLiveStream({
-          livestreamId: liveStreamId,
+        const response = await updateLiveStream({
+          livestreamId: liveStreamId.value,
           duration: props.elapsedTime,
         });
-        console.log(response.data);
-
         emit('stopTimer');
+        await liveStreamStore.fetchLiveStreamData(streamerStore.streamerChannel?.User?.username);
       } else if (newValue === 'streamReady') {
         setUpSteps.value[1].tick = true;
       } else if (newValue == null) {
@@ -114,11 +113,6 @@
       }
     },
   );
-
-  watch(() => {
-    console.log('liveStreamID :', liveStreamId.value);
-    console.table(liveStreamStore.liveStreamData); 
-  });
 </script>
 <template>
   <section
@@ -277,7 +271,9 @@
       </div>
       <!-- END LIVE -->
       <div v-if="liveStatus === 'streamEnded'" class="flex flex-col gap-y-3 font-semibold">
-        <span class="text-xl text-body mr-3">00:00:00</span>
+        <span class="text-xl text-body mr-3">{{
+          formatTimeInStream(liveStreamStore.liveStreamData?.duration)
+        }}</span>
         <div
           class="flex items-center justify-center gap-x-2 px-3 py-2 rounded-md bg-primary-light/20 hover:bg-primary-light/30 text-primary text-center w-full cursor-pointer"
           @click="handleGoHome"

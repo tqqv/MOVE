@@ -19,7 +19,7 @@
     timer = setInterval(() => {
       const currentTime = new Date();
       elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
-      console.log(elapsedTime.value);
+      // console.log(elapsedTime.value);
     }, 1000);
   };
 
@@ -28,6 +28,7 @@
       clearInterval(timer);
       timer = null;
     }
+    elapsedTime.value = 0;
   };
 
   // CONNECT OBS
@@ -45,25 +46,43 @@
   onMounted(async () => {
     await streamerStore.fetchProfileChannel();
     handleConnectOBS();
-    if (liveStreamStore.liveStreamData?.createdAt) {
-      startTimer();
-    }
   });
 
   watch(
     () => streamerStore.streamerChannel?.liveStatus,
-    (newLiveStatus) => {
+    async (newLiveStatus) => {
       liveStatus.value = newLiveStatus;
+      if (newLiveStatus === 'streamPublished') {
+        try {
+          const username = streamerStore.streamerChannel?.User?.username;
+          if (username) {
+            await liveStreamStore.fetchLiveStreamData(username);
+            if (newLiveStatus === 'streamPublished' && liveStreamStore.liveStreamData?.createdAt) {
+              startTimer();
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching live stream data:', error);
+        }
+      }
     },
   );
 
-  watch(() => {
-    console.log('livestatus: ', liveStatus.value);
-    console.log('connectobs: ', connectOBS.value);
-  });
-  watch(() => {
-    // console.log(elapsedTime.value);
-  });
+  // watch(() => {
+  //   console.log('livestatus: ', liveStatus.value);
+  //   console.log('connectobs: ', connectOBS.value);
+  // });
+  watch(
+    () => streamerStore.streamerChannel?.User?.username,
+    (newUsername) => {
+      if (newUsername) {
+        return newUsername;
+      }
+    },
+  );
+  // watch(() => {
+  //   console.log(elapsedTime.value);
+  // });
 </script>
 
 <template>
@@ -77,7 +96,7 @@
       @stopTimer="stopTimer"
     />
     <div class="flex-1 overflow-y-auto">
-      <router-view :connectOBS="connectOBS" :liveStatus="liveStatus" />
+      <router-view :elapsedTime="elapsedTime" :connectOBS="connectOBS" :liveStatus="liveStatus" />
     </div>
   </div>
 </template>
