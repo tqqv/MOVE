@@ -120,6 +120,16 @@ const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
             AND rc.userId = '${userId}'
           )`),
           'userReactionType'
+        ],
+        // Count the number of 'like' reactions for the comment
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.reactionType = 'like'
+          )`),
+          'likeCount'
         ]
       ]
     },
@@ -215,6 +225,16 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
             AND rc.userId = '${userId}'
           )`),
           'userReactionType'
+        ],
+        // Count the number of 'like' reactions for the comment
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.reactionType = 'like'
+          )`),
+          'likeCount'
         ]
       ]
     },
@@ -290,6 +310,16 @@ const getChildCommentsByParentId = async (parentId, page, pageSize, userId) => {
             AND rc.userId = '${userId}'
           )`),
           'userReactionType'
+        ],
+        // Count the number of 'like' reactions for the comment
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.reactionType = 'like'
+          )`),
+          'likeCount'
         ]
       ]
     },
