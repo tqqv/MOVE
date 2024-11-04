@@ -1314,6 +1314,6 @@ module.exports = {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
-  deleteMultipleVideosService
+  deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
 };
