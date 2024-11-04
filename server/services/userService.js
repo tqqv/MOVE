@@ -14,7 +14,7 @@ const getProfile = async (id) => {
       attributes: ['id', 'username', 'email', 'fullName', 'isVerified', 'avatar', 'gender', 'dob', 'REPs', 'country', 'state', 'city', 'isBanned','role'],
       include: [{
         model: Channel,
-        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck']
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck', 'streamKey']
       }]
     });
     if(!user){

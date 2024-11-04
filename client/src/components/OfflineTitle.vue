@@ -8,7 +8,9 @@
   import ReportDialog from './ReportDialog.vue';
   import Rate from '@components/Rate.vue';
   import rateIcon from '@icons/rate.vue';
+  import { usePopupStore } from '@/stores';
 
+  const popupStore = usePopupStore();
   const props = defineProps({
     video: {
       type: Object,
@@ -48,7 +50,7 @@
   };
 
   const showDialogReportVideo = () => {
-    isReportVisible.value = true;
+    getAllReportTypes();
   };
 
   const closeReport = () => {
@@ -86,9 +88,11 @@
       const response = await axiosInstance.get('report/getListReport?type=videos');
       if (response.status === 200) {
         reportTypeVideos.value = response.data.data;
+        isReportVisible.value = true;
       }
     } catch (error) {
-      toast.error(error.message);
+      popupStore.openLoginPopup();
+      isReportVisible.value = false;
     }
   };
 
@@ -129,10 +133,6 @@
         toast.error(`Can't copy this link: `, err);
       });
   };
-
-  onMounted(() => {
-    getAllReportTypes();
-  });
 </script>
 
 <template>

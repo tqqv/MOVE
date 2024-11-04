@@ -5,6 +5,7 @@ const db = require("../models/index.js");
 const { Op } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -803,6 +804,67 @@ const getStateByCountryAndVideoId = async(videoId, country, days) => {
   }
 }
 
+const getDataCountryByIp = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+  const countryData = await ViewVideo.findAll({
+    where: whereCondition,
+    attributes: [
+      'country',
+      [Sequelize.fn('COUNT', Sequelize.col('country')), 'viewerCount']
+    ],
+    group: ['country'],
+    raw: true
+  });
+
+  return countryData;
+};
+
+const getStateByCountryAndVideoIdFromIp = async(videoId, country, days) => {
+  try {
+    const whereCondition = {
+      videoId,
+    };
+
+    if (days) {
+      whereCondition.createdAt = {
+        [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+      };
+    }
+
+    const stateData = await ViewVideo.findAll({
+      where: whereCondition,
+
+      attributes: [
+        'state',
+        [Sequelize.fn('COUNT', Sequelize.col('state')), 'viewerCount']
+      ],
+      group: ['state'],
+      raw: true
+    });
+
+    return {
+      status: 200,
+      data: stateData,
+      message: `Get list state of ${country} successfully.`
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+}
+
 const analyticsVideoById = async(videoId, channelId, days) => {
   try {
     const checkExists = await Video.findOne({
@@ -820,11 +882,12 @@ const analyticsVideoById = async(videoId, channelId, days) => {
       };
     }
 
-    const [videoData, ageData, countryData, genderData] = await Promise.all([
+    const [videoData, ageData, countryData, genderData, dataByIp] = await Promise.all([
       getVideoData(videoId, days),
       getAgeData(videoId, days),
       getCountryDataWithStates(videoId, days),
       getGenderData(videoId, days),
+      getDataCountryByIp(videoId, days)
     ]);
 
     return {
@@ -834,7 +897,8 @@ const analyticsVideoById = async(videoId, channelId, days) => {
         viewersData: {
           ageData,
           genderData,
-          countryData
+          countryData,
+          dataByIp
         }
       },
       message: "Get analytics by video successfully."
@@ -964,7 +1028,25 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
   }
 };
 
-const increaseView = async(userId, videoId, ip) => {
+const fetchGeoData = async(url) => {
+  try {
+    const res = await axios.get(url);
+    const data = res.data;
+    const geo = {
+      country: data.location.country.name,
+      city: data.location.city,
+    };
+    return geo;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return {
+      country: null,
+      city: null
+    }
+  }
+}
+
+const increaseView = async(userId, videoId, ip, viewTime) => {
   try {
     const video = await Video.findOne({where: {id: videoId}})
     if(!video) {
@@ -986,7 +1068,12 @@ const increaseView = async(userId, videoId, ip) => {
     }
 
     if(user && !checkView){
-      const viewData = await ViewVideo.create({viewerId: userId, videoId: videoId, ip: ip})
+      const url = `https://api.ipregistry.co/${ip}?key=${process.env.FIND_IP_API_KEY}`;
+      const res = await fetchGeoData(url)
+
+      const viewData = await ViewVideo.create({viewerId: userId, videoId: videoId, ip: ip, country: res.country, city: res.city, viewTime: viewTime})
+      video.viewCount += 1;
+      await video.save()
       if(viewData) {
         return {
           status: 200,
@@ -1169,4 +1256,5 @@ module.exports = {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  getStateByCountryAndVideoIdFromIp,
 };

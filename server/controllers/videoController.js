@@ -17,6 +17,7 @@ const {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  getStateByCountryAndVideoIdFromIp,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 
@@ -168,6 +169,16 @@ const getStateByCountryAndVideoIdController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getStateByCountryAndVideoIdFromIpController = async(req, res, next) => {
+  const videoId = req.params.videoId
+  const country = req.query.country
+  const days = req.query.days
+
+  const result = await getStateByCountryAndVideoIdFromIp(videoId, country, days)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 const getListVideoByChannelController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
@@ -183,10 +194,11 @@ const getListVideoByChannelController = async(req, res, next) => {
 }
 
 const increaseViewController = async(req, res, next) => {
-  const userId = req.body.id;
+  const userId = req.body.userId;
   const videoId = req.body.videoId;
   const ip = req.body.ip;
-  const result = await increaseView(userId, videoId, ip)
+  const viewTime = req.body.viewTime;
+  const result = await increaseView(userId, videoId, ip, viewTime)
 
   responseHandler(result.status, null, result.message)(req, res, next);
 }
@@ -228,4 +240,5 @@ module.exports = {
   increaseViewController,
   updateViewtimeController,
   getVideoWatchAlsoController,
+  getStateByCountryAndVideoIdFromIpController,
 };

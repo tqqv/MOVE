@@ -1,8 +1,10 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { listSubscribeOfUser } = require("./userService.js");
-const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, sequelize } = db;
+const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, Livestream, sequelize } = db;
 const { v4: uuidv4 } = require('uuid');
+const { remove, get, set } = require("../utils/redis/base/redisBaseService.js");
+const {  takeFinalSnapshot } = require("../utils/redis/stream/redisStreamService.js");
 
 // Function này để lúc admin accept request live sẽ gọi
 const createChannel = async (userId, username, avatar) => {
@@ -86,10 +88,11 @@ const getProfileChannel = async(userId) =>{
         message: "Channel not found."
       };
     }
+    const liveStatus = await get(`channel_${channel.id}_live_status`);
 
     return {
       status: 200,
-      data: channel,
+      data: {...channel.toJSON(), liveStatus},
       message: "Get profile channel successfully."
     }
 
@@ -463,22 +466,21 @@ const createStreamKey = async(channelId) => {
   }
 }
 
-const validateStreamKey = async(streamKey) => {
+const validateStreamKey = async (streamKey) => {
   try {
-    console.log(streamKey);
-    const valid = await Channel.findOne({where: {streamKey: streamKey}});
-    if(!valid){
+    const channel = await Channel.findOne({where: {streamKey: streamKey}});
+    if(!channel){
       return {
         status: 404,
         data: streamKey,
-        message: "Streaming Key is invalid"
-      }
+        message: "Streaming Key is invalid or does not belong to the specified user."
+      };
     }
-    console.log(valid);
-    
-    valid.isLive = true;
-    valid.save();
-    _io.to(valid.id).emit('streamReady', true);
+    setTimeout(
+      () => _io.to(channel.id).emit('socketLiveStatus', 'streamReady'), 10000
+    )
+    // lỡ họ auto bật stream mà kh publish thì phải có cơ chế expire ( sau 5' )
+    await set(`channel_${channel.id}_live_status`, 'streamReady');
     return {
       status: 200,
       data: streamKey,
@@ -494,21 +496,47 @@ const validateStreamKey = async(streamKey) => {
   }
 }
 
-const endStream = async(streamKey) => {
+const endStream = async(data) => {
   try {
-    const valid = await Channel.findOne({where: {streamKey: streamKey}});
-    if(!valid){
+    const channel = await Channel.findOne({where: {streamKey: data.streamKey}});
+    if(!channel){
       return {
         status: 404,
         message: "End stream fail"
       }
     }
-    valid.isLive = false;
-    valid.save();
-    _io.to(valid.id).emit('streamReady', false);
+    // nếu đã tắt từ OBS thì return
+    if(!channel.isLive) {
+      // bắt case status = streamReady ( chưa publish nên isLive vẫn false )
+      _io.to(channel.id).emit('socketLiveStatus', 'null');
+      await remove(`channel_${channel.id}_live_status`);
+      return {
+        status: 200,
+        message: "Stream have already end"
+      }
+    }
+
+    // REDIS HANDLING
+    let liveStatus = await get(`channel_${channel.id}_live_status`);
+    if (liveStatus == 'streamPublished') {
+      // FINAL SNAPSHOT
+      await takeFinalSnapshot(channel.id);
+      _io.to(channel.id).emit('socketLiveStatus', 'streamEnded');
+      await set(`channel_${channel.id}_live_status`, 'streamEnded', 20);
+    } else if (liveStatus == 'streamReady') {
+      _io.to(channel.id).emit('socketLiveStatus', 'null');
+      await remove(`channel_${channel.id}_live_status`);
+    }
+    // SERVER DATABASE HANDLING
+    const livestream = await Livestream.findOne({where: { isLive: true, streamerId: channel.id }});
+    livestream.isLive = false;
+    livestream.save();
+    channel.isLive = false;
+    channel.save();
     return {
       status: 200,
-      message: "End stream success"
+      data: {channel, livestream},
+      message: "Stream ended suceess"
     }
   } catch (error) {
     return {
@@ -517,6 +545,7 @@ const endStream = async(streamKey) => {
     }
   }
 }
+
 module.exports = {
   createChannel,
   listSubscribeOfChannel,
@@ -527,5 +556,6 @@ module.exports = {
   getAllInforFollow,
   createStreamKey,
   validateStreamKey,
-  endStream
+  endStream,
+  generatedStreamKey
 }
