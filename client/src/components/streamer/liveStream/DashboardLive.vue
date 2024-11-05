@@ -5,6 +5,7 @@
     connectOBS: String,
     liveStatus: String,
     elapsedTime: Number,
+    metricsData: Object,
   });
 </script>
 <template>
@@ -20,6 +21,7 @@
       :connectOBS="connectOBS"
       :liveStatus="liveStatus"
       :elapsedTime="elapsedTime"
+      :metricsData="metricsData"
     />
     <!-- END LIVE STREAM -->
     <EndLiveStream :liveStatus="liveStatus" v-if="props.liveStatus === 'streamEnded'" />

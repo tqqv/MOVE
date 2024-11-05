@@ -5,15 +5,21 @@
   import LogoIcon from '@/components/icons/logoIcon.vue';
   import { formatTimeInStream } from '@/utils';
 
-  const props = defineProps({ liveInfo: Array, elapsedTime: Number, duration: Number });
+  const props = defineProps({
+    liveInfo: Array,
+    elapsedTime: Number,
+    duration: Number,
+    metricsData: Object,
+  });
 </script>
+,
 <template>
   <div class="flex justify-start items-center gap-x-3">
     <div class="flex size-8 justify-center items-center bg-primary rounded-full">
       <Eye fill="white" />
     </div>
     <div class="flex flex-col">
-      <p class="font-medium">23</p>
+      <p class="font-medium">{{ metricsData?.currentViews ?? '0' }}</p>
       <p class="text-sm">views</p>
     </div>
   </div>

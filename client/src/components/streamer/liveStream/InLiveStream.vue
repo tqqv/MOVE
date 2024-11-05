@@ -9,6 +9,7 @@
     liveStatus: String,
     connectOBS: String,
     elapsedTime: Number,
+    metricsData: Object,
   });
 
   const userStore = useUserStore();
@@ -20,7 +21,7 @@
         class="flex flex-col p-4 rounded-md basis-full justify-center shadow-md bg-white overflow-hidden max-w-full"
       >
         <div class="flex justify-center gap-x-16 py-4">
-          <InformationLiveStream :elapsedTime="elapsedTime" />
+          <InformationLiveStream :elapsedTime="elapsedTime" :metricsData="metricsData" />
         </div>
       </div>
     </div>
