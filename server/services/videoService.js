@@ -1163,7 +1163,7 @@ const updateViewtime = async(userId, videoId, viewTime) => {
 
     if(checkView && checkView.viewTime < viewTime) {
       checkView.viewTime = viewTime
-      await userVideoView.save();
+      await checkView.save();
     }
 
     return {

@@ -208,7 +208,7 @@ const getListVideoByChannelController = async(req, res, next) => {
 const increaseViewController = async(req, res, next) => {
   const userId = req.body.userId;
   const videoId = req.body.videoId;
-  const ip = req.body.ip;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const viewTime = req.body.viewTime;
   const result = await increaseView(userId, videoId, ip, viewTime)
 
