@@ -14,6 +14,7 @@
   import ReportDialog from '@/components/ReportDialog.vue';
   import { useReadMore } from '@/utils';
   import { postReactionComment } from '@/services/comment';
+  import { useUserStore, usePopupStore } from '@/stores';
 
   dayjs.extend(relativeTime);
 
@@ -35,6 +36,9 @@
       required: true,
     },
   });
+  const userStore = useUserStore();
+  const popupStore = usePopupStore();
+
   const emit = defineEmits(['fetchComments']);
 
   const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
@@ -57,6 +61,11 @@
   const selectedReportComment = ref(null);
   const selectedCommentId = ref(null);
 
+  const likeCount = ref(props.comment.likeCount);
+  const userReactionType = ref(props.comment.userReactionType);
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+  };
   const toggleReportComment = (commentId) => {
     selectedCommentId.value = commentId;
     openReportComment.value = !openReportComment.value;
@@ -66,38 +75,37 @@
     openReportComment.value = false;
     getAllReportTypes();
   };
-  //=====LIKE======///
 
-  const toggleLikeComment = async () => {
-    const data = {
-      commentId: props.comment.id,
-      reactionType: (props.comment.userReactionType = 'like'),
-    };
+  const toggleReaction = async (type) => {
+    if (!userStore.user) {
+      openLoginPopup();
+      return;
+    }
+    const data = { commentId: props.comment.id, reactionType: type };
+    try {
+      const response = await postReactionComment(data);
+      if (response.status === 200) {
+        if (type === 'like') {
+          if (userReactionType.value === 'like') {
+            likeCount.value -= 1;
+          } else if (userReactionType.value === 'dislike') {
+            likeCount.value += 1;
+          } else {
+            likeCount.value += 1;
+          }
+        } else if (type === 'dislike') {
+          if (userReactionType.value === 'like') {
+            likeCount.value -= 1;
+          }
+        }
 
-    const response = await postReactionComment(data);
-    console.log(response);
-
-    if (response.status === 200) {
-      if (props.comment.userReactionType === 'like') {
-        props.comment.likeCount += 1;
-      } else {
-        props.comment.likeCount -= 1;
+        userReactionType.value = userReactionType.value === type ? null : type;
       }
+    } catch (error) {
+      toast.error('Error updating reaction');
     }
   };
-  const toggleDislikeComment = async () => {
-    const data = {
-      commentId: props.comment.id,
-      reactionType: (props.comment.userReactionType = 'dislike'),
-    };
-    console.log(data.reactionType);
 
-    const response = await postReactionComment(data);
-
-    // if (response.status === 200) {
-    //   emit('fetchComments');
-    // }
-  };
   //===========///
 
   const timeFromNow = (createdAt) => {
@@ -251,23 +259,22 @@
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="flex gap-4 items-center"
       >
-        <div class="flex gap-2" @click="toggleLikeComment">
+        <div class="flex gap-2" @click="toggleReaction('like')">
           <Like
-            class="cursor-pointer"
-            :fill="comment.userReactionType === 'like' ? '#13CEB3' : 'white'"
-            :stroke="comment.userReactionType === 'like' ? 'none' : '#13D0B4'"
+            class="cursor-pointer hover:scale-110"
+            :fill="userReactionType === 'like' ? '#13CEB3' : 'white'"
+            :stroke="userReactionType === 'like' ? 'none' : '#13D0B4'"
           />
           <div>
-            <span class="items-center text-primary text-[13px]">{{ comment.likeCount }}</span>
+            <span class="items-center text-primary text-[13px]">{{ likeCount }}</span>
           </div>
         </div>
-        <div class="flex gap-2" @click="toggleDislikeComment">
+        <div class="flex gap-2" @click="toggleReaction('dislike')">
           <Dislike
-            class="cursor-pointer mt-1"
-            :fill="comment.userReactionType === 'dislike' ? '#13CEB3' : 'white'"
-            :stroke="comment.userReactionType === 'dislike' ? 'none' : '#13D0B4'"
+            class="cursor-pointer mt-1 hover:scale-110"
+            :fill="userReactionType === 'dislike' ? '#13CEB3' : 'white'"
+            :stroke="userReactionType === 'dislike' ? 'none' : '#13D0B4'"
           />
-          <span>{{ comment.dislike }}</span>
         </div>
         <div class="relative">
           <div>

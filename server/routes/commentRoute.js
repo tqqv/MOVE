@@ -11,3 +11,4 @@ commentRouter.get("/:userId", getChildCommentsByParentIdController);
 commentRouter.get("/:videoId/:userId", getVideoCommentController);
 
 module.exports = commentRouter;
+  

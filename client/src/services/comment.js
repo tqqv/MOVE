@@ -46,9 +46,11 @@ const getAllCommentOfStreamer = async (streamerId, pageSize, currentPage, isResp
   }
 };
 
-const getReplyCommentOfVideo = async (commentId, page) => {
+const getReplyCommentOfVideo = async (userId, commentId, page) => {
   try {
-    const response = await axios.get(`comment/?parentId=${commentId}&pageSize=5&page=${page}`);
+    const response = await axios.get(
+      `/comment/${userId}/?parentId=${commentId}&pageSize=5&page=${page}`,
+    );
     return response.data;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };

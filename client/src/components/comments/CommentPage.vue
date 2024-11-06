@@ -27,7 +27,7 @@
 
   const fetchComments = async () => {
     try {
-      const response = await getAllComments(props.videoId, userStore.user?.id, {
+      const response = await getAllComments(props.videoId, userStore.user.id, {
         page: currentPage.value,
         pageSize: commentsPerPage.value,
       });
@@ -80,7 +80,7 @@
     };
     loadingRepliesForComment.value[parentId] = true;
     try {
-      const response = await getAllChildComments(parentId, userStore.user?.id, pageInfo);
+      const response = await getAllChildComments(parentId, userStore.user.id, pageInfo);
 
       if (response.data.success && response.data.data) {
         if (!childComments.value[parentId]) {
@@ -157,9 +157,9 @@
   );
 
   onMounted(() => {
-    if (userStore.user?.id) {
-      fetchComments();
-    }
+    fetchComments();
+    // if (userStore.user?.id) {
+    // }
   });
 </script>
 
