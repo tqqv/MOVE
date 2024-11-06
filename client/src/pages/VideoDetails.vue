@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted, watch, computed } from 'vue';
+  import { ref, onMounted, watch, computed, onBeforeUnmount } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
   import { toast } from 'vue3-toastify';
   import Player from '@vimeo/player';
@@ -15,7 +15,10 @@
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
+  import { useUserStore } from '@/stores';
 
+  const userStore = useUserStore();
+  const { user } = userStore;
   const route = useRoute();
   const router = useRouter();
   const vimeoPlayer = ref(null);
@@ -26,9 +29,14 @@
   const channelId = ref(null);
   const categoryId = ref(null);
   const levelworkoutsId = ref(null);
+  const usernameDetails = ref(null);
   const videos = ref([]);
   let playerInstance = null;
   const isLoading = ref(true);
+  let actualWatchTime = 0;
+  let lastUpdateTime = 0;
+  let hasWatchedFiveMinutes = false;
+  let currentVideoId = ref(videoId.value);
 
   const fetchWatchAlso = async () => {
     try {
@@ -50,6 +58,7 @@
         video.value = res.data.data;
         categoryId.value = res.data.data.categoryId;
         levelworkoutsId.value = res.data.data.levelWorkoutsId;
+        usernameDetails.value = res.data.data.channel.User.username;
         channelDetails.value = {
           channelName: res.data.data.channel.channelName,
           avatar: res.data.data.channel.avatar,
@@ -70,6 +79,29 @@
     }
   };
 
+  const increaseView = async (viewTime) => {
+    try {
+      const res = await axiosInstance.post('video/increaseView', {
+        userId: user?.id || null,
+        videoId: videoId.value,
+        viewTime: viewTime,
+      });
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const updateViewTime = async (viewTime, videoId) => {
+    try {
+      const res = await axiosInstance.post('video/updateViewTime', {
+        userId: user?.id || null,
+        videoId: videoId,
+        viewTime: viewTime,
+      });
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   const initializePlayer = () => {
     if (playerInstance) {
       playerInstance.destroy();
@@ -77,7 +109,7 @@
 
     playerInstance = new Player(vimeoPlayer.value, {
       id: videoId.value,
-      loop: true,
+      loop: false,
       autoplay: true,
       title: false,
       byline: false,
@@ -93,6 +125,35 @@
     playerInstance.on('loaded', () => {
       isLoading.value = false;
     });
+    playerInstance.on('timeupdate', (data) => {
+      const currentTime = data.seconds;
+
+      if (currentTime > lastUpdateTime) {
+        actualWatchTime += Math.min(currentTime - lastUpdateTime, 1);
+      }
+
+      lastUpdateTime = currentTime;
+
+      if (Math.floor(actualWatchTime) === 300 && !hasWatchedFiveMinutes) {
+        hasWatchedFiveMinutes = true;
+        increaseView(Math.floor(actualWatchTime));
+      }
+    });
+
+    playerInstance.on('ended', () => {
+      if (!hasWatchedFiveMinutes && actualWatchTime >= lastUpdateTime) {
+        increaseView(Math.floor(actualWatchTime));
+      }
+      actualWatchTime = 0;
+      lastUpdateTime = 0;
+      hasWatchedFiveMinutes = false;
+    });
+  };
+
+  const handleUnload = (videoId) => {
+    if (actualWatchTime >= lastUpdateTime) {
+      updateViewTime(Math.floor(actualWatchTime), videoId);
+    }
   };
 
   onMounted(async () => {
@@ -101,19 +162,23 @@
     await fetchWatchAlso();
   });
 
+  onBeforeUnmount(() => {
+    handleUnload(currentVideoId.value);
+  });
   watch(videoId, async () => {
+    actualWatchTime = 0;
+    lastUpdateTime = 0;
     initializePlayer();
     await fetchVideoById();
     await fetchWatchAlso();
   });
-
-  watch(isLoading, () => {
-    console.log(isLoading.value);
+  watch(videoId, (newVideoId) => {
+    currentVideoId.value = newVideoId;
   });
 </script>
 <template>
   <div class="grid grid-cols-12">
-    <div class="col-span-8">
+    <div class="col-span-12 lg:col-span-8">
       <div ref="vimeoPlayer" :class="['video-player', 'relative', { 'bg-black': isLoading }]">
         <div v-if="isLoading" class="grid place-items-center absolute top-0 left-0 w-full h-full">
           <i class="pi pi-spin pi-spinner text-white text-[50px]"></i>
@@ -128,7 +193,9 @@
           :isButtonGiftREPsVisible="true"
           :totalFollower="totalFollower"
           :channelId="channelId"
+          :usernameDetails="usernameDetails"
           @updateFollowers="fetchVideoById"
+          :hiddenReport="false"
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">
@@ -144,7 +211,7 @@
         <CommentPage :videoId="videoId" />
       </div>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-4">
       <div class="p-[10px]">
         <h3 class="font-bold mb-2 uppercase">watch also</h3>
         <div>

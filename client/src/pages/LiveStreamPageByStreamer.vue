@@ -1,41 +1,112 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, onUnmounted, ref, watch } from 'vue';
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
-  import { useUserStore } from '@/stores';
-  import { joinRoom, listenStreamReady } from '@/services/socketService';
+  import { useLiveStreamStore, useStreamerStore, useUserStore } from '@/stores';
+  import { joinRoom, listenStreamMetrics, listenStreamReady } from '@/services/socketService';
 
-  const userStore = useUserStore();
-  const statusLive = ref('beforeLive');
-  const connectOBS = ref(false);
-  const updateStatusLive = (value) => {
-    statusLive.value = value;
+  const streamerStore = useStreamerStore();
+  const liveStreamStore = useLiveStreamStore();
+  const connectOBS = ref(null);
+  const liveStatus = ref(null);
+  const metricsData = ref(null);
+  // TIME START STREAM
+  const elapsedTime = ref(0);
+  let timer;
+
+  const startTimer = () => {
+    const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
+    timer = setInterval(() => {
+      const currentTime = new Date();
+      elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
+      // console.log(elapsedTime.value);
+    }, 1000);
   };
 
-  const handleConnectOBS = () => {
-    joinRoom(userStore.user.Channel.id);
+  const stopTimer = () => {
+    if (timer) {
+      clearInterval(timer);
+      timer = null;
+    }
+    elapsedTime.value = 0;
+  };
 
-    listenStreamReady((isReady) => {
-      connectOBS.value = isReady;
-    });
+  // CONNECT OBS
+  const handleConnectOBS = () => {
+    if (streamerStore.streamerChannel?.id) {
+      joinRoom(streamerStore.streamerChannel.id);
+
+      listenStreamReady((isReady) => {
+        streamerStore.fetchProfileChannel();
+        connectOBS.value = isReady;
+      });
+
+      listenStreamMetrics((metrics) => {
+        metricsData.value = metrics;
+        console.log('Stream Metrics:', metrics);
+      });
+    }
   };
 
   onMounted(async () => {
-    await userStore.fetchUserProfile();
-    await handleConnectOBS();
+    await streamerStore.fetchProfileChannel();
+    handleConnectOBS();
   });
+
+  watch(
+    () => streamerStore.streamerChannel?.liveStatus,
+    async (newLiveStatus) => {
+      liveStatus.value = newLiveStatus;
+      if (newLiveStatus === 'streamPublished') {
+        try {
+          const username = streamerStore.streamerChannel?.User?.username;
+          if (username) {
+            await liveStreamStore.fetchLiveStreamData(username);
+            if (newLiveStatus === 'streamPublished' && liveStreamStore.liveStreamData?.createdAt) {
+              startTimer();
+            }
+          }
+        } catch (error) {
+          console.error('Error fetching live stream data:', error);
+        }
+      }
+    },
+  );
+
+  // watch(() => {
+  //   console.log('livestatus: ', liveStatus.value);
+  //   console.log('connectobs: ', connectOBS.value);
+  // });
+  watch(
+    () => streamerStore.streamerChannel?.User?.username,
+    (newUsername) => {
+      if (newUsername) {
+        return newUsername;
+      }
+    },
+  );
+  // watch(() => {
+  //   console.log(elapsedTime.value);
+  // });
 </script>
 
 <template>
   <Navbar />
   <div class="flex pt-[72px] bg-[#f0f2f5]">
     <SideBarLive
+      :elapsedTime="elapsedTime"
       :connectOBS="connectOBS"
-      :statusLive="statusLive"
-      @updateStatusLive="updateStatusLive"
+      :liveStatus="liveStatus"
+      @startTimer="startTimer"
+      @stopTimer="stopTimer"
     />
     <div class="flex-1 overflow-y-auto">
-      <router-view :statusLive="statusLive" :connectOBS="connectOBS" />
+      <router-view
+        :elapsedTime="elapsedTime"
+        :connectOBS="connectOBS"
+        :liveStatus="liveStatus"
+        :metricsData="metricsData"
+      />
     </div>
   </div>
 </template>

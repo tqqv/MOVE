@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { formatRating, formatDuration, formatView } from '@/utils';
   import { toast } from 'vue3-toastify';
   import share from '@icons/share.vue';
@@ -9,12 +9,17 @@
   import Rate from '@components/Rate.vue';
   import rateIcon from '@icons/rate.vue';
   import { usePopupStore } from '@/stores';
+  import ReportStream from './ReportStream.vue';
 
   const popupStore = usePopupStore();
   const props = defineProps({
     video: {
       type: Object,
       required: true,
+    },
+    reportType: {
+      type: String,
+      default: 'video',
     },
   });
   const emit = defineEmits(['updateRate']);
@@ -51,6 +56,7 @@
 
   const showDialogReportVideo = () => {
     getAllReportTypes();
+    isReportVisible.value = true;
   };
 
   const closeReport = () => {
@@ -60,6 +66,20 @@
   const closeSuccess = () => {
     isReportSuccessVisible.value = false;
   };
+
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.menu-container')) {
+      isMenuVisible.value = false;
+    }
+  };
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
 
   const handleSubmitReportVideo = async () => {
     if (selectedReportVideo.value.id) {
@@ -137,29 +157,31 @@
 
 <template>
   <div class="flex items-center justify-between">
-    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video.title }}</h3>
+    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video?.title }}</h3>
     <div class="flex items-center">
       <rateIcon class="mr-2 scale-125" />
-      <span class="text-[20px] font-bold">{{ formatRating(video.ratings) }}</span>
+      <span class="text-[20px] font-bold">{{ formatRating(video?.ratings) }}</span>
     </div>
   </div>
   <div class="flex items-center mb-2 text-[13px] mt-2">
-    <span class="text-red">{{ formatView(video.viewCount) }} view</span>
+    <span class="text-red">{{ formatView(video?.viewCount) }} view</span>
     <span class="font-bold text-sm px-2">•</span>
-    <span class="text-primary">{{ video.category.title }}</span>
+    <span class="text-primary">{{ video?.category.title }}</span>
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">
-      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-        video.levelWorkout.levelWorkout
-      }}</span>
+      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
+        {{
+          video?.levelWorkout?.levelWorkout || video?.livestreamLevelWorkout?.levelWorkout || 'N/A'
+        }}
+      </span>
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
     </div>
     <div class="flex items-center gap-9">
       <Rate
         title="Rate Video"
         @rate="toggleRateVideo"
-        :videoId="video.id"
+        :videoId="video?.id"
         @updateRate="updateRate"
       />
       <div class="relative">
@@ -199,7 +221,7 @@
           </ul>
         </div>
       </div>
-      <div class="relative">
+      <div v-if="reportType === 'video'" class="relative menu-container">
         <button
           aria-expanded="false"
           aria-controls="menu"
@@ -208,14 +230,15 @@
         />
         <div
           v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
+          class="absolute bottom-full mb-2 w-[125px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
         >
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
-              class="flex items-center justify-center text-[13px] cursor-pointer text-center"
+              class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
               @click="showDialogReportVideo"
             >
-              Report video
+              <i class="pi pi-flag text-sm"></i>
+              <span class="truncate"> Report video</span>
             </li>
           </ul>
           <ReportDialog
@@ -234,6 +257,7 @@
           />
         </div>
       </div>
+      <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
     </div>
   </div>
 </template>

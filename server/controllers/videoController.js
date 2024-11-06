@@ -17,8 +17,12 @@ const {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  deleteMultipleVideosService,
+  getStateByCountryAndVideoIdFromIp,
+  renewTopVideos,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
+const { createHashmapFromDBData, getFilteredSortedTopVideos } = require('../utils/redis/cache/videoCache');
 
 const getUploadLink = async (req, res, next) => {
   const { fileName, fileSize } = req.body;
@@ -133,6 +137,17 @@ const deleteVideo = async (req, res, next) => {
   }
 }
 
+const deleteMultipleVideos = async (req, res, next) => {
+  const { videoIds } = req.query;
+  try {
+    const results = await deleteMultipleVideosService(videoIds);
+    responseHandler(200, results, 'Videos processed')(req, res, next);
+  } catch (error) {
+    console.log(error);
+    responseHandler(error.status || 500, error.data, error.message)(req, res, next);
+  }
+};
+
 const getListVideoByFilterController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 12;
@@ -168,6 +183,16 @@ const getStateByCountryAndVideoIdController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getStateByCountryAndVideoIdFromIpController = async(req, res, next) => {
+  const videoId = req.params.videoId
+  const country = req.query.country
+  const days = req.query.days
+
+  const result = await getStateByCountryAndVideoIdFromIp(videoId, country, days)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 const getListVideoByChannelController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
@@ -183,10 +208,11 @@ const getListVideoByChannelController = async(req, res, next) => {
 }
 
 const increaseViewController = async(req, res, next) => {
-  const userId = req.body.id;
+  const userId = req.body.userId;
   const videoId = req.body.videoId;
-  const ip = req.body.ip;
-  const result = await increaseView(userId, videoId, ip)
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const viewTime = req.body.viewTime;
+  const result = await increaseView(userId, videoId, ip, viewTime)
 
   responseHandler(result.status, null, result.message)(req, res, next);
 }
@@ -209,6 +235,20 @@ const getVideoWatchAlsoController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getTopVideoController = async(req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const level = req.query.level;
+  const category = req.query.category;
+  // updateAt = desc same as Most recent
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'views',
+    order: req.query.order || 'desc'
+  };
+  const result = await getFilteredSortedTopVideos( {  level, category }, sortCondition.sortBy, page, pageSize, sortCondition.order);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -221,6 +261,7 @@ module.exports = {
   getVideoByUserId,
   getVideoByVideoId,
   deleteVideo,
+  deleteMultipleVideos,
   getListVideoByFilterController,
   analyticsVideoByIdController,
   getListVideoByChannelController,
@@ -228,4 +269,6 @@ module.exports = {
   increaseViewController,
   updateViewtimeController,
   getVideoWatchAlsoController,
+  getStateByCountryAndVideoIdFromIpController,
+  getTopVideoController
 };

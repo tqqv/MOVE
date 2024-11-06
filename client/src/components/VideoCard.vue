@@ -81,8 +81,8 @@
           </div>
 
           <div class="flex items-center space-x-1 text_secondary my-2">
-            <span v-if="video.category.title" class="flex items-center">
-              {{ video.category.title }}
+            <span v-if="video.category?.title" class="flex items-center">
+              {{ video.category?.title }}
             </span>
             <div class="flex items-center">
               <span class="font-bold text-xl px-1 mb-[0.5px] leading-none">•</span>
