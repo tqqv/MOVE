@@ -26,4 +26,4 @@ const fetchStates = async (iso2) => {
   return await fetchData(`/${iso2}/states`);
 };
 
-export { fetchCountries, fetchStates };
+export { fetchCountries, fetchStates, fetchData };

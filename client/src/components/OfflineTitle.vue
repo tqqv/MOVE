@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, ref } from 'vue';
+  import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { formatRating, formatDuration, formatView } from '@/utils';
   import { toast } from 'vue3-toastify';
   import share from '@icons/share.vue';
@@ -55,6 +55,7 @@
 
   const showDialogReportVideo = () => {
     getAllReportTypes();
+    isReportVisible.value = true;
   };
 
   const closeReport = () => {
@@ -64,6 +65,20 @@
   const closeSuccess = () => {
     isReportSuccessVisible.value = false;
   };
+
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.menu-container')) {
+      isMenuVisible.value = false;
+    }
+  };
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
 
   const handleSubmitReportVideo = async () => {
     if (selectedReportVideo.value.id) {
@@ -218,10 +233,11 @@
         >
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
-              class="flex items-center justify-center text-[13px] cursor-pointer text-center"
+              class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
               @click="showDialogReportVideo"
             >
-              Report video
+              <i class="pi pi-flag text-sm"></i>
+              <span class="truncate"> Report video</span>
             </li>
           </ul>
           <ReportDialog
