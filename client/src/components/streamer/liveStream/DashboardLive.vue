@@ -1,6 +1,7 @@
 <script setup>
   import EndLiveStream from './EndLiveStream.vue';
   import InLiveStream from './InLiveStream.vue';
+
   const props = defineProps({
     connectOBS: String,
     liveStatus: String,
@@ -24,6 +25,11 @@
       :metricsData="metricsData"
     />
     <!-- END LIVE STREAM -->
-    <EndLiveStream :liveStatus="liveStatus" v-if="props.liveStatus === 'streamEnded'" />
+
+    <EndLiveStream
+      :metricsData="metricsData"
+      :liveStatus="liveStatus"
+      v-if="props.liveStatus === 'streamEnded'"
+    />
   </section>
 </template>

@@ -10,6 +10,7 @@
     elapsedTime: Number,
     duration: Number,
     metricsData: Object,
+    liveStatus: String,
   });
 </script>
 ,
@@ -19,7 +20,11 @@
       <Eye fill="white" />
     </div>
     <div class="flex flex-col">
-      <p class="font-medium">{{ metricsData?.currentViews ?? '0' }}</p>
+      <p v-if="liveStatus === 'streamEnded'" class="font-medium">
+        {{ metricsData?.totalViews ?? '0' }}
+      </p>
+      <p v-else class="font-medium">{{ metricsData?.currentViews ?? '0' }}</p>
+
       <p class="text-sm">views</p>
     </div>
   </div>
