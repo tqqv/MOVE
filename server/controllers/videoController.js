@@ -19,8 +19,10 @@ const {
   getVideoWatchAlso,
   deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
+  renewTopVideos,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
+const { createHashmapFromDBData, getFilteredSortedTopVideos } = require('../utils/redis/cache/videoCache');
 
 const getUploadLink = async (req, res, next) => {
   const { fileName, fileSize } = req.body;
@@ -208,7 +210,7 @@ const getListVideoByChannelController = async(req, res, next) => {
 const increaseViewController = async(req, res, next) => {
   const userId = req.body.userId;
   const videoId = req.body.videoId;
-  const ip = req.body.ip;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
   const viewTime = req.body.viewTime;
   const result = await increaseView(userId, videoId, ip, viewTime)
 
@@ -233,6 +235,20 @@ const getVideoWatchAlsoController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getTopVideoController = async(req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const level = req.query.level;
+  const category = req.query.category;
+  // updateAt = desc same as Most recent
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'views',
+    order: req.query.order || 'desc'
+  };
+  const result = await getFilteredSortedTopVideos( {  level, category }, sortCondition.sortBy, page, pageSize, sortCondition.order);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -254,4 +270,5 @@ module.exports = {
   updateViewtimeController,
   getVideoWatchAlsoController,
   getStateByCountryAndVideoIdFromIpController,
+  getTopVideoController
 };
