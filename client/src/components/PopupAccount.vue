@@ -70,8 +70,15 @@
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
           </div>
           <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
-            <wallet class="fill-black group-hover:fill-primary" />
-            <h1 class="mb-1 group-hover:text-primary">Wallet ({{ props.user?.REPs ?? 0 }} REPs)</h1>
+            <RouterLink
+              to="/wallet/payment-method"
+              class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            >
+              <wallet class="fill-black group-hover:fill-primary" />
+              <h1 class="mb-1 group-hover:text-primary">
+                Wallet ({{ props.user?.REPs ?? 0 }} REPs)
+              </h1></RouterLink
+            >
           </div>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />

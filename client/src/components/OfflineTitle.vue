@@ -8,7 +8,9 @@
   import ReportDialog from './ReportDialog.vue';
   import Rate from '@components/Rate.vue';
   import rateIcon from '@icons/rate.vue';
+  import { usePopupStore } from '@/stores';
 
+  const popupStore = usePopupStore();
   const props = defineProps({
     video: {
       type: Object,
@@ -101,9 +103,11 @@
       const response = await axiosInstance.get('report/getListReport?type=videos');
       if (response.status === 200) {
         reportTypeVideos.value = response.data.data;
+        isReportVisible.value = true;
       }
     } catch (error) {
-      toast.error(error.message);
+      popupStore.openLoginPopup();
+      isReportVisible.value = false;
     }
   };
 
@@ -148,29 +152,31 @@
 
 <template>
   <div class="flex items-center justify-between">
-    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video.title }}</h3>
+    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video?.title }}</h3>
     <div class="flex items-center">
       <rateIcon class="mr-2 scale-125" />
-      <span class="text-[20px] font-bold">{{ formatRating(video.ratings) }}</span>
+      <span class="text-[20px] font-bold">{{ formatRating(video?.ratings) }}</span>
     </div>
   </div>
   <div class="flex items-center mb-2 text-[13px] mt-2">
-    <span class="text-red">{{ formatView(video.viewCount) }} view</span>
+    <span class="text-red">{{ formatView(video?.viewCount) }} view</span>
     <span class="font-bold text-sm px-2">•</span>
-    <span class="text-primary">{{ video.category.title }}</span>
+    <span class="text-primary">{{ video?.category.title }}</span>
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">
-      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-        video.levelWorkout.levelWorkout
-      }}</span>
+      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
+        {{
+          video?.levelWorkout?.levelWorkout || video?.livestreamLevelWorkout?.levelWorkout || 'N/A'
+        }}
+      </span>
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
     </div>
     <div class="flex items-center gap-9">
       <Rate
         title="Rate Video"
         @rate="toggleRateVideo"
-        :videoId="video.id"
+        :videoId="video?.id"
         @updateRate="updateRate"
       />
       <div class="relative">

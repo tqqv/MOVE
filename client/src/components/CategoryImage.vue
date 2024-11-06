@@ -7,11 +7,11 @@
 </script>
 
 <template>
-  <RouterLink
+  <router-link
     v-for="category in categories"
     :key="category.id"
     class="flex flex-col items-start cursor-pointer"
-    :to="`/category/${category.title}`"
+    :to="`/browse/categories/${category.title}`"
   >
     <img
       :src="category.imgUrl"
@@ -22,5 +22,5 @@
     <p class="text_secondary">
       {{ category.totalViews || '1' }} {{ category.totalViews > 1 ? 'views' : 'view' }}
     </p>
-  </RouterLink>
+  </router-link>
 </template>

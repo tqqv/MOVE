@@ -4,30 +4,61 @@
   import Filter from '@components/Filter.vue';
   import Camera from '@/components/icons/camera.vue';
   import Key from '@/components/icons/key.vue';
-  import { useCategoriesStore, useUserStore } from '@/stores';
+  import { useCategoriesStore, useLiveStreamStore, useUserStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import EmptyImage from '@/components/icons/emptyImage.vue';
   import NotConnectScreen from './NotConnectScreen.vue';
   import { toast } from 'vue3-toastify';
   import { changeStreamKey } from '@/services/streamer';
+  import { uploadAvatar } from '@/services/cloudinary';
 
   const props = defineProps({
-    statusLive: String,
-    connectOBS: Boolean,
+    connectOBS: String,
+    liveStatus: String,
   });
 
   const userStore = useUserStore();
   const categoriesStore = useCategoriesStore();
+  const liveStreamStore = useLiveStreamStore();
   const levelWorkoutStore = useLevelWorkoutStore();
+
   const isLoadingAvatar = ref(false);
-  const streamKey = ref('?streamKey=');
-  const title = ref('');
-  const description = ref('');
   const isCameraSelected = ref(false);
   const isLiveStreamSelected = ref(true);
-  const thumbnail = ref('');
 
+  // DATA LIVESTREAM
+  const streamKey = computed(() => userStore.user?.Channel.streamKey || '');
+  const streamId = computed(() => userStore.user?.Channel.id);
+  const title = ref('');
+  const description = ref('');
+  const thumbnail = ref();
+  const selectCategoryOptions = ref('');
+  const selectLevelWorkoutOptions = ref('');
+
+  // HANDLE DATA LIVE
+  const checkCompleteStatus = () => {
+    const isComplete =
+      title.value &&
+      description.value &&
+      thumbnail.value &&
+      selectCategoryOptions.value != 0 &&
+      selectLevelWorkoutOptions.value != 0;
+    liveStreamStore.setCompleteStatus(isComplete ? true : false);
+  };
+
+  watch([title, description, thumbnail, selectCategoryOptions, selectLevelWorkoutOptions], () => {
+    liveStreamStore.updateLiveStreamData({
+      streamerId: streamId.value,
+      streamKey: streamKey.value,
+      title: title.value,
+      description: description.value,
+      thumbnailUrl: thumbnail.value,
+      categoryId: selectCategoryOptions.value,
+      levelWorkoutsId: selectLevelWorkoutOptions.value,
+    });
+    checkCompleteStatus();
+  });
   // COPYTOCLIPBOARD
   const handleCopyStreamKey = () => {
     copyToClipboard(
@@ -53,7 +84,6 @@
     try {
       const data = await uploadAvatar(selectedFile);
       if (data.secure_url) {
-        // profileData.value.avatar = data.secure_url;
         thumbnail.value = data.secure_url;
       } else {
         isLoadingAvatar.value = false;
@@ -82,11 +112,8 @@
   };
 
   // SELECT OPTION
-  const categoryOptions = computed(() => categoriesStore.categoryOptions);
-  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
-
-  const selectCategoryOptions = ref('');
-  const selectLevelWorkoutOptions = ref('');
+  const categoryOptions = computed(() => categoriesStore.categoriesForSelect);
+  const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutForSelect);
 
   // CATEGORIES VS LEVEL WORKOUT
 
@@ -112,19 +139,32 @@
   <section class="">
     <div class=" ">
       <!-- SCREEN LIVE -->
-      <div v-if="statusLive === 'beforeLive'" class="px-8 flex items-center flex-col">
+      <div
+        v-if="
+          props.connectOBS == null || props.liveStatus === 'streamReady' || props.liveStatus == null
+        "
+        class="px-8 flex items-center flex-col"
+      >
         <!-- STREAMING SOFTWARE -->
         <div v-if="isLiveStreamSelected" class="w-full flex justify-center">
           <div
             class="flex flex-col max-w-[1028px] basis-full justify-center rounded-lg shadow-md bg-white mb-6 overflow-hidden"
           >
             <!-- SCREEN DONT" CONNET OBS -->
-            <div v-if="!props.connectOBS" class="flex w-full p-4">
+            <div
+              v-if="
+                (props.connectOBS == null || props.connectOBS == 'null') && props.liveStatus == null
+              "
+              class="flex w-full p-4"
+            >
               <NotConnectScreen />
             </div>
             <!-- SCREEN CONNECT OBCS -->
-            <div v-if="props.connectOBS" class="flex w-full p-4">
-              <LiveStreamScreen />
+            <div
+              v-if="props.connectOBS === 'streamReady' || props.liveStatus === 'streamReady'"
+              class="flex w-full p-4"
+            >
+              <LiveStreamScreen :username="userStore.user.username" />
             </div>
             <!-- YOUR SCREEN -->
             <div class="pt-2 pb-6 px-8">
@@ -204,7 +244,12 @@
               <div class="my-4">
                 <h1 class="font-semibold mb-4">Stream key</h1>
                 <div class="flex items-center gap-x-3 mb-2">
-                  <input type="text" v-model="streamKey" class="input_custom bg-gray-light" />
+                  <input
+                    type="text"
+                    v-model="streamKey"
+                    class="input_custom bg-gray-light"
+                    disabled
+                  />
                   <div
                     v-tooltip.top="'copy stream key'"
                     class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
@@ -229,7 +274,7 @@
               <input type="text" class="input_custom" v-model="title" placeholder="Title" />
               <textarea
                 type="text"
-                class="input_custom h-32 resize-none"
+                class="input_custom h-32 resize-none pr-1"
                 v-model="description"
                 placeholder="Description"
               ></textarea>
@@ -239,7 +284,7 @@
               <Filter
                 :class="'w-full py-1 border !border-gray-dark'"
                 :options="categoryOptions"
-                @change="selectCategoryOptions = $event.title"
+                @change="selectCategoryOptions = $event.id"
               />
             </div>
             <div class="flex flex-col mb-6 gap-y-3">
@@ -247,7 +292,7 @@
               <Filter
                 :class="'w-full py-1 !border-gray-dark'"
                 :options="levelWorkoutOptions"
-                @change="selectLevelWorkoutOptions = $event.title"
+                @change="selectLevelWorkoutOptions = $event.id"
               />
             </div>
             <!-- UPLOAD THUMBNAIL -->
@@ -261,6 +306,7 @@
                   ref="fileInputRef"
                   class="hidden"
                   @change="handleSelectedFile"
+                  accept="image/*"
                 />
 
                 <span
@@ -270,7 +316,7 @@
                   Upload thumbnail
                 </span>
               </div>
-              <div class="relative">
+              <div class="relative min-h-[226px]">
                 <div
                   v-show="isLoadingAvatar"
                   class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2"
@@ -288,6 +334,7 @@
                 <div
                   v-else
                   class="flex flex-col items-center justify-center rounded-md py-20 bg-gray-light/40 border-2 border-dashed border-gray-dark"
+                  :class="{ 'opacity-20': isLoadingAvatar }"
                 >
                   <EmptyImage />
                 </div>

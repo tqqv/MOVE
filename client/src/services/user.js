@@ -65,7 +65,7 @@ const getRequestStreamer = async () => {
 const postFollowChannel = async (data) => {
   try {
     const response = await axios.post('/user/followChannel', data);
-    return response.data;
+    return response;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
@@ -78,8 +78,26 @@ const getListFollowOfUser = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+///cate
+const postFollowCate = async (data) => {
+  try {
+    const response = await axios.post('/user/followCategory', data);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getCheckFollowCate = async (cateId) => {
+  try {
+    const response = await axios.get(`/user/checkUserFollowCate/${cateId}`);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   getProfile,
+  getCheckFollowCate,
   updateProfile,
   changePassword,
   viewFollowChannel,
@@ -88,4 +106,5 @@ export {
   postFollowChannel,
   getListFollowOfUser,
   getProfilebyUsername,
+  postFollowCate,
 };

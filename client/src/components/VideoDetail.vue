@@ -6,7 +6,7 @@
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
   import { toast } from 'vue3-toastify';
-  import { usePopupStore, useUserStore } from '@/stores';
+  import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
   const props = defineProps({
     isButtonGiftREPsVisible: {
@@ -27,14 +27,16 @@
     },
     usernameDetails: {
       type: String,
-      required: true,
     },
     avatarDetails: {
       type: String,
-      required: true,
     },
     username: {
       type: String,
+    },
+    hiddenReport: {
+      type: Boolean,
+      default: false,
     },
   });
 
@@ -43,6 +45,7 @@
   const isFilled = ref(false);
   const userStore = useUserStore();
   const popupStore = usePopupStore();
+  const username = computed(() => userStore.user?.username);
 
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
@@ -57,7 +60,7 @@
         channelId: props.channelId,
       });
 
-      if (response.success) {
+      if (response.status === 200) {
         toast.success(response.message);
         isFilled.value = !isFilled.value;
         emit('updateFollowers');
@@ -85,6 +88,12 @@
       channel.channelId === props.channelId ? props.channelId.toString() : null,
     );
   });
+  watch(
+    () => props.usernameDetails,
+    (newVal) => {
+      console.log('Channel details changed:', newVal);
+    },
+  );
   onMounted(() => {
     if (userStore.user) {
       userStore.loadFollowers();
@@ -128,8 +137,10 @@
       </div>
     </div>
     <!-- User Action -->
+
     <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
+        v-if="username !== props.usernameDetails"
         class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
         @click="toggleFollow"
       >
@@ -146,7 +157,12 @@
       >
         <share class="mr-1" /> Share
       </div>
-
+      <div
+        v-if="username !== props.usernameDetails"
+        class="btn text-[13px] font-bold flex items-center cursor-pointer"
+      >
+        Gift REPs <i class="pi pi-angle-right" />
+      </div>
       <ReportChannel :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
     </div>
   </div>

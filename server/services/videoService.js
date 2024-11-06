@@ -5,6 +5,7 @@ const db = require("../models/index.js");
 const { Op } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
 const { v4: uuidv4 } = require('uuid');
+const axios = require('axios');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -113,9 +114,7 @@ const updateVideoService = async (videoId, updateData) => {
         VideoKeyword.create({ videoId, keywordId })
       );
       await Promise.all(videoKeywordPromises);
-      console.log('Keywords saved successfully');
     } catch (error) {
-      console.error('Error saving keywords:', error);
       return {
         status: 500,
         message: 'An error occurred while saving keywords',
@@ -474,6 +473,10 @@ const getVideoByVideoIdService = async (videoId) => {
     include: [
       {
         model: Channel,
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
         attributes: ['channelName', 'bio', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
           [
             sequelize.literal(`(
@@ -492,7 +495,7 @@ const getVideoByVideoIdService = async (videoId) => {
       {
         model: LevelWorkout,
         as: "levelWorkout",
-      },
+      }
     ]
   });
   if (!video) {
@@ -513,6 +516,18 @@ const deleteVideoService = async (videoId) => {
   const video = await Video.findOne({
     where: { id: videoId }
   });
+
+  if (!video) {
+    return {
+      status: 404,
+      message: 'Video not found',
+      data: null
+    };
+  }
+
+  const videoKeywords = await VideoKeyword.findAll({ where: { videoId } });
+  const keywordIds = videoKeywords.map(vk => vk.keywordId);
+
   return new Promise((resolve, reject) => {
     client.request({
       method: 'DELETE',
@@ -521,19 +536,63 @@ const deleteVideoService = async (videoId) => {
       if (error) {
         reject({ status: 500, message: error.message });
       } else {
-        if(!video) {
-          return {
-            status: 404,
-            message: 'Video not found',
-            data: null
-          };
+        await VideoKeyword.destroy({ where: { videoId } });
+
+        if (keywordIds.length > 0) {
+          await Keyword.destroy({ where: { id: keywordIds } });
         }
+
         await video.destroy();
-        resolve({ status: 200, message: 'Video deleted successfully', data: null });
+        resolve({ status: 200, message: 'Video and related keywords deleted successfully', data: null });
       }
     });
   });
-}
+};
+
+const deleteMultipleVideosService = async (videoIds) => {
+  const results = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findOne({ where: { id: videoId } });
+      if (!video) {
+        results.push({ status: 404, message: `Video ID ${videoId} not found`, data: null });
+        continue; 
+      }
+
+      const videoKeywords = await VideoKeyword.findAll({ where: { videoId } });
+      const keywordIds = videoKeywords.map(vk => vk.keywordId);
+
+      await VideoKeyword.destroy({ where: { videoId } });
+
+      if (keywordIds.length > 0) {
+        await Keyword.destroy({ where: { id: keywordIds } });
+      }
+
+      await video.destroy();
+
+      results.push({ status: 200, message: `Video ID ${videoId} and related keywords deleted successfully`, data: null });
+
+      await new Promise((resolve, reject) => {
+        client.request({
+          method: 'DELETE',
+          path: `videos/${videoId}`,
+        }, (error) => {
+          if (error) {
+            reject({ status: 500, message: `Error deleting video ID ${videoId} from client: ${error.message}` });
+          } else {
+            resolve();
+          }
+        });
+      });
+
+    } catch (error) {
+      results.push({ status: 500, message: `Error processing video ID ${videoId}: ${error.message}` });
+    }
+  }
+
+  return results;
+};
 
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
@@ -803,6 +862,67 @@ const getStateByCountryAndVideoId = async(videoId, country, days) => {
   }
 }
 
+const getDataCountryByIp = async (videoId, days) => {
+  const whereCondition = {
+    videoId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+  const countryData = await ViewVideo.findAll({
+    where: whereCondition,
+    attributes: [
+      'country',
+      [Sequelize.fn('COUNT', Sequelize.col('country')), 'viewerCount']
+    ],
+    group: ['country'],
+    raw: true
+  });
+
+  return countryData;
+};
+
+const getStateByCountryAndVideoIdFromIp = async(videoId, country, days) => {
+  try {
+    const whereCondition = {
+      videoId,
+    };
+
+    if (days) {
+      whereCondition.createdAt = {
+        [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+      };
+    }
+
+    const stateData = await ViewVideo.findAll({
+      where: whereCondition,
+
+      attributes: [
+        'state',
+        [Sequelize.fn('COUNT', Sequelize.col('state')), 'viewerCount']
+      ],
+      group: ['state'],
+      raw: true
+    });
+
+    return {
+      status: 200,
+      data: stateData,
+      message: `Get list state of ${country} successfully.`
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+}
+
 const analyticsVideoById = async(videoId, channelId, days) => {
   try {
     const checkExists = await Video.findOne({
@@ -820,11 +940,12 @@ const analyticsVideoById = async(videoId, channelId, days) => {
       };
     }
 
-    const [videoData, ageData, countryData, genderData] = await Promise.all([
+    const [videoData, ageData, countryData, genderData, dataByIp] = await Promise.all([
       getVideoData(videoId, days),
       getAgeData(videoId, days),
       getCountryDataWithStates(videoId, days),
       getGenderData(videoId, days),
+      getDataCountryByIp(videoId, days)
     ]);
 
     return {
@@ -834,7 +955,8 @@ const analyticsVideoById = async(videoId, channelId, days) => {
         viewersData: {
           ageData,
           genderData,
-          countryData
+          countryData,
+          dataByIp
         }
       },
       message: "Get analytics by video successfully."
@@ -904,6 +1026,14 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
             )`),
             'viewerGift'
           ],
+          [
+            sequelize.literal(`(
+              SELECT Count(videoId)
+              FROM comments
+              WHERE comments.videoId = Video.id
+            )`),
+            'totalComment'
+          ],
         ],
       },
       include: [
@@ -956,7 +1086,25 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
   }
 };
 
-const increaseView = async(userId, videoId, ip) => {
+const fetchGeoData = async(url) => {
+  try {
+    const res = await axios.get(url);
+    const data = res.data;
+    const geo = {
+      country: data.location.country.name,
+      city: data.location.city,
+    };
+    return geo;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    return {
+      country: null,
+      city: null
+    }
+  }
+}
+
+const increaseView = async(userId, videoId, ip, viewTime) => {
   try {
     const video = await Video.findOne({where: {id: videoId}})
     if(!video) {
@@ -978,7 +1126,12 @@ const increaseView = async(userId, videoId, ip) => {
     }
 
     if(user && !checkView){
-      const viewData = await ViewVideo.create({viewerId: userId, videoId: videoId, ip: ip})
+      const url = `https://api.ipregistry.co/${ip}?key=${process.env.FIND_IP_API_KEY}`;
+      const res = await fetchGeoData(url)
+
+      const viewData = await ViewVideo.create({viewerId: userId, videoId: videoId, ip: ip, country: res.country, city: res.city, viewTime: viewTime})
+      video.viewCount += 1;
+      await video.save()
       if(viewData) {
         return {
           status: 200,
@@ -1008,8 +1161,8 @@ const updateViewtime = async(userId, videoId, viewTime) => {
 
     const checkView = await ViewVideo.findOne({where: {viewerId: userId, videoId: videoId}})
 
-    if(checkView) {
-      checkView.viewTime = Math.min(checkView.viewTime + viewTime, video.duration);
+    if(checkView && checkView.viewTime < viewTime) {
+      checkView.viewTime = viewTime
       await userVideoView.save();
     }
 
@@ -1033,6 +1186,19 @@ const getVideoWatchAlso = async (category, level, videoId) => {
         id: {
           [Op.not]: videoId,
         },
+        status: 'public',
+      },
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+            SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ]
+        ]
       },
       include: [
         {
@@ -1050,13 +1216,13 @@ const getVideoWatchAlso = async (category, level, videoId) => {
           model: LevelWorkout,
           attributes: ['levelWorkout'],
           as: 'levelWorkout',
-          where: level ? { levelWorkout: level } : {},
+          where: level ? { id: level } : {},
         },
         {
           model: Category,
           attributes: ['title'],
           as: 'category',
-          where: category ? { title: category } : {},
+          where: category ? { id: category } : {},
         },
       ],
       limit: 13
@@ -1071,6 +1237,19 @@ const getVideoWatchAlso = async (category, level, videoId) => {
           id: {
             [Op.notIn]: [...existingVideoIds, videoId],
           },
+          status: 'public',
+        },
+        attributes: {
+          include: [
+            [
+              Sequelize.literal(`(
+              SELECT AVG(rating) as ratings
+                  FROM ratings
+                  WHERE ratings.videoId = Video.id
+              )`),
+              'ratings'
+            ]
+          ]
         },
         limit: 20 - videos.length,
         include: [
@@ -1135,4 +1314,6 @@ module.exports = {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  deleteMultipleVideosService,
+  getStateByCountryAndVideoIdFromIp,
 };

@@ -1,18 +1,27 @@
-import socket from '@/utils/socket';
+import livestreamSocket from '@/utils/socket';
 
-// JOIN ROOM
+// LIVESTREAM SOCKET EVENTS
 const joinRoom = (channelId) => {
-  console.log('join ' + channelId);
-
-  socket.emit('joinRoom', channelId);
+  console.log('Joining room:', channelId);
+  if (!livestreamSocket.connected) {
+    livestreamSocket.connect();
+  }
+  livestreamSocket.emit('joinRoom', channelId);
 };
 
-// CHECK STREAM ALREADY FROM SERVER
 const listenStreamReady = (callback) => {
-  socket.on('streamReady', (arg) => {
-    console.log('Received streamReady event with arg:', arg);
+  livestreamSocket.off('socketLiveStatus');
+  livestreamSocket.on('socketLiveStatus', (arg) => {
+    console.log('Received socketLiveStatus  event with arg:', arg);
     callback(arg);
   });
 };
 
-export { joinRoom, listenStreamReady };
+const disconnectLivestream = () => {
+  if (livestreamSocket.connected) {
+    livestreamSocket.emit('disconnecting');
+    livestreamSocket.disconnect();
+  }
+};
+
+export { joinRoom, listenStreamReady, disconnectLivestream };

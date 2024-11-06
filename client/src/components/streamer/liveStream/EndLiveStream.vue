@@ -1,10 +1,16 @@
 <script setup>
   import Clapper from '@/components/icons/clapper.vue';
   import Clock from '@/components/icons/clock.vue';
-  import LiveStream from '@/components/icons/liveStream.vue';
   import InformationLiveStream from './InformationLiveStream.vue';
   import TopDonates from './TopDonates.vue';
-  var currentdate = new Date();
+  import { useLiveStreamStore } from '@/stores';
+  import { formatTimeEndLive } from '@/utils';
+
+  const props = defineProps({
+    liveStatus: String,
+  });
+
+  const liveStreamStore = useLiveStreamStore();
 </script>
 <template>
   <div class="px-10 flex items-center flex-col">
@@ -37,32 +43,33 @@
         <div class="flex items-center gap-x-4">
           <Clock width="15px" />
           <h1 class="text-xs text-footer font-medium">
-            October 17, 6:16 PM - October 17, 6:17 PM (UTC+8)
+            {{ formatTimeEndLive(liveStreamStore.liveStreamData?.createdAt) }} -
+            {{ formatTimeEndLive(liveStreamStore.liveStreamData?.updatedAt) }} (UTC+8)
           </h1>
         </div>
         <div class="flex flex-col gap-y-3 mt-4 text-sm">
           <div class="flex gap-x-4">
             <label class="font-medium" for="">Title:</label>
-            <h1>Hello anh em</h1>
+            <h1>{{ liveStreamStore.liveStreamData?.title }}</h1>
           </div>
           <div class="flex gap-x-4 text sm">
             <label class="font-medium" for="">Description:</label>
             <h1>
-              Lorem ipsum dolor sit amet consectetur adipiscing elit in imperdiet ad suspendisse ullamcorper, vivamus primis malesuada diam etiam conubia justo fusce convallis laoreet nullam. Placerat parturient interdum integer nisi vitae luctus commodo, justo morbi inceptos sapien magna sagittis imperdiet, suscipit molestie cras purus nam euismod. 
+              {{ liveStreamStore.liveStreamData?.description }}
             </h1>
           </div>
           <div class="flex gap-x-4">
             <label class="font-medium" for="">Category:</label>
-            <h1>MMA</h1>
+            <h1>{{ liveStreamStore.liveStreamData?.category.title }}</h1>
           </div>
           <div class="flex gap-x-4">
             <label class="font-medium" for="">Level workout:</label>
-            <h1>Beginner</h1>
+            <h1>{{ liveStreamStore.liveStreamData?.livestreamLevelWorkout.levelWorkout }}</h1>
           </div>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-7" />
         <div class="grid grid-cols-2 gap-y-8 gap-x-16 mb-7 items-start ml-7">
-          <InformationLiveStream />
+          <InformationLiveStream :duration="liveStreamStore.liveStreamData?.duration" />
         </div>
       </div>
       <!-- RIGHT -->
