@@ -3,13 +3,15 @@
   import CommentItem from './CommentItem.vue';
   import { getAllComments, getAllChildComments } from '@/services/comment';
   import WriteComments from './WriteComments.vue';
-
+  import { useUserStore } from '@/stores';
   const props = defineProps({
     videoId: {
       type: [Number, String],
       required: true,
     },
   });
+  const userStore = useUserStore();
+  console.log(userStore.user?.id);
 
   const comments = ref([]);
   const childComments = ref({});
@@ -25,7 +27,7 @@
 
   const fetchComments = async () => {
     try {
-      const response = await getAllComments(props.videoId, {
+      const response = await getAllComments(props.videoId, userStore.user?.id, {
         page: currentPage.value,
         pageSize: commentsPerPage.value,
       });
@@ -60,6 +62,7 @@
         });
 
         hasMoreComments.value = currentPage.value < response.data.data.totalPages;
+        console.log('fetch neeeeeeeeee', comments.value);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -77,7 +80,7 @@
     };
     loadingRepliesForComment.value[parentId] = true;
     try {
-      const response = await getAllChildComments(parentId, pageInfo);
+      const response = await getAllChildComments(parentId, userStore.user?.id, pageInfo);
 
       if (response.data.success && response.data.data) {
         if (!childComments.value[parentId]) {
@@ -123,10 +126,6 @@
 
   watch(() => props.videoId, resetComments);
 
-  onMounted(() => {
-    fetchComments();
-  });
-
   const handleSendComment = (newComment) => {
     if (newComment) {
       comments.value.unshift(newComment);
@@ -146,6 +145,22 @@
       console.error('New comment is undefined or null');
     }
   };
+  watch(
+    () => userStore.user?.id,
+    (newUserId) => {
+      if (newUserId) {
+        fetchComments();
+      } else {
+        console.warn('User ID is undefined, cannot fetch comments');
+      }
+    },
+  );
+
+  onMounted(() => {
+    if (userStore.user?.id) {
+      fetchComments();
+    }
+  });
 </script>
 
 <template>
@@ -166,6 +181,7 @@
       :hasMoreChildComments="hasMoreChildComments[comment.id]"
       :loadingReplies="loadingRepliesForComment[comment.id]"
       :videoId="videoId"
+      @fetchComments="fetchComments"
     />
 
     <div

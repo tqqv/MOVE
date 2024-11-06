@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, watch, onMounted, computed } from 'vue';
   import Verified from '@/components/icons/verified.vue';
   import Gift from '../icons/gift.vue';
   import Like from '../icons/like.vue';
@@ -13,6 +13,7 @@
   import axiosInstance from '@/services/axios';
   import ReportDialog from '@/components/ReportDialog.vue';
   import { useReadMore } from '@/utils';
+  import { postReactionComment } from '@/services/comment';
 
   dayjs.extend(relativeTime);
 
@@ -34,11 +35,12 @@
       required: true,
     },
   });
+  const emit = defineEmits(['fetchComments']);
+
   const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
     props.comment.content,
     300,
   );
-
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
   const isShowMoreChild = ref(false);
@@ -64,15 +66,39 @@
     openReportComment.value = false;
     getAllReportTypes();
   };
+  //=====LIKE======///
+
+  const toggleLikeComment = async () => {
+    const data = {
+      commentId: props.comment.id,
+      reactionType: (props.comment.userReactionType = 'like'),
+    };
+
+    const response = await postReactionComment(data);
+    console.log(response);
+
+    if (response.status === 200) {
+      if (props.comment.userReactionType === 'like') {
+        props.comment.likeCount += 1;
+      } else {
+        props.comment.likeCount -= 1;
+      }
+    }
+  };
+  const toggleDislikeComment = async () => {
+    const data = {
+      commentId: props.comment.id,
+      reactionType: (props.comment.userReactionType = 'dislike'),
+    };
+    console.log(data.reactionType);
+
+    const response = await postReactionComment(data);
+
+    // if (response.status === 200) {
+    //   emit('fetchComments');
+    // }
+  };
   //===========///
-  const toggleLike = () => {
-    props.comment.isLike = !props.comment.isLike;
-    if (props.comment.isLike) props.comment.isDisLike = false;
-  };
-  const toggleDislike = () => {
-    props.comment.isDisLike = !props.comment.isDisLike;
-    if (props.comment.isDisLike) props.comment.isLike = false;
-  };
 
   const timeFromNow = (createdAt) => {
     return dayjs(createdAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
@@ -219,24 +245,27 @@
           </button>
         </span>
       </p>
+
       <!-- Like/Dislike -->
       <div
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="flex gap-4 items-center"
       >
-        <div class="flex gap-2" @click="toggleLike">
+        <div class="flex gap-2" @click="toggleLikeComment">
           <Like
             class="cursor-pointer"
-            :fill="comment.isLike ? '#13CEB3' : 'white'"
-            :stroke="comment.isLike ? 'none' : '#13D0B4'"
+            :fill="comment.userReactionType === 'like' ? '#13CEB3' : 'white'"
+            :stroke="comment.userReactionType === 'like' ? 'none' : '#13D0B4'"
           />
-          <span>{{ comment.like }}</span>
+          <div>
+            <span class="items-center text-primary text-[13px]">{{ comment.likeCount }}</span>
+          </div>
         </div>
-        <div class="flex gap-2" @click="toggleDislike">
+        <div class="flex gap-2" @click="toggleDislikeComment">
           <Dislike
             class="cursor-pointer mt-1"
-            :fill="comment.isDisLike ? '#13CEB3' : 'white'"
-            :stroke="comment.isDisLike ? 'none' : '#13D0B4'"
+            :fill="comment.userReactionType === 'dislike' ? '#13CEB3' : 'white'"
+            :stroke="comment.userReactionType === 'dislike' ? 'none' : '#13D0B4'"
           />
           <span>{{ comment.dislike }}</span>
         </div>

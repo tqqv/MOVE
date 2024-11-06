@@ -5,8 +5,8 @@ const postComments = (videoId, data) => {
 };
 
 // GetAll comment 1 video
-const getAllComments = (videoId, pageInfo) => {
-  return axios.get(`/comment/${videoId}`, {
+const getAllComments = (videoId, userId, pageInfo) => {
+  return axios.get(`/comment/${videoId}/${userId}`, {
     params: {
       page: pageInfo.page,
       pageSize: pageInfo.pageSize,
@@ -14,8 +14,8 @@ const getAllComments = (videoId, pageInfo) => {
   });
 };
 // GetAll comment của 1 parent
-const getAllChildComments = (parentId, pageInfo) => {
-  return axios.get('/comment', {
+const getAllChildComments = (parentId, userId, pageInfo) => {
+  return axios.get(`/comment/${userId}`, {
     params: {
       parentId: parentId,
       page: pageInfo.page,
@@ -54,11 +54,14 @@ const getReplyCommentOfVideo = async (commentId, page) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
+const postReactionComment = (data) => {
+  return axios.post('comment/reactionComment', data);
+};
 export {
   postComments,
   getAllComments,
   getAllChildComments,
   getAllCommentOfStreamer,
   getReplyCommentOfVideo,
+  postReactionComment,
 };
