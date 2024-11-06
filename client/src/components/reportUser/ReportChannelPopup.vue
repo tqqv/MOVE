@@ -7,6 +7,7 @@ import CheckboxCustom from '../CheckboxCustom.vue';
 
   const props = defineProps({
     channelName: String,
+    visibleReport: Boolean,
   });
   const popupStore = usePopupStore();
   const selectedReason = ref('');
