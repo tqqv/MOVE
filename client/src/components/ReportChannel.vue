@@ -18,7 +18,6 @@
   const handleOpenReportChannelDialog = async () => {
     try {
       await fetchListReportChannel();
-      popupStore.openReportChannel();
       isMenuVisible.value = false;
     } catch (error) {
       console.log('Failed to fetch report channels:', error);
@@ -46,7 +45,12 @@
   const fetchListReportChannel = async () => {
     try {
       const response = await getAllReportChannelTypes();
-      listReportChannel.value = response.data;
+      if (response.error) {
+        popupStore.openLoginPopup();
+      } else {
+        listReportChannel.value = response.data;
+        popupStore.openReportChannel();
+      }
     } catch (error) {
       console.log(error);
     }

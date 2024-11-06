@@ -163,7 +163,7 @@
       >
         Gift REPs <i class="pi pi-angle-right" />
       </div>
-      <ReportChannel :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
+      <ReportChannel v-if="hiddenReport" :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
     </div>
   </div>
 </template>

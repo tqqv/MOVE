@@ -9,6 +9,7 @@
   import Rate from '@components/Rate.vue';
   import rateIcon from '@icons/rate.vue';
   import { usePopupStore } from '@/stores';
+  import ReportStream from './ReportStream.vue';
 
   const popupStore = usePopupStore();
   const props = defineProps({
@@ -220,7 +221,7 @@
           </ul>
         </div>
       </div>
-      <div v-if="reportType === 'video'" class="relative">
+      <div v-if="reportType === 'video'" class="relative menu-container">
         <button
           aria-expanded="false"
           aria-controls="menu"
@@ -229,7 +230,7 @@
         />
         <div
           v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
+          class="absolute bottom-full mb-2 w-[125px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
         >
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
@@ -256,7 +257,7 @@
           />
         </div>
       </div>
-      
+      <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
     </div>
   </div>
 </template>

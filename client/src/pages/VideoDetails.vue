@@ -195,6 +195,7 @@
           :channelId="channelId"
           :usernameDetails="usernameDetails"
           @updateFollowers="fetchVideoById"
+          :hiddenReport="false"
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">
