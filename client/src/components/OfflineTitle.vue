@@ -16,6 +16,10 @@
       type: Object,
       required: true,
     },
+    reportType: {
+      type: String,
+      default: 'video',
+    },
   });
   const emit = defineEmits(['updateRate']);
   const isMenuVisible = ref(false);
@@ -216,7 +220,7 @@
           </ul>
         </div>
       </div>
-      <div class="relative menu-container">
+      <div v-if="reportType === 'video'" class="relative">
         <button
           aria-expanded="false"
           aria-controls="menu"
@@ -252,6 +256,7 @@
           />
         </div>
       </div>
+      
     </div>
   </div>
 </template>
