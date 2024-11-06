@@ -25,25 +25,26 @@
 <template>
   <div class="flex">
     <LiveStreamScreen
-      v-if="props.connectOBS === 'streamPublished' || (props.liveStatus && props.connectOBS == null)"
+      v-if="
+        props.connectOBS === 'streamPublished' || (props.liveStatus && props.connectOBS == null)
+      "
       :username="username"
     />
     <NoneLiveStream
       v-if="
         props.connectOBS === 'streamEnded' ||
-        props.connectOBS === 'streamReady'||
+        props.connectOBS === 'streamReady' ||
         props.connectOBS === 'null' ||
-      (  props.connectOBS == null && !props.liveStatus )
+        (props.connectOBS == null && !props.liveStatus)
       "
     />
   </div>
   <div class="container py-6">
-    <OfflineTitle :video="props.liveStreamData?.livestream" />
+    <OfflineTitle :livestream="props.liveStreamData?.livestream" titleRate="Rate Stream" />
     <hr class="h-[2px] my-7 bg-gray-dark border-0" />
     <VideoDetail
       v-if="props.liveStreamData.channel"
       :channelDetails="props.liveStreamData?.channel"
-      
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">

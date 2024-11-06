@@ -122,7 +122,12 @@
         </div>
       </div>
       <div class="p-[20px]">
-        <OfflineTitle v-if="video" :video="video" @updateRate="fetchVideoById" />
+        <OfflineTitle
+          v-if="video"
+          :video="video"
+          @updateRate="fetchVideoById"
+          titleRate="Rate Video"
+        />
         <Divider />
         <VideoDetail
           v-if="channelDetails"
