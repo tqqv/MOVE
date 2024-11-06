@@ -50,7 +50,13 @@ module.exports = (sequelize, DataTypes) => {
       },
       ip: {
         type:DataTypes.STRING,
-      }
+      },
+      country: {
+        type:DataTypes.STRING,
+      },
+      city: {
+        type:DataTypes.STRING,
+      },
     },
     {
       sequelize,

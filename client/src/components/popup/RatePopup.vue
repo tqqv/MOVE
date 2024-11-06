@@ -44,7 +44,8 @@
       }
 
       const result = await postRateVideo(data);
-      if (result.success) {
+
+      if (result.status === 200) {
         toast.success('Thank you for your ratings!');
 
         //đóng mở popup và fetch data đã rate

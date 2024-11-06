@@ -2,22 +2,20 @@
   import VisaIcon from '../icons/visa.vue';
   import { ref, computed } from 'vue';
   import RemoveCardPayment from './dialog/RemoveCardPayment.vue';
-  import PaymentDetail from './dialog/PaymentDetail.vue';
+
+  const emit = defineEmits(['toggleOpenPaymentDetails']);
 
   const isRemoveVisible = ref(false);
-  const isPaymentDetailsVisible = ref(false);
 
   const toggleOpenRemove = async () => {
     isRemoveVisible.value = !isRemoveVisible.value;
   };
-  const toggleOpenPaymentDetails = async () => {
-    isPaymentDetailsVisible.value = !isPaymentDetailsVisible.value;
-  };
+
   const toggleCloseRemove = () => {
     isRemoveVisible.value = false;
   };
-  const toggleClosePaymentDetails = () => {
-    isPaymentDetailsVisible.value = false;
+  const toggleOpenPaymentDetails = () => {
+    emit('toggleOpenPaymentDetails');
   };
 
   const formattedNumber = computed(() => {
@@ -53,10 +51,5 @@
     title="Remove card"
     :isRemoveVisible="isRemoveVisible"
     @closeRemove="toggleCloseRemove"
-  />
-  <PaymentDetail
-    title="Payment details"
-    :isPaymentDetailsVisible="isPaymentDetailsVisible"
-    @closePayment="toggleClosePaymentDetails"
   />
 </template>

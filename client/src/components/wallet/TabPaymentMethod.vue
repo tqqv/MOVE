@@ -1,14 +1,34 @@
 <script setup>
-  import CardPayment from './CardPayment.vue';
   import { ref } from 'vue';
+  import CardPayment from './CardPayment.vue';
+  import PaymentDetail from '@components/wallet/dialog/PaymentDetail.vue';
+  import { useContryStore } from '@/stores';
+
+  const countryStore = useContryStore();
+
   const isDisplay = ref(true);
+  let hasFetchedCountries = false;
+
+  const isPaymentDetailsVisible = ref(false);
+  const toggleOpenPaymentDetails = async () => {
+    isPaymentDetailsVisible.value = !isPaymentDetailsVisible.value;
+    if (!hasFetchedCountries) {
+      countryStore.fetchCountries();
+      hasFetchedCountries = true;
+    }
+  };
 </script>
 <template>
   <div class="space-y-2">
     <span class="text-base font-bold">Your payment method</span>
 
     <!-- Card -->
-    <CardPayment v-if="isDisplay" username="Phillip Giggs" number="1234123412341234" />
+    <CardPayment
+      v-if="isDisplay"
+      username="Phillip Giggs"
+      number="1234123412341234"
+      @toggleOpenPaymentDetails="toggleOpenPaymentDetails"
+    />
 
     <!-- No card -->
     <div v-else class="flex items-center justify-center pt-[10%]">
@@ -18,9 +38,14 @@
           <div class="text-base italic">You do not have any saved payment information.</div>
         </div>
         <div>
-          <button class="btn">Setup payment method</button>
+          <button @click="toggleOpenPaymentDetails" class="btn">Setup payment method</button>
         </div>
       </div>
     </div>
   </div>
+  <PaymentDetail
+    title="Payment details"
+    :isPaymentDetailsVisible="isPaymentDetailsVisible"
+    @closePayment="toggleOpenPaymentDetails"
+  />
 </template>
