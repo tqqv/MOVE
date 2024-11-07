@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService } = require("../services/livestreamService.js");
+const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService } = require("../services/livestreamService.js");
 
 
 const createLivestreamController = async (req, res, next) => {
@@ -16,8 +16,21 @@ const endLivestreamController = async (req, res, next) => {
 
 
 const getLivestreamController = async (req, res, next) => {
-  const username = req.params.username;  
+  const username = req.params.username;
   const result = await getLivestreamService(username);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getAllLivestreamController = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const level = req.query.level;
+  const category = req.query.category;
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'totalView',
+    order: req.query.order || 'desc'
+  };
+  const result = await getTopLivestreamService(page, pageSize, level, category, sortCondition);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
@@ -48,5 +61,6 @@ module.exports = {
   endLivestreamController,
   updateLivestreamController,
   getLivestreamController,
-  getLivestreamByUserController
+  getLivestreamByUserController,
+  getAllLivestreamController
 }
