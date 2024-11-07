@@ -1,21 +1,38 @@
 <script setup>
-  import { computed, ref } from 'vue';
+  import { computed, onMounted, onUnmounted, ref } from 'vue';
   import { formatRating, formatDuration, formatView } from '@/utils';
   import { toast } from 'vue3-toastify';
-  import rate from '@icons/rate.vue';
-  import heart from '@icons/heart.vue';
   import share from '@icons/share.vue';
+  import axiosInstance from '@/services/axios';
+  import { watch } from 'vue';
+  import ReportDialog from './ReportDialog.vue';
+  import Rate from '@components/Rate.vue';
+  import rateIcon from '@icons/rate.vue';
+  import { usePopupStore, useUserStore } from '@/stores';
+  import ReportStream from './ReportStream.vue';
 
+  const popupStore = usePopupStore();
+  const userStore = useUserStore();
+  const { user } = userStore;
   const props = defineProps({
     video: {
       type: Object,
       required: true,
     },
+    reportType: {
+      type: String,
+      default: 'video',
+    },
   });
-
+  const emit = defineEmits(['updateRate']);
   const isMenuVisible = ref(false);
   const isFilled = ref(false);
   const isShareVisible = ref(false);
+  const isReportVisible = ref(false);
+  const isReportSuccessVisible = ref(false);
+  const reportTypeVideos = ref([]);
+
+  const selectedReportVideo = ref(null);
 
   const duration = computed(() => {
     if (formatDuration(props.video?.duration) < 30) return '< 30 mins';
@@ -32,13 +49,88 @@
     isShareVisible.value = !isShareVisible.value;
     isMenuVisible.value = false;
   };
-
+  const toggleRateVideo = () => {
+    isMenuVisible.value = false;
+  };
   const closeShare = () => {
     isShareVisible.value = false;
   };
 
-  const closeMenu = () => {
+  const showDialogReportVideo = () => {
+    if (user) {
+      getAllReportTypes();
+      isReportVisible.value = true;
+    } else {
+      popupStore.openLoginPopup();
+    }
+  };
+
+  const closeReport = () => {
+    isReportVisible.value = false;
+  };
+
+  const closeSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+
+  const handleClickOutside = (event) => {
+    if (!event.target.closest('.menu-container')) {
+      isMenuVisible.value = false;
+    }
+  };
+
+  onMounted(() => {
+    document.addEventListener('click', handleClickOutside);
+  });
+
+  onUnmounted(() => {
+    document.removeEventListener('click', handleClickOutside);
+  });
+
+  const handleSubmitReportVideo = async () => {
+    if (selectedReportVideo.value.id) {
+      try {
+        const response = await axiosInstance.post('report/video', {
+          videoId: props.video.id,
+          reportTypeId: selectedReportVideo.value.id,
+        });
+        if (response.status === 200) {
+          isReportVisible.value = false;
+          isReportSuccessVisible.value = true;
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+
+  const closeReportSuccess = () => {
+    isReportSuccessVisible.value = false;
     isMenuVisible.value = false;
+  };
+
+  const getAllReportTypes = async () => {
+    try {
+      const response = await axiosInstance.get('report/getListReport?type=videos');
+      if (response.status === 200) {
+        reportTypeVideos.value = response.data.data;
+        isReportVisible.value = true;
+      }
+    } catch (error) {
+      isReportVisible.value = false;
+    }
+  };
+
+  watch(
+    selectedReportVideo,
+    (newVal) => {
+      selectedReportVideo.value = newVal;
+    },
+    { deep: true },
+  );
+
+  const updateRate = () => {
+    emit('updateRate');
   };
 
   const handleClickShareFacebook = async () => {
@@ -70,28 +162,33 @@
 
 <template>
   <div class="flex items-center justify-between">
-    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video.title }}</h3>
+    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video?.title }}</h3>
     <div class="flex items-center">
-      <rate class="mr-2 scale-125" />
-      <span class="text-[20px] font-bold">{{ formatRating(video.ratings) }}</span>
+      <rateIcon class="mr-2 scale-125" />
+      <span class="text-[20px] font-bold">{{ formatRating(video?.ratings) }}</span>
     </div>
   </div>
   <div class="flex items-center mb-2 text-[13px] mt-2">
-    <span class="text-red">{{ formatView(video.viewCount) }} view</span>
+    <span class="text-red">{{ formatView(video?.viewCount) }} view</span>
     <span class="font-bold text-sm px-2">•</span>
-    <span class="text-primary">{{ video.category.title }}</span>
+    <span class="text-primary">{{ video?.category.title }}</span>
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">
-      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-        video.levelWorkout.levelWorkout
-      }}</span>
+      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
+        {{
+          video?.levelWorkout?.levelWorkout || video?.livestreamLevelWorkout?.levelWorkout || 'N/A'
+        }}
+      </span>
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
     </div>
     <div class="flex items-center gap-9">
-      <div class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase">
-        <i class="pi pi-star mr-1"></i> Rate Video
-      </div>
+      <Rate
+        title="Rate Video"
+        @rate="toggleRateVideo"
+        :videoId="video?.id"
+        @updateRate="updateRate"
+      />
       <div class="relative">
         <button
           class="text-primary text-[13px] font-bold flex items-center uppercase"
@@ -129,7 +226,7 @@
           </ul>
         </div>
       </div>
-      <div class="relative">
+      <div v-if="reportType === 'video'" class="relative menu-container">
         <button
           aria-expanded="false"
           aria-controls="menu"
@@ -138,18 +235,34 @@
         />
         <div
           v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-50"
+          class="absolute bottom-full mb-2 w-[125px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
         >
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
-              class="flex items-center justify-center text-[13px] cursor-pointer text-center"
-              @click="closeMenu"
+              class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
+              @click="showDialogReportVideo"
             >
-              Report video
+              <i class="pi pi-flag text-sm"></i>
+              <span class="truncate"> Report video</span>
             </li>
           </ul>
         </div>
       </div>
+      <ReportDialog
+        title="video"
+        groupName="reportTypeVideos"
+        titleReport="Report Video"
+        :isReportVisible="isReportVisible"
+        :isReportSuccessVisible="isReportSuccessVisible"
+        :reportType="reportTypeVideos"
+        :selectedReport="selectedReportVideo"
+        @update:selectedReport="selectedReportVideo = $event"
+        @close="closeReportSuccess"
+        @submit="handleSubmitReportVideo"
+        @hide="closeReport"
+        @hideSuccess="closeSuccess"
+      />
+      <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
     </div>
   </div>
 </template>

@@ -25,6 +25,7 @@ module.exports = (sequelize, DataTypes) => {
         as: 'replies',
       });
       this.hasMany(models.Report, { foreignKey: 'targetCommentId', as: 'commentReport' });
+      this.hasMany(models.ReactionComment, { foreignKey: 'commentId', as: 'commentReaction' });
     }
   }
   Comment.init(

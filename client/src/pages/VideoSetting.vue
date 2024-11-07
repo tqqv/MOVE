@@ -11,18 +11,22 @@
   import { genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useVideoStore } from '@/stores';
+  import axiosInstance from '@/services/axios';
 
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
   const currentPage = ref(1);
   const totalPage = ref();
   const totalVideo = ref(0);
-  const selectedProduct = ref();
+  const selectedProduct = ref([]);
   const videos = ref([]);
   const showMenu = ref(false);
   const isShareVisible = ref(false);
   const confirm = useConfirm();
   const showConfirmDialog = ref(false);
+  const showConfirmDialogMulti = ref(false);
+  const fadeIn = ref(false);
+  let previousLength = 0;
 
   const confirmModal = (videoId) => {
     confirm.require({
@@ -47,6 +51,30 @@
       },
     });
   };
+  const confirmModalMulti = () => {
+    confirm.require({
+      message:
+        'All of your videos will be permanently deleted. You will lose all datas such from your videos as views, comments & ratings. Are you sure?',
+      header: 'Delete all videos',
+      icon: 'pi pi-info-circle',
+      rejectProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptProps: {
+        label: 'Confirm',
+        severity: 'danger',
+      },
+      accept: async () => {
+        await handleDeleteMultipleVideo();
+        showConfirmDialogMulti.value = false;
+      },
+      reject: () => {
+        showConfirmDialogMulti.value = false;
+      },
+    });
+  };
 
   const toggleShowMenu = () => {
     showMenu.value = !showMenu.value;
@@ -60,7 +88,7 @@
     { id: 2, name: 20, value: 20 },
     { id: 3, name: 30, value: 30 },
   ];
-  const selectedPageSize = ref(pageSizeOptions[0].name);
+  const selectedPageSize = ref(pageSizeOptions[0].value);
 
   const fetchVideos = async () => {
     try {
@@ -76,11 +104,30 @@
     showConfirmDialog.value = true;
     confirmModal(videoId);
   };
+  const openConfirmDialogMulti = () => {
+    showConfirmDialogMulti.value = true;
+    confirmModalMulti();
+  };
   const handleDeleteVideo = async (videoId) => {
     try {
       const response = await deleteVideoById(videoId);
       if (response.status === 200) {
         toast.success('Video deleted successfully');
+        fetchVideos();
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const handleDeleteMultipleVideo = async () => {
+    const videoIds = selectedProduct.value.map((video) => video.id);
+    try {
+      const response = await axiosInstance.delete('/video/delete-videos', {
+        params: { videoIds: videoIds },
+      });
+      if (response.status === 200) {
+        toast.success('Video(s) deleted successfully');
+        selectedProduct.value = [];
         fetchVideos();
       }
     } catch (error) {
@@ -133,10 +180,19 @@
     videoStore.setIsEdit(true);
     popupStore.openVideoDetailPopup();
   };
-  watch(selectedProduct, () => {
-    console.log(selectedProduct);
+  const handleSelectAll = () => {
+    selectedProduct.value = videos.value;
+  };
+  watch(selectedProduct, (newVal) => {
+    if (previousLength === 0 && newVal.length > 0) {
+      fadeIn.value = true;
+      setTimeout(() => {
+        fadeIn.value = false;
+      }, 1000);
+    }
+    previousLength = newVal.length;
   });
-  watch([selectedPageSize], () => {
+  watch(selectedPageSize, () => {
     currentPage.value = 1;
     fetchVideos();
   });
@@ -146,6 +202,15 @@
 </script>
 <template>
   <h1 class="p-[16px] font-bold text-[24px]">Videos</h1>
+  <div class="px-[16px] fade-in" v-if="selectedProduct.length != 0">
+    <button
+      class="flex gap-3 items-center text-primary cursor-pointer hover:text-primary-light"
+      @click="openConfirmDialogMulti"
+    >
+      <button class="pi pi-trash"></button>
+      <span class="text-nowrap">Delete video(s)</span>
+    </button>
+  </div>
   <div v-if="videos.length > 0" class="card">
     <DataTable
       v-model:selection="selectedProduct"
@@ -154,7 +219,7 @@
       dataKey="id"
       tableStyle="min-width: 50rem"
     >
-      <!-- <Column selectionMode="multiple" headerStyle="width: 3rem"></Column> -->
+      <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column header="Videos">
         <template #body="{ data }">
           <img :src="data.thumbnailUrl" class="w-[200px] h-[100px] object-cover" />
@@ -184,7 +249,11 @@
           <span>{{ data.viewCount || 0 }}</span>
         </template>
       </Column>
-      <Column field="comments" header="Comments" class="!text-center"></Column>
+      <Column header="Comments" class="!text-center">
+        <template #body="{ data }">
+          <span>{{ data.totalComment || 0 }}</span>
+        </template>
+      </Column>
       <Column header="Ratings">
         <template #body="{ data }">
           <div class="flex items-center gap-2">
@@ -278,19 +347,29 @@
         </template>
       </Column>
       <Column field="" header="" style="display: none"></Column>
-      <!-- <template #groupheader="{ data }">
+      <template #groupheader="{ data }" v-if="selectedProduct.length != 0">
         <div
-          class="flex gap-10 justify-center border-primary border-2 rounded-lg bg-[#E6FFFB] py-3"
+          :class="[
+            'mt-3 flex gap-10 justify-center border-primary border-2 rounded-lg bg-[#E6FFFB] py-3',
+            fadeIn ? 'fade-in' : '',
+          ]"
         >
-          <span> <span class="font-bold">2</span> videos on this page has been selected.</span>
-          <button class="font-bold text-primary hover:text-primary-light">
+          <span>
+            <span class="font-bold">{{ selectedProduct.length }}</span> videos on this page has been
+            selected.</span
+          >
+          <button class="font-bold text-primary hover:text-primary-light" @click="handleSelectAll">
             Select all videos.
           </button>
         </div>
-      </template> -->
+      </template>
     </DataTable>
     <div class="flex justify-end gap-x-12 items-center px-12 pt-3">
-      <Filter :title="'Rows per page'" :options="pageSizeOptions" v-model="selectedPageSize" />
+      <Filter
+        :title="'Rows per page'"
+        :options="pageSizeOptions"
+        @change="selectedPageSize = $event.value"
+      />
       <div class="">
         <span>
           {{ (currentPage - 1) * selectedPageSize + 1 }}
@@ -348,9 +427,12 @@
           </g>
         </g>
       </svg>
-
       <h1 class="mb-1">Upload a video</h1>
     </button>
   </div>
   <ConfirmDialog v-model:visible="showConfirmDialog" :style="{ width: '604px' }"></ConfirmDialog>
+  <ConfirmDialog
+    v-model:visible="showConfirmDialogMulti"
+    :style="{ width: '604px' }"
+  ></ConfirmDialog>
 </template>

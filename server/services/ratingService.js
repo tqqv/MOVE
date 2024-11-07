@@ -144,7 +144,62 @@ const createRatingOnStream = async(userId, livestreamId, rating) => {
   }
 }
 
+const getRatingOfVideo = async(userId, videoId) => {
+  try {
+    const video = await Video.findOne({where: {id: videoId}})
+    if(!video) {
+      return {
+        status: 404,
+        message: "Video not found."
+      }
+    }
+
+    const rate = await Rating.findOne({where: {videoId: videoId, userId: userId}})
+
+    return {
+      status: 200,
+      data: rate,
+      message: "Get rating of video successfully"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
+const getRatingOfStream = async(userId, livestreamId) => {
+  try {
+    const livestream = await Livestream.findOne({where: {id: livestreamId}})
+    if(!livestream) {
+      return {
+        status: 404,
+        message: "Livestream not found."
+      }
+    }
+
+    const rate = await Rating.findOne({where: {livestreamId: livestreamId, userId: userId}})
+
+
+    return {
+      status: 200,
+      data: rate,
+      message: "Get rating of livestream successfully"
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
 module.exports = {
   createRatingOnVideo,
   createRatingOnStream,
+  getRatingOfVideo,
+  getRatingOfStream,
 }

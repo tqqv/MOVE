@@ -9,6 +9,10 @@
   import dayjs from 'dayjs';
   import relativeTime from 'dayjs/plugin/relativeTime';
   import SmallLoading from '@/components/icons/smallLoading.vue';
+  import { toast } from 'vue3-toastify';
+  import axiosInstance from '@/services/axios';
+  import ReportDialog from '@/components/ReportDialog.vue';
+  import { useReadMore } from '@/utils';
 
   dayjs.extend(relativeTime);
 
@@ -19,19 +23,21 @@
     totalRepliesCount: Object,
     childCommentsPage: {
       type: Number,
-      required: true,
     },
     childCommentsPerPage: {
       type: Number,
-      required: true,
     },
     hasMoreChildComments: Boolean,
     loadingReplies: Boolean,
     videoId: {
-      type: Number,
+      type: [Number, String],
       required: true,
     },
   });
+  const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
+    props.comment.content,
+    300,
+  );
 
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
@@ -40,7 +46,25 @@
   const hasFetchedChildComments = ref(false);
   const id = ref(null);
   const parentIdReply = ref(null);
-  // const replyToUsername = ref(null);
+  // report
+
+  const openReportComment = ref(false);
+  const isReportVisible = ref(false);
+  const isReportSuccessVisible = ref(false);
+  const reportTypeVideos = ref([]);
+  const selectedReportComment = ref(null);
+  const selectedCommentId = ref(null);
+
+  const toggleReportComment = (commentId) => {
+    selectedCommentId.value = commentId;
+    openReportComment.value = !openReportComment.value;
+  };
+  const openPopupReport = () => {
+    isReportVisible.value = !isReportVisible.value;
+    openReportComment.value = false;
+    getAllReportTypes();
+  };
+  //===========///
   const toggleLike = () => {
     props.comment.isLike = !props.comment.isLike;
     if (props.comment.isLike) props.comment.isDisLike = false;
@@ -98,7 +122,43 @@
       console.error('New comment is undefined or null');
     }
   };
-
+  ///REPORT
+  const getAllReportTypes = async () => {
+    try {
+      const response = await axiosInstance.get('report/getListReport?type=videos');
+      if (response.status === 200) {
+        reportTypeVideos.value = response.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const handleSubmitReportComment = async () => {
+    if (selectedReportComment.value.id) {
+      try {
+        const response = await axiosInstance.post('report/comment', {
+          commentId: selectedCommentId.value,
+          reportTypeId: selectedReportComment.value.id,
+        });
+        if (response.status === 200) {
+          isReportVisible.value = false;
+          isReportSuccessVisible.value = true;
+          toast.success(response.data.message);
+        }
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+  const closeReportSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
+  const closeReport = () => {
+    isReportVisible.value = false;
+  };
+  const closeSuccess = () => {
+    isReportSuccessVisible.value = false;
+  };
   onMounted(() => {
     const hash = window.location.hash;
     if (hash) {
@@ -126,6 +186,7 @@
         class="size-10 object-cover rounded-full"
       />
     </div>
+
     <div class="space-y-2 w-full">
       <!-- USERNAME -->
       <div class="flex justify-between items-center gap-x-4 w-fit">
@@ -141,12 +202,28 @@
           {{ timeFromNow(comment.createdAt) }}
         </p>
       </div>
-
+      <div v-if="comment.commentReport?.some((report) => report.status === 'approved')">
+        <span class="text-[#666666] text-sm italic"
+          >[This comment has been removed due to violation of community guideline]</span
+        >
+      </div>
       <!-- COMMENT -->
-      <p class="break-words text-sm text-black">{{ comment.content }}</p>
-
+      <p
+        v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
+        class="break-all text-sm text-black"
+      >
+        {{ displayedText() }}
+        <span v-if="isLongText">
+          <button @click="toggleText" class="text-primary font-semibold ml-1">
+            {{ showFullText ? 'Show less' : 'Read more' }}
+          </button>
+        </span>
+      </p>
       <!-- Like/Dislike -->
-      <div class="flex gap-4 items-center">
+      <div
+        v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
+        class="flex gap-4 items-center"
+      >
         <div class="flex gap-2" @click="toggleLike">
           <Like
             class="cursor-pointer"
@@ -162,6 +239,30 @@
             :stroke="comment.isDisLike ? 'none' : '#13D0B4'"
           />
           <span>{{ comment.dislike }}</span>
+        </div>
+        <div class="relative">
+          <div>
+            <button
+              class="text-primary text-[13px] font-bold flex items-center cursor-pointer"
+              id="report-menu-button"
+              @click="toggleReportComment(comment.id)"
+            >
+              <i class="pi pi-ellipsis-v"></i>
+            </button>
+          </div>
+
+          <div
+            v-if="openReportComment"
+            id="report-menu"
+            class="absolute left-0 z-10 mt-5 top-3 p-2 border border-primary origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+          >
+            <span
+              @click="openPopupReport"
+              class="text-primary text-xs whitespace-nowrap cursor-pointer"
+            >
+              Report comment
+            </span>
+          </div>
         </div>
         <span
           class="font-semibold text-[13px] text-primary cursor-pointer"
@@ -196,7 +297,12 @@
         />
       </div>
       <!-- Toggle to show/hide child comments -->
-      <div v-if="totalRepliesCount?.[comment.id] > 0">
+      <div
+        v-if="
+          totalRepliesCount?.[comment.id] > 0 &&
+          !comment.commentReport?.some((report) => report.status === 'approved')
+        "
+      >
         <div
           class="flex gap-2 font-bold text-[13px] text-primary cursor-pointer"
           @click="toggleShowMoreChild"
@@ -235,4 +341,18 @@
       </div>
     </div>
   </div>
+  <ReportDialog
+    title="comment"
+    groupName="reportTypeComments"
+    titleReport="Report Comment"
+    :isReportVisible="isReportVisible"
+    :isReportSuccessVisible="isReportSuccessVisible"
+    :reportType="reportTypeVideos"
+    :selectedReport="selectedReportComment"
+    @update:selectedReport="selectedReportComment = $event"
+    @close="closeReportSuccess"
+    @submit="handleSubmitReportComment"
+    @hide="closeReport"
+    @hideSuccess="closeSuccess"
+  />
 </template>

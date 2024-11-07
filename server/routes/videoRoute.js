@@ -14,13 +14,21 @@ const { getUploadLink,
   analyticsVideoByIdController,
   getListVideoByChannelController,
   getStateByCountryAndVideoIdController,
+  increaseViewController,
+  updateViewtimeController,
+  getVideoWatchAlsoController,
+  deleteMultipleVideos,
+  getTopVideoController,
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
+router.get('/getTopvideo', getTopVideoController);
+router.get('/getVideoWatchAlso', getVideoWatchAlsoController);
 router.get('/getState/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
+router.get('/getStateFromIP/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
 router.get('/getVideoAnalytics/:videoId', verifyStreamer, analyticsVideoByIdController)
 router.get('/getVideosByFilter', getListVideoByFilterController);
 router.get('/getVideosByChannel', verifyStreamer, getListVideoByChannelController);
@@ -35,5 +43,11 @@ router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
 router.get('/channel/:channelId', getVideoByUserId);
 router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
+router.delete('/delete-videos', verifyStreamer, deleteMultipleVideos);
+
+// Tăng View ở đây
+router.post('/increaseView', increaseViewController);
+router.post('/updateViewTime', verifyUser, updateViewtimeController);
+
 
 module.exports = router;

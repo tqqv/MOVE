@@ -1,6 +1,7 @@
 <script setup>
-  import { ref, onMounted } from 'vue';
-  import { useRoute } from 'vue-router';
+  import { ref, onMounted, watch, computed, onBeforeUnmount } from 'vue';
+  import { useRoute, useRouter } from 'vue-router';
+  import { toast } from 'vue3-toastify';
   import Player from '@vimeo/player';
   import VideoDetail from '@/components/VideoDetail.vue';
   import OfflineTitle from '@/components/OfflineTitle.vue';
@@ -14,22 +15,34 @@
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
-  import { useUserStore } from '@/stores/user.store';
+  import { useUserStore } from '@/stores';
 
   const userStore = useUserStore();
-
+  const { user } = userStore;
   const route = useRoute();
+  const router = useRouter();
   const vimeoPlayer = ref(null);
-  const videoId = route.params.videoId;
+  const videoId = computed(() => route.params.videoId);
   const video = ref(null);
   const channelDetails = ref(null);
   const totalFollower = ref(null);
   const channelId = ref(null);
+  const categoryId = ref(null);
+  const levelworkoutsId = ref(null);
+  const usernameDetails = ref(null);
   const videos = ref([]);
+  let playerInstance = null;
+  const isLoading = ref(true);
+  let actualWatchTime = 0;
+  let lastUpdateTime = 0;
+  let hasWatchedFiveMinutes = false;
+  let currentVideoId = ref(videoId.value);
 
-  const fetchAllVideo = async () => {
+  const fetchWatchAlso = async () => {
     try {
-      const res = await axiosInstance.get('video');
+      const res = await axiosInstance.get(
+        `video/getVideoWatchAlso?videoId=${videoId.value}&category=${categoryId.value}&levelWorkout=${levelworkoutsId.value}`,
+      );
       if (res.status === 200) {
         videos.value = res.data.data;
       }
@@ -40,9 +53,12 @@
 
   const fetchVideoById = async () => {
     try {
-      const res = await axiosInstance.get(`video/${videoId}`);
+      const res = await axiosInstance.get(`video/${videoId.value}`);
       if (res.status === 200) {
         video.value = res.data.data;
+        categoryId.value = res.data.data.categoryId;
+        levelworkoutsId.value = res.data.data.levelWorkoutsId;
+        usernameDetails.value = res.data.data.channel.User.username;
         channelDetails.value = {
           channelName: res.data.data.channel.channelName,
           avatar: res.data.data.channel.avatar,
@@ -55,29 +71,122 @@
         channelId.value = res.data.data.channelId;
       }
     } catch (error) {
-      toast.error(error.message);
+      if (error.response && error.response.status === 404) {
+        router.push('/404');
+      } else {
+        toast.error(error.message);
+      }
     }
   };
 
-  onMounted(() => {
-    const player = new Player(vimeoPlayer.value, {
-      id: videoId,
-      loop: true,
+  const increaseView = async (viewTime) => {
+    try {
+      const res = await axiosInstance.post('video/increaseView', {
+        userId: user?.id || null,
+        videoId: videoId.value,
+        viewTime: viewTime,
+      });
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  const updateViewTime = async (viewTime, videoId) => {
+    if (user?.id) {
+      try {
+        const res = await axiosInstance.post('video/updateViewTime', {
+          videoId: videoId,
+          viewTime: viewTime,
+        });
+      } catch (error) {
+        toast.error(error.message);
+      }
+    }
+  };
+
+  const initializePlayer = () => {
+    if (playerInstance) {
+      playerInstance.destroy();
+    }
+
+    playerInstance = new Player(vimeoPlayer.value, {
+      id: videoId.value,
+      loop: false,
       autoplay: true,
       title: false,
       byline: false,
       portrait: false,
     });
-    fetchVideoById();
-    fetchAllVideo();
+    playerInstance.ready().catch((error) => {
+      isLoading.value = true;
+    });
+
+    playerInstance.on('play', () => {
+      isLoading.value = false;
+    });
+    playerInstance.on('loaded', () => {
+      isLoading.value = false;
+    });
+    playerInstance.on('timeupdate', (data) => {
+      const currentTime = data.seconds;
+
+      if (currentTime > lastUpdateTime) {
+        actualWatchTime += Math.min(currentTime - lastUpdateTime, 1);
+      }
+
+      lastUpdateTime = currentTime;
+
+      if (Math.floor(actualWatchTime) === 300 && !hasWatchedFiveMinutes) {
+        hasWatchedFiveMinutes = true;
+        increaseView(Math.floor(actualWatchTime));
+      }
+    });
+
+    playerInstance.on('ended', () => {
+      if (!hasWatchedFiveMinutes && actualWatchTime >= lastUpdateTime) {
+        increaseView(Math.floor(actualWatchTime));
+      }
+      actualWatchTime = 0;
+      lastUpdateTime = 0;
+      hasWatchedFiveMinutes = false;
+    });
+  };
+
+  const handleUnload = (videoId) => {
+    if (actualWatchTime >= lastUpdateTime) {
+      updateViewTime(Math.floor(actualWatchTime), videoId);
+    }
+  };
+
+  onMounted(async () => {
+    initializePlayer();
+    await fetchVideoById();
+    await fetchWatchAlso();
+  });
+
+  onBeforeUnmount(() => {
+    handleUnload(currentVideoId.value);
+  });
+  watch(videoId, async () => {
+    actualWatchTime = 0;
+    lastUpdateTime = 0;
+    initializePlayer();
+    await fetchVideoById();
+    await fetchWatchAlso();
+  });
+  watch(videoId, (newVideoId) => {
+    currentVideoId.value = newVideoId;
   });
 </script>
 <template>
   <div class="grid grid-cols-12">
-    <div class="col-span-8">
-      <div ref="vimeoPlayer" class="video-player"></div>
+    <div class="col-span-12 lg:col-span-8">
+      <div ref="vimeoPlayer" :class="['video-player', 'relative', { 'bg-black': isLoading }]">
+        <div v-if="isLoading" class="grid place-items-center absolute top-0 left-0 w-full h-full">
+          <i class="pi pi-spin pi-spinner text-white text-[50px]"></i>
+        </div>
+      </div>
       <div class="p-[20px]">
-        <OfflineTitle v-if="video" :video="video" />
+        <OfflineTitle v-if="video" :video="video" @updateRate="fetchVideoById" />
         <Divider />
         <VideoDetail
           v-if="channelDetails"
@@ -85,7 +194,9 @@
           :isButtonGiftREPsVisible="true"
           :totalFollower="totalFollower"
           :channelId="channelId"
+          :usernameDetails="usernameDetails"
           @updateFollowers="fetchVideoById"
+          :hiddenReport="false"
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">
@@ -101,17 +212,11 @@
         <CommentPage :videoId="videoId" />
       </div>
     </div>
-    <div class="col-span-4">
+    <div class="col-span-12 lg:col-span-4">
       <div class="p-[10px]">
         <h3 class="font-bold mb-2 uppercase">watch also</h3>
         <div>
-          <VideoCard
-            v-if="videos"
-            v-for="(video, index) in videos"
-            :key="index"
-            :video="video"
-            :channelDetails="video.channel"
-          />
+          <VideoCard v-if="videos" :videos="videos" />
         </div>
       </div>
     </div>

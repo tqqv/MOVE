@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, ref, watch, watchEffect } from 'vue';
   import { useRoute } from 'vue-router';
   import { useRouter } from 'vue-router';
   import LiveStream from '@/components/icons/liveStream.vue';
@@ -8,14 +8,17 @@
   import Clock from '@/components/icons/clock.vue';
   import { useLiveStreamStore, useStreamerStore } from '@/stores';
   import { toast } from 'vue3-toastify';
-  import { createLiveStream } from '@/services/liveStream';
-  import { formatTime } from '@/utils';
+  import { createLiveStream, endLiveStream, updateLiveStream } from '@/services/liveStream';
+  import { formatTimeInStream } from '@/utils';
 
   const props = defineProps({
-    connectOBS: Boolean,
+    connectOBS: String,
     liveStatus: String,
-    time: Number,
+    elapsedTime: Number,
+    metricsData: Object,
   });
+
+  const emit = defineEmits(['startTimer', 'stopTimer']);
 
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
@@ -24,8 +27,7 @@
   const route = useRoute();
   const isShow = ref(true);
   const showGoLivePopup = ref(false);
-
-  const emit = defineEmits(['handleEndLive', 'updateStatusLive']);
+  const liveStreamId = computed(() => liveStreamStore.liveStreamData?.id || '');
 
   // SETUP STEP
   const setUpSteps = ref([
@@ -58,21 +60,27 @@
 
   const handleGoLive = async () => {
     if (props.liveStatus === 'streamReady' && liveStreamStore.complete) {
-      // showGoLivePopup.value = true;
       try {
         const response = await createLiveStream(liveStreamStore.liveStreamData);
-        console.log(response);
-        emit('updateStatusLive', 'inLive');
+        // console.log(response);
+        liveStreamStore.updateLiveStreamData(response.data);
+        // emit('startTimer');
         router.push('/streaming/dashboard-live');
+        setUpSteps.value[2].tick = false;
       } catch (error) {
         toast.error('Failed to ');
       }
     }
   };
 
-  const handleEndLive = () => {
-    emit('handleEndLive');
-    emit('updateStatusLive', 'afterLive');
+  const handleEndLive = async () => {
+    try {
+      const response = await endLiveStream({ streamKey: streamerStore.streamerChannel.streamKey });
+      // console.log(response);
+      // router.push('/streaming/dashboard-live');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleGoHome = () => {
@@ -91,19 +99,21 @@
 
   watch(
     () => props.liveStatus,
-    (newValue) => {
-      if (newValue === 'streamReady') {
+    async (newValue) => {
+      if (newValue === 'streamEnded') {
+        const response = await updateLiveStream({
+          livestreamId: liveStreamId.value,
+          duration: props.elapsedTime,
+        });
+        emit('stopTimer');
+        await liveStreamStore.fetchLiveStreamData(streamerStore.streamerChannel?.User?.username);
+      } else if (newValue === 'streamReady') {
         setUpSteps.value[1].tick = true;
       } else if (newValue == null) {
         setUpSteps.value[1].tick = false;
       }
     },
   );
-
-  // watch(() => {
-  //   console.log(liveStreamStore.complete);
-  //   console.log(props.connectOBS);
-  // });
 </script>
 <template>
   <section
@@ -119,7 +129,7 @@
               ? 'Create live video'
               : liveStatus === 'streamPublished'
               ? 'Live dashboard'
-              : liveStatus === 'streamEnded '
+              : liveStatus === 'streamEnded'
               ? 'End of live stream'
               : ''
           }}
@@ -167,7 +177,7 @@
             {{
               liveStatus === 'streamPublished'
                 ? 'Now that you are live, you can see your real-time insights or add tools to increase distribution or engagement.'
-                : statusLive === 'streamEnded'
+                : liveStatus === 'streamEnded'
                 ? 'Your live stream has ended. Review your performance metrics and plan your next steps for future broadcasts.'
                 : ''
             }}</span
@@ -246,7 +256,7 @@
         <!-- TIME -->
         <div class="flex gap-x-4 items-center">
           <Clock />
-          <span class="text-xl text-body w-[77px]">{{ formatTime(time) }}</span>
+          <span class="text-xl text-body w-[77px]">{{ formatTimeInStream(elapsedTime) }}</span>
           <div class="relative size-4 border border-red rounded-full">
             <div
               class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 size-3 bg-red rounded-full"
@@ -261,11 +271,10 @@
         </div>
       </div>
       <!-- END LIVE -->
-      <div
-        :class="{ hidden: statusLive !== 'afterLive' }"
-        class="flex flex-col gap-y-3 font-semibold"
-      >
-        <span class="text-xl text-body mr-3">00:00:00</span>
+      <div v-if="liveStatus === 'streamEnded'" class="flex flex-col gap-y-3 font-semibold">
+        <span class="text-xl text-body mr-3">{{
+          formatTimeInStream(liveStreamStore.liveStreamData?.duration)
+        }}</span>
         <div
           class="flex items-center justify-center gap-x-2 px-3 py-2 rounded-md bg-primary-light/20 hover:bg-primary-light/30 text-primary text-center w-full cursor-pointer"
           @click="handleGoHome"

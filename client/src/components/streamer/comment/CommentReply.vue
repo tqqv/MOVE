@@ -7,6 +7,7 @@
   import { formatDate } from '@/utils/calculatorDate';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import CommentField from './CommentField.vue';
+  import { useReadMore } from '@/utils';
 
   const props = defineProps({
     replies: Array,
@@ -18,6 +19,7 @@
   });
 
   const openReplyField = ref({});
+  const expandedReplies = ref({});
 
   const handleOpenReplyField = (replyId) => {
     openReplyField.value[replyId] = !openReplyField.value[replyId];
@@ -31,6 +33,9 @@
         props.replies.unshift(newReply);
       }
     }
+  };
+  const toggleReadMore = (replyId) => {
+    expandedReplies.value[replyId] = !expandedReplies.value[replyId];
   };
 </script>
 
@@ -58,10 +63,20 @@
         </span>
         <p class="text-footer">{{ formatDate(reply.updatedAt) }}</p>
       </div>
-      <p class="text-sm break-words">
-        {{ reply.content }}
+      <p class="text-sm text-black break-all">
+        {{
+          expandedReplies[reply.id] || reply.content.length <= 300
+            ? reply.content
+            : reply.content.slice(0, 300)
+        }}
+        <span
+          v-if="reply.content.length > 300"
+          class="text-primary cursor-pointer"
+          @click="toggleReadMore(reply.id)"
+        >
+          {{ expandedReplies[reply.id] ? 'Read Less' : 'Read More' }}
+        </span>
       </p>
-
       <!-- LIKE DISLIKE -->
       <div class="flex gap-4 items-center mt-2">
         <div class="flex gap-2" @click="toggleLike">
@@ -80,6 +95,8 @@
           />
           <span>{{ reply.dislike }}</span>
         </div>
+        <!-- <i class="pi pi-ellipsis-v text-md text-primary cursor-pointer"></i> -->
+
         <span
           class="font-semibold text-[13px] text-primary cursor-pointer"
           @click="handleOpenReplyField(reply.id)"

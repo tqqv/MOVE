@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel } = db;
+const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, ReactionComment, Report } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -89,8 +89,7 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
   }
 }
 
-const getCommentsByVideo = async (videoId, page, pageSize) => {
-
+const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
   const comments = await Comment.findAndCountAll({
     where: {
       parentId: null,
@@ -111,6 +110,26 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
             )
           )`),
           'totalRepliesCount'
+        ],
+        // Check if the user has reacted to the comment, and include the reaction type
+        [
+          Sequelize.literal(`(
+            SELECT reactionType
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.userId = '${userId}'
+          )`),
+          'userReactionType'
+        ],
+        // Count the number of 'like' reactions for the comment
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.reactionType = 'like'
+          )`),
+          'likeCount'
         ]
       ]
     },
@@ -125,6 +144,12 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
         as: 'channelComments',
         attributes: ['avatar','channelName', 'popularCheck']
       },
+      {
+        model: Report,
+        as: 'commentReport',
+        attributes: ['status']
+      },
+
     ],
 
     order: [
@@ -139,7 +164,7 @@ const getCommentsByVideo = async (videoId, page, pageSize) => {
     data: {
       comments,
       totalPages: Math.ceil(comments.count/pageSize)
-    
+
     },
     message: "Get comments success"
   }
@@ -190,6 +215,26 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
             )
           )`),
           'totalRepliesCount'
+        ],
+        // Check if the user has reacted to the comment, and include the reaction type
+        [
+          Sequelize.literal(`(
+            SELECT reactionType
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.userId = '${userId}'
+          )`),
+          'userReactionType'
+        ],
+        // Count the number of 'like' reactions for the comment
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.reactionType = 'like'
+          )`),
+          'likeCount'
         ]
       ]
     },
@@ -223,7 +268,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
             attributes: ['id', 'levelWorkout']
           }
         ]
-      }
+      },
     ],
     order: [[sortCondition.sortBy, sortCondition.order]],
     offset: (page - 1) * pageSize,
@@ -240,7 +285,7 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
   }
 }
 
-const getChildCommentsByParentId = async (parentId, page, pageSize) => {
+const getChildCommentsByParentId = async (parentId, page, pageSize, userId) => {
   const comments = await Comment.findAndCountAll({
     where: {
       parentId: parentId,
@@ -255,10 +300,35 @@ const getChildCommentsByParentId = async (parentId, page, pageSize) => {
             WHERE replies.parentId = Comment.id
           )`),
           'totalRepliesCount'
+        ],
+        // Check if the user has reacted to the comment, and include the reaction type
+        [
+          Sequelize.literal(`(
+            SELECT reactionType
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.userId = '${userId}'
+          )`),
+          'userReactionType'
+        ],
+        // Count the number of 'like' reactions for the comment
+        [
+          Sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reactionComments AS rc
+            WHERE rc.commentId = Comment.id
+            AND rc.reactionType = 'like'
+          )`),
+          'likeCount'
         ]
       ]
     },
     include: [
+      {
+        model: Report,
+        as: 'commentReport',
+        attributes: ['status']
+      },
       {
         model: User, // Join User from Comment to get avatar, username, email
         as: 'userComments',

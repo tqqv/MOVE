@@ -14,7 +14,7 @@
   import { uploadAvatar } from '@/services/cloudinary';
 
   const props = defineProps({
-    connectOBS: Boolean,
+    connectOBS: String,
     liveStatus: String,
   });
 
@@ -53,7 +53,7 @@
       streamKey: streamKey.value,
       title: title.value,
       description: description.value,
-      thumbnail: thumbnail.value,
+      thumbnailUrl: thumbnail.value,
       categoryId: selectCategoryOptions.value,
       levelWorkoutsId: selectLevelWorkoutOptions.value,
     });
@@ -140,7 +140,9 @@
     <div class=" ">
       <!-- SCREEN LIVE -->
       <div
-        v-if="props.connectOBS == null || props.liveStatus === 'streamReady'"
+        v-if="
+          props.connectOBS == null || props.liveStatus === 'streamReady' || props.liveStatus == null
+        "
         class="px-8 flex items-center flex-col"
       >
         <!-- STREAMING SOFTWARE -->
@@ -150,7 +152,9 @@
           >
             <!-- SCREEN DONT" CONNET OBS -->
             <div
-              v-if="props.connectOBS == null && props.liveStatus == null"
+              v-if="
+                (props.connectOBS == null || props.connectOBS == 'null') && props.liveStatus == null
+              "
               class="flex w-full p-4"
             >
               <NotConnectScreen />
@@ -302,6 +306,7 @@
                   ref="fileInputRef"
                   class="hidden"
                   @change="handleSelectedFile"
+                  accept="image/*"
                 />
 
                 <span
