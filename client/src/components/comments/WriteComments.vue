@@ -38,14 +38,14 @@
   const showActions = ref(false);
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
+    autoResize(event.target);
   };
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
   const addEmoji = (emoji) => {
     commentText.value += emoji.i;
-    const commentInput = document.getElementById('commentInput');
-    commentInput.innerText = commentText.value;
+    autoResize(document.getElementById('commentTextarea'));
   };
 
   const handleFocus = () => {
@@ -124,6 +124,10 @@
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+  const autoResize = (textarea) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
 </script>
 
 <template>
@@ -134,10 +138,10 @@
         <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
-        <input
-          type="text"
+        <textarea
           placeholder="Write a comment"
-          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-normal placeholder:text-black/50 w-full h-12"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
+          rows="1"
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"
