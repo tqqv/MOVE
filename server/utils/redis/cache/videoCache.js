@@ -8,7 +8,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const { category, level } = criteria;
 
         // Input validation
-        if (!['score', 'views', 'duration'].includes(sortBy)) {
+        if (!['score', 'viewCount', 'duration', 'ratings'].includes(sortBy)) {
             return { status: 400, message: 'Invalid sortBy parameter' };
         }
 
@@ -31,9 +31,22 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
             }
 
             const videos = await _redis.hmget('video:details', videoIds);
+            const total = await _redis.zcard(cacheKey); // Total count of filtered videos
+
             return {
                 status: 200,
-                data: videos.map(v => v && JSON.parse(v)).filter(Boolean)
+                data: {
+                    "listVideo": {
+                        "count": total,
+                        "rows": videos.map(v => v && JSON.parse(v)).filter(Boolean)
+                    }
+                },
+                pagination: {
+                    total,
+                    page,
+                    limit,
+                    totalPages: Math.ceil(total / limit)
+                }
             };
         }
 
@@ -90,11 +103,16 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const videos = await _redis.hmget('video:details', videoIds);
 
         // Calculate total results for pagination
-        const total = await _redis.zcard(cacheKey);
+        const total = await _redis.zcard(cacheKey); // Total count of filtered videos
 
         return {
             status: 200,
-            data: videos.map(v => v && JSON.parse(v)).filter(Boolean),
+            data: {
+                "listVideo": {
+                    "count": total,
+                    "rows": videos.map(v => v && JSON.parse(v)).filter(Boolean)
+                }
+            },
             pagination: {
                 total,
                 page,
@@ -140,7 +158,12 @@ const createHashmapFromDBData = async (data) => {
                 isBanned: video.isBanned,
                 createdAt: video.createdAt,
                 updatedAt: video.updatedAt,
-                score: video.dataValues.score
+                channel: video.channel,
+                levelWorkout: video.levelWorkout,
+                category: video.category,
+                //abnormal
+                score: video.dataValues.score,
+                ratings: video.dataValues.ratings
             };
 
             // Thêm video vào hashMap với video.id làm key
@@ -182,7 +205,8 @@ cron.schedule('*/30000 * * * *', async () => {
                 score,
                 viewCount,
                 duration,
-                level
+                level,
+                ratings
             } = videoData;
 
             const normalizedCategory = categoryName.toLowerCase().trim();
@@ -201,12 +225,14 @@ cron.schedule('*/30000 * * * *', async () => {
 
             // Initialize and add to sorted sets
             if (!sortedSets.score) sortedSets.score = new Map();
-            if (!sortedSets.views) sortedSets.views = new Map();
+            if (!sortedSets.viewCount) sortedSets.viewCount = new Map();
             if (!sortedSets.duration) sortedSets.duration = new Map();
+            if (!sortedSets.ratings) sortedSets.ratings = new Map();
 
             sortedSets.score.set(cleanedVideoId, parseFloat(score) || 0);
-            sortedSets.views.set(cleanedVideoId, parseInt(viewCount) || 0);
+            sortedSets.viewCount.set(cleanedVideoId, parseInt(viewCount) || 0);
             sortedSets.duration.set(cleanedVideoId, parseInt(duration) || 0);
+            sortedSets.ratings.set(cleanedVideoId, parseInt(ratings) || 0);
         });
 
         // Save to Redis

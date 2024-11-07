@@ -242,7 +242,7 @@ const getTopVideoController = async(req, res, next) => {
   const category = req.query.category;
   // updateAt = desc same as Most recent
   const sortCondition = {
-    sortBy: req.query.sortBy || 'views',
+    sortBy: req.query.sortBy || 'score',
     order: req.query.order || 'desc'
   };
   const result = await getFilteredSortedTopVideos( {  level, category }, sortCondition.sortBy, page, pageSize, sortCondition.order);
@@ -270,5 +270,5 @@ module.exports = {
   updateViewtimeController,
   getVideoWatchAlsoController,
   getStateByCountryAndVideoIdFromIpController,
-  getTopVideoController
+  getTopVideoController,
 };

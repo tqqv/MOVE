@@ -1320,11 +1320,21 @@ const renewTopVideos = async () => {
         attributes: {
           include: [
             // Tính điểm của video dựa trên các trọng số: viewCount, commentCount và totalShare
-            [Sequelize.literal(`(
+            [
+              Sequelize.literal(`(
               Video.viewCount * ${WEIGHTS.VIEW} +
               ( SELECT COUNT(*) FROM comments WHERE comments.videoId = Video.id ) * ${WEIGHTS.COMMENT} +
               Video.totalShare * ${WEIGHTS.SHARE}
-            )`), 'score'], // Điểm được tính từ các yếu tố trên
+              )`), 'score'
+            ], // Điểm được tính từ các yếu tố trên
+            [
+              Sequelize.literal(`(
+                SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.videoId = Video.id
+                )`),
+                'ratings'
+            ]
           ],
         },
         order: [[Sequelize.literal('score'), 'DESC']],
@@ -1336,10 +1346,20 @@ const renewTopVideos = async () => {
             attributes: [],
           },
           {
-            model: LevelWorkout,
-            as: 'levelWorkout',
-            attributes: ['levelWorkout'],
+            model: Channel,
+            as: 'channel',
+            attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
           },
+          {
+            model: LevelWorkout,
+            attributes: ['levelWorkout'],
+            as: "levelWorkout",
+          },
+          {
+            model: Category,
+            attributes: ['title'],
+            as: 'category',
+          }
         ],
       });
 
