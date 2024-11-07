@@ -241,22 +241,22 @@
               <span class="truncate"> Report video</span>
             </li>
           </ul>
-          <ReportDialog
-            title="video"
-            groupName="reportTypeVideos"
-            titleReport="Report Video"
-            :isReportVisible="isReportVisible"
-            :isReportSuccessVisible="isReportSuccessVisible"
-            :reportType="reportTypeVideos"
-            :selectedReport="selectedReportVideo"
-            @update:selectedReport="selectedReportVideo = $event"
-            @close="closeReportSuccess"
-            @submit="handleSubmitReportVideo"
-            @hide="closeReport"
-            @hideSuccess="closeSuccess"
-          />
         </div>
       </div>
+      <ReportDialog
+        title="video"
+        groupName="reportTypeVideos"
+        titleReport="Report Video"
+        :isReportVisible="isReportVisible"
+        :isReportSuccessVisible="isReportSuccessVisible"
+        :reportType="reportTypeVideos"
+        :selectedReport="selectedReportVideo"
+        @update:selectedReport="selectedReportVideo = $event"
+        @close="closeReportSuccess"
+        @submit="handleSubmitReportVideo"
+        @hide="closeReport"
+        @hideSuccess="closeSuccess"
+      />
       <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
     </div>
   </div>
