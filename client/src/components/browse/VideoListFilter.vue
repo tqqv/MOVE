@@ -64,8 +64,8 @@
         selectedSortBy.value,
         selectedOrder.value,
       );
-      videos.value = response.data.listVideo.rows;
-      totalPage.value = response.data.totalPages;
+      videos.value = response.data.data.listVideo.rows;
+      totalPage.value = response.data.data.totalPages;
     } catch (error) {
       console.log(error);
     }

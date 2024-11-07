@@ -28,7 +28,7 @@
           <div class="flex bg-white shadow-lg overflow-hidden">
             <!-- Cột hình ảnh -->
 
-            <div class="w-2/3 h-full">
+            <div class="md:w-2/3 h-full w-full">
               <RouterLink :to="`/video/${slide.id}`" :key="slide.id">
                 <img
                   :src="slide.thumbnailUrl"
@@ -50,7 +50,7 @@
             </div>
             <!-- Cột thông tin -->
 
-            <div class="flex flex-col p-6 w-1/3 h-full justify-between">
+            <div class="hidden md:flex flex-col p-6 w-1/3 h-full justify-between">
               <div v-if="liveData !== null" class="flex items-center space-x-2">
                 <div class="size-2 bg-red rounded-full"></div>
                 <h3 class="font-bold text-lg">Currently live</h3>
@@ -89,8 +89,8 @@
                   {{ genreDuration(slide.duration) }}
                 </span>
               </div>
-              <div>
-                <span class="text-[14px] text-body break-words">{{
+              <div class="hidden xl:flex">
+                <span class="text-[14px] text-body break-all">{{
                   truncateDescripton(slide.description, 100)
                 }}</span>
               </div>

@@ -38,7 +38,7 @@ const getTopVideo = async (currentPage, pageSize, level, category, sortBy, order
     };
 
     const response = await axios.get('/video/getTopvideo', { params });
-    return response.data;
+    return response;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
