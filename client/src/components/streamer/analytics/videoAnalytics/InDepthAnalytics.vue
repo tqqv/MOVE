@@ -11,7 +11,13 @@
   import { getVideoAnalyticsById } from '@services/video';
   import rate from '@components/icons/rate.vue';
   import { useRoute } from 'vue-router';
-  import { formatView, formatRating, formatDatePosted, formatAvgViewTime } from '@/utils';
+  import {
+    formatView,
+    formatRating,
+    formatDatePosted,
+    formatAvgViewTime,
+    formatNumber,
+  } from '@/utils';
   import TabAge from './TabAge.vue';
   import TabCountry from './TabCountry.vue';
   import Filter from '@/components/Filter.vue';
@@ -105,9 +111,7 @@
         <div class="pt-6 space-y-4">
           <div class="flex justify-between">
             <span class="text-sm uppercase text-[#666666]">Views</span>
-            <span class="text-sm">{{
-              formatView(videosDetails.viewCount + videosDetails.totalViewer)
-            }}</span>
+            <span class="text-sm">{{ formatView(videosDetails.viewCount) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm uppercase text-[#666666]">avg. view time</span>

@@ -1,6 +1,12 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue';
-  import { formatRating, formatDatePosted, formatAvgViewTime, formatView } from '@/utils';
+  import {
+    formatRating,
+    formatDatePosted,
+    formatAvgViewTime,
+    formatView,
+    formatNumber,
+  } from '@/utils';
   import rate from '@/components/icons/rate.vue';
   import rep from '@/components/icons/rep.vue';
 
@@ -130,7 +136,7 @@
         </Column>
         <Column header="Views">
           <template #body="{ data }">
-            <span>{{ formatView(data.viewCount + data.totalViewer) || 0 }}</span>
+            <span>{{ formatView(data.viewCount) || 0 }}</span>
           </template>
         </Column>
         <Column header="Avg. view time">
@@ -152,14 +158,14 @@
         <Column header="REPs Received">
           <template #body="{ data }">
             <div class="flex items-center gap-2">
-              <rep /><span>{{ data.totalReps || 0 }}</span>
+              <rep /><span>{{ formatNumber(data.totalReps) || 0 }}</span>
             </div>
           </template></Column
         >
 
         <Column header="Viewer Gifted">
           <template #body="{ data }">
-            <span>{{ data.viewerGift }}</span>
+            <span>{{ formatNumber(data.viewerGift) }}</span>
           </template>
         </Column>
 

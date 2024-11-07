@@ -1,9 +1,7 @@
 <script setup>
   import { onMounted, ref } from 'vue';
-  import { fetchCountries } from '@services/address';
-  import { getStateByCountry } from '@services/video';
+  import { getStateFromIP } from '@services/video';
   import { useRoute } from 'vue-router';
-  import UnknowIcon from '@/components/icons/unknow.vue'; // Đổi tên để nhất quán với convention
 
   const props = defineProps({
     dataByIp: {
@@ -24,18 +22,24 @@
   const showStates = ref(false);
   const selectedCountryIndex = ref(null);
 
-  const getStatesByCountry = async (country) => {
-    const result = await getStateByCountry(videoId, country);
-    states.value = result.data;
-    console.log(states.value);
+  const getStatesFromIP = async (country) => {
+    try {
+      const result = await getStateFromIP(videoId, country);
+      if (result.status == 200) {
+        states.value = result.data.data;
+      }
+    } catch (error) {
+      console.error('Failed to fetch state data:', error);
+      states.value = [];
+    }
   };
 
-  // const toggleCountry = async (index) => {
-  //   selectedCountryIndex.value = index;
-  //   const selectedCountry = props.countryStats[index].country;
-  //   await getStatesByCountry(selectedCountry);
-  //   showStates.value = true;
-  // };
+  const toggleCountry = async (index) => {
+    selectedCountryIndex.value = index;
+    const selectedCountry = props.dataByIp[index].country;
+    await getStatesFromIP(selectedCountry);
+    showStates.value = true;
+  };
 
   const goBackToCountries = () => {
     showStates.value = false;
@@ -60,7 +64,7 @@
           class="text-base cursor-pointer transition duration-200 ease-in-out hover:underline hover:text-primary"
           @click="toggleCountry(index)"
         >
-          {{ stat.country ? stat.country : 'Unknown' }}
+          {{ stat.country }}
         </div>
       </div>
       <div class="flex flex-col items-start">
@@ -81,15 +85,11 @@
         <span @click="goBackToCountries">Back to countries</span>
       </div>
       <div class="text-lg font-bold whitespace-nowrap flex items-center gap-2">
-        <span>{{
-          countryStats[selectedCountryIndex].country
-            ? countryStats[selectedCountryIndex].country
-            : 'Unknown'
-        }}</span>
-        <span>({{ props.countryStats[selectedCountryIndex].viewerCount }})</span>
+        <span>{{ dataByIp[selectedCountryIndex].country }}</span>
+        <span>({{ props.dataByIp[selectedCountryIndex].viewerCount }})</span>
       </div>
       <div v-for="state in states" :key="state" class="flex items-center justify-between">
-        <div class="text-base cursor-pointer">{{ state.state }}</div>
+        <div class="text-base cursor-pointer">{{ state.city }}</div>
         <div class="flex items-center space-x-2">
           <div class="text-base font-bold">{{ state.viewerCount }}</div>
           <div class="ml-2 w-16 text-right">
