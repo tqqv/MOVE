@@ -39,6 +39,8 @@
       errorData.value = result.message;
       router.push('/404');
     } else {
+      console.log(result.data);
+
       channelDetails.value = result.data.Channel;
       usernameDetails.value = result.data.username;
       avatarDetails.value = result.data.avatar;

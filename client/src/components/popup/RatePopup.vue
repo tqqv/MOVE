@@ -39,6 +39,7 @@
       const data = { rating: newValue, videoId: props.videoId };
 
       if (!userStore.user) {
+        value.value = null;
         popupStore.openLoginPopup();
         return;
       }

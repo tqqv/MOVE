@@ -476,7 +476,7 @@
       </div>
     </div>
   </nav>
-  <Login v-model:visible="popupStore.showLoginPopup" />
+  <Login />
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
   <UploadVideo />
   <VideoDetail />
