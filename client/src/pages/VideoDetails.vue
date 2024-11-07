@@ -91,14 +91,15 @@
     }
   };
   const updateViewTime = async (viewTime, videoId) => {
-    try {
-      const res = await axiosInstance.post('video/updateViewTime', {
-        userId: user?.id || null,
-        videoId: videoId,
-        viewTime: viewTime,
-      });
-    } catch (error) {
-      toast.error(error.message);
+    if (user?.id) {
+      try {
+        const res = await axiosInstance.post('video/updateViewTime', {
+          videoId: videoId,
+          viewTime: viewTime,
+        });
+      } catch (error) {
+        toast.error(error.message);
+      }
     }
   };
 
