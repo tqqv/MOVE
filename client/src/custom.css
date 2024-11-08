@@ -192,11 +192,11 @@ html {
 .p-checkbox .p-checkbox-icon {
   color: white;
 }
-
+/* 
 input::placeholder {
   all: unset !important;
   color: #a9a9a9 !important;
-}
+} */
 
 /* CUSTOM TOOLTIPS */
 .p-tooltip .p-tooltip-text {

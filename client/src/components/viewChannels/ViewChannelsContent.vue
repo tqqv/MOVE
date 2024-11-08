@@ -21,7 +21,7 @@
   const route = useRoute();
   const router = useRouter();
   const userStore = useUserStore();
-
+  const activeTab = ref('0');
   const username = ref(route.params.username);
   const channelId = ref(null);
 
@@ -39,8 +39,6 @@
       errorData.value = result.message;
       router.push('/404');
     } else {
-      console.log(result.data);
-
       channelDetails.value = result.data.Channel;
       usernameDetails.value = result.data.username;
       avatarDetails.value = result.data.avatar;
@@ -69,11 +67,14 @@
       await fetchListFollowOfChannel(channelId.value);
     }
   });
-
+  const handleResetActiveTab = (newTab) => {
+    activeTab.value = newTab;
+  };
   watch(
     () => route.params.username,
     async (newUsername) => {
       username.value = newUsername;
+      activeTab.value = '0';
       await fetchChannelData();
       if (channelDetails.value !== null) {
         channelId.value = channelDetails.value.id;
@@ -81,6 +82,9 @@
       }
     },
   );
+  const onTabChange = (event) => {
+    activeTab.value = event;
+  };
 </script>
 
 <template>
@@ -99,7 +103,7 @@
     />
     <div>
       <div class="mt-2">
-        <Tabs value="0">
+        <Tabs :value="activeTab" @update:value="onTabChange">
           <TabList>
             <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
           </TabList>
@@ -111,6 +115,8 @@
                 :channelDetails="channelDetails"
                 :channelId="channelId"
                 :followChannelDetails="followChannelDetails"
+                :usernameDetails="usernameDetails"
+                @handleResetActiveTab="handleResetActiveTab"
               />
             </TabPanel>
           </TabPanels>

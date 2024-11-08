@@ -13,6 +13,8 @@
   import axiosInstance from '@/services/axios';
   import ReportDialog from '@/components/ReportDialog.vue';
   import { useReadMore } from '@/utils';
+  import { useUserStore } from '@/stores';
+  import { usePopupStore } from '@/stores';
 
   dayjs.extend(relativeTime);
 
@@ -38,7 +40,8 @@
     props.comment.content,
     300,
   );
-
+  const userStore = useUserStore();
+  const popupStore = usePopupStore();
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
   const isShowMoreChild = ref(false);
@@ -60,6 +63,11 @@
     openReportComment.value = !openReportComment.value;
   };
   const openPopupReport = () => {
+    if (!userStore.user) {
+      popupStore.openLoginPopup();
+
+      return;
+    }
     isReportVisible.value = !isReportVisible.value;
     openReportComment.value = false;
     getAllReportTypes();
