@@ -187,7 +187,7 @@
   });
 </script>
 <template>
-  <nav class="bg-black text-white fixed w-full z-[100]">
+  <nav class="bg-[#18181b] text-white fixed w-full z-[100]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <!-- Mobile menu button-->
