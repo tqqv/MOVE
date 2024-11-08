@@ -8,10 +8,12 @@
   import ReportDialog from './ReportDialog.vue';
   import Rate from '@components/Rate.vue';
   import rateIcon from '@icons/rate.vue';
-  import { usePopupStore } from '@/stores';
+  import { usePopupStore, useUserStore } from '@/stores';
   import ReportStream from './ReportStream.vue';
 
   const popupStore = usePopupStore();
+  const userStore = useUserStore();
+  const { user } = userStore;
   const props = defineProps({
     video: {
       type: Object,
@@ -55,8 +57,12 @@
   };
 
   const showDialogReportVideo = () => {
-    getAllReportTypes();
-    isReportVisible.value = true;
+    if (user) {
+      getAllReportTypes();
+      isReportVisible.value = true;
+    } else {
+      popupStore.openLoginPopup();
+    }
   };
 
   const closeReport = () => {
@@ -111,7 +117,6 @@
         isReportVisible.value = true;
       }
     } catch (error) {
-      popupStore.openLoginPopup();
       isReportVisible.value = false;
     }
   };
@@ -241,22 +246,22 @@
               <span class="truncate"> Report video</span>
             </li>
           </ul>
-          <ReportDialog
-            title="video"
-            groupName="reportTypeVideos"
-            titleReport="Report Video"
-            :isReportVisible="isReportVisible"
-            :isReportSuccessVisible="isReportSuccessVisible"
-            :reportType="reportTypeVideos"
-            :selectedReport="selectedReportVideo"
-            @update:selectedReport="selectedReportVideo = $event"
-            @close="closeReportSuccess"
-            @submit="handleSubmitReportVideo"
-            @hide="closeReport"
-            @hideSuccess="closeSuccess"
-          />
         </div>
       </div>
+      <ReportDialog
+        title="video"
+        groupName="reportTypeVideos"
+        titleReport="Report Video"
+        :isReportVisible="isReportVisible"
+        :isReportSuccessVisible="isReportSuccessVisible"
+        :reportType="reportTypeVideos"
+        :selectedReport="selectedReportVideo"
+        @update:selectedReport="selectedReportVideo = $event"
+        @close="closeReportSuccess"
+        @submit="handleSubmitReportVideo"
+        @hide="closeReport"
+        @hideSuccess="closeSuccess"
+      />
       <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
     </div>
   </div>
