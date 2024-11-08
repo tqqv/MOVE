@@ -2,6 +2,8 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const usePopupStore = defineStore('popup', () => {
+  const showGetREPsMenuOpen = ref(false);
+
   const showLoginPopup = ref(false);
   const showSignupPopup = ref(false);
   const showForgotPasswordPopup = ref(false);
@@ -14,7 +16,9 @@ export const usePopupStore = defineStore('popup', () => {
   const showReportSuccess = ref(false);
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
-
+  const toggleGetREPsMenuOpen = () => {
+    showGetREPsMenuOpen.value = !showGetREPsMenuOpen.value;
+  };
   const toggleLoadingPayment = () => {
     showLoadingPayment.value = !showLoadingPayment.value;
   };
@@ -131,5 +135,7 @@ export const usePopupStore = defineStore('popup', () => {
     toggleBuyREPs,
     showLoadingPayment,
     toggleLoadingPayment,
+    toggleGetREPsMenuOpen,
+    showGetREPsMenuOpen,
   };
 });

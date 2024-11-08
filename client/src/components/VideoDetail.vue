@@ -8,11 +8,9 @@
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
+  import DonateModal from './DonateModal.vue';
+  import GetREPS from './getReps/GetREPS.vue';
   const props = defineProps({
-    isButtonGiftREPsVisible: {
-      type: Boolean,
-      default: false,
-    },
     isUserAction: {
       type: Boolean,
       default: false,
@@ -46,7 +44,16 @@
   const userStore = useUserStore();
   const popupStore = usePopupStore();
   const username = computed(() => userStore.user?.username);
+  const isButtonGiftVisible = ref(false);
 
+  const isGetREPsMenuOpen = ref(false);
+  const toggleGetREPsMenu = () => {
+    isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+  };
+
+  const toggleButtonGiftVisible = () => {
+    isButtonGiftVisible.value = !isButtonGiftVisible.value;
+  };
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
@@ -157,13 +164,34 @@
       >
         <share class="mr-1" /> Share
       </div>
-      <div
-        v-if="username !== props.usernameDetails"
-        class="btn text-[13px] font-bold flex items-center cursor-pointer"
-      >
-        Gift REPs <i class="pi pi-angle-right" />
+      <div class="relative">
+        <div
+          @click="toggleButtonGiftVisible"
+          v-if="username !== props.usernameDetails"
+          class="btn text-[13px] font-bold flex items-center cursor-pointer"
+        >
+          Gift REPs <i class="pi pi-angle-right" />
+        </div>
+        <DonateModal
+          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          v-if="isButtonGiftVisible"
+          @toggleButtonGiftVisible="toggleButtonGiftVisible"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+        />
+        <GetREPS
+          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          v-if="isGetREPsMenuOpen"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+          @toggleBuyREPs="popupStore.toggleBuyREPs"
+          @toggleButtonGiftVisible="toggleButtonGiftVisible"
+          :isBackVisible="true"
+        />
       </div>
-      <ReportChannel v-if="hiddenReport" :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
+      <ReportChannel
+        v-if="hiddenReport"
+        :channelId="channelDetails.id"
+        :channelName="channelDetails.channelName"
+      />
     </div>
   </div>
 </template>

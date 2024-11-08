@@ -62,10 +62,10 @@
     isCreateMenuOpen.value = !isCreateMenuOpen.value;
   };
 
-  const toogleNotiMenu = () => {
+  const toggleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
-  const toogleGetREPsMenu = () => {
+  const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
   };
   const closeAllPopups = () => {
@@ -331,7 +331,7 @@
           <template v-else>
             <div v-if="userStore.user?.role == 'user'" class="relative">
               <div
-                @click="toogleGetREPsMenu"
+                @click="toggleGetREPsMenu"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
@@ -346,8 +346,9 @@
                 tabindex="-1"
               >
                 <GetREPS
+                  :isBackVisible="false"
                   v-if="isGetREPsMenuOpen"
-                  @toogleGetREPsMenu="toogleGetREPsMenu"
+                  @toggleGetREPsMenu="toggleGetREPsMenu"
                   @toggleBuyREPs="popupStore.toggleBuyREPs"
                 />
               </div>
@@ -360,7 +361,7 @@
                 class="inline-flex cursor-pointer"
                 size="small"
                 id="noti-menu-button"
-                @click="toogleNotiMenu"
+                @click="toggleNotiMenu"
               >
                 <notification fill="fill-white" class="scale-110" />
               </OverlayBadge>
@@ -373,7 +374,7 @@
                 aria-labelledby="noti-menu-button"
                 tabindex="-1"
               >
-                <Notification @toogleNotiMenu="toogleNotiMenu" />
+                <Notification @toggleNotiMenu="toggleNotiMenu" />
               </div>
             </div>
             <div class="relative">
