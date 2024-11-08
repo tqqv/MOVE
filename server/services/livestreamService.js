@@ -44,7 +44,19 @@ const getTopLivestreamService = async (page, pageSize, level, category, sortCond
   try {
     const livestreams = await Livestream.findAll({
       where: { isLive: true },
-      attributes: {exclude: ['streamKey'] },
+      attributes: {
+        exclude: ['streamKey'],
+        include: [
+          [
+            Sequelize.literal(`(
+            SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.livestreamId = Livestream.id
+            )`),
+            'ratings'
+          ]
+        ]
+       },
       include: [
         {
           model: Category,
