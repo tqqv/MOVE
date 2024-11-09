@@ -33,19 +33,27 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.STRING,
             allowNull: false,
         },
-            expirationDate: {
-            type: DataTypes.DATE,
+        expirationDate: {
+            type: DataTypes.STRING,
             allowNull: false,
         },
         cardType: {
-            type: DataTypes.ENUM('creditCard', 'debitCard'),
+            type: DataTypes.ENUM('visa', 'mastercard'),
+            allowNull: false,
+        },
+        country: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        paymentMethodId: {
+            type: DataTypes.STRING,
             allowNull: false,
         },
     },
     {
       sequelize,
       modelName: "CardPaymentInfor",
-      tableName: "cardPaymentInfors",
+      tableName: "paymentCardInfors",
       timestamps: true,
   });
   return CardPaymentInfor;

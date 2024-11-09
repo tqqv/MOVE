@@ -18,12 +18,12 @@
     emit('toggleOpenPaymentDetails');
   };
 
-  const formattedNumber = computed(() => {
-    return '**** **** **** ' + props.number.slice(-4);
-  });
   const props = defineProps({
-    username: String,
-    number: Number,
+    card: Object
+  });
+
+  const formattedNumber = computed(() => {
+    return '**** **** **** ' + props.card.cardNumber;
   });
 </script>
 
@@ -37,7 +37,7 @@
           ><span @click="toggleOpenRemove" class="text-[#E24848] cursor-pointer">Remove</span>
         </div>
       </div>
-      <div class="text-[20px]">{{ username }}</div>
+      <div class="text-[20px]">{{ card.cardOwnerName }}</div>
     </div>
     <div class="space-y-2">
       <div class="text-xs">Card number</div>

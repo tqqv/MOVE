@@ -5,6 +5,8 @@
   import VisaIcon from '@components/icons/visa.vue';
   import MasterCardIcon from '@components/icons/mastercard.vue';
   import FormCardPayment from '@/components/FormCardPayment.vue';
+  import { createCardInfo } from '@/services/payment';
+  import { toast } from 'vue3-toastify';
 
   const props = defineProps({
     isPaymentDetailsVisible: Boolean,
@@ -39,6 +41,48 @@
   onMounted(() => {
     loadCountries();
   });
+
+
+  ////// Payment with Stripeq
+  const cardForm = ref(null);
+
+  const handleSubmit = async () => {
+    if (!cardForm.value || !cardForm.value.stripe) {
+      console.error("cardForm or Stripe is undefined");
+      return;
+    }
+
+    const { cardNumber, cardName, stripe, country } = cardForm.value;
+
+    const { error, paymentMethod } = await stripe.createPaymentMethod({
+      type: 'card',
+      card: cardNumber,
+      billing_details: {
+        name: cardName,
+      },
+    });
+
+    if (error) {
+      console.error("Error:", error.message);
+    } else {
+      // console.log("Payment Method ID:", paymentMethod.id);
+      const data = {
+        cardNumber: paymentMethod.card.last4,
+        cardName: cardName,
+        paymentMethodId: paymentMethod.id,
+        cardType: paymentMethod.card.brand,
+        country: country.name,
+        expirationDate: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year
+      }
+      const res = await createCardInfo(data);
+      if(res) {
+        toast.success('Saved successfully.');
+        toggleClosePayment();
+      }else {
+        toast.error('Insert failed')
+      }
+    }
+  }
 </script>
 
 <template>
@@ -54,7 +98,7 @@
       :style="{ width: '40rem' }"
     >
       <div class="space-y-4">
-        <FormCardPayment />
+        <FormCardPayment ref="cardForm" />
         <div class="text-xs">
           <span class="text-[#777777]">
             By submitting payment information you acknowledge that you have read, understood and
@@ -65,7 +109,7 @@
           <span class="text-primary"> Refund Policy</span>.
         </div>
         <div class="flex justify-center mt-4">
-          <button class="btn w-1/3">Submit</button>
+          <button @click="handleSubmit" class="btn w-1/3">Submit</button>
         </div>
       </div>
     </Dialog>

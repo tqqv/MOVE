@@ -1,12 +1,13 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import CardPayment from './CardPayment.vue';
   import PaymentDetail from '@components/wallet/dialog/PaymentDetail.vue';
   import { useContryStore } from '@/stores';
+  import { getCardInfo } from '@/services/payment';
 
   const countryStore = useContryStore();
 
-  const isDisplay = ref(true);
+  const isDisplay = ref(false);
   let hasFetchedCountries = false;
 
   const isPaymentDetailsVisible = ref(false);
@@ -17,6 +18,18 @@
       hasFetchedCountries = true;
     }
   };
+
+  const card = ref({})
+
+  onMounted(async() => {
+    const res = await getCardInfo();
+    if(res && res.status === 200){
+      card.value = res.data.data;
+      isDisplay.value = !isDisplay.value
+    } else {
+      console.log('Khong co data card');
+    }
+  })
 </script>
 <template>
   <div class="space-y-2">
@@ -25,8 +38,7 @@
     <!-- Card -->
     <CardPayment
       v-if="isDisplay"
-      username="Phillip Giggs"
-      number="1234123412341234"
+      :card="card"
       @toggleOpenPaymentDetails="toggleOpenPaymentDetails"
     />
 
