@@ -1,26 +1,25 @@
 <script setup>
   import { usePopupStore } from '@/stores';
   import { onMounted, onUnmounted, ref, watch } from 'vue';
-  import ReportChannelPopup from './reportUser/ReportChannelPopup.vue';
-  import { getAllReportChannelTypes, reportChannel } from '@/services/report';
+  import { getAllReportLiveStream, reportLiveStream } from '@/services/report';
   import ReportDialog from './ReportDialog.vue';
   import { toast } from 'vue3-toastify';
 
   const props = defineProps({
-    channelName: String,
-    channelId: Number,
+    liveStreamId: Number,
   });
 
   const popupStore = usePopupStore();
-  const listReportChannel = ref([]);
+  const listReportLivestream = ref([]);
   const isMenuVisible = ref(false);
-  const selectReportChannel = ref(null);
-  const handleOpenReportChannelDialog = async () => {
+  const selectReportLiveStream = ref(null);
+
+  const handleOpenReportLiveStreamDialog = async () => {
     try {
-      await fetchListReportChannel();
+      await fetchListReportLiveStream();
       isMenuVisible.value = false;
     } catch (error) {
-      console.log('Failed to fetch report channels:', error);
+      console.log('Failed to fetch report live stream:', error);
     }
   };
 
@@ -42,13 +41,13 @@
   });
 
   // GET ALL REPORT
-  const fetchListReportChannel = async () => {
+  const fetchListReportLiveStream = async () => {
     try {
-      const response = await getAllReportChannelTypes();
+      const response = await getAllReportLiveStream();
       if (response.error) {
         popupStore.openLoginPopup();
       } else {
-        listReportChannel.value = response.data;
+        listReportLivestream.value = response.data;
         popupStore.openReportChannel();
       }
     } catch (error) {
@@ -56,12 +55,15 @@
     }
   };
 
-  // HANDLE SUBMIT REPORT CHANNEL
-  const handleSubmitReportChannel = async () => {
-    if (selectReportChannel.value.id) {
+  // HANDLE SUBMIT REPORT LIVESTREAM
+  const handleSubmitReportLiveStream = async () => {
+    if (selectReportLiveStream.value.id) {
       try {
-        const response = await reportChannel(props.channelId, selectReportChannel.value.id);
-        toast.success('Report channel sent successfully');
+        const response = await reportLiveStream(
+          props.liveStreamId,
+          selectReportLiveStream.value.id,
+        );
+        toast.success('Report live stream sent successfully');
         popupStore.closeReportChannel();
         popupStore.openReportSuccess();
         return response.data;
@@ -72,9 +74,9 @@
   };
 
   watch(
-    selectReportChannel,
+    selectReportLiveStream,
     (newVal) => {
-      selectReportChannel.value = newVal;
+      selectReportLiveStream.value = newVal;
     },
     { deep: true },
   );
@@ -90,30 +92,30 @@
     />
     <div
       v-if="isMenuVisible"
-      class="absolute mb-2 w-[145px] bg-white shadow rounded-md z-50 p-2 right-0 mt-2'"
+      class="absolute mb-2 w-[155px] bg-white shadow rounded-md z-50 p-2 right-0 mt-2'"
     >
       <ul class="flex flex-col justify-center h-full gap-y-1 m-0 p-0">
         <li
           class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
-          @click="handleOpenReportChannelDialog"
+          @click="handleOpenReportLiveStreamDialog"
         >
           <i class="pi pi-flag text-sm"></i>
-          <span class="truncate"> Report channel</span>
+          <span class="truncate"> Report livestream</span>
         </li>
       </ul>
     </div>
   </div>
   <ReportDialog
-    title="channels"
-    groupName="reportTypeChannel"
-    :reportType="listReportChannel"
-    :titleReport="`Report ${channelName}`"
-    :selectedReport="selectReportChannel"
+    title="livestream"
+    groupName="reportTypeLiveStream"
+    :reportType="listReportLivestream"
+    :titleReport="`Report live stream`"
+    :selectedReport="selectReportLiveStream"
     :isReportVisible="popupStore.showReportChannel"
     :isReportSuccessVisible="popupStore.showReportSuccess"
-    @update:selectedReport="selectReportChannel = $event"
+    @update:selectedReport="selectReportLiveStream = $event"
     @hide="popupStore.closeReportChannel"
-    @submit="handleSubmitReportChannel"
+    @submit="handleSubmitReportLiveStream"
     @close="popupStore.closeReportSuccess"
     @hideSuccess="popupStore.closeReportSuccess"
   />

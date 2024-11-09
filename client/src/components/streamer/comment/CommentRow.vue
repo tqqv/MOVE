@@ -142,7 +142,7 @@
         reportTypeVideos.value = response.data.data;
       }
     } catch (error) {
-      toast.error(error.message);
+      // toast.error(error.message);
     }
   };
   const handleSubmitReportComment = async () => {
@@ -155,10 +155,10 @@
         if (response.status === 200) {
           isReportVisible.value = false;
           isReportSuccessVisible.value = true;
-          toast.success(response.data.message);
+          // toast.success(response.data.message);
         }
       } catch (error) {
-        toast.error(error.message);
+        // toast.error(error.message);
       }
     }
   };
@@ -204,7 +204,7 @@
 <template>
   <tr class="bg-white border-b-[1px] border-gray-dark">
     <!-- COMMENT -->
-    <td class="w-1/2 px-6 py-4 font-normal align-top text-gray-900">
+    <td class="w-[50%] px-6 py-4 font-normal align-top text-gray-900">
       <div class="flex gap-x-4">
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
@@ -232,7 +232,7 @@
             <p class="text-xs text-footer">{{ formatDate(comment.updatedAt) }}</p>
           </div>
           <!-- COMMENT -->
-          <p class="break-words text-sm text-black">
+          <p class="break-all text-sm text-black">
             {{ displayedText() }}
             <span v-if="isLongText">
               <button @click="toggleText" class="text-primary font-semibold ml-1">

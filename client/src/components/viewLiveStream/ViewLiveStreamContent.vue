@@ -33,12 +33,12 @@
         props.connectOBS === 'streamEnded' ||
         props.connectOBS === 'streamReady'||
         props.connectOBS === 'null' ||
-      (  props.connectOBS == null && !props.liveStatus )
+      (  props.connectOBS    == null && !props.liveStatus )
       "
     />
   </div>
   <div class="container py-6">
-    <OfflineTitle :video="props.liveStreamData?.livestream" />
+    <OfflineTitle :video="props.liveStreamData?.livestream" reportType="stream" />
     <hr class="h-[2px] my-7 bg-gray-dark border-0" />
     <VideoDetail
       v-if="props.liveStreamData.channel"

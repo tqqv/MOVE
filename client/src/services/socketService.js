@@ -24,4 +24,14 @@ const disconnectLivestream = () => {
   }
 };
 
-export { joinRoom, listenStreamReady, disconnectLivestream };
+const listenStreamMetrics = (callback) => {
+  livestreamSocket.off('streamMetrics');
+  livestreamSocket.on('streamMetrics', (arg) => {
+    // console.log('Received streamMetrics event with arg:', arg);
+    if (callback) {
+      callback(arg);
+    }
+  });
+};
+
+export { joinRoom, listenStreamReady, disconnectLivestream, listenStreamMetrics };

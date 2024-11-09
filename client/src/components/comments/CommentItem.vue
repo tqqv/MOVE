@@ -244,7 +244,7 @@
       <!-- COMMENT -->
       <p
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
-        class="break-words text-sm text-black"
+        class="break-all text-sm text-black"
       >
         {{ displayedText() }}
         <span v-if="isLongText">
