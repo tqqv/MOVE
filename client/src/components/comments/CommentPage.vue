@@ -158,8 +158,6 @@
 
   onMounted(() => {
     fetchComments();
-    // if (userStore.user?.id) {
-    // }
   });
 </script>
 
