@@ -5,15 +5,26 @@
   import LogoIcon from '@/components/icons/logoIcon.vue';
   import { formatTimeInStream } from '@/utils';
 
-  const props = defineProps({ liveInfo: Array, elapsedTime: Number, duration: Number });
+  const props = defineProps({
+    liveInfo: Array,
+    elapsedTime: Number,
+    duration: Number,
+    metricsData: Object,
+    liveStatus: String,
+  });
 </script>
+,
 <template>
   <div class="flex justify-start items-center gap-x-3">
     <div class="flex size-8 justify-center items-center bg-primary rounded-full">
       <Eye fill="white" />
     </div>
     <div class="flex flex-col">
-      <p class="font-medium">23</p>
+      <p v-if="liveStatus === 'streamEnded'" class="font-medium">
+        {{ metricsData?.totalViews ?? '0' }}
+      </p>
+      <p v-else class="font-medium">{{ metricsData?.currentViews ?? '0' }}</p>
+
       <p class="text-sm">views</p>
     </div>
   </div>

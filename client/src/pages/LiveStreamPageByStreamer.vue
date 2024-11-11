@@ -3,13 +3,13 @@
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
   import { useLiveStreamStore, useStreamerStore, useUserStore } from '@/stores';
-  import { joinRoom, listenStreamReady } from '@/services/socketService';
+  import { joinRoom, listenStreamMetrics, listenStreamReady } from '@/services/socketService';
 
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
   const connectOBS = ref(null);
   const liveStatus = ref(null);
-
+  const metricsData = ref(null);
   // TIME START STREAM
   const elapsedTime = ref(0);
   let timer;
@@ -39,6 +39,11 @@
       listenStreamReady((isReady) => {
         streamerStore.fetchProfileChannel();
         connectOBS.value = isReady;
+      });
+
+      listenStreamMetrics((metrics) => {
+        metricsData.value = metrics;
+        console.log('Stream Metrics:', metrics);
       });
     }
   };
@@ -96,7 +101,12 @@
       @stopTimer="stopTimer"
     />
     <div class="flex-1 overflow-y-auto">
-      <router-view :elapsedTime="elapsedTime" :connectOBS="connectOBS" :liveStatus="liveStatus" />
+      <router-view
+        :elapsedTime="elapsedTime"
+        :connectOBS="connectOBS"
+        :liveStatus="liveStatus"
+        :metricsData="metricsData"
+      />
     </div>
   </div>
 </template>

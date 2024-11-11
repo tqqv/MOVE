@@ -19,9 +19,9 @@
   const fetchUserViewLive = async (username) => {
     try {
       const response = await fetchViewLiveStreamByUsername(username);
-      if (!response.data?.channel?.isLive) {
-        router.push(`/user/${username}`);
-      }
+      // if (!response.data?.channel?.isLive) {
+      //   router.push(`/user/${username}`);
+      // }
       liveStreamData.value = response.data;
       console.log(liveStreamData.value);
     } catch (error) {
