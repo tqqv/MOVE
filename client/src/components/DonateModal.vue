@@ -1,24 +1,15 @@
 <script setup>
   import { ref } from 'vue';
   import Button from 'primevue/button';
-  import REPs1 from './icons/REPsItems/REPs1.vue';
-  import REPs2 from './icons/REPsItems/REPs2.vue';
-  import REPs3 from './icons/REPsItems/REPs3.vue';
-  import REPs4 from './icons/REPsItems/REPs4.vue';
-  import REPs5 from './icons/REPsItems/REPs5.vue';
-  import { usePopupStore } from '@/stores';
 
-  const popupStore = usePopupStore();
-
+  import { useUserStore } from '@/stores';
+  const userStore = useUserStore();
+  const props = defineProps({
+    donationItems: {
+      type: Object,
+    },
+  });
   const emit = defineEmits(['toggleButtonGiftVisible', 'toggleGetREPsMenu']);
-  const donateValueList = [
-    { value: 100 },
-    { value: 1000 },
-    { value: 5000 },
-    { value: 10000 },
-    { value: 25000 },
-  ];
-  const icons = [REPs1, REPs2, REPs3, REPs4, REPs5];
 
   const presentMessages = [
     { id: 1, message: 'Best workout yet!' },
@@ -34,10 +25,6 @@
     emit('toggleButtonGiftVisible');
 
     emit('toggleGetREPsMenu');
-  };
-  const user = {
-    id: 1,
-    REPs: 300,
   };
 
   const selectedValue = ref(null);
@@ -78,18 +65,21 @@
       <hr class="h-[2px] bg-gray-dark border-0" />
 
       <!-- BUTTON MODAL -->
-      <div class="flex justify-between mx-3 py-3">
+      <div class="flex justify-center gap-x-12 mx-3 py-3">
         <div
-          v-for="(donateValue, index) in donateValueList"
-          :key="donateValue.value"
+          v-for="(donateValue, index) in donationItems"
+          :key="donateValue.id"
           class="flex flex-col justify-center items-center gap-y-1"
         >
-          <component
-            class="cursor-pointer"
-            @click="handleSelectValue(donateValue.value)"
-            :reps="donateValue.value"
-            :is="icons[index]"
-          />
+          <div class="flex-shrink-0">
+            <img
+              :src="donateValue.image"
+              alt="REPs"
+              class="w-full h-full rounded-full object-cover cursor-pointer"
+              @click="handleSelectValue(donateValue.REPs)"
+            />
+          </div>
+          <span class="font-bold text-black">{{ donateValue.REPs }}</span>
         </div>
       </div>
 
@@ -122,8 +112,8 @@
           </h2>
           <Button
             class="btn px-4 text-nowrap text-[12px] md:text-[15px]"
-            :class="{ 'bg-body': user.REPs < selectedValue }"
-            :disabled="user.REPs < selectedValue"
+            :class="{ 'bg-body': userStore.user.REPs < selectedValue }"
+            :disabled="userStore.user.REPs < selectedValue"
           >
             Send {{ selectedValue }} REPs
           </Button>
@@ -134,7 +124,7 @@
       <div class="py-4 bg-[#008370] rounded-b-lg">
         <div class="flex justify-between px-5 items-center text-white">
           <h1 class="text-[12px] md:text-[16px]">
-            You have <span class="font-bold">{{ user.REPs }} REPs</span>
+            You have <span class="font-bold">{{ userStore.user.REPs }} REPs</span>
           </h1>
           <Button @click="toggleGetREPsMenu" class="btn px-4 text-nowrap text-[12px] md:text-[15px]"
             >Get REPs</Button
