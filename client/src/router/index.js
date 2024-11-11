@@ -21,13 +21,14 @@ import TabCategories from '@/components/browse/TabCategories.vue';
 import TabHighestRated from '@/components/browse/TabHighestRated.vue';
 import TabTopVideo from '@/components/browse/TabTopVideo.vue';
 import TabMostView from '@/components/browse/TabMostView.vue';
-import Overview from '@/components/streamer/analytics/Overview.vue';
+import Overview from '@/components/streamer/analytics/overview/Overview.vue';
 import VideoAnalytics from '@/components/streamer/analytics/videoAnalytics/VideoAnalytics.vue';
 import ViewLiveStreamPage from '@/pages/ViewLiveStreamPage.vue';
 import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InDepthAnalytics.vue';
 import WalletContent from '@/components/wallet/WalletContent.vue';
 import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
 import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
+import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
 
 const routes = [
   // User router
@@ -81,6 +82,7 @@ const routes = [
       { path: 'analytics', component: Overview },
       { path: 'video-analytics', component: VideoAnalytics },
       { path: 'video-analytics/:videoId', component: InDepthAnalytics },
+      { path: 'live-stream-analytics', component: LiveStreamAnalytics },
     ],
   },
   // Live stream by streamer
