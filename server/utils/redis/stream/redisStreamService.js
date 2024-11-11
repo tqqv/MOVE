@@ -73,7 +73,7 @@ const getStreamStats = async (channelId) => {
             totalReacts: parseInt(results[3][1] || '0'),
             totalShares: parseInt(results[4][1] || '0'),
             totalReps: parseInt(results[5][1] || '0'),
-            avgRates: parseInt(results[6][1] || '0'),
+            avgRates: parseFloat(results[6][1] || '0'),
             totalLikes: parseInt(results[7][1] || '0')
         };
         let liveStatus = await get(`channel_${channelId}_live_status`);
