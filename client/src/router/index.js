@@ -28,6 +28,7 @@ import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InD
 import WalletContent from '@/components/wallet/WalletContent.vue';
 import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
 import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
+import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 
 const routes = [
   // User router
@@ -81,6 +82,7 @@ const routes = [
       { path: 'analytics', component: Overview },
       { path: 'video-analytics', component: VideoAnalytics },
       { path: 'video-analytics/:videoId', component: InDepthAnalytics },
+      { path: 'cashout', component: Cashout },
     ],
   },
   // Live stream by streamer
