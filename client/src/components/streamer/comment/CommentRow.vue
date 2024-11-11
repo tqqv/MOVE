@@ -2,8 +2,8 @@
   import { ref, onMounted, onBeforeUnmount } from 'vue';
   import rep from '@icons/rep.vue';
   import rep2500 from '@icons/reps25000.vue';
-  import dislike from '@/components/icons/dislike.vue';
-  import like from '@/components/icons/like.vue';
+  import Dislike from '@/components/icons/dislike.vue';
+  import Like from '@/components/icons/like.vue';
   import verified from '@icons/verified.vue';
   import CommentField from './CommentField.vue';
   import CommentReply from './CommentReply.vue';
@@ -15,11 +15,16 @@
   import axiosInstance from '@/services/axios';
   import { toast } from 'vue3-toastify';
   import { useReadMore } from '@/utils';
+  import { postReactionComment } from '@/services/comment';
+  import { useUserStore } from '@/stores';
 
   const props = defineProps({
     comment: Object,
     fetchAllCommentStreamer: Function,
   });
+
+  const userStore = useUserStore();
+
   //comment
   const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
     props.comment.content,
@@ -41,7 +46,10 @@
   const reportTypeVideos = ref([]);
   const selectedReportComment = ref(null);
   const selectedCommentId = ref(null);
+  //react
 
+  const likeCount = ref(props.comment.likeCount);
+  const userReactionType = ref(props.comment.userReactionType);
   // HANDLE COMMENT FIELD
   const handleOpenCommentField = () => {
     openCommentField.value = !openCommentField.value;
@@ -87,7 +95,11 @@
   const fetchReplyOfComment = async (commentId) => {
     loadingReplies.value = true;
     try {
-      const response = await getReplyCommentOfVideo(commentId, currentPage.value);
+      const response = await getReplyCommentOfVideo(
+        userStore.user.id,
+        commentId,
+        currentPage.value,
+      );
       const existingCommentIds = [...replies.value, ...newReplies.value].map((reply) => reply.id);
       const newComments = response.data.comments.rows.filter(
         (comment) => !existingCommentIds.includes(comment.id),
@@ -130,7 +142,7 @@
         reportTypeVideos.value = response.data.data;
       }
     } catch (error) {
-      toast.error(error.message);
+      // toast.error(error.message);
     }
   };
   const handleSubmitReportComment = async () => {
@@ -143,10 +155,10 @@
         if (response.status === 200) {
           isReportVisible.value = false;
           isReportSuccessVisible.value = true;
-          toast.success(response.data.message);
+          // toast.success(response.data.message);
         }
       } catch (error) {
-        toast.error(error.message);
+        // toast.error(error.message);
       }
     }
   };
@@ -159,13 +171,40 @@
   const closeSuccess = () => {
     isReportSuccessVisible.value = false;
   };
+  // react
+
+  const toggleReaction = async (type) => {
+    const data = { commentId: props.comment.id, reactionType: type };
+    try {
+      const response = await postReactionComment(data);
+      if (response.status === 200) {
+        if (type === 'like') {
+          if (userReactionType.value === 'like') {
+            likeCount.value -= 1;
+          } else if (userReactionType.value === 'dislike') {
+            likeCount.value += 1;
+          } else {
+            likeCount.value += 1;
+          }
+        } else if (type === 'dislike') {
+          if (userReactionType.value === 'like') {
+            likeCount.value -= 1;
+          }
+        }
+
+        userReactionType.value = userReactionType.value === type ? null : type;
+      }
+    } catch (error) {
+      toast.error('Error updating reaction');
+    }
+  };
   //------///
 </script>
 
 <template>
   <tr class="bg-white border-b-[1px] border-gray-dark">
     <!-- COMMENT -->
-    <td class="w-1/2 px-6 py-4 font-normal align-top text-gray-900">
+    <td class="w-[50%] px-6 py-4 font-normal align-top text-gray-900">
       <div class="flex gap-x-4">
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
@@ -193,7 +232,7 @@
             <p class="text-xs text-footer">{{ formatDate(comment.updatedAt) }}</p>
           </div>
           <!-- COMMENT -->
-          <p class="break-words text-sm text-black">
+          <p class="break-all text-sm text-black">
             {{ displayedText() }}
             <span v-if="isLongText">
               <button @click="toggleText" class="text-primary font-semibold ml-1">
@@ -205,15 +244,21 @@
           <div class="flex mt-2 gap-x-6 text-sm">
             <div class="flex gap-x-8 items-center text-primary">
               <!-- LIKE DISLIKE -->
-              <div class="flex items-center gap-x-3">
-                <like class="cursor-pointer hover:scale-110" />
-                <p class="mt-1">{{ comment.like }}</p>
+              <div class="flex gap-2" @click="toggleReaction('like')">
+                <Like
+                  class="cursor-pointer hover:scale-110"
+                  :fill="userReactionType === 'like' ? '#13CEB3' : 'white'"
+                  :stroke="userReactionType === 'like' ? 'none' : '#13D0B4'"
+                />
+                <div class="mt-1">
+                  <span class="items-center text-primary">{{ likeCount }}</span>
+                </div>
               </div>
-              <div>
-                <dislike
-                  class="cursor-pointer mt-2 hover:scale-110"
-                  fill="white"
-                  stroke="#13ceb3"
+              <div class="flex gap-2" @click="toggleReaction('dislike')">
+                <Dislike
+                  class="cursor-pointer mt-1 hover:scale-110"
+                  :fill="userReactionType === 'dislike' ? '#13CEB3' : 'white'"
+                  :stroke="userReactionType === 'dislike' ? 'none' : '#13D0B4'"
                 />
               </div>
               <div class="relative">

@@ -14,12 +14,6 @@
   const showPassword = ref(false);
   const popupStore = usePopupStore();
 
-  // const buttonColor = computed(() => {
-  //   return email.value.trim() && password.value.trim() ? 'btn' : 'btnDisable';
-  // });
-  // const isButtonDisabled = computed(() => {
-  //   return !(email.value.trim() && password.value.trim());
-  // });
   const handleLoginWithEmail = () => {
     showLoginWithEmail.value = true;
   };
@@ -52,17 +46,6 @@
     const url = `${import.meta.env.VITE_API_URL}auth/google`;
     window.open(url, '_self');
   };
-
-  // onMounted(async () => {
-  //   try {
-  //     await userStore.fetchUserProfile();
-  //     if (!userStore.user) {
-  //       toast.error('Failed to fetch user profile');
-  //     }
-  //   } catch (error) {
-  //     toast.error('Failed to fetch user profile');
-  //   }
-  // });
 </script>
 
 <template>

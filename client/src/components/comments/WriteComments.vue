@@ -5,12 +5,14 @@
   import { useUserStore } from '@/stores';
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
+  import { useTabStore } from '@/stores';
 
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
   const userStore = useUserStore();
   const popupStore = usePopupStore();
+  const tabStore = useTabStore();
 
   const avatar = computed(
     () => userStore.user?.avatar || 'https://img.upanh.tv/2024/06/18/user-avatar.png',
@@ -38,14 +40,14 @@
   const showActions = ref(false);
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
+    autoResize(event.target);
   };
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
   const addEmoji = (emoji) => {
     commentText.value += emoji.i;
-    const commentInput = document.getElementById('commentInput');
-    commentInput.innerText = commentText.value;
+    autoResize(document.getElementById('commentTextarea'));
   };
 
   const handleFocus = () => {
@@ -59,6 +61,7 @@
   const handleSend = async () => {
     if (!userStore.user) {
       openLoginPopup();
+
       return;
     }
     const data = { content: commentText.value, parentId: parentId.value };
@@ -124,6 +127,10 @@
   onBeforeUnmount(() => {
     document.removeEventListener('click', handleClickOutside);
   });
+  const autoResize = (textarea) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
 </script>
 
 <template>
@@ -131,13 +138,13 @@
     <!-- WRITE COMMENTS -->
     <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full py-2">
       <div class="flex-shrink-0">
-        <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
+        <img v-if="avatar" :src="avatar" class="size-12 rounded-full object-cover" />
       </div>
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
-        <input
-          type="text"
+        <textarea
           placeholder="Write a comment"
-          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-normal placeholder:text-black/50 w-full h-12"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
+          rows="1"
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"
