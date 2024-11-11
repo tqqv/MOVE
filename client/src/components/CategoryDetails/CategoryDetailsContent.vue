@@ -29,10 +29,8 @@
   const fetchCategoryByTitle = async (title) => {
     try {
       const response = await getCategoryByTitle(title);
-      console.log(response);
 
       categoryDetail.value = response.data;
-      console.log(categoryDetail.value);
     } catch (error) {
       console.error(error.message);
     }

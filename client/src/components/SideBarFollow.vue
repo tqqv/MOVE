@@ -81,16 +81,19 @@
         >
           <div
             :class="[
-              'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
-              userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
+              'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
+              userFollower.followChannel.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
             ]"
           >
             <img
               :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="size-12 rounded-full object-cover p-[1.5px]"
+              class="w-full h-full rounded-full object-cover"
             />
           </div>
+
           <div class="flex flex-col gap-y-1 truncate">
             <div class="flex flex-row gap-x-3">
               <p class="text_para truncate">
@@ -154,6 +157,7 @@
           :key="userFollower.id"
           class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
         >
+
           <RouterLink
             v-if="userStore.followers.length && userStore.user"
             v-for="userFollower in userStore.followers"
@@ -161,17 +165,20 @@
             class="flex items-center gap-x-3 cursor-pointer"
             :to="`/user/${userFollower.followChannel.User.username}`"
           >
-            <div
-              :class="[
-                'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
-                userFollower.isStreaming ? 'border-[3px] border-red' : '',
-              ]"
-            >
-              <img
-                :src="userFollower.followChannel?.avatar"
-                alt="Avatar"
-                class="w-full h-full rounded-full object-cover"
-              /></div
+             <div
+            :class="[
+              'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
+              userFollower.followChannel.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
+            ]"
+          >
+            <img
+              :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
+              alt="Avatar"
+              class="w-full h-full rounded-full object-cover"
+            />
+          </div>
           ></RouterLink>
         </div>
       </div>

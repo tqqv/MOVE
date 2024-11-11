@@ -12,7 +12,7 @@
       type: String,
       required: true,
     },
-    fetchVideosFunction: {
+    fetchLiveStreamFunction: {
       type: Function,
       required: true,
     },
@@ -28,7 +28,7 @@
 
   const levelWorkoutStore = useLevelWorkoutStore();
 
-  const videos = ref([]);
+  const livestreams = ref([]);
   const currentPage = ref(1);
   const totalPage = ref();
   const pageSize = ref(12);
@@ -54,10 +54,10 @@
     selectedOrder.value = newValue.order;
   };
 
-  // FETCH VIDEO
-  const fetchVideos = async () => {
+  // FETCH Live
+  const fetchLiveStream = async () => {
     try {
-      const response = await props.fetchVideosFunction(
+      const response = await props.fetchLiveStreamFunction(
         currentPage.value,
         pageSize.value,
         selectLevelWorkoutOptions.value,
@@ -65,7 +65,9 @@
         selectedSortBy.value,
         selectedOrder.value,
       );
-      videos.value = response.data.listVideo.rows;
+      console.log(response);
+
+      livestreams.value = response.data.data.livestreamsWithStats;
       totalPage.value = response.data.totalPages;
     } catch (error) {
       console.log(error);
@@ -83,15 +85,12 @@
     (newValues, oldValues) => {
       if (newValues !== oldValues) {
         currentPage.value = 1;
-        fetchVideos();
+        fetchLiveStream();
       }
     },
   );
 
-  onMounted(async () => {
-    await levelWorkoutStore.fetchLevelWorkout();
-    // await fetchVideos();
-  });
+  onMounted(async () => {});
 </script>
 
 <template>
@@ -119,7 +118,7 @@
         <p>Sort & Filter</p>
       </button>
     </div>
-    <GirdVideo v-if="videos.length > 0" :videos="videos" />
+    <GirdVideo v-if="livestreams.length > 0" :videos="livestreams" />
     <Paginator
       v-if="totalPage > 1"
       :rows="pageSize"
@@ -127,9 +126,9 @@
       :totalRecords="totalPage * pageSize"
       @page="onPageChange"
     />
-    <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
+    <div v-if="!livestreams.length" class="h-full flex justify-center items-center mt-20">
       <EmptyPage
-        title="There are no matching videos"
+        title="There are no matching live streams"
         subTitle="Try different keywords or remove search filters"
       />
     </div>

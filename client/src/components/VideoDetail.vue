@@ -125,25 +125,26 @@
 <template>
   <div class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
+
       <RouterLink :to="`/user/${usernameDetails}`">
         <div class="relative inline-block">
-          <div
-            :class="[
-              'flex items-center justify-center w-16 h-16 rounded-full',
-              channelDetails?.isLive ? 'border-[3px] border-red' : '',
-            ]"
-          >
-            <img
-              :src="channelDetails ? channelDetails.avatar : avatarDetails"
-              alt="Avatar"
-              class="w-full h-full rounded-full object-cover p-[1.5px]"
-            />
-            <Live
-              v-if="channelDetails?.isLive"
-              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
-            />
-          </div></div
-      ></RouterLink>
+        <div
+          :class="[
+            'flex items-center justify-center size-16 rounded-full p-[2px] flex-shrink-0',
+            channelDetails?.isLive ? 'border-[3px] border-red' : 'border-[3px] border-transparent',
+          ]"
+        >
+          <img
+            :src="channelDetails ? channelDetails.avatar : avatarDetails"
+            alt="Avatar"
+            class="w-full h-full rounded-full object-cover"
+          />
+          <Live
+            v-if="channelDetails?.isLive"
+            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
+          />
+        </div>
+      </div></RouterLink>
       <div>
         <p class="text-[20px] flex items-center gap-x-4">
           <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>
