@@ -107,14 +107,14 @@
       <div class="relative inline-block">
         <div
           :class="[
-            'flex items-center justify-center w-16 h-16 rounded-full',
-            channelDetails?.isLive ? 'border-[3px] border-red' : '',
+            'flex items-center justify-center size-16 rounded-full p-[2px] flex-shrink-0',
+            channelDetails?.isLive ? 'border-[3px] border-red' : 'border-[3px] border-transparent',
           ]"
         >
           <img
             :src="channelDetails ? channelDetails.avatar : avatarDetails"
             alt="Avatar"
-            class="w-full h-full rounded-full object-cover p-[1.5px]"
+            class="w-full h-full rounded-full object-cover"
           />
           <Live
             v-if="channelDetails?.isLive"
@@ -163,7 +163,11 @@
       >
         Gift REPs <i class="pi pi-angle-right" />
       </div>
-      <ReportChannel v-if="hiddenReport" :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
+      <ReportChannel
+        v-if="hiddenReport"
+        :channelId="channelDetails.id"
+        :channelName="channelDetails.channelName"
+      />
     </div>
   </div>
 </template>

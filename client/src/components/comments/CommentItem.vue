@@ -183,7 +183,7 @@
       <img
         :src="comment?.userComments?.avatar"
         alt="Avatar"
-        class="size-10 object-cover rounded-full"
+        class="size-12 object-cover rounded-full"
       />
     </div>
 

@@ -178,7 +178,7 @@ const getAllLivestreamService = async (page, pageSize, level, category, sortCond
       const avgRates = await get(`channelStreamId:${livestream.streamerId}:avgRates`);
       return {
         ...livestream.toJSON(),
-        currentViews,
+        currentViews:currentViews || 0,
         avgRates,
       };
     }));
