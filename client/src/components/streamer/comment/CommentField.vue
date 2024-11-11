@@ -2,18 +2,25 @@
   import { ref, computed } from 'vue';
   import { useStreamerStore } from '@/stores';
   import { postComments } from '@/services/comment';
+  import EmojiPicker from 'vue3-emoji-picker';
+
   const streamerStore = useStreamerStore();
 
   const props = defineProps({
     comment: Object,
   });
+  const showActions = ref(false);
 
   const commentText = ref('');
 
   const handleCommentInput = (event) => {
     commentText.value = event.target.value;
+    autoResize(event.target);
   };
-
+  const addEmoji = (emoji) => {
+    commentText.value += emoji.i;
+    autoResize(document.getElementById('commentTextarea'));
+  };
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
 
   const emit = defineEmits([
@@ -21,7 +28,9 @@
     'handleSendCommentReply',
     'updateTotalRepliesCount',
   ]);
-
+  const handleFocus = () => {
+    showActions.value = true;
+  };
   //   HANDLE CANCEL
   const handleCancel = () => {
     commentText.value = '';
@@ -49,6 +58,10 @@
       console.error('Error posting comment:', error);
     }
   };
+  const autoResize = (textarea) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
+  };
 </script>
 
 <template>
@@ -60,16 +73,31 @@
         class="size-10 rounded-full object-cover"
       />
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
-        <input
-          class="flex-grow bg-transparent focus:outline-none placeholder:text-xs placeholder:font-normal placeholder:text-black/50 w-full h-12"
-          type="text"
-          placeholder="Reply comment..."
+        <textarea
+          placeholder="Write a comment"
+          class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
+          rows="1"
+          @focus="handleFocus"
           @input="handleCommentInput"
-          @keyup.enter="handleSend"
           v-model="commentText"
+          @keydown="handleKeyDown"
         />
-        <div class="flex justify-end mt-5">
-          <div class="flex gap-x-4">
+        <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
+          <div class="relative">
+            <button
+              @click="togglePicker"
+              class="pi pi-face-smile text-xl cursor-pointer"
+              aria-label="Toggle Emoji Picker"
+            />
+            <EmojiPicker
+              :native="true"
+              v-bind:disable-skin-tones="true"
+              v-if="isPickerVisible"
+              @select="addEmoji"
+              class="absolute z-10 -mt-2 emoji-picker"
+            />
+          </div>
+          <div class="flex gap-2">
             <button
               @click="handleCancel"
               class="rounded-full text-xs text-primary font-semibold p-2"
@@ -78,11 +106,10 @@
             </button>
             <button
               @click="handleSend"
-              :disabled="!isCommentNotEmpty"
               :class="{
-                'rounded-md text-xs font-semibold px-4': true,
+                'rounded-lg text-xs font-semibold px-4': true,
                 'bg-primary text-white': isCommentNotEmpty,
-                'bg-black/10 text-black/50': !isCommentNotEmpty,
+                'bg-[rgba(0,0,0,0.05)] text-[#909090]': !isCommentNotEmpty,
               }"
             >
               Send

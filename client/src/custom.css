@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .shadow {
   box-shadow: rgba(0, 0, 0, 0.075) 0px 5px 15px;
 }
@@ -207,14 +211,12 @@ input::placeholder {
 .p-tooltip-right .p-tooltip-arrow {
   border-right-color: #39393a;
   margin-left: 5px;
-
 }
 
 .p-tooltip-top .p-tooltip-arrow {
   border-top-color: #39393a;
   margin-bottom: 5px;
 }
-
 
 .p-tooltip-bottom .p-tooltip-arrow {
   border-bottom-color: #39393a;
@@ -232,11 +234,11 @@ input::placeholder {
 }
 
 /* Custom position */
-.p-tooltip[data-position="top"] {
+.p-tooltip[data-position='top'] {
   margin-bottom: 10px;
 }
 
-.p-tooltip[data-position="bottom"] {
+.p-tooltip[data-position='bottom'] {
   margin-top: 10px;
 }
 
@@ -245,4 +247,17 @@ input::placeholder {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.fade-in {
+  animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
 }

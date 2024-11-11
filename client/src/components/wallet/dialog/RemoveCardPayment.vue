@@ -1,10 +1,13 @@
 <script setup>
   import { watch } from 'vue';
   import Dialog from 'primevue/dialog';
+import { deleteCardInfo } from '@/services/payment';
+import { toast } from 'vue3-toastify';
 
   const props = defineProps({
     isRemoveVisible: Boolean,
     title: String,
+    paymentMethodId: String,
   });
   const emit = defineEmits(['closeRemove']);
 
@@ -21,6 +24,16 @@
       else unlockScroll();
     },
   );
+
+  const handleDeleteCardInfor = async() => {
+    const res = await deleteCardInfo(props.paymentMethodId)
+    if(res && res.status === 200) {
+      toggleCloseRemove()
+      toast.success('Card removed successfully.')
+    } else {
+      toast.error('Card remove failed.')
+    }
+  }
 </script>
 <template>
   <div class="card flex justify-center">
@@ -41,7 +54,7 @@
         >
         <div class="flex items-center gap-x-4 justify-end">
           <div @click="toggleCloseRemove" class="text-base text-primary cursor-pointer">Cancel</div>
-          <div class="btn cursor-pointer">Remove</div>
+          <div @click="handleDeleteCardInfor" class="btn cursor-pointer">Remove</div>
         </div>
       </div>
     </Dialog>

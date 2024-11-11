@@ -15,6 +15,7 @@
     connectOBS: String,
     liveStatus: String,
     elapsedTime: Number,
+    metricsData: Object,
   });
 
   const emit = defineEmits(['startTimer', 'stopTimer']);

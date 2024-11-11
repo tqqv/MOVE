@@ -48,6 +48,7 @@
     </div>
   </div>
   <RemoveCardPayment
+    :paymentMethodId="card.paymentMethodId"
     title="Remove card"
     :isRemoveVisible="isRemoveVisible"
     @closeRemove="toggleCloseRemove"

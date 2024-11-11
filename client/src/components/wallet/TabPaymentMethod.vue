@@ -21,7 +21,7 @@
 
   const card = ref({})
 
-  onMounted(async() => {
+  const getCard = async() => {
     const res = await getCardInfo();
     if(res && res.status === 200){
       card.value = res.data.data;
@@ -29,6 +29,10 @@
     } else {
       console.log('Khong co data card');
     }
+  }
+
+  onMounted(async() => {
+    getCard();
   })
 </script>
 <template>

@@ -5,6 +5,7 @@ const db = require("../models/index.js");
 const { Op } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
 const { v4: uuidv4 } = require('uuid');
+const WEIGHTS = require('../models/enum/constants.js');
 const axios = require('axios');
 
 const generateUploadLink = async (fileName, fileSize) => {
@@ -114,9 +115,7 @@ const updateVideoService = async (videoId, updateData) => {
         VideoKeyword.create({ videoId, keywordId })
       );
       await Promise.all(videoKeywordPromises);
-      console.log('Keywords saved successfully');
     } catch (error) {
-      console.error('Error saving keywords:', error);
       return {
         status: 500,
         message: 'An error occurred while saving keywords',
@@ -475,6 +474,10 @@ const getVideoByVideoIdService = async (videoId) => {
     include: [
       {
         model: Channel,
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
         attributes: ['channelName', 'bio', 'avatar', 'isLive', 'popularCheck', 'facebookUrl', 'instaUrl', 'youtubeUrl',
           [
             sequelize.literal(`(
@@ -493,7 +496,7 @@ const getVideoByVideoIdService = async (videoId) => {
       {
         model: LevelWorkout,
         as: "levelWorkout",
-      },
+      }
     ]
   });
   if (!video) {
@@ -514,6 +517,18 @@ const deleteVideoService = async (videoId) => {
   const video = await Video.findOne({
     where: { id: videoId }
   });
+
+  if (!video) {
+    return {
+      status: 404,
+      message: 'Video not found',
+      data: null
+    };
+  }
+
+  const videoKeywords = await VideoKeyword.findAll({ where: { videoId } });
+  const keywordIds = videoKeywords.map(vk => vk.keywordId);
+
   return new Promise((resolve, reject) => {
     client.request({
       method: 'DELETE',
@@ -522,19 +537,63 @@ const deleteVideoService = async (videoId) => {
       if (error) {
         reject({ status: 500, message: error.message });
       } else {
-        if(!video) {
-          return {
-            status: 404,
-            message: 'Video not found',
-            data: null
-          };
+        await VideoKeyword.destroy({ where: { videoId } });
+
+        if (keywordIds.length > 0) {
+          await Keyword.destroy({ where: { id: keywordIds } });
         }
+
         await video.destroy();
-        resolve({ status: 200, message: 'Video deleted successfully', data: null });
+        resolve({ status: 200, message: 'Video and related keywords deleted successfully', data: null });
       }
     });
   });
-}
+};
+
+const deleteMultipleVideosService = async (videoIds) => {
+  const results = [];
+
+  for (const videoId of videoIds) {
+    try {
+      const video = await Video.findOne({ where: { id: videoId } });
+      if (!video) {
+        results.push({ status: 404, message: `Video ID ${videoId} not found`, data: null });
+        continue;
+      }
+
+      const videoKeywords = await VideoKeyword.findAll({ where: { videoId } });
+      const keywordIds = videoKeywords.map(vk => vk.keywordId);
+
+      await VideoKeyword.destroy({ where: { videoId } });
+
+      if (keywordIds.length > 0) {
+        await Keyword.destroy({ where: { id: keywordIds } });
+      }
+
+      await video.destroy();
+
+      results.push({ status: 200, message: `Video ID ${videoId} and related keywords deleted successfully`, data: null });
+
+      await new Promise((resolve, reject) => {
+        client.request({
+          method: 'DELETE',
+          path: `videos/${videoId}`,
+        }, (error) => {
+          if (error) {
+            reject({ status: 500, message: `Error deleting video ID ${videoId} from client: ${error.message}` });
+          } else {
+            resolve();
+          }
+        });
+      });
+
+    } catch (error) {
+      results.push({ status: 500, message: `Error processing video ID ${videoId}: ${error.message}` });
+    }
+  }
+
+  return results;
+};
 
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
@@ -1105,7 +1164,7 @@ const updateViewtime = async(userId, videoId, viewTime) => {
 
     if(checkView && checkView.viewTime < viewTime) {
       checkView.viewTime = viewTime
-      await userVideoView.save();
+      await checkView.save();
     }
 
     return {
@@ -1236,7 +1295,95 @@ const getVideoWatchAlso = async (category, level, videoId) => {
   }
 };
 
+const renewTopVideos = async () => {
+  try {
+    let topVideosList = [];
+    // SCALE - OPTIMIZE BY LIMIT NUM OF CATEGORIES HERE.
+    const categories = await Category.findAll();
+    if (!categories || categories.length === 0) {
+      return {
+        status: 404,
+        message: 'No categories found',
+        data: null
+      };
+    }
 
+    for (const category of categories) {
+      const videos = await Video.findAll({
+        where: {
+          createdAt: {
+            [Sequelize.Op.gte]: Sequelize.literal("DATE_SUB(NOW(), INTERVAL 10 DAY)"), // Video được đăng trong 2 ngày qua
+          },
+          status: "public", // Chỉ lấy video có trạng thái là public
+          categoryId: category.id // Lọc video theo category
+        },
+        attributes: {
+          include: [
+            // Tính điểm của video dựa trên các trọng số: viewCount, commentCount và totalShare
+            [
+              Sequelize.literal(`(
+              Video.viewCount * ${WEIGHTS.VIEW} +
+              ( SELECT COUNT(*) FROM comments WHERE comments.videoId = Video.id ) * ${WEIGHTS.COMMENT} +
+              Video.totalShare * ${WEIGHTS.SHARE}
+              )`), 'score'
+            ], // Điểm được tính từ các yếu tố trên
+            [
+              Sequelize.literal(`(
+                SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.videoId = Video.id
+                )`),
+                'ratings'
+            ]
+          ],
+        },
+        order: [[Sequelize.literal('score'), 'DESC']],
+        limit: 5,
+        include: [
+          {
+            model: Comment,
+            as: 'videoComment',
+            attributes: [],
+          },
+          {
+            model: Channel,
+            as: 'channel',
+            attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          },
+          {
+            model: LevelWorkout,
+            attributes: ['levelWorkout'],
+            as: "levelWorkout",
+          },
+          {
+            model: Category,
+            attributes: ['title'],
+            as: 'category',
+          }
+        ],
+      });
+
+
+      // Lưu top video của category vào mảng kết quả
+      topVideosList.push({
+        categoryName: category.title,
+        videos,
+      });
+    }
+    return {
+      status: 200,
+      message: 'Top videos fetched successfully',
+      data: topVideosList,
+    };
+  } catch (error) {
+    console.error('Error in renewTopVideos:', error);
+    return {
+      status: 500,
+      message: 'Error fetching top videos',
+      data: null,
+    };
+  }
+};
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,
@@ -1256,5 +1403,7 @@ module.exports = {
   increaseView,
   updateViewtime,
   getVideoWatchAlso,
+  deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
+  renewTopVideos
 };

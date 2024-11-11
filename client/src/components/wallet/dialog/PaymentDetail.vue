@@ -5,7 +5,7 @@
   import VisaIcon from '@components/icons/visa.vue';
   import MasterCardIcon from '@components/icons/mastercard.vue';
   import FormCardPayment from '@/components/FormCardPayment.vue';
-  import { createCardInfo } from '@/services/payment';
+  import { createCardInfo, getClientSecret } from '@/services/payment';
   import { toast } from 'vue3-toastify';
 
   const props = defineProps({
@@ -46,6 +46,17 @@
   ////// Payment with Stripeq
   const cardForm = ref(null);
 
+  const setupIntentClientSecret = async () => {
+    const res = await getClientSecret()
+    if(res) {
+      // console.log(res);
+      return res.data.data
+    } else {
+      console.error("Get Client Secret failed");
+      return;
+    }
+  }
+
   const handleSubmit = async () => {
     if (!cardForm.value || !cardForm.value.stripe) {
       console.error("cardForm or Stripe is undefined");
@@ -54,33 +65,37 @@
 
     const { cardNumber, cardName, stripe, country } = cardForm.value;
 
-    const { error, paymentMethod } = await stripe.createPaymentMethod({
-      type: 'card',
-      card: cardNumber,
-      billing_details: {
-        name: cardName,
-      },
-    });
+    const clientSecret = await setupIntentClientSecret();
+    // console.log(clientSecret);
 
-    if (error) {
+    try {
+      const confirm = await stripe.confirmCardSetup(clientSecret, {
+        payment_method: {
+          card: cardNumber,
+          billing_details: { name: cardName },
+        },
+      });
+
+      if (confirm) {
+        const data = {
+          cardName,
+          paymentMethodId: confirm.setupIntent.payment_method,
+          country: country.name,
+        };
+
+        const res = await createCardInfo(data);
+
+        if (res && res.status === 200) {
+          toast.success('Saved successfully.');
+          toggleClosePayment();
+        } else {
+          toast.error('Insert failed');
+        }
+      } else {
+        console.error("Error: Confirmation failed");
+      }
+    } catch (error) {
       console.error("Error:", error.message);
-    } else {
-      // console.log("Payment Method ID:", paymentMethod.id);
-      const data = {
-        cardNumber: paymentMethod.card.last4,
-        cardName: cardName,
-        paymentMethodId: paymentMethod.id,
-        cardType: paymentMethod.card.brand,
-        country: country.name,
-        expirationDate: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year
-      }
-      const res = await createCardInfo(data);
-      if(res) {
-        toast.success('Saved successfully.');
-        toggleClosePayment();
-      }else {
-        toast.error('Insert failed')
-      }
     }
   }
 </script>

@@ -53,7 +53,7 @@
       streamKey: streamKey.value,
       title: title.value,
       description: description.value,
-      thumbnail: thumbnail.value,
+      thumbnailUrl: thumbnail.value,
       categoryId: selectCategoryOptions.value,
       levelWorkoutsId: selectLevelWorkoutOptions.value,
     });
