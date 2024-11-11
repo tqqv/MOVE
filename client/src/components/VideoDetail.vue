@@ -8,11 +8,9 @@
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
+  import DonateModal from './DonateModal.vue';
+  import GetREPS from './getReps/GetREPS.vue';
   const props = defineProps({
-    isButtonGiftREPsVisible: {
-      type: Boolean,
-      default: false,
-    },
     isUserAction: {
       type: Boolean,
       default: false,
@@ -46,7 +44,16 @@
   const userStore = useUserStore();
   const popupStore = usePopupStore();
   const username = computed(() => userStore.user?.username);
+  const isButtonGiftVisible = ref(false);
 
+  const isGetREPsMenuOpen = ref(false);
+  const toggleGetREPsMenu = () => {
+    isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+  };
+
+  const toggleButtonGiftVisible = () => {
+    isButtonGiftVisible.value = !isButtonGiftVisible.value;
+  };
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
@@ -61,13 +68,13 @@
       });
 
       if (response.status === 200) {
-        toast.success(response.message);
+        toast.success(response.data.message);
         isFilled.value = !isFilled.value;
         emit('updateFollowers');
         userStore.loadFollowers();
       } else {
         isFilled.value = !isFilled.value;
-        toast.success(response.message);
+        toast.success(response.data.message);
         emit('updateFollowers');
         userStore.loadFollowers();
       }
@@ -90,9 +97,7 @@
   });
   watch(
     () => props.usernameDetails,
-    (newVal) => {
-      console.log('Channel details changed:', newVal);
-    },
+    (newVal) => {},
   );
   onMounted(() => {
     if (userStore.user) {
@@ -104,7 +109,9 @@
 <template>
   <div class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
-      <div class="relative inline-block">
+
+      <RouterLink :to="`/user/${usernameDetails}`">
+        <div class="relative inline-block">
         <div
           :class="[
             'flex items-center justify-center size-16 rounded-full p-[2px] flex-shrink-0',
@@ -121,7 +128,7 @@
             class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
           />
         </div>
-      </div>
+      </div></RouterLink>
       <div>
         <p class="text-[20px] flex items-center gap-x-4">
           <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>
@@ -157,11 +164,28 @@
       >
         <share class="mr-1" /> Share
       </div>
-      <div
-        v-if="username !== props.usernameDetails"
-        class="btn text-[13px] font-bold flex items-center cursor-pointer"
-      >
-        Gift REPs <i class="pi pi-angle-right" />
+      <div class="relative">
+        <div
+          @click="toggleButtonGiftVisible"
+          v-if="username !== props.usernameDetails"
+          class="btn text-[13px] font-bold flex items-center cursor-pointer"
+        >
+          Gift REPs <i class="pi pi-angle-right" />
+        </div>
+        <DonateModal
+          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          v-if="isButtonGiftVisible"
+          @toggleButtonGiftVisible="toggleButtonGiftVisible"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+        />
+        <GetREPS
+          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          v-if="isGetREPsMenuOpen"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+          @toggleBuyREPs="popupStore.toggleBuyREPs"
+          @toggleButtonGiftVisible="toggleButtonGiftVisible"
+          :isBackVisible="true"
+        />
       </div>
       <ReportChannel
         v-if="hiddenReport"

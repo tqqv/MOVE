@@ -4,6 +4,8 @@
   import { onMounted, ref, watch } from 'vue';
   import { useStreamerStore } from '@/stores';
   import { getAllCommentOfStreamer } from '@/services/comment';
+  import EmptyPage from '@/pages/EmptyPage.vue';
+
   const responsesOptions = [
     { id: 1, name: 'All responses', value: '' },
     { id: 2, name: "I haven't respond", value: 'false' },
@@ -107,6 +109,7 @@
               </th>
             </tr>
           </thead>
+
           <tbody>
             <CommentRow
               v-for="comment in comments"
@@ -118,7 +121,10 @@
         </table>
       </div>
     </div>
-    <div class="flex justify-end gap-x-12 items-center px-12 pt-3">
+    <div v-if="!comments.length" class="h-full flex justify-center items-center mt-20">
+      <EmptyPage title="No videos found" subTitle="Upload a new video to manage comments" />
+    </div>
+    <div v-else class="flex justify-end gap-x-12 items-center px-12 pt-3">
       <Filter
         :title="'Rows per page'"
         :options="pageSizeOptions"

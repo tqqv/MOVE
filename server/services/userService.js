@@ -561,7 +561,7 @@ const getProfileByUserName = async(username) => {
       },
       include: [{
         model: Channel,
-        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck',
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck','facebookUrl','youtubeUrl','instaUrl','bio',
           [
             sequelize.literal(`(
               SELECT COUNT(*)

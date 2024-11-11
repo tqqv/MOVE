@@ -157,7 +157,15 @@
           :key="userFollower.id"
           class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
         >
-          <div
+
+          <RouterLink
+            v-if="userStore.followers.length && userStore.user"
+            v-for="userFollower in userStore.followers"
+            :key="userFollower.id"
+            class="flex items-center gap-x-3 cursor-pointer"
+            :to="`/user/${userFollower.followChannel.User.username}`"
+          >
+             <div
             :class="[
               'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
               userFollower.followChannel.isLive
@@ -171,6 +179,7 @@
               class="w-full h-full rounded-full object-cover"
             />
           </div>
+          ></RouterLink>
         </div>
       </div>
     </div>
