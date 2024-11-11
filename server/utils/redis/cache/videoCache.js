@@ -170,8 +170,6 @@ const createHashmapFromDBData = async (data) => {
             videoDetailsMap[video.id] = videoData;
         });
     });
-    console.log("Tao check: ", videoDetailsMap);
-
     return videoDetailsMap;
 }
 
