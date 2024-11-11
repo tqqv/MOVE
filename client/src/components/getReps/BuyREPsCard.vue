@@ -12,25 +12,10 @@
   const getRepsStore = useGetRepsStore();
   const popupStore = usePopupStore();
 
-  // console.log(getRepsStore.selectedOption);
-
-  // const isOpenBuyREPs = ref(false);
-  // const isOpenOrder = ref(true);
-  // const isOrderSuccessful = ref(false);
-
-  // const isHaveInfo = ref(true);
-  // const isLoadPayment = ref(false);
-  // const toggleOrder = () => {
-  //   isOpenOrder.value = !isOpenOrder.value;
-  // };
-  // const toggleLoadPayment = () => {
-  //   isLoadPayment.value = !isLoadPayment.value;
-  //   isOpenBuyREPs.value = false;
-  // };
   const toggleBuyREPs = () => {
     emit('toggleBuyREPs', props.purchaseOptions);
     popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
-    emit('toogleGetREPsMenu');
+    emit('toggleGetREPsMenu');
   };
 </script>
 <template>
