@@ -73,6 +73,8 @@
     isNotiMenuOpen.value = false;
     isSearchPopupOpen.value = false;
     isGetREPsMenuOpen.value = false;
+    isCreateMenuOpen.value = false;
+    console.log('đóng nè');
   };
 
   const openLoginPopup = () => {
@@ -403,7 +405,7 @@
                 aria-labelledby="user-menu-button"
                 tabindex="-1"
               >
-                <PopupAccount :user="userStore.user" />
+                <PopupAccount :user="userStore.user" @closeAllPopups="closeAllPopups" />
               </div>
             </div>
           </template>
@@ -476,7 +478,7 @@
       </div>
     </div>
   </nav>
-  <Login v-model:visible="popupStore.showLoginPopup" />
+  <Login />
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
   <UploadVideo />
   <VideoDetail />
