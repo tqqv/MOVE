@@ -5,6 +5,8 @@
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
+  import { getAllDonationItems } from '@/services/donationItem';
+
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
@@ -45,7 +47,7 @@
   const popupStore = usePopupStore();
   const username = computed(() => userStore.user?.username);
   const isButtonGiftVisible = ref(false);
-
+  const donationItems = ref({});
   const isGetREPsMenuOpen = ref(false);
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
@@ -53,12 +55,26 @@
 
   const toggleButtonGiftVisible = () => {
     isButtonGiftVisible.value = !isButtonGiftVisible.value;
+    fetchAllDonationItems();
   };
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
   const closeMenu = () => {
     isMenuVisible.value = false;
+  };
+  const fetchAllDonationItems = async () => {
+    try {
+      const response = await getAllDonationItems();
+
+      if (response.status === 200) {
+        donationItems.value = response.data.data;
+      } else {
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching donation items:', error);
+    }
   };
 
   const followChannel = async () => {
@@ -176,6 +192,7 @@
           v-if="isButtonGiftVisible"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           @toggleGetREPsMenu="toggleGetREPsMenu"
+          :donationItems="donationItems"
         />
         <GetREPS
           class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
