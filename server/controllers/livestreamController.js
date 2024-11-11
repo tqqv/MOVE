@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService } = require("../services/livestreamService.js");
+const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService, getAllLivestreamService } = require("../services/livestreamService.js");
 
 
 const createLivestreamController = async (req, res, next) => {
@@ -30,7 +30,7 @@ const getAllLivestreamController = async (req, res, next) => {
     sortBy: req.query.sortBy || 'totalView',
     order: req.query.order || 'desc'
   };
-  const result = await getTopLivestreamService(page, pageSize, level, category, sortCondition);
+  const result = await getAllLivestreamService(page, pageSize, level, category, sortCondition);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 

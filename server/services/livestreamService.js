@@ -2,7 +2,7 @@ const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set, get } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
-const { Livestream, Donation, Rating, Channel, User, Category, LevelWorkout, Sequelize } = db;
+const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Sequelize } = db;
 
 const createLivestream = async(data) => {
   try {
@@ -81,7 +81,7 @@ const getTopLivestreamService = async (page, pageSize, level, category, sortCond
       limit: pageSize * 1,
     });
 
-    const livestreamsWithViewCount = await Promise.all(livestreams.map(async (livestream) => {
+    const livestreamsWithStats = await Promise.all(livestreams.map(async (livestream) => {
       const currentViews = await get(`channelStreamId:${livestream.streamerId}:currentViews`);
       const avgRates = await get(`channelStreamId:${livestream.streamerId}:avgRates`);
       return {
@@ -93,7 +93,7 @@ const getTopLivestreamService = async (page, pageSize, level, category, sortCond
 
     return {
       status: 200,
-      data:  livestreamsWithViewCount,
+      data:  livestreamsWithStats,
       message: 'Retrieve data success'
     };
   } catch (error) {
@@ -133,6 +133,62 @@ const getLivestreamService = async (username) => {
     return {
       status: 200,
       data: {channel, livestream},
+      message: 'Retrieve data success'
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
+const getAllLivestreamService = async (page, pageSize, level, category, sortCondition) => {
+  try {
+    const listLivestream = await Livestream.findAndCountAll({
+      attributes: ["title", "description", "thumbnailUrl", "isLive", "totalView"],
+      where: { isLive: true },
+      include: [
+        {
+          model: Channel,
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          as: 'livestreamChannel'
+        },
+        {
+          model: LevelWorkout,
+          attributes: ["levelWorkout"],
+          as: 'livestreamLevelWorkout',
+          where: level ? {levelWorkout: level} : {}
+        },
+        {
+          model: Category,
+          attributes: ["title"],
+          as: 'category',
+          where: category ? {title: category} : {}
+        }
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    const livestreamsWithStats = await Promise.all(listLivestream.rows.map(async (livestream) => {
+      const currentViews = await get(`channelStreamId:${livestream.streamerId}:currentViews`);
+      const avgRates = await get(`channelStreamId:${livestream.streamerId}:avgRates`);
+      return {
+        ...livestream.toJSON(),
+        currentViews,
+        avgRates,
+      };
+    }));
+
+    return {
+      status: 200,
+      data: {
+        livestreamsWithStats,
+        totalPages: Math.ceil(listLivestream.count/pageSize)
+      },
       message: 'Retrieve data success'
     };
   } catch (error) {
@@ -290,5 +346,6 @@ module.exports = {
   createLivestream,
   getLivestreamStatistics,
   updateLivestream,
-  getTopLivestreamService
+  getTopLivestreamService,
+  getAllLivestreamService
 }
