@@ -15,6 +15,7 @@ const ratingRouter = require("./routes/ratingRoute.js");
 const {connectSocket} = require("./services/socketService.js");
 const reportRouter = require("./routes/reportRoute.js");
 const livestreamRouter = require("./routes/livestreamRoute.js");
+const searchRouter = require("./routes/searchRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -52,6 +53,7 @@ app.use("/api/category", cateRouter);
 app.use("/api/levelWorkout", lvWorkoutRouter);
 app.use("/api/rating", ratingRouter);
 app.use("/api/livestream", livestreamRouter);
+app.use('/api/search', searchRouter)
 // init socket connection
 global._io.on('connection', connectSocket);
 app.use("/api/report", reportRouter);

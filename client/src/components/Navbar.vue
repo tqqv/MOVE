@@ -128,14 +128,16 @@
 
   // SEARCH
 
-  const handleSearch = debounce((e) => {
-    searchData.value = e.target.value;
-    if (searchData.value.trim() === '' && onFocused.value) {
-      isSearchPopupOpen.value = false;
-    } else {
-      isSearchPopupOpen.value = true;
-    }
-  }, 500);
+  // const handleSearch = debounce((e) => {
+  //   searchData.value = e.target.value;
+  //   console.log(searchData.value);
+
+  //   if (searchData.value.trim() === '' && onFocused.value) {
+  //     isSearchPopupOpen.value = false;
+  //   } else {
+  //     isSearchPopupOpen.value = true;
+  //   }
+  // }, 500);
 
   const handleFocus = () => {
     onFocused.value = true;
@@ -148,30 +150,44 @@
     onFocused.value = false;
   };
 
+  const handleSearch = (e) => {
+    searchData.value = e.target.value;
+    if (searchData.value.trim() === '' && onFocused.value) {
+      isSearchPopupOpen.value = false;
+    } else {
+      isSearchPopupOpen.value = true;
+    }
+  };
+
+  const debouncedSearch = debounce(async (newSearchData) => {
+    if (newSearchData) {
+      try {
+        const response = await searchInformation(newSearchData, 2, 0);
+        const data = response.data.data;
+        categories.value = data.categories;
+        videos.value = data.videos;
+        users.value = data.users;
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      }
+    } else {
+      categories.value = [];
+      videos.value = [];
+      users.value = [];
+    }
+  }, 500);
+
   watch(
     () => searchData.value,
-    async (newSearchData) => {
-      if (newSearchData) {
-        try {
-          const response = await searchInformation(newSearchData);
-          const data = response.data.data;
-          categories.value = data.categories;
-          videos.value = data.videos;
-          users.value = data.users;
-        } catch (error) {
-          console.error('Error fetching search results:', error);
-        }
-      } else {
-        categories.value = [];
-        videos.value = [];
-        users.value = [];
-      }
+    (newSearchData) => {
+      debouncedSearch(newSearchData);
     },
   );
 
   const performSearch = () => {
     if (searchData.value.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+      isSearchPopupOpen.value = false;
     }
   };
 
@@ -262,6 +278,7 @@
                 id="search-menu-button"
                 placeholder="Search"
                 v-model="searchData"
+                autocomplete="off"
                 @input="handleSearch"
                 @keyup.enter="performSearch"
                 @focus="handleFocus"
