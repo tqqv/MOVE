@@ -84,13 +84,13 @@
       });
 
       if (response.status === 200) {
-        toast.success(response.message);
+        toast.success(response.data.message);
         isFilled.value = !isFilled.value;
         emit('updateFollowers');
         userStore.loadFollowers();
       } else {
         isFilled.value = !isFilled.value;
-        toast.success(response.message);
+        toast.success(response.data.message);
         emit('updateFollowers');
         userStore.loadFollowers();
       }
@@ -113,9 +113,7 @@
   });
   watch(
     () => props.usernameDetails,
-    (newVal) => {
-      console.log('Channel details changed:', newVal);
-    },
+    (newVal) => {},
   );
   onMounted(() => {
     if (userStore.user) {
@@ -127,24 +125,25 @@
 <template>
   <div class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
-      <div class="relative inline-block">
-        <div
-          :class="[
-            'flex items-center justify-center w-16 h-16 rounded-full',
-            channelDetails?.isLive ? 'border-[3px] border-red' : '',
-          ]"
-        >
-          <img
-            :src="channelDetails ? channelDetails.avatar : avatarDetails"
-            alt="Avatar"
-            class="w-full h-full rounded-full object-cover p-[1.5px]"
-          />
-          <Live
-            v-if="channelDetails?.isLive"
-            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
-          />
-        </div>
-      </div>
+      <RouterLink :to="`/user/${usernameDetails}`">
+        <div class="relative inline-block">
+          <div
+            :class="[
+              'flex items-center justify-center w-16 h-16 rounded-full',
+              channelDetails?.isLive ? 'border-[3px] border-red' : '',
+            ]"
+          >
+            <img
+              :src="channelDetails ? channelDetails.avatar : avatarDetails"
+              alt="Avatar"
+              class="w-full h-full rounded-full object-cover p-[1.5px]"
+            />
+            <Live
+              v-if="channelDetails?.isLive"
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
+            />
+          </div></div
+      ></RouterLink>
       <div>
         <p class="text-[20px] flex items-center gap-x-4">
           <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>

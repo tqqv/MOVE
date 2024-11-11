@@ -154,18 +154,25 @@
           :key="userFollower.id"
           class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
         >
-          <div
-            :class="[
-              'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
-              userFollower.isStreaming ? 'border-[3px] border-red' : '',
-            ]"
+          <RouterLink
+            v-if="userStore.followers.length && userStore.user"
+            v-for="userFollower in userStore.followers"
+            :key="userFollower.id"
+            class="flex items-center gap-x-3 cursor-pointer"
+            :to="`/user/${userFollower.followChannel.User.username}`"
           >
-            <img
-              :src="userFollower.followChannel?.avatar"
-              alt="Avatar"
-              class="w-full h-full rounded-full object-cover"
-            />
-          </div>
+            <div
+              :class="[
+                'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
+                userFollower.isStreaming ? 'border-[3px] border-red' : '',
+              ]"
+            >
+              <img
+                :src="userFollower.followChannel?.avatar"
+                alt="Avatar"
+                class="w-full h-full rounded-full object-cover"
+              /></div
+          ></RouterLink>
         </div>
       </div>
     </div>
