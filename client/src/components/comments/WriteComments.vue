@@ -34,6 +34,7 @@
       required: true,
     },
     replyToUsername: String,
+    isCommentable: Boolean,
   });
 
   const parentId = ref(props.commentId || null);
@@ -137,10 +138,15 @@
   <div class="space-y-6">
     <!-- WRITE COMMENTS -->
     <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full py-2">
-      <div class="flex-shrink-0">
-        <img v-if="avatar" :src="avatar" class="size-12 rounded-full object-cover" />
+      <div :class="['flex-shrink-0', !isCommentable ? 'opacity-50 pointer-events-none' : '']">
+        <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
-      <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
+      <div
+        :class="[
+          'flex-grow px-4 py-2 rounded-md bg-gray-dark/25',
+          !isCommentable ? 'opacity-50 pointer-events-none' : '',
+        ]"
+      >
         <textarea
           placeholder="Write a comment"
           class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"

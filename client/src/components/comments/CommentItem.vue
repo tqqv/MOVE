@@ -37,8 +37,6 @@
       required: true,
     },
   });
-  const userStore = useUserStore();
-  const popupStore = usePopupStore();
 
   const emit = defineEmits(['fetchComments']);
 
@@ -224,7 +222,7 @@
       <img
         :src="comment?.userComments?.avatar"
         alt="Avatar"
-        class="size-12 object-cover rounded-full"
+        class="size-10 object-cover rounded-full"
       />
     </div>
 

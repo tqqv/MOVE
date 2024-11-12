@@ -31,6 +31,7 @@
   const levelworkoutsId = ref(null);
   const usernameDetails = ref(null);
   const videos = ref([]);
+  const isCommentable = ref(null);
   let playerInstance = null;
   const isLoading = ref(true);
   let actualWatchTime = 0;
@@ -69,6 +70,7 @@
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
+        isCommentable.value = res.data.data.isCommentable;
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -209,7 +211,7 @@
           </TabPanels>
         </Tabs>
         <Divider />
-        <CommentPage :videoId="videoId" />
+        <CommentPage :videoId="videoId" :isCommentable="isCommentable" />
       </div>
     </div>
     <div class="col-span-12 lg:col-span-4">
