@@ -1,7 +1,10 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
+import { useTabStore } from '@/stores';
 
 export const usePopupStore = defineStore('popup', () => {
+  const showGetREPsMenuOpen = ref(false);
+
   const showLoginPopup = ref(false);
   const showSignupPopup = ref(false);
   const showForgotPasswordPopup = ref(false);
@@ -14,6 +17,11 @@ export const usePopupStore = defineStore('popup', () => {
   const showReportSuccess = ref(false);
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
+
+  const toggleGetREPsMenuOpen = () => {
+    showGetREPsMenuOpen.value = !showGetREPsMenuOpen.value;
+  };
+  const tabStore = useTabStore();
 
   const toggleLoadingPayment = () => {
     showLoadingPayment.value = !showLoadingPayment.value;
@@ -46,14 +54,13 @@ export const usePopupStore = defineStore('popup', () => {
     showUploadVideoPopup.value = false;
   };
 
-  const openSignupPopup = () => {
-    showSignupPopup.value = true;
-  };
-
   const openLoginPopup = () => {
     showLoginPopup.value = true;
+    // tabStore.setActiveTab('0');
   };
-
+  const openSignupPopup = () => {
+    showLoginPopup.value = true;
+  };
   const closeLoginPopup = () => {
     showLoginPopup.value = false;
   };
@@ -110,6 +117,7 @@ export const usePopupStore = defineStore('popup', () => {
     showReportChannel,
     showReportSuccess,
     openLoginPopup,
+    openSignupPopup,
     closeLoginPopup,
     openForgotPasswordPopup,
     closeForgotPasswordPopup,
@@ -131,5 +139,7 @@ export const usePopupStore = defineStore('popup', () => {
     toggleBuyREPs,
     showLoadingPayment,
     toggleLoadingPayment,
+    toggleGetREPsMenuOpen,
+    showGetREPsMenuOpen,
   };
 });

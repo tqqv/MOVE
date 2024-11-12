@@ -1,5 +1,5 @@
 <script setup>
-  import StatsCard from './StatsCard.vue';
+  import StatsCard from '@components/streamer/analytics/StatsCard.vue';
   import rate from '@components/icons/rate.vue';
 
   const overviewStats = [
@@ -73,7 +73,7 @@
             <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
             <span class="text-[16px] font-bold">Lorem ipsum dolor sit amet, consetetur…</span>
           </div>
-          <div>
+          <div class="space-y-2">
             <div class="flex justify-between">
               <span class="text-base">Total views</span>
               <span class="text-base font-bold">15,519</span>

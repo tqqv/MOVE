@@ -890,6 +890,7 @@ const getStateByCountryAndVideoIdFromIp = async(videoId, country, days) => {
   try {
     const whereCondition = {
       videoId,
+      country
     };
 
     if (days) {
@@ -902,17 +903,17 @@ const getStateByCountryAndVideoIdFromIp = async(videoId, country, days) => {
       where: whereCondition,
 
       attributes: [
-        'state',
-        [Sequelize.fn('COUNT', Sequelize.col('state')), 'viewerCount']
+        'city',
+        [Sequelize.fn('COUNT', Sequelize.col('city')), 'viewerCount']
       ],
-      group: ['state'],
+      group: ['city'],
       raw: true
     });
 
     return {
       status: 200,
       data: stateData,
-      message: `Get list state of ${country} successfully.`
+      message: `Get list city of ${country} successfully.`
     }
   } catch (error) {
     console.log(error)
