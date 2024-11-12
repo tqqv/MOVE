@@ -28,6 +28,7 @@ import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InD
 import WalletContent from '@/components/wallet/WalletContent.vue';
 import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
 import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
+import Following from '@/pages/Following.vue';
 
 const routes = [
   // User router
@@ -61,6 +62,7 @@ const routes = [
         ],
       },
       { path: 'search', component: SearchContent },
+      { path: 'following', component: Following },
       { path: 'video/:videoId', component: VideoDetails },
       { path: 'browse/categories/:category', component: CategoryDetailsContent },
     ],
