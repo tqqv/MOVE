@@ -4,8 +4,10 @@
   import PaymentDetail from '@components/wallet/dialog/PaymentDetail.vue';
   import { useContryStore } from '@/stores';
   import { getCardInfo } from '@/services/payment';
+import { useCardStore } from '@/stores/card.store';
 
   const countryStore = useContryStore();
+  const cardStore = useCardStore();
 
   const isDisplay = ref(false);
   let hasFetchedCountries = false;
@@ -19,21 +21,10 @@
     }
   };
 
-  const card = ref({})
-
-  const getCard = async() => {
-    const res = await getCardInfo();
-    if(res && res.status === 200){
-      card.value = res.data.data;
-      isDisplay.value = !isDisplay.value
-    } else {
-      console.log('Khong co data card');
-    }
-  }
-
   onMounted(async() => {
-    getCard();
+    cardStore.fetchCard();
   })
+
 </script>
 <template>
   <div class="space-y-2">
@@ -41,8 +32,7 @@
 
     <!-- Card -->
     <CardPayment
-      v-if="isDisplay"
-      :card="card"
+      v-if="cardStore.card?.cardOwnerName"
       @toggleOpenPaymentDetails="toggleOpenPaymentDetails"
     />
 

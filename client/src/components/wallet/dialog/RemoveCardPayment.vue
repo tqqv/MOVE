@@ -3,13 +3,14 @@
   import Dialog from 'primevue/dialog';
 import { deleteCardInfo } from '@/services/payment';
 import { toast } from 'vue3-toastify';
+import { useCardStore } from '@/stores/card.store';
 
   const props = defineProps({
     isRemoveVisible: Boolean,
     title: String,
-    paymentMethodId: String,
   });
   const emit = defineEmits(['closeRemove']);
+  const cardStore = useCardStore();
 
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');
@@ -26,9 +27,10 @@ import { toast } from 'vue3-toastify';
   );
 
   const handleDeleteCardInfor = async() => {
-    const res = await deleteCardInfo(props.paymentMethodId)
+    const res = await deleteCardInfo(cardStore.card.paymentMethodId)
     if(res && res.status === 200) {
       toggleCloseRemove()
+      cardStore.clearCard()
       toast.success('Card removed successfully.')
     } else {
       toast.error('Card remove failed.')

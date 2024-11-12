@@ -24,7 +24,8 @@
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
   import GoLive from './icons/goLive.vue';
-  import { useTabStore } from '@/stores/tab.store';
+  import { useTabStore } from '@/stores/tab.store';  import { useGetRepsStore } from '@/stores/getReps.store';
+
   import GetREPS from './getReps/GetREPS.vue';
   import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
   import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
@@ -33,6 +34,7 @@
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
+  const getRepsStore = useGetRepsStore();
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
@@ -49,7 +51,6 @@
   const users = ref([]);
   // SEARCH
 
-  const isHaveInfo = ref(true);
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -67,6 +68,9 @@
   };
   const toogleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+    if(!getRepsStore.purchaseOptions.length > 0){
+      getRepsStore.getRepPackages()
+    }
   };
   const closeAllPopups = () => {
     isUserMenuOpen.value = false;
@@ -331,11 +335,20 @@
           <template v-else>
             <div v-if="userStore.user?.role == 'user'" class="relative">
               <div
+                v-if="userStore.user?.REPs === 0"
                 @click="toogleGetREPsMenu"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
                 Get REP$
+              </div>
+              <div
+                v-else
+                @click="toogleGetREPsMenu"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
+                id="reps-menu-button"
+              >
+                {{ userStore.user?.REPs }} REP$
               </div>
               <div
                 id="reps-menu"
@@ -482,7 +495,7 @@
   <VideoDetail />
   <!-- POPUP GET REPS -->
   <CompletePurchaseNoInfo
-    v-if="!isHaveInfo"
+    v-if="!popupStore.isHaveCard"
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
   />

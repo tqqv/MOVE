@@ -36,4 +36,29 @@ const deleteCardInfo = async (data) => {
   }
 };
 
-export { createCardInfo, getCardInfo, getClientSecret, deleteCardInfo };
+const getListRepPackage = async () => {
+  try {
+    const response = await axios.get('/repPackage/');
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const checkout = async (data) => {
+  try {
+    const response = await axios.post('/payment/checkout', data);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  createCardInfo,
+  getCardInfo,
+  getClientSecret,
+  deleteCardInfo,
+  getListRepPackage,
+  checkout,
+};

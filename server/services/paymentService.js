@@ -1,19 +1,6 @@
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const db = require("../models/index.js");
-const { CardPaymentInfor, User } = db;
-
-const createStripeCustomerId = async(name, email) => {
-  try {
-    const customer = await stripe.customers.create({
-      name: name,  // Tên người dùng
-      email: email, // Email của người dùng
-    });
-
-    return customer.id
-  } catch (error) {
-    return error.message
-  }
-}
+const { createStripeCustomerId, createStripeSetupIntent, retrievePaymentMethod, createStripePaymentIntent, detachPaymentMethod } = require("./stripeService.js");
+const { CardPaymentInfor, User, RepPackage, Payment } = db;
 
 const createSetupIntent = async (userId) => {
   try {
@@ -27,9 +14,7 @@ const createSetupIntent = async (userId) => {
     }
 
     // Tạo SetupIntent với customerId của user
-    const setupIntent = await stripe.setupIntents.create({
-      customer: user.stripeCustomerId,
-    });
+    const setupIntent = await createStripeSetupIntent(user.stripeCustomerId)
 
     return {
       status: 200,
@@ -47,7 +32,7 @@ const createSetupIntent = async (userId) => {
 
 const createCardInfor = async(userId, cardName, paymentMethodId, country) => {
   try {
-    const paymentMethod = await stripe.paymentMethods.retrieve(paymentMethodId)
+    const paymentMethod = await retrievePaymentMethod(paymentMethodId)
 
     await CardPaymentInfor.create({
       userId: userId,
@@ -101,31 +86,63 @@ const getCardInfoByUserId = async(userId) => {
   }
 }
 
-const createPayment = async() => {
+const createPayment = async(userId, paymentMethodId, repPackageId) => {
   try {
-    const session = await stripe.checkout.sessions.create({
-      success_url: `${process.env.CLIENT_HOST}/success`,
-      cancel_url: `${process.env.CLIENT_HOST}`,
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data:{
-              name: '100 REPS'
-            },
-            unit_amount: 50*2
-          },
-          quantity: 2,
-        },
-      ],
-      mode: 'payment',
-    });
-
-    console.log(session.url);
-
-    return {
-      url: session.url
+    if(!paymentMethodId && !repPackageId) {
+      return {
+        status: 404,
+        message: "Not null"
+      }
     }
+
+    const user = await User.findOne({
+      where: {
+        id: userId
+      }
+    })
+
+    const repPackage = await RepPackage.findOne({
+      where: {
+        id: repPackageId
+      }
+    })
+
+    const paymentIntent = await createStripePaymentIntent(user.stripeCustomerId, paymentMethodId, repPackage.amount)
+
+    if (paymentIntent.status === 'succeeded') {
+      await Payment.create({
+        userId: userId,
+        repPackageId: repPackageId,
+        paymentMethodId: paymentMethodId,
+        paymentIntentId: paymentIntent.id,
+        paymentStatus: "completed",
+        amount: repPackage.amount,
+        rep: repPackage.rep,
+      })
+
+      user.REPs += repPackage.rep;
+      await user.save();
+
+      return {
+        status: 200,
+        message: 'Payment successfully.'
+      }
+    } else {
+      await Payment.create({
+        userId: userId,
+        repPackageId: repPackageId,
+        paymentMethodId: paymentMethodId,
+        paymentIntentId: paymentIntent.id,
+        amount: repPackage.amount,
+        rep: repPackage.rep,
+      })
+
+      return {
+        status: 200,
+        message: `Your bill status is: ${paymentIntent.status}`
+      }
+    }
+
   } catch (error) {
     console.log(error);
     return {
@@ -138,7 +155,7 @@ const createPayment = async() => {
 
 const deleteCardInfo = async(userId, paymentMethodId) => {
   try {
-    await stripe.paymentMethods.detach(paymentMethodId);
+    await detachPaymentMethod(paymentMethodId)
 
     await CardPaymentInfor.destroy({
       where: {

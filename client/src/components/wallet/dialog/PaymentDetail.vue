@@ -7,12 +7,15 @@
   import FormCardPayment from '@/components/FormCardPayment.vue';
   import { createCardInfo, getClientSecret } from '@/services/payment';
   import { toast } from 'vue3-toastify';
+import { useCardStore } from '@/stores/card.store';
 
   const props = defineProps({
     isPaymentDetailsVisible: Boolean,
     title: String,
   });
   const countries = ref([]);
+
+  const cardStore = useCardStore();
 
   const emit = defineEmits(['closePayment']);
 
@@ -86,6 +89,7 @@
         const res = await createCardInfo(data);
 
         if (res && res.status === 200) {
+          cardStore.fetchCard()
           toast.success('Saved successfully.');
           toggleClosePayment();
         } else {

@@ -6,7 +6,7 @@ const paymentRouter = express.Router();
 paymentRouter.get('/getClientSecret', verifyUser, createSetupIntentController);
 paymentRouter.get('/getCardInfor', verifyUser, getCardInfoByUserIdController);
 
-paymentRouter.post('/checkout', createPaymentController);
+paymentRouter.post('/checkout', verifyUser, createPaymentController);
 paymentRouter.post('/createCardInfor', verifyUser, createCardInforController);
 
 paymentRouter.delete('/:paymentMethodId', verifyUser, deleteCardInfoController);

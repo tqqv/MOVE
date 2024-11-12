@@ -2,9 +2,13 @@ const responseHandler = require("../middlewares/responseHandler");
 const { createPayment, createCardInfor, getCardInfoByUserId, createSetupIntent, deleteCardInfo } = require("../services/paymentService");
 
 const createPaymentController = async(req, res, next) => {
-  const result = await createPayment();
+  const userId  = req.user.id;
+  const paymentMethodId = req.body.paymentMethodId;
+  const repPackageId = req.body.repPackageId;
 
-  res.send(result)
+  const result = await createPayment(userId, paymentMethodId, repPackageId);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
 }
 
 const createCardInforController = async(req, res, next) => {
