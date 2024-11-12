@@ -1,6 +1,6 @@
 const db = require("../models/index.js");
 const { createStripeCustomerId, createStripeSetupIntent, retrievePaymentMethod, createStripePaymentIntent, detachPaymentMethod } = require("./stripeService.js");
-const { CardPaymentInfor, User, RepPackage, Payment } = db;
+const { PaymentCardInfor, User, RepPackage, Payment } = db;
 
 const createSetupIntent = async (userId) => {
   try {
@@ -34,7 +34,7 @@ const createCardInfor = async(userId, cardName, paymentMethodId, country) => {
   try {
     const paymentMethod = await retrievePaymentMethod(paymentMethodId)
 
-    await CardPaymentInfor.create({
+    await PaymentCardInfor.create({
       userId: userId,
       cardNumber: paymentMethod.card.last4,
       cardOwnerName: cardName,
@@ -58,7 +58,7 @@ const createCardInfor = async(userId, cardName, paymentMethodId, country) => {
 
 const getCardInfoByUserId = async(userId) => {
   try {
-    const card = await CardPaymentInfor.findOne({
+    const card = await PaymentCardInfor.findOne({
       where: {
         userId: userId
       },
@@ -157,7 +157,7 @@ const deleteCardInfo = async(userId, paymentMethodId) => {
   try {
     await detachPaymentMethod(paymentMethodId)
 
-    await CardPaymentInfor.destroy({
+    await PaymentCardInfor.destroy({
       where: {
         userId: userId,
         paymentMethodId: paymentMethodId

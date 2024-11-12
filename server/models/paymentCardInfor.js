@@ -2,12 +2,12 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class CardPaymentInfor extends Model {
+  class PaymentCardInfor extends Model {
     static associate(models) {
         this.belongsTo(models.User);
     }
   }
-  CardPaymentInfor.init(
+  PaymentCardInfor.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -52,9 +52,9 @@ module.exports = (sequelize, DataTypes) => {
     },
     {
       sequelize,
-      modelName: "CardPaymentInfor",
+      modelName: "PaymentCardInfor",
       tableName: "paymentCardInfors",
       timestamps: true,
   });
-  return CardPaymentInfor;
+  return PaymentCardInfor;
 };
