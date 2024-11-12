@@ -5,6 +5,6 @@ const featuredContentRouter = express.Router();
 
 
 featuredContentRouter.get('/', getAllFeatureContentController);
-featuredContentRouter.post('/', createFeatureContentController);
+featuredContentRouter.post('/', verifyAdmin, createFeatureContentController);
 
 module.exports = featuredContentRouter;
