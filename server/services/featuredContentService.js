@@ -77,7 +77,7 @@ const getAllFeatureContentService = async (page, pageSize) => {
         {
           model: Video,
           as: 'video',
-          attributes: ['title', 'description', 'videoUrl', 'thumbnailUrl', 'viewCount',
+          attributes: ['title', 'description', 'videoUrl', 'thumbnailUrl', 'viewCount', 'duration',
             [
               sequelize.literal(`(
                 SELECT AVG(rating)

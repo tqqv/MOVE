@@ -152,21 +152,13 @@
       </RouterLink>
       <div class="flex flex-col gap-y-2 my-2 items-center">
         <RouterLink
+          v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
-          v-tooltip="userFollower.followChannel.channelName"
           :key="userFollower.id"
-          class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
+          class="flex items-center gap-x-3 cursor-pointer"
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
-
-          <RouterLink
-            v-if="userStore.followers.length && userStore.user"
-            v-for="userFollower in userStore.followers"
-            :key="userFollower.id"
-            class="flex items-center gap-x-3 cursor-pointer"
-            :to="`/user/${userFollower.followChannel.User.username}`"
-          >
-             <div
+          <div
             :class="[
               'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
               userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
