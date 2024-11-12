@@ -1,6 +1,6 @@
 const { Op, where } = require("sequelize");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize, LevelWorkout } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 const { updateStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 
@@ -486,14 +486,20 @@ const getAllInforFollow = async(userId) => {
       where: {
         channelId: {
           [Op.in]: listChannelId
-        }
+        },
+        status: 'public',
       },
       include: [{
         model: Channel,
         as: 'channel',
         attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+      },
+      {
+        model: LevelWorkout,
+        as: 'levelWorkout', 
+        attributes: ['levelWorkout'] 
       }],
-      limit: 6,
+      limit: 8,
       order: [['createdAt', 'DESC']]
     });
 
@@ -501,14 +507,24 @@ const getAllInforFollow = async(userId) => {
       where: {
         userId: userId
       },
-      include: [{
-        model: Category,
-        as: 'category',
-        attributes: ['title', 'imgUrl'],
-      }],
-      limit: 4,
+      include: [
+        {
+          model: Category,
+          as: 'category',
+          attributes: [
+            'id', 
+            'title', 
+            'imgUrl',
+            [sequelize.literal(`(
+              SELECT SUM(viewCount) 
+              FROM videos 
+              WHERE videos.categoryId = category.id
+            )`), 'totalViews']
+          ]
+        }
+      ],
       order: [['createdAt', 'DESC']]
-    })
+    });
 
     if(!videos && !cate) {
       return {
