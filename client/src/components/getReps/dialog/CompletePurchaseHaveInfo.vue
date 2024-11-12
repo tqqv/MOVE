@@ -19,7 +19,7 @@ import { toast } from 'vue3-toastify';
   const userStore = useUserStore();
 
 
-  const emit = defineEmits(['toogleGetREPsMenu', 'toggleLoadPayment']);
+  const emit = defineEmits(['toggleGetREPsMenu', 'toggleLoadPayment']);
   const chooseCard = ref(false);
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');

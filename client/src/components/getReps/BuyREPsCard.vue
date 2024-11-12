@@ -47,7 +47,7 @@
 
     emit('toggleBuyREPs', props.purchaseOptions);
     popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
-    emit('toogleGetREPsMenu');
+    emit('toggleGetREPsMenu');
   };
 </script>
 <template>

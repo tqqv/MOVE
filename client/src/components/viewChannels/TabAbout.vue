@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, watch } from 'vue';
   import FacebookIcon from '@/components/icons/facebookIcon.vue';
   import YoutubeIcon from '@/components/icons/youtubeIcon.vue';
   import InstagramIcon from '@/components/icons/instagramIcon.vue';
@@ -14,7 +14,19 @@
     followChannelDetails: {
       type: Object,
     },
+    usernameDetails: {
+      type: String,
+    },
   });
+  // const emit = defineEmits(['handleResetActiveTab']);
+  // console.log('fl', props.followChannelDetails);
+
+  // watch(
+  //   () => props.followChannelDetails,
+  //   () => {
+  //     emit('handleResetActiveTab', '0');
+  //   },
+  // );
 </script>
 <template>
   <div class="space-y-8">
@@ -60,7 +72,7 @@
         <div v-else class="text-sm italic">No social network found.</div>
       </div>
     </div>
-    <div v-if="followChannelDetails" class="space-y-8">
+    <div v-if="followChannelDetails && followChannelDetails.length" class="space-y-8">
       <div class="text-2xl font-bold text-black">{{ channelDetails.channelName }} is following</div>
       <div class="grid grid-cols-4 gap-4">
         <div
@@ -68,24 +80,25 @@
           :key="index"
           class="flex flex-col items-center space-y-4"
         >
-          <div class="relative inline-block">
-            <div
-              :class="[
-                'flex items-center justify-center w-16 h-16 rounded-full',
-                item.isLive ? 'border-[3px] border-red' : '',
-              ]"
-            >
-              <img
-                :src="item.avatar"
-                alt="Avatar"
-                class="w-full h-full rounded-full object-cover p-[1.5px]"
-              />
-              <Live
-                v-if="item.isLive"
-                class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
-              />
-            </div>
-          </div>
+          <RouterLink :to="`/user/${item.User.username}`">
+            <div class="relative inline-block">
+              <div
+                :class="[
+                  'flex items-center justify-center w-16 h-16 rounded-full',
+                  item.isLive ? 'border-[3px] border-red' : '',
+                ]"
+              >
+                <img
+                  :src="item.avatar"
+                  alt="Avatar"
+                  class="w-full h-full rounded-full object-cover p-[1.5px]"
+                />
+                <Live
+                  v-if="item.isLive"
+                  class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
+                />
+              </div></div
+          ></RouterLink>
           <div class="flex flex-col items-center text-center">
             <p class="text-[20px] flex items-center justify-center">
               {{ item.channelName }}

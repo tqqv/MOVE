@@ -63,10 +63,10 @@
     isCreateMenuOpen.value = !isCreateMenuOpen.value;
   };
 
-  const toogleNotiMenu = () => {
+  const toggleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
-  const toogleGetREPsMenu = () => {
+  const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
     if(!getRepsStore.purchaseOptions.length > 0){
       getRepsStore.getRepPackages()
@@ -77,6 +77,8 @@
     isNotiMenuOpen.value = false;
     isSearchPopupOpen.value = false;
     isGetREPsMenuOpen.value = false;
+    isCreateMenuOpen.value = false;
+    console.log('đóng nè');
   };
 
   const openLoginPopup = () => {
@@ -132,14 +134,16 @@
 
   // SEARCH
 
-  const handleSearch = debounce((e) => {
-    searchData.value = e.target.value;
-    if (searchData.value.trim() === '' && onFocused.value) {
-      isSearchPopupOpen.value = false;
-    } else {
-      isSearchPopupOpen.value = true;
-    }
-  }, 500);
+  // const handleSearch = debounce((e) => {
+  //   searchData.value = e.target.value;
+  //   console.log(searchData.value);
+
+  //   if (searchData.value.trim() === '' && onFocused.value) {
+  //     isSearchPopupOpen.value = false;
+  //   } else {
+  //     isSearchPopupOpen.value = true;
+  //   }
+  // }, 500);
 
   const handleFocus = () => {
     onFocused.value = true;
@@ -152,30 +156,44 @@
     onFocused.value = false;
   };
 
+  const handleSearch = (e) => {
+    searchData.value = e.target.value;
+    if (searchData.value.trim() === '' && onFocused.value) {
+      isSearchPopupOpen.value = false;
+    } else {
+      isSearchPopupOpen.value = true;
+    }
+  };
+
+  const debouncedSearch = debounce(async (newSearchData) => {
+    if (newSearchData) {
+      try {
+        const response = await searchInformation(newSearchData, 2, 0);
+        const data = response.data.data;
+        categories.value = data.categories;
+        videos.value = data.videos;
+        users.value = data.users;
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      }
+    } else {
+      categories.value = [];
+      videos.value = [];
+      users.value = [];
+    }
+  }, 500);
+
   watch(
     () => searchData.value,
-    async (newSearchData) => {
-      if (newSearchData) {
-        try {
-          const response = await searchInformation(newSearchData);
-          const data = response.data.data;
-          categories.value = data.categories;
-          videos.value = data.videos;
-          users.value = data.users;
-        } catch (error) {
-          console.error('Error fetching search results:', error);
-        }
-      } else {
-        categories.value = [];
-        videos.value = [];
-        users.value = [];
-      }
+    (newSearchData) => {
+      debouncedSearch(newSearchData);
     },
   );
 
   const performSearch = () => {
     if (searchData.value.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+      isSearchPopupOpen.value = false;
     }
   };
 
@@ -191,7 +209,7 @@
   });
 </script>
 <template>
-  <nav class="bg-black text-white fixed w-full z-[100]">
+  <nav class="bg-[#18181b] text-white fixed w-full z-[100]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <!-- Mobile menu button-->
@@ -266,6 +284,7 @@
                 id="search-menu-button"
                 placeholder="Search"
                 v-model="searchData"
+                autocomplete="off"
                 @input="handleSearch"
                 @keyup.enter="performSearch"
                 @focus="handleFocus"
@@ -359,8 +378,9 @@
                 tabindex="-1"
               >
                 <GetREPS
+                  :isBackVisible="false"
                   v-if="isGetREPsMenuOpen"
-                  @toogleGetREPsMenu="toogleGetREPsMenu"
+                  @toggleGetREPsMenu="toggleGetREPsMenu"
                   @toggleBuyREPs="popupStore.toggleBuyREPs"
                 />
               </div>
@@ -373,7 +393,7 @@
                 class="inline-flex cursor-pointer"
                 size="small"
                 id="noti-menu-button"
-                @click="toogleNotiMenu"
+                @click="toggleNotiMenu"
               >
                 <notification fill="fill-white" class="scale-110" />
               </OverlayBadge>
@@ -386,7 +406,7 @@
                 aria-labelledby="noti-menu-button"
                 tabindex="-1"
               >
-                <Notification @toogleNotiMenu="toogleNotiMenu" />
+                <Notification @toggleNotiMenu="toggleNotiMenu" />
               </div>
             </div>
             <div class="relative">
@@ -416,7 +436,7 @@
                 aria-labelledby="user-menu-button"
                 tabindex="-1"
               >
-                <PopupAccount :user="userStore.user" />
+                <PopupAccount :user="userStore.user" @closeAllPopups="closeAllPopups" />
               </div>
             </div>
           </template>
@@ -489,7 +509,7 @@
       </div>
     </div>
   </nav>
-  <Login v-model:visible="popupStore.showLoginPopup" />
+  <Login />
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
   <UploadVideo />
   <VideoDetail />

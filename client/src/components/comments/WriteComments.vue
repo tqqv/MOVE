@@ -5,12 +5,14 @@
   import { useUserStore } from '@/stores';
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
+  import { useTabStore } from '@/stores';
 
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
   const userStore = useUserStore();
   const popupStore = usePopupStore();
+  const tabStore = useTabStore();
 
   const avatar = computed(
     () => userStore.user?.avatar || 'https://img.upanh.tv/2024/06/18/user-avatar.png',
@@ -59,6 +61,7 @@
   const handleSend = async () => {
     if (!userStore.user) {
       openLoginPopup();
+
       return;
     }
     const data = { content: commentText.value, parentId: parentId.value };
@@ -135,7 +138,7 @@
     <!-- WRITE COMMENTS -->
     <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full py-2">
       <div class="flex-shrink-0">
-        <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
+        <img v-if="avatar" :src="avatar" class="size-12 rounded-full object-cover" />
       </div>
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
         <textarea

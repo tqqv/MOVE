@@ -31,8 +31,8 @@ module.exports = {
   },
 
   async down (queryInterface, Sequelize) {
+    await queryInterface.removeColumn('payments', 'paymentIntentId');
     await queryInterface.removeColumn('payments', 'paymentMethodId');
-    await queryInterface.removeColumn('payments', 'paymentMethodId');
-    await queryInterface.removeColumn('payments', 'paymentMethodId');
+    await queryInterface.removeColumn('payments', 'repPackageId');
   }
 };
