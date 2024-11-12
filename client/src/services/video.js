@@ -51,6 +51,16 @@ const getStateByCountry = async (videoId, country) => {
     return { error: true, message: error.message };
   }
 };
+const getStateFromIP = async (videoId, country, days) => {
+  try {
+    const response = await axios.get(`/video/getStateFromIP/${videoId}`, {
+      params: { country, days },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 const getAllCategory = async () => {
   try {
     const response = await axios.get('/category');
@@ -112,4 +122,5 @@ export {
   getVideoById,
   getVideoAnalyticsById,
   getStateByCountry,
+  getStateFromIP,
 };

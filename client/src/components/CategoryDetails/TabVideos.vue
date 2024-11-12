@@ -1,7 +1,11 @@
 <script setup>
   import { getMostViewOfVideo } from '@/services/browse';
   import VideoListFilter from './VideoListFilter.vue';
-
+  const props = defineProps({
+    categoryTitle: {
+      type: String,
+    },
+  });
   const sortByOptions = [
     { id: 1, name: 'Most recent', sortBy: '', order: '' },
     { id: 2, name: 'Views (High to Low)', sortBy: 'viewCount', order: 'desc' },

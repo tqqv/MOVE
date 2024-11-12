@@ -33,8 +33,12 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
-        paymentMethod: {
-            type: DataTypes.ENUM('creditCard', 'debitCard', 'onlineBanking', 'other'),
+        paymentMethodId: {
+            type: DataTypes.STRING,
+            allowNull: false,
+        },
+        paymentIntentId: {
+            type: DataTypes.STRING,
             allowNull: false,
         },
         paymentStatus: {
@@ -42,9 +46,15 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             defaultValue: 'pending'
         },
-        paymentAction: {
-            type: DataTypes.ENUM('payIn', 'withdraw'),
-            allowNull: false,
+        repPackageId: {
+            type: DataTypes.UUID,
+            allowNull: true,
+            references: {
+                model: 'repPackages',
+                key: 'id'
+            },
+            onUpdate: 'CASCADE',
+            onDelete: 'CASCADE',
         },
     },
     {

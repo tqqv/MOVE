@@ -30,6 +30,16 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE', // Xóa follow khi user bị xóa
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
+      commentId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'comments',
+          key: 'id',
+        },
+        onDelete: 'CASCADE', // Xóa follow khi user bị xóa
+        onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
+      },
       livestreamId: {
         type: DataTypes.UUID,
         allowNull: true,

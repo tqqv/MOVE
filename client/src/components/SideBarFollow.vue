@@ -81,8 +81,10 @@
         >
           <div
             :class="[
-              'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
-              userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
+              'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
+              userFollower.followChannel.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
             ]"
           >
             <img
@@ -91,6 +93,7 @@
               class="size-11 rounded-full object-cover p-[1.5px]"
             />
           </div>
+
           <div class="flex flex-col gap-y-1 truncate">
             <div class="flex flex-row gap-x-3">
               <p class="text_para truncate">
@@ -155,7 +158,15 @@
           class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
-          <div
+
+          <RouterLink
+            v-if="userStore.followers.length && userStore.user"
+            v-for="userFollower in userStore.followers"
+            :key="userFollower.id"
+            class="flex items-center gap-x-3 cursor-pointer"
+            :to="`/user/${userFollower.followChannel.User.username}`"
+          >
+             <div
             :class="[
               'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
               userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
