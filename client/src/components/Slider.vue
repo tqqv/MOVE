@@ -62,13 +62,13 @@
               </div>
               <div class="flex items-center space-x-4">
                 <div class="relative inline-block">
-                  <div class="flex items-center justify-center size-16 rounded-full">
+                  <div class="flex items-center justify-center size-16 rounded-full flex-shrink-0">
                     <img
                       :src="
                         slide.video?.channel.avatar || slide.livestream?.livestreamChannel.avatar
                       "
                       alt="Avatar"
-                      class="w-full h-full rounded-full object-cover p-[1.5px]"
+                      class="w-full h-full rounded-full object-cover"
                     />
                   </div>
                 </div>

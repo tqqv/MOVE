@@ -76,7 +76,7 @@
           v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
-          class="flex items-center gap-x-3 cursor-pointer"
+          class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2"
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
           <div
@@ -90,16 +90,16 @@
             <img
               :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="size-11 rounded-full object-cover p-[1.5px]"
+              class="w-full h-full rounded-full object-cover"
             />
           </div>
 
           <div class="flex flex-col gap-y-1 truncate">
-            <div class="flex flex-row gap-x-3">
-              <p class="text_para truncate">
+            <div class="flex flex-row gap-x-4">
+              <p class="text_para truncate" :title="userFollower.followChannel?.channelName">
                 {{ userFollower.followChannel?.channelName }}
               </p>
-              <verified v-if="userFollower.followChannel.popularCheck" class="mx-1 fill-blue" />
+              <verified v-if="userFollower.followChannel.popularCheck" class="mx-3 fill-blue" />
             </div>
             <div
               v-if="userFollower.isStreaming"
@@ -155,19 +155,22 @@
           v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
-          class="flex items-center gap-x-3 cursor-pointer"
+          class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2"
+
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
           <div
             :class="[
-              'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
-              userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
+              'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
+              userFollower.followChannel.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
             ]"
           >
             <img
               :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="size-10 rounded-full object-cover p-[1.5px]"
+              class="w-full h-full rounded-full object-cover"
             />
           </div>
         </RouterLink>
