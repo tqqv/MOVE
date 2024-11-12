@@ -109,9 +109,8 @@ const connectSocket = (socket) => {
 
             // Xử lý và lưu message
             await handleChatMessage(channelId, messageData);
-
             // Broadcast message
-            io.to(channelId).emit('newMessage', messageData);
+            _io.to(channelId).emit('newMessage', messageData);
 
         } catch (error) {
             socket.emit('error', 'Could not send message');

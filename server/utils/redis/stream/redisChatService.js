@@ -4,15 +4,15 @@ const _redis = require("../config.js");
 const { isValidUUID } = require('../../formatChecker.js');
 const { rateLimitMiddleware } = require("./chatLimiter.js");
 
-const MESSAGE_LIMIT = 100;
+const MESSAGE_LIMIT = 1000;
 const MESSAGE_EXPIRY = 60 * 60; // 1 hours
 
 const handleChatMessage = async (channelId, messageData) => {
     try {
         // Validate channelId
-        if (!isValidUUID(channelId)) {
-            throw new Error('Invalid channel ID');
-        }
+        // if (!isValidUUID(channelId)) {
+        //     throw new Error('Invalid channel ID');
+        // }
 
         // Check rate limit trước khi xử lý message
         await rateLimitMiddleware(messageData.userId, async () => {
@@ -20,7 +20,7 @@ const handleChatMessage = async (channelId, messageData) => {
             const pipeline = _redis.pipeline();
 
             // Lưu message
-            pipeline.lpush(messagesKey, JSON.stringify(messageData));
+            pipeline.rpush(messagesKey, JSON.stringify(messageData));
             pipeline.ltrim(messagesKey, 0, MESSAGE_LIMIT - 1);
             pipeline.expire(messagesKey, MESSAGE_EXPIRY);
 
@@ -46,9 +46,9 @@ const handleChatMessage = async (channelId, messageData) => {
 
 const getChatHistory = async (channelId) => {
     try {
-        if (!isValidUUID(channelId)) {
-            throw new Error('Invalid channel ID');
-        }
+        // if (!isValidUUID(channelId)) {
+        //     throw new Error('Invalid channel ID');
+        // }
 
         const messagesKey = chatKeys.messages(channelId);
 
