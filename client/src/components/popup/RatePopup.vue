@@ -1,7 +1,7 @@
 <script setup>
   import { ref, watch } from 'vue';
   import Rating from 'primevue/rating';
-  import { postRateVideo } from '@/services/rate';
+  import { postRateVideo, postRateStream } from '@/services/rate';
   import { usePopupStore, useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
 
@@ -10,6 +10,9 @@
 
   const props = defineProps({
     videoId: {
+      type: String,
+    },
+    livestreamId: {
       type: String,
     },
     dataRate: {
@@ -37,15 +40,18 @@
   const handleRatingChange = async (newValue) => {
     if (newValue !== null && newValue !== previousValue.value) {
       const data = { rating: newValue, videoId: props.videoId };
-
+      if (props.videoId) {
+        data.videoId = props.videoId;
+      } else if (props.livestreamId) {
+        data.livestreamId = props.livestreamId;
+      }
       if (!userStore.user) {
         value.value = null;
         popupStore.openLoginPopup();
         return;
       }
 
-      const result = await postRateVideo(data);
-
+      const result = props.videoId ? await postRateVideo(data) : await postRateStream(data);
       if (result.status === 200) {
         toast.success('Thank you for your ratings!');
 
