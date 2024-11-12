@@ -28,8 +28,10 @@ import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InD
 import WalletContent from '@/components/wallet/WalletContent.vue';
 import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
 import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
+import SearchTotal from '@/components/search/SearchTotal.vue';
 import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
+
 
 const routes = [
   // User router
@@ -63,13 +65,20 @@ const routes = [
         ],
       },
       { path: 'search', component: SearchContent },
+      {
+        path: 'total-search',
+        component: SearchTotal,
+        props: (route) => ({
+          query: route.query.q,
+          type: route.query.type,
+        }),
+      },
       { path: 'video/:videoId', component: VideoDetails },
       { path: 'browse/categories/:category', component: CategoryDetailsContent },
     ],
   },
   // LIVE STREAM LAYOUT
   { path: '/live/:username', component: ViewLiveStreamPage },
-
   { path: '/reset-password/:token', component: ResetPassword },
   // Streamer router
   {
