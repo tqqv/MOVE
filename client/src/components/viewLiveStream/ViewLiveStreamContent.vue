@@ -40,7 +40,11 @@
     />
   </div>
   <div class="container py-6">
-    <OfflineTitle :livestream="props.liveStreamData?.livestream" titleRate="Rate Stream" />
+    <OfflineTitle
+      :livestream="props.liveStreamData?.livestream"
+      titleRate="Rate Stream"
+      reportType="stream"
+    />
     <hr class="h-[2px] my-7 bg-gray-dark border-0" />
     <VideoDetail
       v-if="props.liveStreamData.channel"

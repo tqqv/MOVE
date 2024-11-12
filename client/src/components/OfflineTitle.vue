@@ -8,9 +8,12 @@
   import ReportDialog from './ReportDialog.vue';
   import Rate from '@components/Rate.vue';
   import rateIcon from '@icons/rate.vue';
-  import { usePopupStore } from '@/stores';
+  import { usePopupStore, useUserStore } from '@/stores';
+  import ReportStream from './ReportStream.vue';
 
   const popupStore = usePopupStore();
+  const userStore = useUserStore();
+  const { user } = userStore;
   const props = defineProps({
     livestream: {
       type: Object,
@@ -23,6 +26,10 @@
     titleRate: {
       type: String,
       required: true,
+    },
+    reportType: {
+      type: String,
+      default: 'video',
     },
   });
   const emit = defineEmits(['updateRate']);
@@ -58,8 +65,12 @@
   };
 
   const showDialogReportVideo = () => {
-    getAllReportTypes();
-    isReportVisible.value = true;
+    if (user) {
+      getAllReportTypes();
+      isReportVisible.value = true;
+    } else {
+      popupStore.openLoginPopup();
+    }
   };
 
   const closeReport = () => {
@@ -114,7 +125,6 @@
         isReportVisible.value = true;
       }
     } catch (error) {
-      popupStore.openLoginPopup();
       isReportVisible.value = false;
     }
   };
@@ -231,7 +241,7 @@
           </ul>
         </div>
       </div>
-      <div class="relative menu-container">
+      <div v-if="reportType === 'video'" class="relative menu-container">
         <button
           aria-expanded="false"
           aria-controls="menu"
@@ -240,7 +250,7 @@
         />
         <div
           v-if="isMenuVisible"
-          class="absolute bottom-full mb-2 w-[115px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
+          class="absolute bottom-full mb-2 w-[125px] h-[40px] bg-white shadow rounded-md z-[1000] right-0"
         >
           <ul class="flex items-center justify-center h-full m-0 p-0">
             <li
@@ -251,22 +261,23 @@
               <span class="truncate"> Report video</span>
             </li>
           </ul>
-          <ReportDialog
-            title="video"
-            groupName="reportTypeVideos"
-            titleReport="Report Video"
-            :isReportVisible="isReportVisible"
-            :isReportSuccessVisible="isReportSuccessVisible"
-            :reportType="reportTypeVideos"
-            :selectedReport="selectedReportVideo"
-            @update:selectedReport="selectedReportVideo = $event"
-            @close="closeReportSuccess"
-            @submit="handleSubmitReportVideo"
-            @hide="closeReport"
-            @hideSuccess="closeSuccess"
-          />
         </div>
       </div>
+      <ReportDialog
+        title="video"
+        groupName="reportTypeVideos"
+        titleReport="Report Video"
+        :isReportVisible="isReportVisible"
+        :isReportSuccessVisible="isReportSuccessVisible"
+        :reportType="reportTypeVideos"
+        :selectedReport="selectedReportVideo"
+        @update:selectedReport="selectedReportVideo = $event"
+        @close="closeReportSuccess"
+        @submit="handleSubmitReportVideo"
+        @hide="closeReport"
+        @hideSuccess="closeSuccess"
+      />
+      <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
     </div>
   </div>
 </template>

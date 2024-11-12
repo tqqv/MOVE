@@ -90,7 +90,7 @@
 
   onMounted(async () => {
     await levelWorkoutStore.fetchLevelWorkout();
-    await fetchVideos();
+    // await fetchVideos();
   });
 </script>
 

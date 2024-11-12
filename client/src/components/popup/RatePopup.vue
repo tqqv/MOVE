@@ -46,6 +46,7 @@
         data.livestreamId = props.livestreamId;
       }
       if (!userStore.user) {
+        value.value = null;
         popupStore.openLoginPopup();
         return;
       }

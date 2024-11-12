@@ -27,7 +27,7 @@
       submenu: [
         { name: 'Overview', link: '/dashboard-streamer/analytics' },
         { name: 'Video analytics', link: '/dashboard-streamer/video-analytics' },
-        { name: 'Live analytics', link: '/dashboard-streamer/live-analytics' },
+        { name: 'Live analytics', link: '/dashboard-streamer/live-stream-analytics' },
       ],
     },
     { name: 'Cashout', icon: CashoutIcon, link: '/dashboard-streamer/cashout' },

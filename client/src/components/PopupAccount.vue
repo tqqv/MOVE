@@ -8,6 +8,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+  const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
   const router = useRouter();
@@ -16,7 +17,9 @@
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       userStore.clearUserData();
-      toast.success(response.data.message || 'Logout successful!');
+
+      toast.success(response?.data.message || 'Logout successful!');
+      emit('closeAllPopups');
       router.push('/');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');

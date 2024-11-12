@@ -18,15 +18,18 @@ const { getUploadLink,
   updateViewtimeController,
   getVideoWatchAlsoController,
   deleteMultipleVideos,
+  getTopVideoController,
+  getStateByCountryAndVideoIdFromIpController
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
 const upload = multer({ dest: 'uploads/' });
 const router = express.Router();
 
+router.get('/getTopvideo', getTopVideoController);
 router.get('/getVideoWatchAlso', getVideoWatchAlsoController);
 router.get('/getState/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
-router.get('/getStateFromIP/:videoId', verifyStreamer, getStateByCountryAndVideoIdController)
+router.get('/getStateFromIP/:videoId', verifyStreamer, getStateByCountryAndVideoIdFromIpController)
 router.get('/getVideoAnalytics/:videoId', verifyStreamer, analyticsVideoByIdController)
 router.get('/getVideosByFilter', getListVideoByFilterController);
 router.get('/getVideosByChannel', verifyStreamer, getListVideoByChannelController);

@@ -32,13 +32,13 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[271px] border-r-2 border-gray-dark bg-white"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[251px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col p-4">
-      <div class="flex items-center my-2 justify-between">
+      <div class="flex items-center my-1 justify-between">
         <h2 class="uppercase text_subTitle text-[14px]">follow channels</h2>
         <i
-          class="pi pi-arrow-left cursor-pointer text-[19px] p-2 rounded-full hover:bg-primary-light/30"
+          class="pi pi-arrow-left cursor-pointer text-[16px] p-2 rounded-full hover:bg-primary-light/30"
           style="font-weight: 800"
           @click="handleShow"
         ></i>
@@ -81,16 +81,19 @@
         >
           <div
             :class="[
-              'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
-              userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
+              'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
+              userFollower.followChannel.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
             ]"
           >
             <img
               :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="size-12 rounded-full object-cover p-[1.5px]"
+              class="size-11 rounded-full object-cover p-[1.5px]"
             />
           </div>
+
           <div class="flex flex-col gap-y-1 truncate">
             <div class="flex flex-row gap-x-3">
               <p class="text_para truncate">
@@ -118,7 +121,7 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[100px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[80px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-2">
       <div
@@ -126,7 +129,7 @@
         v-tooltip="'Expand sidebar '"
         @click="handleShow"
       >
-        <i class="pi pi-align-right text-[19.5px]" style="font-weight: 800"></i>
+        <i class="pi pi-arrow-right text-[16px]" style="font-weight: 800"></i>
       </div>
       <!-- NOT LOG IN -->
       <div v-if="!userStore.user" class="flex justify-center mt-4 rounded-md">
@@ -147,26 +150,35 @@
       >
         <i class="pi pi-th-large"></i>
       </RouterLink>
-      <div class="flex flex-col gap-y-4 my-2 items-center">
-        <div
+      <div class="flex flex-col gap-y-2 my-2 items-center">
+        <RouterLink
           v-for="userFollower in userStore.followers"
           v-tooltip="userFollower.followChannel.channelName"
           :key="userFollower.id"
           class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
+          :to="`/user/${userFollower.followChannel.User.username}`"
         >
-          <div
+
+          <RouterLink
+            v-if="userStore.followers.length && userStore.user"
+            v-for="userFollower in userStore.followers"
+            :key="userFollower.id"
+            class="flex items-center gap-x-3 cursor-pointer"
+            :to="`/user/${userFollower.followChannel.User.username}`"
+          >
+             <div
             :class="[
-              'relative inline-flex items-center justify-center w-12 h-12 rounded-full p-0.5',
-              userFollower.isStreaming ? 'border-[3px] border-red' : '',
+              'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
+              userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
             ]"
           >
             <img
-              :src="userFollower.followChannel?.avatar"
+              :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="w-full h-full rounded-full object-cover"
+              class="size-10 rounded-full object-cover p-[1.5px]"
             />
           </div>
-        </div>
+        </RouterLink>
       </div>
     </div>
   </div>

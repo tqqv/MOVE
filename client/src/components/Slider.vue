@@ -12,7 +12,6 @@
     },
   });
   const liveData = ref(null);
-  console.log(props.videos);
 </script>
 <template>
   <div class="box rounded-lg">

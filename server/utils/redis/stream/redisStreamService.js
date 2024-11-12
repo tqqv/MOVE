@@ -35,16 +35,20 @@ const updateStreamStats = async (channelId, action, field, amount) => {
                 return newValue;
             }
             case 'decrement': {
-                if (field === 'currentViews' || field === 'totalLikes') {
+                if (field === 'currentViews') {
+
+                if((await getStreamStats(channelId)).currentViews > 0) {
                     return await decrement(key, amount);
+                }
+                }
+                else if ( field === 'totalLikes') {
+                        return await decrement(key, amount);
                 }
                 else {
                     console.log("not handle");
                     return;
                 }
             }
-            default:
-                throw new Error('Invalid action');
         }
     } catch (error) {
         console.log(`Error updating stream stats for ${channelId}:`, error);
