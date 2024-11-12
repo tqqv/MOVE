@@ -23,7 +23,7 @@
   const emit = defineEmits(['rate', 'updateRate']);
   const isRated = ref(false);
   const isRatePopupOpen = ref(false);
-  const isVideo = computed(() => !!props.videoId); // Kiểm tra xem đây là video hay stream
+  const isVideo = computed(() => !!props.videoId);
 
   const fetchUserRating = async () => {
     if (isVideo.value && props.videoId) {
