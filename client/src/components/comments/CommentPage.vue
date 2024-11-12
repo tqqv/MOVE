@@ -167,7 +167,7 @@
     This video is not open for comments.
   </p>
 
-  <div class="space-y-8">
+  <div  class="space-y-8">
     <WriteComments
       :videoId="videoId"
       :fetchChildComments="fetchChildComments"
@@ -177,6 +177,7 @@
 
     <CommentItem
       v-for="(comment, index) in comments"
+      v-if="comments.length > 0"
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
@@ -186,8 +187,9 @@
       :loadingReplies="loadingRepliesForComment[comment.id]"
       :videoId="videoId"
       @fetchComments="fetchComments"
-    />
-
+    /><p v-else class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
+    No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
+  </p>
     <div
       v-if="hasMoreComments && comments.length > 0"
       class="font-bold text-[13px] text-primary cursor-pointer pt-2"
@@ -196,4 +198,5 @@
       <span>Show more comments</span>
     </div>
   </div>
+  
 </template>
