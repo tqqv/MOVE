@@ -21,7 +21,7 @@ import TabCategories from '@/components/browse/TabCategories.vue';
 import TabHighestRated from '@/components/browse/TabHighestRated.vue';
 import TabTopVideo from '@/components/browse/TabTopVideo.vue';
 import TabMostView from '@/components/browse/TabMostView.vue';
-import Overview from '@/components/streamer/analytics/Overview.vue';
+import Overview from '@/components/streamer/analytics/overview/Overview.vue';
 import VideoAnalytics from '@/components/streamer/analytics/videoAnalytics/VideoAnalytics.vue';
 import ViewLiveStreamPage from '@/pages/ViewLiveStreamPage.vue';
 import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InDepthAnalytics.vue';
@@ -29,6 +29,10 @@ import WalletContent from '@/components/wallet/WalletContent.vue';
 import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
 import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
 import Following from '@/pages/Following.vue';
+import SearchTotal from '@/components/search/SearchTotal.vue';
+import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
+import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
+
 
 const routes = [
   // User router
@@ -63,13 +67,20 @@ const routes = [
       },
       { path: 'search', component: SearchContent },
       { path: 'following', component: Following },
+      {
+        path: 'total-search',
+        component: SearchTotal,
+        props: (route) => ({
+          query: route.query.q,
+          type: route.query.type,
+        }),
+      },
       { path: 'video/:videoId', component: VideoDetails },
       { path: 'browse/categories/:category', component: CategoryDetailsContent },
     ],
   },
   // LIVE STREAM LAYOUT
   { path: '/live/:username', component: ViewLiveStreamPage },
-
   { path: '/reset-password/:token', component: ResetPassword },
   // Streamer router
   {
@@ -83,6 +94,8 @@ const routes = [
       { path: 'analytics', component: Overview },
       { path: 'video-analytics', component: VideoAnalytics },
       { path: 'video-analytics/:videoId', component: InDepthAnalytics },
+      { path: 'cashout', component: Cashout },
+      { path: 'live-stream-analytics', component: LiveStreamAnalytics },
     ],
   },
   // Live stream by streamer

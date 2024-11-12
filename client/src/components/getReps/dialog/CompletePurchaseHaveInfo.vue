@@ -13,7 +13,7 @@
   const popupStore = usePopupStore();
   const getRepsStore = useGetRepsStore();
 
-  const emit = defineEmits(['toogleGetREPsMenu', 'toggleLoadPayment']);
+  const emit = defineEmits(['toggleGetREPsMenu', 'toggleLoadPayment']);
   const chooseCard = ref(false);
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');

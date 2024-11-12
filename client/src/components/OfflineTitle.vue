@@ -15,8 +15,16 @@
   const userStore = useUserStore();
   const { user } = userStore;
   const props = defineProps({
+    livestream: {
+      type: Object,
+      required: false,
+    },
     video: {
       type: Object,
+      required: false,
+    },
+    titleRate: {
+      type: String,
       required: true,
     },
     reportType: {
@@ -49,7 +57,7 @@
     isShareVisible.value = !isShareVisible.value;
     isMenuVisible.value = false;
   };
-  const toggleRateVideo = () => {
+  const toggleRate = () => {
     isMenuVisible.value = false;
   };
   const closeShare = () => {
@@ -162,10 +170,14 @@
 
 <template>
   <div class="flex items-center justify-between">
-    <h3 class="text-[20px] whitespace-nowrap text-black">{{ video?.title }}</h3>
+    <h3 class="text-[20px] whitespace-nowrap text-black">
+      {{ video?.title || livestream?.title }}
+    </h3>
     <div class="flex items-center">
       <rateIcon class="mr-2 scale-125" />
-      <span class="text-[20px] font-bold">{{ formatRating(video?.ratings) }}</span>
+      <span class="text-[20px] font-bold">{{
+        formatRating(video?.ratings || livestream?.ratings)
+      }}</span>
     </div>
   </div>
   <div class="flex items-center mb-2 text-[13px] mt-2">
@@ -177,16 +189,19 @@
     <div class="flex gap-2 items-center text-[11px] font-bold">
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
         {{
-          video?.levelWorkout?.levelWorkout || video?.livestreamLevelWorkout?.levelWorkout || 'N/A'
+          video?.levelWorkout?.levelWorkout ||
+          livestream?.livestreamLevelWorkout?.levelWorkout ||
+          'N/A'
         }}
       </span>
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
     </div>
     <div class="flex items-center gap-9">
       <Rate
-        title="Rate Video"
-        @rate="toggleRateVideo"
+        :title="titleRate"
+        @rate="toggleRate"
         :videoId="video?.id"
+        :livestreamId="livestream?.id"
         @updateRate="updateRate"
       />
       <div class="relative">

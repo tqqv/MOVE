@@ -8,6 +8,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+  const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
   const router = useRouter();
@@ -16,7 +17,9 @@
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       userStore.clearUserData();
-      toast.success(response.data.message || 'Logout successful!');
+
+      toast.success(response?.data.message || 'Logout successful!');
+      emit('closeAllPopups');
       router.push('/');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
@@ -42,11 +45,14 @@
         :to="`/user/${props.user.username}`"
         class="flex flex-row gap-x-3 items-center pb-3"
       >
-        <img
-          :src="props.user.avatar"
-          :alt="props.user.username"
-          class="rounded-full object-cover size-12"
-        />
+        <div class="flex items-center justify-center size-12 rounded-full flex-shrink-0">
+          <img
+            :src="props.user.avatar"
+            :alt="props.user.username"
+            alt="Avatar"
+            class="w-full h-full rounded-full object-cover"
+          />
+        </div>
         <h1 class="text_subTitle whitespace-nowrap">{{ props.user.username }}</h1>
         <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
       </RouterLink>

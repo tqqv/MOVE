@@ -2,6 +2,7 @@ const { Op, where } = require("sequelize");
 const db = require("../models/index.js");
 const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize, LevelWorkout } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
+const { updateStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 
 
 
@@ -310,6 +311,7 @@ const followChannel = async (userId, channelId) => {
       }
     })
 
+
     if(!checkChannelExist) {
       return {
         status: 400,
@@ -324,13 +326,16 @@ const followChannel = async (userId, channelId) => {
         userId: userId,
         channelId: channelId
       }})
-    if(checkSubscribe) {
-      return {
-        status: 200,
-        data: null,
-        message: "Unsubscribe successful."
+      if(checkSubscribe) {
+        if(checkChannelExist.isLive) {
+          await updateStreamStats(channelId, 'decrement', 'newFollowers', 1)
+        }
+        return {
+          status: 200,
+          data: null,
+          message: "Unsubscribe successful."
+        }
       }
-    }
 
     // Không được follow chính channel của mình
     const channel = await Channel.findOne({
@@ -357,6 +362,7 @@ const followChannel = async (userId, channelId) => {
           message: "You subscribe failed."
       }
     }
+    await updateStreamStats(channelId, 'increment', 'newFollowers', 1)
     return {
       status: 200,
       data: null,
@@ -577,7 +583,7 @@ const getProfileByUserName = async(username) => {
       },
       include: [{
         model: Channel,
-        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck',
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck','facebookUrl','youtubeUrl','instaUrl','bio',
           [
             sequelize.literal(`(
               SELECT COUNT(*)

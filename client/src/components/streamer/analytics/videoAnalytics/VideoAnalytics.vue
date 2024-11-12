@@ -1,6 +1,12 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue';
-  import { formatRating, formatDatePosted, formatAvgViewTime, formatView } from '@/utils';
+  import {
+    formatRating,
+    formatDatePosted,
+    formatAvgViewTime,
+    formatView,
+    formatNumber,
+  } from '@/utils';
   import rate from '@/components/icons/rate.vue';
   import rep from '@/components/icons/rep.vue';
 
@@ -9,6 +15,7 @@
   import { getVideoSetting } from '@services/video';
   import { toast } from 'vue3-toastify';
   import Filter from '@/components/Filter.vue';
+  import EmptyPage from '@/pages/EmptyPage.vue';
 
   const sortByOptions = [
     { id: 1, name: 'Most recent' },
@@ -130,7 +137,7 @@
         </Column>
         <Column header="Views">
           <template #body="{ data }">
-            <span>{{ formatView(data.viewCount + data.totalViewer) || 0 }}</span>
+            <span>{{ formatView(data.viewCount) || 0 }}</span>
           </template>
         </Column>
         <Column header="Avg. view time">
@@ -152,20 +159,23 @@
         <Column header="REPs Received">
           <template #body="{ data }">
             <div class="flex items-center gap-2">
-              <rep /><span>{{ data.totalReps || 0 }}</span>
+              <rep /><span>{{ formatNumber(data.totalReps) || 0 }}</span>
             </div>
           </template></Column
         >
 
         <Column header="Viewer Gifted">
           <template #body="{ data }">
-            <span>{{ data.viewerGift }}</span>
+            <span>{{ formatNumber(data.viewerGift) }}</span>
           </template>
         </Column>
 
         <Column field="" header="" style="display: none"></Column>
       </DataTable>
-      <div class="flex justify-end gap-x-12 items-center px-12 py-3">
+      <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
+        <EmptyPage title="No videos found" subTitle="Upload a new video to track analytics" />
+      </div>
+      <div v-else class="flex justify-end gap-x-12 items-center px-12 py-3">
         <Filter
           :title="'Rows per page'"
           :options="pageSizeOptions"

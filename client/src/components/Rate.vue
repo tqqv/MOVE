@@ -1,7 +1,7 @@
 <script setup>
   import { ref, computed, onMounted, watch } from 'vue';
   import RatePopup from './popup/RatePopup.vue';
-  import { getRateOfUser } from '@/services/rate';
+  import { getRateOfUser, getRateStreamOfUser } from '@/services/rate';
   import { useUserStore } from '@/stores';
 
   const userStore = useUserStore();
@@ -12,24 +12,38 @@
     },
     videoId: {
       type: String,
-      required: true,
+      required: false,
+    },
+    livestreamId: {
+      type: String,
+      required: false,
     },
   });
   const dataRate = ref(null);
   const emit = defineEmits(['rate', 'updateRate']);
   const isRated = ref(false);
   const isRatePopupOpen = ref(false);
-  //fetch data đã rate
-  const fetchUserRating = async () => {
-    const result = await getRateOfUser(props.videoId);
+  const isVideo = computed(() => !!props.videoId);
 
-    if (result && result.data) {
-      dataRate.value = result.data.rating;
-      console.log('data Rate neeee', dataRate.value);
-      isRated.value = dataRate.value > 0;
-    } else {
-      dataRate.value = null;
-      isRated.value = false;
+  const fetchUserRating = async () => {
+    if (isVideo.value && props.videoId) {
+      const result = await getRateOfUser(props.videoId);
+      if (result && result.data) {
+        dataRate.value = result.data.rating;
+        isRated.value = dataRate.value > 0;
+      } else {
+        dataRate.value = null;
+        isRated.value = false;
+      }
+    } else if (props.livestreamId) {
+      const result = await getRateStreamOfUser(props.livestreamId);
+      if (result && result.data) {
+        dataRate.value = result.data.rating;
+        isRated.value = dataRate.value > 0;
+      } else {
+        dataRate.value = null;
+        isRated.value = false;
+      }
     }
   };
 
@@ -64,9 +78,9 @@
   });
 
   watch(
-    () => props.videoId,
-    (newVideoId, oldVideoId) => {
-      if (newVideoId !== oldVideoId) {
+    () => [props.videoId, props.livestreamId],
+    ([newVideoId, newLivestreamId], [oldVideoId, oldLivestreamId]) => {
+      if (newVideoId !== oldVideoId || newLivestreamId !== oldLivestreamId) {
         fetchUserRating();
         closePopup();
       }
@@ -98,6 +112,7 @@
     >
       <RatePopup
         :videoId="videoId"
+        :livestreamId="props.livestreamId"
         :dataRate="dataRate"
         @toogleRate="handleRate"
         @fillRate="fillRate"
