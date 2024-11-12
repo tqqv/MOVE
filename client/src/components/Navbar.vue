@@ -355,7 +355,7 @@
             <div v-if="userStore.user?.role == 'user'" class="relative">
               <div
                 v-if="userStore.user?.REPs === 0"
-                @click="toogleGetREPsMenu"
+                @click="toggleGetREPsMenu"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
@@ -363,7 +363,7 @@
               </div>
               <div
                 v-else
-                @click="toogleGetREPsMenu"
+                @click="toggleGetREPsMenu"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >

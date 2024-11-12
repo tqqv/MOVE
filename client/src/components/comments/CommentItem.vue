@@ -16,8 +16,7 @@
 
   import { postReactionComment } from '@/services/comment';
   import { useUserStore, usePopupStore } from '@/stores';
-  import { useUserStore } from '@/stores';
-  import { usePopupStore } from '@/stores';
+
 
   dayjs.extend(relativeTime);
 
@@ -49,8 +48,6 @@
     300,
   );
 
-  const userStore = useUserStore();
-  const popupStore = usePopupStore();
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
   const isShowMoreChild = ref(false);
