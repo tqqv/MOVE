@@ -1,13 +1,44 @@
+import { data } from 'autoprefixer';
 import axios from './axios';
 
-const searchInformation = async (searchData) => {
+const searchInformation = async (searchData, quality, page) => {
   return await axios.get('channel/searchVideoChannel', {
     params: {
       data: searchData,
-      limit: 5,
-      offset: 0,
+      limit: quality,
+      offset: page,
     },
   });
 };
 
-export { searchInformation };
+const searchCate = async (searchData, quality, currentPage) => {
+  return await axios.get('search/totalCate', {
+    params: {
+      data: searchData,
+      page: currentPage,
+      pageSize: quality,
+    },
+  });
+};
+
+const searchUser = async (searchData, quality, currentPage) => {
+  return await axios.get('search/totalUser', {
+    params: {
+      data: searchData,
+      page: currentPage,
+      pageSize: quality,
+    },
+  });
+};
+
+const searchVideo = async (searchData, quality, currentPage) => {
+  return await axios.get('search/totalVideo', {
+    params: {
+      data: searchData,
+      page: currentPage,
+      pageSize: quality,
+    },
+  });
+};
+
+export { searchInformation, searchCate, searchUser, searchVideo };
