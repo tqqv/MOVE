@@ -4,7 +4,7 @@
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import InformationLiveStream from './InformationLiveStream.vue';
   import NotConnectScreen from './NotConnectScreen.vue';
-  import { useUserStore } from '@/stores';
+  import { useStreamerStore, useUserStore } from '@/stores';
   const props = defineProps({
     liveStatus: String,
     connectOBS: String,
@@ -13,6 +13,7 @@
   });
 
   const userStore = useUserStore();
+  const streamerStore = useStreamerStore();
 </script>
 <template>
   <div class="px-10 flex items-center flex-col">
@@ -67,7 +68,7 @@
         </div>
       </div>
       <!-- CHAT -->
-      <LiveChat :isStreamer="true" />
+      <LiveChat :liveStreamData="streamerStore.streamerChannel?.id" :isStreamer="true" />
     </div>
   </div>
 </template>
