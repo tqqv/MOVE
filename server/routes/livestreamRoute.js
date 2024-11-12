@@ -1,6 +1,6 @@
 const express = require('express');
 const { verifyStreamer } = require('../middlewares/verifyToken');
-const { createLivestreamController, getLivestreamStatisticController, endLivestreamController, updateLivestreamController, getLivestreamController, getLivestreamByUserController, getAllLivestreamController} = require('../controllers/livestreamController');
+const { createLivestreamController, getLivestreamStatisticController, endLivestreamController, updateLivestreamController, getLivestreamController, getLivestreamByUserController, getAllLivestreamController, getAllLivestreamSessionController, getLivestreamSessionDetailController} = require('../controllers/livestreamController');
 const { getStreamStats, clearStreamStats } = require('../utils/redis/stream/redisStreamService');
 const { set } = require('../utils/redis/base/redisBaseService');
 
@@ -21,6 +21,8 @@ livestreamRouter.get('/clear', async () => {
     console.log(clearStreamStats(3));
 })
 livestreamRouter.get('/all', getAllLivestreamController)
+livestreamRouter.get('/streamSessions', verifyStreamer, getAllLivestreamSessionController)
+livestreamRouter.get('/streamDetails/:livestreamId', verifyStreamer, getLivestreamSessionDetailController)
 livestreamRouter.get('/:username', getLivestreamByUserController)
 livestreamRouter.get('/info/:username', verifyStreamer, getLivestreamController)
 livestreamRouter.post('/', verifyStreamer, createLivestreamController)

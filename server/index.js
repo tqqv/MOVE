@@ -15,6 +15,7 @@ const ratingRouter = require("./routes/ratingRoute.js");
 const {connectSocket} = require("./services/socketService.js");
 const reportRouter = require("./routes/reportRoute.js");
 const livestreamRouter = require("./routes/livestreamRoute.js");
+const featuredContentRouter = require("./routes/featuredContentRoute.js");
 const searchRouter = require("./routes/searchRoute.js");
 const donationItemRouter = require("./routes/donationItemRoute.js");
 
@@ -54,6 +55,7 @@ app.use("/api/category", cateRouter);
 app.use("/api/levelWorkout", lvWorkoutRouter);
 app.use("/api/rating", ratingRouter);
 app.use("/api/livestream", livestreamRouter);
+app.use("/api/featuredContent", featuredContentRouter);
 app.use('/api/search', searchRouter)
 app.use("/api/donationItem", donationItemRouter);
 // init socket connection
