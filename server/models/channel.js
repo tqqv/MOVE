@@ -22,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
 
             this.hasMany(models.Report, { foreignKey: 'targetChannelId', as: 'channelReport' });
 
+            this.hasMany(models.Withdraw, { foreignKey: 'channelId', as: 'channelWithdraw' });
+
 
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
