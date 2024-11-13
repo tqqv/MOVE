@@ -18,7 +18,7 @@
       header="Verification failed"
       class="w-[568px]"
       :draggable="false"
-      dismissableMask="true"
+      :dismissableMask="true"
     >
       <div class="space-y-4">
         <span class="text_para">

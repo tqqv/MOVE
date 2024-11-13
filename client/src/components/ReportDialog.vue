@@ -59,7 +59,7 @@
     :header="props.titleReport"
     :style="{ width: '40rem' }"
     @update:visible="hideReport"
-    dismissableMask="true"
+    :dismissableMask="true"
   >
     <div v-for="reportType in reportType" :key="reportType.id" class="flex gap-4 items-center mt-3">
       <CheckboxReport
@@ -97,11 +97,10 @@
     @update:visible="hideReportSuccess"
     @show="lockScroll"
     @hide="unlockScroll"
-    dismissableMask="true"
-
+    :dismissableMask="true"
   >
     <p class="text-[14px] text-footer">You reported the {{ title }} for:</p>
-    <h2>{{ selectedReport.description }}</h2>
+    <h2>{{ selectedReport?.description }}</h2>
     <p class="text-[14px] text-footer mt-4">
       If we find this channel violated
       <a href="/" class="underline">Community Guidelines</a>, the channel will be suspended

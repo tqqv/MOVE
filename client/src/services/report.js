@@ -42,4 +42,24 @@ const getAllReportLiveStream = async () => {
   }
 };
 
-export { reportChannel, getAllReportChannelTypes, getAllReportLiveStream, reportLiveStream };
+const reportChatMessage = async (userId, reportTypeId, content, accountId) => {
+  try {
+    const response = await axios.post('report/chatMessages', {
+      userId,
+      reportTypeId,
+      content,
+      accountId,
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  reportChannel,
+  getAllReportChannelTypes,
+  getAllReportLiveStream,
+  reportLiveStream,
+  reportChatMessage,
+};
