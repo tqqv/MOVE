@@ -22,6 +22,9 @@
   onMounted(() => {
     if (frameVideo.value) {
       initializeHLS(frameVideo.value, urlHls);
+      console.log("urlHls: ", urlHls);
+      console.log(initializeHLS(frameVideo.value, urlHls));
+
       frameVideo.value.addEventListener('error', () => {
         console.log('Reloading video due to error');
         initializeHLS(frameVideo.value, urlHls);
