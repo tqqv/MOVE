@@ -36,14 +36,15 @@
       type: [Number, String],
       required: true,
     },
+    isCommentable: Boolean,
   });
 
   const emit = defineEmits(['fetchComments']);
-
-  const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
-    props.comment.content,
-    300,
-  );
+  const formatCommentText = (text) => {
+    return text.replace(/\n/g, '<br/>');
+  };
+  const { showFullText, displayedText, toggleText, isLongText, isTallText, textElement } =
+    useReadMore(formatCommentText(props.comment.content), 300);
 
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
@@ -247,22 +248,23 @@
         >
       </div>
       <!-- COMMENT -->
-      <p
+      <div
+        ref="textElement"
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="break-all text-sm text-black"
       >
-        {{ displayedText() }}
-        <span v-if="isLongText">
+        <span ref="textElement" v-html="displayedText()" />
+        <span v-if="isLongText || isTallText">
           <button @click="toggleText" class="text-primary font-semibold ml-1">
             {{ showFullText ? 'Show less' : 'Read more' }}
           </button>
         </span>
-      </p>
+      </div>
 
       <!-- Like/Dislike -->
       <div
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
-        class="flex gap-4 items-center"
+        :class="['flex gap-4 items-center', !isCommentable ? 'opacity-50 pointer-events-none' : '']"
       >
         <div class="flex gap-2" @click="toggleReaction('like')">
           <Like
@@ -325,6 +327,7 @@
         @sendComment="handleSendComment"
         :replyToUsername="replyToUsername"
         :videoId="videoId"
+        :isCommentable="isCommentable"
       />
       <div v-if="!isShowMoreChild">
         <CommentItem
@@ -335,6 +338,7 @@
           :childComments="props.childComments"
           :totalRepliesCount="props.totalRepliesCount"
           :videoId="videoId"
+          :isCommentable="isCommentable"
         />
       </div>
       <!-- Toggle to show/hide child comments -->
@@ -369,6 +373,7 @@
             :childComments="props.childComments"
             :totalRepliesCount="props.totalRepliesCount"
             :videoId="videoId"
+            :isCommentable="isCommentable"
           />
           <div
             v-if="hasMoreChildComments && !loadingReplies"
