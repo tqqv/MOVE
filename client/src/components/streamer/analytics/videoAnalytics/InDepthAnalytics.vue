@@ -68,7 +68,13 @@
       genderStats.value = response.data.viewersData.genderData;
 
       ageStats.value = response.data.viewersData.ageData;
-      countryStats.value = response.data.viewersData.countryData;
+      console.log(ageStats.value);
+
+      countryStats.value = response.data.viewersData.countryData.sort((a, b) => {
+        if (a.country === null) return 1;
+        if (b.country === null) return -1;
+        return a.country.localeCompare(b.country);
+      });
       dataByIp.value = response.data.viewersData.dataByIp;
     } catch (error) {
       toast.error(error.message);

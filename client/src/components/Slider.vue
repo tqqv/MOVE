@@ -14,19 +14,13 @@
 </script>
 <template>
   <div class="box rounded-lg">
-    <carousel-3d
-      height="300"
-      width="1400"
-      controlsVisible="true"
-      autoplay="true"
-      autoplayTimeout="5000"
-    >
+    <carousel-3d height="300" width="1300" controlsVisible="true" border="0">
       <slide v-for="(slide, i) in dataSlider" :index="i" :key="i">
         <div>
           <div class="flex bg-white shadow-lg overflow-hidden">
             <!-- Cột hình ảnh -->
 
-            <div class="h-full w-full xl:w-2/3">
+            <div class="h-full w-full xl:w-2/3 rounded-lg">
               <RouterLink
                 :to="
                   slide.livestream
@@ -38,7 +32,7 @@
                 <img
                   :src="slide.livestream?.thumbnailUrl || slide.video?.thumbnailUrl"
                   alt="Live Session"
-                  class="h-[300px] object-cover relative"
+                  class="h-[300px] object-cover relative hover:border-4 hover:border-primary transition-all rounded-2xl duration-300 shadow-lg"
               /></RouterLink>
               <span
                 v-if="slide.livestream?.livestreamChannel.isLive"

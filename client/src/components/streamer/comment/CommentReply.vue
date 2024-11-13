@@ -116,13 +116,14 @@
             ? reply.content
             : reply.content.slice(0, 300)
         }}
-        <span
-          v-if="reply.content.length > 300"
-          class="text-primary cursor-pointer"
+         <div v-if="!expandedReplies[reply.id] && reply.content.length > 300"
+                        class="text-[#666666]">...</div>
+        <div
+          class="text-[#666666] hover:underline font-semibold cursor-pointer"
           @click="toggleReadMore(reply.id)"
         >
-          {{ expandedReplies[reply.id] ? 'Read Less' : 'Read More' }}
-        </span>
+          {{ expandedReplies[reply.id] ? 'Show less' : 'Read More' }}
+        </div>
       </p>
       <!-- LIKE DISLIKE -->
       <div class="flex gap-4 items-center mt-2">
