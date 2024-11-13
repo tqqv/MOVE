@@ -97,7 +97,7 @@
         <Divider class="flex-grow mt-1" />
         <div><span class="font-bold text-[24px] whitespace-nowrap">Video you may like</span></div>
       </div>
-      <GirdVideo :videos="videos.slice(0, 6)" />
+      <GirdVideo :videos="videos.slice(0, 8)" />
     </div>
   </section>
 </template>

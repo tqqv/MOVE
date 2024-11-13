@@ -187,6 +187,8 @@
       :loadingReplies="loadingRepliesForComment[comment.id]"
       :videoId="videoId"
       @fetchComments="fetchComments"
+      :isCommentable="isCommentable"
+
     /><p v-else class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
     No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
   </p>
