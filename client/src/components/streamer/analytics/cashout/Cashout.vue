@@ -1,8 +1,9 @@
 <script setup>
   import ProgressBar from 'primevue/progressbar';
-  import WithdrawPopup from './WithdrawPopup.vue';
+  import WithdrawPopup from './popup/WithdrawPopup.vue';
   import { ref } from 'vue';
-  import ProcessingPaymentPopup from './ProcessingPaymentPopup.vue';
+  import ProcessingPaymentPopup from './popup/ProcessingPaymentPopup.vue';
+  import ReceivePaymentPopup from './popup/ReceivePaymentPopup.vue';
 
   const props = defineProps({
     reps: Number,
@@ -11,12 +12,18 @@
   });
   const isWithdrawVisible = ref(false);
   const isProcessingPaymentVisible = ref(false);
+  const isReceivePaymentVisible = ref(false);
+
   const hasInfo = ref(false);
+
   const toogleWithdrawVisible = () => {
     isWithdrawVisible.value = !isWithdrawVisible.value;
   };
   const toogleProcessingPaymentVisible = () => {
     isProcessingPaymentVisible.value = !isProcessingPaymentVisible.value;
+  };
+  const toogleReceivePaymentVisible = () => {
+    isReceivePaymentVisible.value = !isReceivePaymentVisible.value;
   };
 </script>
 <template>
@@ -33,7 +40,7 @@
           <div class="text-base">(Estimated value ${{ estimatedValue || 64.0 }})</div>
         </div>
         <div class="card">
-          <ProgressBar :value="50"></ProgressBar>
+          <ProgressBar :value="50" title="50%" />
         </div>
         <div class="text-sm">
           You need to earn at least <span class="font-bold">2500 REPs</span> to withdraw.
@@ -54,7 +61,9 @@
 
         <!-- NO INFO -->
         <div v-else>
-          <div class="text-sm text-primary cursor-pointer">Setup bank information</div>
+          <div @click="toogleReceivePaymentVisible" class="text-sm text-primary cursor-pointer">
+            Setup bank information
+          </div>
           <div class="flex items-center justify-between">
             <div class="space-y-2">
               <div class="text-[17px] font-bold">No bank information available</div>
@@ -75,5 +84,10 @@
     :isProcessingPaymentVisible="isProcessingPaymentVisible"
     title="Processing payment"
     @toogleProcessingPaymentVisible="toogleProcessingPaymentVisible"
+  />
+  <ReceivePaymentPopup
+    :isReceivePaymentVisible="isReceivePaymentVisible"
+    title="I want to receive payment via"
+    @toogleReceivePaymentVisible="toogleReceivePaymentVisible"
   />
 </template>

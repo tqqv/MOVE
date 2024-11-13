@@ -48,6 +48,6 @@
         <i v-if="modelValue" class="pi pi-check text-white text-base"></i>
       </span>
     </label>
-    <h1>{{ label }}</h1>
+    <h1 class="text-sm text-[#777777]">{{ label }}</h1>
   </div>
 </template>

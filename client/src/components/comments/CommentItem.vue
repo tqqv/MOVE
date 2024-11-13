@@ -18,7 +18,7 @@
   import { useUserStore, usePopupStore } from '@/stores';
 
   dayjs.extend(relativeTime);
-
+  const userStore = useUserStore();
   const props = defineProps({
     comment: Object,
     fetchChildComments: Function,

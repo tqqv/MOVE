@@ -31,7 +31,9 @@
         <div class="text-[#777777] text-xs">
           Note: The amount receive may vary due to the exchange rate & bank charges.
         </div>
-        <div class="flex justify-center"><button class="btn w-[170px]">Close</button></div>
+        <div class="flex justify-center">
+          <button @click="toogleProcessingPaymentVisible" class="btn w-[170px]">Close</button>
+        </div>
       </div>
     </Dialog>
   </div>
