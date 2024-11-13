@@ -33,6 +33,7 @@
       @update:visible="popupStore.toggleLoadingPayment"
       :closable="false"
       :style="{ width: '40rem' }"
+      dismissableMask="true"
     >
       <div class="p-8 text-base">
         <div class="space-y-4">

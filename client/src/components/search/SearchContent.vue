@@ -21,7 +21,7 @@
   onMounted(async () => {
     if (query.value) {
       try {
-        const response = await searchInformation(query.value);
+        const response = await searchInformation(query.value, 8, 0);
         const data = response.data.data;
         categories.value = data.categories;
         videos.value = data.videos;
@@ -50,7 +50,16 @@
         <div class="my-2">
           <!-- CATEGORIES -->
           <div v-if="categories.length" class="">
-            <h1 class="text_subTitle mb-2">Categories</h1>
+            <div class="flex justify-between items-center">
+              <h1 class="text_subTitle mb-2">Categories</h1>
+              <RouterLink
+                :to="`/total-search?q=${query}&type=categories`"
+                v-if="categories.length == 8"
+                class="text-primary text-sm cursor-pointer"
+              >
+                View all <i class="pi pi-chevron-right text-xs"></i>
+              </RouterLink>
+            </div>
             <div
               class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             >
@@ -60,13 +69,31 @@
           <hr v-if="categories.length" class="h-px my-10 bg-gray-dark border-0" />
           <!-- CHANNELS -->
           <div v-if="users.length">
-            <h1 class="text_subTitle mb-4">Channels</h1>
+            <div class="flex justify-between items-center">
+              <h1 class="text_subTitle mb-2">User</h1>
+              <RouterLink
+                :to="`/total-search?q=${query}&type=users`"
+                v-if="users.length == 8"
+                class="text-primary text-sm cursor-pointer"
+              >
+                View all <i class="pi pi-chevron-right text-xs"></i>
+              </RouterLink>
+            </div>
             <ChannelList :users="users" />
           </div>
           <hr v-if="users.length" class="h-px my-10 bg-gray-dark border-0" />
           <!-- VIDEOS -->
           <div v-if="videos.length">
-            <h1 class="text_subTitle mb-4">Videos</h1>
+            <div class="flex justify-between items-center">
+              <h1 class="text_subTitle mb-2">Video</h1>
+              <RouterLink
+                :to="`/total-search?q=${query}&type=videos`"
+                v-if="videos.length == 8"
+                class="text-primary text-sm cursor-pointer"
+              >
+                View all <i class="pi pi-chevron-right text-xs"></i>
+              </RouterLink>
+            </div>
             <div class="w-full py-4">
               <div
                 class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8"

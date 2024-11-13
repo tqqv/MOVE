@@ -1,7 +1,10 @@
 <script setup>
   import { useUserStore } from '@/stores/user.store';
   import { onBeforeMount, onMounted } from 'vue';
+  import GlobalLoading from './components/GlobalLoading.vue';
+  import { useLoadingStore } from './stores';
   const userStore = useUserStore();
+  const loadingStore = useLoadingStore();
 
   const getCookie = (cname) => {
     let name = cname + '=';
@@ -34,8 +37,15 @@
       userStore.loadFollowers();
     }
   });
+  onMounted(() => {
+    loadingStore.showLoading();
+    setTimeout(() => {
+      loadingStore.hideLoading();
+    }, 1000);
+  });
 </script>
 
 <template>
+  <GlobalLoading />
   <router-view />
 </template>

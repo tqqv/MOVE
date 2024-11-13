@@ -2,12 +2,12 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Payment extends Model {
-    static associate(models) {
-        this.belongsTo(models.User);
-    }
+  class Withdraw extends Model {
+  static associate(models) {
+    this.belongsTo(models.Channel, { foreignKey: "channelId" });
   }
-  Payment.init(
+  }
+  Withdraw.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -15,43 +15,35 @@ module.exports = (sequelize, DataTypes) => {
             allowNull: false,
             primaryKey: true,
         },
-        userId: {
+        channelId: {
             type: DataTypes.UUID,
             allowNull: true,
             references: {
-                model: 'users',
+                model: 'Channels',
                 key: 'id'
             },
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
         amount: {
-            type: DataTypes.INTEGER,
+            type: DataTypes.FLOAT,
             allowNull: false,
         },
-        rep: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
-        paymentMethod: {
-            type: DataTypes.ENUM('creditCard', 'debitCard', 'onlineBanking', 'other'),
-            allowNull: false,
-        },
-        paymentStatus: {
+        status: {
             type: DataTypes.ENUM('pending', 'completed', 'failed'),
             allowNull: false,
             defaultValue: 'pending'
         },
-        paymentAction: {
-            type: DataTypes.ENUM('payIn', 'withdraw'),
-            allowNull: false,
+        arrivalDate: {
+            type: DataTypes.DATE,
+            // defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
         },
     },
     {
       sequelize,
-      modelName: "Payment",
-      tableName: "payments",
+      modelName: "Withdraw",
+      tableName: "withdraws",
       timestamps: true,
   });
-  return Payment;
+  return Withdraw;
 };

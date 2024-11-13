@@ -45,6 +45,7 @@
       @hide="unlockScroll"
       @update:visible="closeOrder"
       :style="{ width: '40rem' }"
+      dismissableMask="true"
     >
       <div class="space-y-6">
         <!-- Order Status Message -->

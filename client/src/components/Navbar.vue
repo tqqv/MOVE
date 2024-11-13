@@ -24,7 +24,8 @@
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
   import GoLive from './icons/goLive.vue';
-  import { useTabStore } from '@/stores/tab.store';
+  import { useTabStore } from '@/stores/tab.store';  import { useGetRepsStore } from '@/stores/getReps.store';
+
   import GetREPS from './getReps/GetREPS.vue';
   import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
   import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
@@ -33,6 +34,7 @@
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
+  const getRepsStore = useGetRepsStore();
 
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
@@ -49,7 +51,6 @@
   const users = ref([]);
   // SEARCH
 
-  const isHaveInfo = ref(true);
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -62,17 +63,22 @@
     isCreateMenuOpen.value = !isCreateMenuOpen.value;
   };
 
-  const toogleNotiMenu = () => {
+  const toggleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
-  const toogleGetREPsMenu = () => {
+  const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+    if(!getRepsStore.purchaseOptions.length > 0){
+      getRepsStore.getRepPackages()
+    }
   };
   const closeAllPopups = () => {
     isUserMenuOpen.value = false;
     isNotiMenuOpen.value = false;
     isSearchPopupOpen.value = false;
     isGetREPsMenuOpen.value = false;
+    isCreateMenuOpen.value = false;
+    console.log('đóng nè');
   };
 
   const openLoginPopup = () => {
@@ -128,14 +134,16 @@
 
   // SEARCH
 
-  const handleSearch = debounce((e) => {
-    searchData.value = e.target.value;
-    if (searchData.value.trim() === '' && onFocused.value) {
-      isSearchPopupOpen.value = false;
-    } else {
-      isSearchPopupOpen.value = true;
-    }
-  }, 500);
+  // const handleSearch = debounce((e) => {
+  //   searchData.value = e.target.value;
+  //   console.log(searchData.value);
+
+  //   if (searchData.value.trim() === '' && onFocused.value) {
+  //     isSearchPopupOpen.value = false;
+  //   } else {
+  //     isSearchPopupOpen.value = true;
+  //   }
+  // }, 500);
 
   const handleFocus = () => {
     onFocused.value = true;
@@ -148,30 +156,44 @@
     onFocused.value = false;
   };
 
+  const handleSearch = (e) => {
+    searchData.value = e.target.value;
+    if (searchData.value.trim() === '' && onFocused.value) {
+      isSearchPopupOpen.value = false;
+    } else {
+      isSearchPopupOpen.value = true;
+    }
+  };
+
+  const debouncedSearch = debounce(async (newSearchData) => {
+    if (newSearchData) {
+      try {
+        const response = await searchInformation(newSearchData, 2, 0);
+        const data = response.data.data;
+        categories.value = data.categories;
+        videos.value = data.videos;
+        users.value = data.users;
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      }
+    } else {
+      categories.value = [];
+      videos.value = [];
+      users.value = [];
+    }
+  }, 500);
+
   watch(
     () => searchData.value,
-    async (newSearchData) => {
-      if (newSearchData) {
-        try {
-          const response = await searchInformation(newSearchData);
-          const data = response.data.data;
-          categories.value = data.categories;
-          videos.value = data.videos;
-          users.value = data.users;
-        } catch (error) {
-          console.error('Error fetching search results:', error);
-        }
-      } else {
-        categories.value = [];
-        videos.value = [];
-        users.value = [];
-      }
+    (newSearchData) => {
+      debouncedSearch(newSearchData);
     },
   );
 
   const performSearch = () => {
     if (searchData.value.trim()) {
       window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+      isSearchPopupOpen.value = false;
     }
   };
 
@@ -187,7 +209,7 @@
   });
 </script>
 <template>
-  <nav class="bg-black text-white fixed w-full z-[100]">
+  <nav class="bg-[#18181b] text-white fixed w-full z-[100]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <!-- Mobile menu button-->
@@ -235,7 +257,7 @@
           <div class="hidden md:block">
             <div class="flex space-x-4">
               <RouterLink
-                to="#"
+                to="/following"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 aria-current="page"
                 >Following</RouterLink
@@ -262,6 +284,7 @@
                 id="search-menu-button"
                 placeholder="Search"
                 v-model="searchData"
+                autocomplete="off"
                 @input="handleSearch"
                 @keyup.enter="performSearch"
                 @focus="handleFocus"
@@ -331,11 +354,20 @@
           <template v-else>
             <div v-if="userStore.user?.role == 'user'" class="relative">
               <div
-                @click="toogleGetREPsMenu"
+                v-if="userStore.user?.REPs === 0"
+                @click="toggleGetREPsMenu"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
                 Get REP$
+              </div>
+              <div
+                v-else
+                @click="toggleGetREPsMenu"
+                class="rounded-md px-3 py-2 text_nav text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
+                id="reps-menu-button"
+              >
+                {{ userStore.user?.REPs }} REP$
               </div>
               <div
                 id="reps-menu"
@@ -346,8 +378,9 @@
                 tabindex="-1"
               >
                 <GetREPS
+                  :isBackVisible="false"
                   v-if="isGetREPsMenuOpen"
-                  @toogleGetREPsMenu="toogleGetREPsMenu"
+                  @toggleGetREPsMenu="toggleGetREPsMenu"
                   @toggleBuyREPs="popupStore.toggleBuyREPs"
                 />
               </div>
@@ -360,7 +393,7 @@
                 class="inline-flex cursor-pointer"
                 size="small"
                 id="noti-menu-button"
-                @click="toogleNotiMenu"
+                @click="toggleNotiMenu"
               >
                 <notification fill="fill-white" class="scale-110" />
               </OverlayBadge>
@@ -373,7 +406,7 @@
                 aria-labelledby="noti-menu-button"
                 tabindex="-1"
               >
-                <Notification @toogleNotiMenu="toogleNotiMenu" />
+                <Notification @toggleNotiMenu="toggleNotiMenu" />
               </div>
             </div>
             <div class="relative">
@@ -403,7 +436,7 @@
                 aria-labelledby="user-menu-button"
                 tabindex="-1"
               >
-                <PopupAccount :user="userStore.user" />
+                <PopupAccount :user="userStore.user" @closeAllPopups="closeAllPopups" />
               </div>
             </div>
           </template>
@@ -476,13 +509,13 @@
       </div>
     </div>
   </nav>
-  <Login v-model:visible="popupStore.showLoginPopup" />
+  <Login />
   <ForgotPasswordPopup v-model:visible="popupStore.showForgotPasswordPopup" />
   <UploadVideo />
   <VideoDetail />
   <!-- POPUP GET REPS -->
   <CompletePurchaseNoInfo
-    v-if="!isHaveInfo"
+    v-if="!popupStore.isHaveCard"
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
   />

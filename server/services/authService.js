@@ -13,7 +13,7 @@ const generateJwtToken = (user) => {
       const token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_SECRET_KEY,
-        { expiresIn: "15d" }
+        { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
       );
       resolve(token);
     } catch (error) {

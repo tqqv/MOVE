@@ -44,11 +44,28 @@ const fetchViewLiveStreamByUsername = async (username) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const getLiveStream = async (currentPage, pageSize, level, category, sortBy, order) => {
+  try {
+    const params = {
+      page: currentPage,
+      ...(pageSize !== 12 && { pageSize }),
+      ...(level && { level }),
+      ...(category && { category }),
+      ...(sortBy && { sortBy }),
+      ...(order && { order }),
+    };
 
+    const response = await axios.get('/livestream/all', { params });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createLiveStream,
   endLiveStream,
   updateLiveStream,
   fetchLiveStreamByStreamer,
   fetchViewLiveStreamByUsername,
+  getLiveStream,
 };
