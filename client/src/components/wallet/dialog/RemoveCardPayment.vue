@@ -1,9 +1,9 @@
 <script setup>
   import { watch } from 'vue';
   import Dialog from 'primevue/dialog';
-import { deleteCardInfo } from '@/services/payment';
-import { toast } from 'vue3-toastify';
-import { useCardStore } from '@/stores/card.store';
+  import { deleteCardInfo } from '@/services/payment';
+  import { toast } from 'vue3-toastify';
+  import { useCardStore } from '@/stores/card.store';
 
   const props = defineProps({
     isRemoveVisible: Boolean,
@@ -26,16 +26,16 @@ import { useCardStore } from '@/stores/card.store';
     },
   );
 
-  const handleDeleteCardInfor = async() => {
-    const res = await deleteCardInfo(cardStore.card.paymentMethodId)
-    if(res && res.status === 200) {
-      toggleCloseRemove()
-      cardStore.clearCard()
-      toast.success('Card removed successfully.')
+  const handleDeleteCardInfor = async () => {
+    const res = await deleteCardInfo(cardStore.card.paymentMethodId);
+    if (res && res.status === 200) {
+      toggleCloseRemove();
+      cardStore.clearCard();
+      toast.success('Card removed successfully.');
     } else {
-      toast.error('Card remove failed.')
+      toast.error('Card remove failed.');
     }
-  }
+  };
 </script>
 <template>
   <div class="card flex justify-center">
@@ -48,7 +48,7 @@ import { useCardStore } from '@/stores/card.store';
       @hide="unlockScroll"
       @update:visible="toggleCloseRemove"
       :style="{ width: '40rem' }"
-      dismissableMask="true"
+      :dismissableMask="true"
     >
       <div class="space-y-6">
         <span

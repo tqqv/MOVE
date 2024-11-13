@@ -7,7 +7,7 @@
   import FormCardPayment from '@/components/FormCardPayment.vue';
   import { createCardInfo, getClientSecret } from '@/services/payment';
   import { toast } from 'vue3-toastify';
-import { useCardStore } from '@/stores/card.store';
+  import { useCardStore } from '@/stores/card.store';
 
   const props = defineProps({
     isPaymentDetailsVisible: Boolean,
@@ -45,24 +45,23 @@ import { useCardStore } from '@/stores/card.store';
     loadCountries();
   });
 
-
   ////// Payment with Stripeq
   const cardForm = ref(null);
 
   const setupIntentClientSecret = async () => {
-    const res = await getClientSecret()
-    if(res) {
+    const res = await getClientSecret();
+    if (res) {
       // console.log(res);
-      return res.data.data
+      return res.data.data;
     } else {
-      console.error("Get Client Secret failed");
+      console.error('Get Client Secret failed');
       return;
     }
-  }
+  };
 
   const handleSubmit = async () => {
     if (!cardForm.value || !cardForm.value.stripe) {
-      console.error("cardForm or Stripe is undefined");
+      console.error('cardForm or Stripe is undefined');
       return;
     }
 
@@ -89,19 +88,19 @@ import { useCardStore } from '@/stores/card.store';
         const res = await createCardInfo(data);
 
         if (res && res.status === 200) {
-          cardStore.fetchCard()
+          cardStore.fetchCard();
           toast.success('Saved successfully.');
           toggleClosePayment();
         } else {
           toast.error('Insert failed');
         }
       } else {
-        console.error("Error: Confirmation failed");
+        console.error('Error: Confirmation failed');
       }
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
     }
-  }
+  };
 </script>
 
 <template>
@@ -115,7 +114,7 @@ import { useCardStore } from '@/stores/card.store';
       @hide="unlockScroll"
       @update:visible="toggleClosePayment"
       :style="{ width: '40rem' }"
-      dismissableMask="true"
+      :dismissableMask="true"
     >
       <div class="space-y-4">
         <FormCardPayment ref="cardForm" />

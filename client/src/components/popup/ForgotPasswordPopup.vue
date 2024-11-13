@@ -43,7 +43,7 @@
 </script>
 
 <template>
-  <Dialog header="Reset password" :draggable="false" class="w-[568px]" dismissableMask="true">
+  <Dialog header="Reset password" :draggable="false" class="w-[568px]" :dismissableMask="true">
     <div class="space-y-4">
       <div class="space-y-2">
         <label for="email" class="text_para" :class="{ 'text-gray-500': isSubmitting }">

@@ -24,7 +24,7 @@
       header="Almost there"
       :draggable="false"
       class="w-[568px]"
-      dismissableMask="true"
+      :dismissableMask="true"
     >
       <div class="space-y-4">
         <span class="text_para">
