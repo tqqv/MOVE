@@ -3,7 +3,7 @@ const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set, get } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
-const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize } = db;
+const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize, ViewVideo } = db;
 
 const createLivestream = async(data) => {
   try {
@@ -408,6 +408,117 @@ const getAllLivestreamSessionService = async (streamerId, page, pageSize, sortCo
   }
 };
 
+const getAgeData = async (livestreamId) => {
+  const whereCondition = {
+    livestreamId,
+  };
+
+  return await ViewVideo.findAll({
+    where: whereCondition,
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: []
+    }],
+    attributes: [
+      [Sequelize.literal(`
+        CASE
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) < 18 THEN '<18'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 18 AND 24 THEN '18-24'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 25 AND 34 THEN '25-34'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 35 AND 44 THEN '35-44'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'
+          ELSE '>64'
+        END
+      `), 'ageGroup'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['ageGroup'],
+    raw: true
+  });
+};
+
+const getGenderData = async (livestreamId) => {
+  const whereCondition = {
+    livestreamId,
+  };
+
+  return await ViewVideo.findAll({
+    where: whereCondition,
+    include: [{
+      model: User,
+      as: 'viewVideoUser',
+      attributes: [] // Không cần lấy thêm thuộc tính từ User
+    }],
+    attributes: [
+      [Sequelize.literal(`
+        CASE
+          WHEN viewVideoUser.gender = 'Male' THEN 'Male'
+          WHEN viewVideoUser.gender = 'Female' THEN 'Female'
+          ELSE 'Other'
+        END
+      `), 'genderGroup'],
+      [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
+    ],
+    group: ['genderGroup'] // Nhóm theo genderGroup để có thể đếm viewer
+  });
+};
+
+const getDataCountryByIp = async (livestreamId) => {
+  const whereCondition = {
+    livestreamId,
+  };
+
+  if (days) {
+    whereCondition.createdAt = {
+      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
+    };
+  }
+  const countryData = await ViewVideo.findAll({
+    where: whereCondition,
+    attributes: [
+      'country',
+      [Sequelize.fn('COUNT', Sequelize.col('country')), 'viewerCount']
+    ],
+    group: ['country'],
+    raw: true
+  });
+
+  return countryData;
+};
+
+const getStateByCountryAndStreamIdFromIp = async(livestreamId, country) => {
+  try {
+    const whereCondition = {
+      livestreamId,
+      country
+    };
+
+    const stateData = await ViewVideo.findAll({
+      where: whereCondition,
+
+      attributes: [
+        'city',
+        [Sequelize.fn('COUNT', Sequelize.col('city')), 'viewerCount']
+      ],
+      group: ['city'],
+      raw: true
+    });
+
+    return {
+      status: 200,
+      data: stateData,
+      message: `Get list city of ${country} successfully.`
+    }
+  } catch (error) {
+    console.log(error)
+    return {
+      status: 500,
+      data: null,
+      message: error
+    };
+  }
+}
 
 const getLivestreamSessionDetailsService = async (livestreamId) => {
   try {
@@ -431,15 +542,38 @@ const getLivestreamSessionDetailsService = async (livestreamId) => {
             )`),
             'repsEarned'
           ],
+          [
+            Sequelize.literal(`(
+              SELECT AVG(viewTime) as avgView
+                  FROM viewVideos
+                  WHERE viewVideos.livestreamId = Livestream.id
+              )`),
+              'avgView'
+          ]
         ],
       }
     })
 
 
     let newFollowers = await countNewFollowersDuringStream(livestream.streamerId, livestream.createdAt, livestream.duration) || 0;
+
+    const [ageData, genderData, dataByIp] = await Promise.all([
+      getAgeData(livestreamId),
+      getGenderData(livestreamId),
+      getDataCountryByIp(livestreamId)
+    ]);
+
     return {
       status: 200,
-      data: {livestream, newFollowers},
+      data: {
+        livestream,
+        newFollowers,
+        data: {
+          ageData,
+          genderData,
+          dataByIp
+        }
+      },
       message: 'Retrieve data success'
     };
   } catch (error) {
@@ -484,5 +618,6 @@ module.exports = {
   getTopLivestreamService,
   getAllLivestreamService,
   getAllLivestreamSessionService,
-  getLivestreamSessionDetailsService
+  getLivestreamSessionDetailsService,
+  getStateByCountryAndStreamIdFromIp
 }
