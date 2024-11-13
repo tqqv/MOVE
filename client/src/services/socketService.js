@@ -12,7 +12,7 @@ const joinRoom = (channelId) => {
 const listenStreamReady = (callback) => {
   livestreamSocket.off('socketLiveStatus');
   livestreamSocket.on('socketLiveStatus', (arg) => {
-    console.log('Received socketLiveStatus  event with arg:', arg);
+    // console.log('Received socketLiveStatus  event with arg:', arg);
     callback(arg);
   });
 };
@@ -34,4 +34,37 @@ const listenStreamMetrics = (callback) => {
   });
 };
 
-export { joinRoom, listenStreamReady, disconnectLivestream, listenStreamMetrics };
+const listenChatHistory = (callback) => {
+  livestreamSocket.off('message_history');
+  livestreamSocket.on('message_history', (messageHistory) => {
+    // console.log('Received chat message history:', messageHistory);
+    if (callback) {
+      callback(messageHistory);
+    }
+  });
+};
+
+const listenNewMessage = (callback) => {
+  livestreamSocket.on('newMessage', (newMessage) => {
+    // console.log('Received new message:', newMessage);
+    if (callback) {
+      callback(newMessage);
+    }
+  });
+};
+const sendMessage = (channelId, messageData) => {
+  livestreamSocket.emit('chatMessage', {
+    channelId,
+    ...messageData,
+  });
+};
+
+export {
+  joinRoom,
+  listenStreamReady,
+  disconnectLivestream,
+  listenStreamMetrics,
+  listenChatHistory,
+  listenNewMessage,
+  sendMessage,
+};

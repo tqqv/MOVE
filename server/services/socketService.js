@@ -1,6 +1,7 @@
 const intervals = {};   // Lưu trữ các bộ đếm setInterval cho mỗi channelId
 
 const { get } = require("../utils/redis/base/redisBaseService");
+const { getChatHistory, handleChatMessage, validateMessage } = require("../utils/redis/stream/redisChatService");
 const { updateStreamStats, getStreamStats, filterRoomsForDeletion } = require("../utils/redis/stream/redisStreamService");
 
 const getNumOfConnectInAllRooms = () => {
@@ -40,6 +41,10 @@ const onClientJoinChannel = async (socket, channelId) => {
         intervals[channelId] = setInterval(() => broadcastStreamStats(channelId), 30000);
     }
     socket.join(channelId);
+
+    // Lấy chat history
+    const messageHistory = await getChatHistory(channelId);
+    socket.emit('message_history', messageHistory);
 };
 
 // Xử lý khi một client rời khỏi channel
@@ -89,7 +94,34 @@ const connectSocket = (socket) => {
         // socket.join(channelId);
         await onClientJoinChannel(socket, channelId);
     })
+
+    socket.on('chatMessage', async (data) => {
+        try {
+            const { channelId, message, userId, username, avatar } = data;
+            validateMessage(message);
+            const messageData = {
+                userId,
+                username,
+                message,
+                avatar,
+                timestamp: Date.now()
+            };
+
+            // Xử lý và lưu message
+            await handleChatMessage(channelId, messageData);
+            // Broadcast message
+            _io.to(channelId).emit('newMessage', messageData);
+
+        } catch (error) {
+            socket.emit('error', 'Could not send message');
+        }
+    });
+
+    socket.on('leaveRoom', (channelId) => {
+        socket.leave(channelId);
+    });
 }
+
 
 module.exports = {
     connectSocket,
