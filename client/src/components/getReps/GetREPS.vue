@@ -18,7 +18,6 @@
   let hasFetchedCountries = false;
   const isOrderSuccessful = ref(false);
 
-  const isHaveInfo = ref(true);
   const toggleBuyREPs = (selectedOption) => {
     getRepsStore.setSelectedOption(selectedOption);
     if (!hasFetchedCountries) {

@@ -1,5 +1,6 @@
 var jwt = require("jsonwebtoken");
 var responseHandler = require("./responseHandler");
+const { clearCookies } = require("../utils/cookies");
 
 const verifyToken = (req, res, next) => {
   const token = req.cookies.accessToken;
@@ -12,6 +13,10 @@ const verifyToken = (req, res, next) => {
   }
   jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
     if (err) {
+      clearCookies([
+        {name: 'accessToken', options: { httpOnly: true }},
+        {name: 'isLogin'}
+      ])(req, res, next);
       return responseHandler(400, null, "Tokent is invalid")(req, res, next);
     }
     req.user = user;

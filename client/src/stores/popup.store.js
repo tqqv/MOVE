@@ -17,6 +17,7 @@ export const usePopupStore = defineStore('popup', () => {
   const showReportSuccess = ref(false);
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
+  const isHaveCard = ref(false);
 
   const toggleGetREPsMenuOpen = () => {
     showGetREPsMenuOpen.value = !showGetREPsMenuOpen.value;
@@ -139,6 +140,7 @@ export const usePopupStore = defineStore('popup', () => {
     toggleBuyREPs,
     showLoadingPayment,
     toggleLoadingPayment,
+    isHaveCard,
     toggleGetREPsMenuOpen,
     showGetREPsMenuOpen,
   };
