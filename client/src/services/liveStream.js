@@ -61,6 +61,27 @@ const getLiveStream = async (currentPage, pageSize, level, category, sortBy, ord
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const getAllLivestreamSession = async (page, pageSize) => {
+  try {
+    const response = await axios.get('/livestream/streamSessions', {
+      params: {
+        page,
+        pageSize,
+      },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getLiveStreamAnalytics = async (livestreamId) => {
+  try {
+    const response = await axios.get(`/livestream/streamDetails/${livestreamId}`);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createLiveStream,
   endLiveStream,
@@ -68,4 +89,6 @@ export {
   fetchLiveStreamByStreamer,
   fetchViewLiveStreamByUsername,
   getLiveStream,
+  getAllLivestreamSession,
+  getLiveStreamAnalytics,
 };

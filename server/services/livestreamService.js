@@ -345,7 +345,7 @@ const getAllLivestreamSessionService = async (streamerId, page, pageSize, sortCo
   try {
     const listLivestream = await Livestream.findAndCountAll({
       attributes: ["id", "createdAt", "duration"],
-      where: { streamerId },
+      where: { streamerId, isLive: false },
       order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
@@ -353,7 +353,6 @@ const getAllLivestreamSessionService = async (streamerId, page, pageSize, sortCo
 
     // Map through the livestream list to add the 'timeLive' field
     const enhancedList = listLivestream.rows
-    .filter(livestream => livestream.duration !== null)
     .map(livestream => {
       const createdAt = new Date(livestream.createdAt);
       const duration = parseInt(livestream.duration, 10);
