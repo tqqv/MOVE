@@ -15,6 +15,7 @@
     v-model:visible="popupStore.showReportSuccess"
     :header="`Thank you for reporting`"
     class="w-full md:w-[494px]"
+    dismissableMask="true"
   >
     <div class="flex flex-col my-2">
       <h1 class="text-footer text-sm">You reported the {{ props.typeReport }}</h1>

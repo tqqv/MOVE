@@ -115,6 +115,7 @@ import { useCardStore } from '@/stores/card.store';
       @hide="unlockScroll"
       @update:visible="toggleClosePayment"
       :style="{ width: '40rem' }"
+      dismissableMask="true"
     >
       <div class="space-y-4">
         <FormCardPayment ref="cardForm" />

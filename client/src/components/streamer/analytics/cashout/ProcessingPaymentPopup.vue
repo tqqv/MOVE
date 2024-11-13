@@ -21,6 +21,7 @@
       :header="props.title"
       @update:visible="toogleProcessingPaymentVisible"
       :style="{ width: '40rem' }"
+      dismissableMask="true"
     >
       <div class="text-black space-y-8">
         <div class="text-base">
