@@ -156,7 +156,6 @@
       >
         <textarea
           id="commentTextarea"
-          x
           placeholder="Write a comment"
           class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
           @focus="handleFocus"

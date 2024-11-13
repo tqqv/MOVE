@@ -253,12 +253,13 @@
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="break-all text-sm text-black"
       >
-        <span ref="textElement" v-html="displayedText()" />
-        <span v-if="isLongText || isTallText">
-          <button @click="toggleText" class="text-primary font-semibold ml-1">
+        <div ref="textElement" v-html="displayedText()" />
+        <div v-if="isLongText || isTallText">
+          <div v-if="!showFullText" class="text-[#666666]">...</div>
+          <button @click="toggleText" class="text-[#666666] hover:underline font-semibold">
             {{ showFullText ? 'Show less' : 'Read more' }}
           </button>
-        </span>
+        </div>
       </div>
 
       <!-- Like/Dislike -->

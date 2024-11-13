@@ -234,12 +234,14 @@
           <!-- COMMENT -->
           <p class="break-all text-sm text-black">
             {{ displayedText() }}
-            <span v-if="isLongText">
-              <button @click="toggleText" class="text-primary font-semibold ml-1">
-                {{ showFullText ? 'Show less' : 'Read more' }}
+            <div v-if="isLongText">        
+              <div v-if="!showFullText" class="text-[#666666]">...</div>
+              <button @click="toggleText" class="text-[#666666] hover:underline font-semibold">
+                  {{ showFullText ? 'Show less' : 'Read more' }}
               </button>
-            </span>
+            </div>
           </p>
+          
           <!-- REPLY COMMENT -->
           <div class="flex mt-2 gap-x-6 text-sm">
             <div class="flex gap-x-8 items-center text-primary">
