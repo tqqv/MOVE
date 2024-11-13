@@ -40,6 +40,7 @@
       @hide="unlockScroll"
       @update:visible="toggleBuyREPs"
       :style="{ width: '40rem' }"
+      dismissableMask="true"
     >
       <div class="space-y-4">
         <div class="text-base text-[#666666] font-bold">Order Summary</div>

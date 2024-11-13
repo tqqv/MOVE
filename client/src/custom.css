@@ -261,3 +261,10 @@ input::placeholder {
     opacity: 1;
   }
 }
+.p-dialog-mask {
+  overflow: auto !important;
+}
+
+body.p-overflow-hidden {
+  overflow: auto !important;
+}

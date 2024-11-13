@@ -33,6 +33,7 @@
       @hide="unlockScroll"
       @update:visible="toggleCloseRemove"
       :style="{ width: '40rem' }"
+      dismissableMask="true"
     >
       <div class="space-y-6">
         <span

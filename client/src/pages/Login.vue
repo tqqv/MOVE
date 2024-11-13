@@ -37,6 +37,7 @@
       popupStore.showLoginPopup = !popupStore.showLoginPopup && tabStore.clearActiveTab()
     "
     class="w-[560px]"
+    dismissableMask="true"
   >
     <template #header>
       <img :src="logoBlack" alt="Logo" class="h-8 mx-auto" />

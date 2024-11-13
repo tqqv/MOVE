@@ -8,7 +8,7 @@
 
 <template>
   <div>
-    <Button label="Show Reset Successful" @click="showResetSuccessfulPopup = true" />
+    <Button label="Show Reset Successful" @click="showResetSuccessfulPopup = true" dismissableMask="true"/>
 
     <Dialog
       v-model:visible="showResetSuccessfulPopup"
