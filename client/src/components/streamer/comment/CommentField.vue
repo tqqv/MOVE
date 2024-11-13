@@ -54,6 +54,7 @@
       emit('handleSendCommentReply', newReply);
       emit('updateTotalRepliesCount', props.comment.totalRepliesCount + 1);
       commentText.value = '';
+      commentText.blur();
     } catch (error) {
       console.error('Error posting comment:', error);
     }
@@ -61,6 +62,14 @@
   const autoResize = (textarea) => {
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
+  };
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' && !event.shiftKey && isCommentNotEmpty.value) {
+      event.preventDefault();
+      handleSend();
+    } else if (event.key === 'Enter' && event.shiftKey) {
+      autoResize(document.getElementById('commentTextarea'));
+    }
   };
 </script>
 
