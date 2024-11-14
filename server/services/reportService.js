@@ -222,7 +222,7 @@ const reportComment = async(userId, commentId, reportTypeId) => {
 
 const reportChatMessages = async(userId, content, reportTypeId, accountId) => {
   try {
-    if (!userId || !content || !reportTypeId, accountId) {
+    if (!userId || !content || !reportTypeId  || !accountId) {
       return {
         status: 400,
         data: null,

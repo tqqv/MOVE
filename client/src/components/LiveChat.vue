@@ -9,6 +9,7 @@
   import { listenChatHistory, listenNewMessage, sendMessage } from '@/services/socketService';
   import Warning from './icons/warning.vue';
   import FollowToChat from './chatOnLiveStream/FollowToChat.vue';
+  import ReportChat from './chatOnLiveStream/ReportChat.vue';
 
   const props = defineProps({
     isStreamer: Boolean,
@@ -28,7 +29,9 @@
   // follower can chat
   const showFollowPopup = ref(false);
   const errorMessage = ref('');
-
+  // open report chat
+  const showReportChat = ref(false);
+  const selectedIndex = ref(null);
   const handleOpenLiveChat = () => {
     openLiveChat.value = !openLiveChat.value;
   };
@@ -118,10 +121,15 @@
       errorMessage.value = '';
     }
   });
+  // REPORT CHAT
+  const handleOpenOptionChat = (index) => {
+    if (selectedIndex.value === index) {
+      selectedIndex.value = null;
+    } else {
+      selectedIndex.value = index;
+    }
+  };
 
-  watch(() => {
-    console.log(isChannelFollowed.value);
-  });
 
   onMounted(() => {
     fetchChat();
@@ -160,7 +168,7 @@
     >
       <!-- CONTENT -->
       <div
-        class="max-h-full h-[109px] flex-grow pb-1 relative"
+        class="max-h-full h-[30px] flex-grow pb-1 relative"
         :class="{ 'max-h-[440px]  h-[70px]': isStreamer }"
       >
         <div
@@ -169,7 +177,13 @@
           @scroll="handleScroll"
         >
           <div class="flex flex-col gap-y-5">
-            <div v-for="userChat in chatMessages" :key="userChat.userId" class="text-[13px]">
+            <div v-for="(userChat, index) in chatMessages" :key="index" class="text-[13px]">
+              <ReportChat
+                v-if="selectedIndex === index"
+                :userChat="userChat"
+                :userReportId="userStore.user?.id"
+                @handleOpenOptionChat="handleOpenOptionChat"
+              />
               <div class="inline-block mr-1">
                 <div class="flex gap-x-1.5 truncate">
                   <h1 class="text-body">{{ formatTimeChatInLive(userChat.timestamp) }}</h1>
@@ -179,7 +193,12 @@
                     alt=""
                   />
                   <div class="flex gap-x-0.5 max-w-[100px]">
-                    <h2 class="font-bold truncate">{{ userChat.username }}</h2>
+                    <h2
+                      class="font-bold truncate cursor-pointer"
+                      @click="handleOpenOptionChat(index)"
+                    >
+                      {{ userChat.username }}
+                    </h2>
                     <p class="text-black">:</p>
                   </div>
                 </div>

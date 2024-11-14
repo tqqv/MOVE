@@ -31,7 +31,7 @@
     v-model:visible="popupStore.showReportChannel"
     :header="`Report ${channelName}`"
     class="w-full md:w-[494px]"
-    dismissableMask="true"
+    :dismissableMask="true"
     ><div class="flex flex-col gap-y-4 my-2">
       <CheckboxCustom
         v-for="(option, index) in reportOptions"

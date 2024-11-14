@@ -36,7 +36,7 @@
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
 
   const selectLevelWorkoutOptions = ref('');
-  const selectedSortBy = ref(props.sortByOptions[0].value);
+  const selectedSortBy = ref(props.sortByOptions[0].sortBy);
   const selectedOrder = ref(props.sortByOptions[0].order);
 
   const onPageChange = (event) => {
@@ -50,7 +50,7 @@
 
   // CREATE PARAM TO BE
   const handleSortChange = (newValue) => {
-    selectedSortBy.value = newValue.value || '';
+    selectedSortBy.value = newValue.sortBy || '';
     selectedOrder.value = newValue.order;
   };
 

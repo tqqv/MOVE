@@ -8,13 +8,16 @@
 
 <template>
   <div>
-    <Button label="Show Reset Successful" @click="showResetSuccessfulPopup = true" dismissableMask="true"/>
-
+    <Button
+      label="Show Reset Successful"
+      @click="showResetSuccessfulPopup = true"
+    />
     <Dialog
       v-model:visible="showResetSuccessfulPopup"
       header="Password reset successful"
       class="w-[424px]"
       :draggable="false"
+      :dismissableMask="true"
     >
       <div class="space-y-4">
         <span class="text_para">
