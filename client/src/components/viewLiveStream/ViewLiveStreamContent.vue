@@ -16,6 +16,7 @@
     connectOBS: String,
     liveStatus: String,
     liveStreamData: Array,
+    metricsData: Object,
   });
 
   onMounted(() => {
@@ -42,6 +43,7 @@
   <div class="container py-6">
     <OfflineTitle
       :livestream="props.liveStreamData?.livestream"
+      :metricsData="props.metricsData"
       titleRate="Rate Stream"
       reportType="stream"
     />

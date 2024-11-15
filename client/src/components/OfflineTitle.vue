@@ -31,6 +31,7 @@
       type: String,
       default: 'video',
     },
+    metricsData: Object,
   });
   const emit = defineEmits(['updateRate']);
   const isMenuVisible = ref(false);
@@ -176,25 +177,25 @@
     <div class="flex items-center">
       <rateIcon class="mr-2 scale-125" />
       <span class="text-[20px] font-bold">{{
-        formatRating(video?.ratings || livestream?.ratings)
+        formatRating(video?.ratings ?? props.metricsData?.avgRates)
       }}</span>
     </div>
   </div>
   <div class="flex items-center mb-2 text-[13px] mt-2">
-    <span class="text-red">{{ formatView(video?.viewCount) }} view</span>
+    <span class="text-red">
+      {{ formatView(video?.viewCount ?? props.metricsData?.currentViews) }} view
+    </span>
     <span class="font-bold text-sm px-2">•</span>
     <span class="text-primary">{{ video?.category.title }}</span>
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">
       <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
-        {{
-          video?.levelWorkout?.levelWorkout ||
-          livestream?.livestreamLevelWorkout?.levelWorkout ||
-          'N/A'
-        }}
+        {{ video?.levelWorkout?.levelWorkout || livestream?.livestreamLevelWorkout?.levelWorkout }}
       </span>
-      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{ duration }}</span>
+      <span v-if="video" class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
+        duration
+      }}</span>
     </div>
     <div class="flex items-center gap-9">
       <Rate

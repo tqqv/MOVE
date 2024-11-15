@@ -6,14 +6,19 @@
   import ViewLiveStreamContent from '@/components/viewLiveStream/ViewLiveStreamContent.vue';
   import { onMounted, ref, watch } from 'vue';
   import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
-  import { joinRoom, listenChatHistory, listenStreamReady } from '@/services/socketService';
+  import {
+    joinRoom,
+    listenChatHistory,
+    listenStreamMetrics,
+    listenStreamReady,
+  } from '@/services/socketService';
 
   const route = useRoute();
   const connectOBS = ref(null);
   const liveStatus = ref(null);
   const username = route.params.username;
   const liveStreamData = ref([]);
-
+  const metricsData = ref([]);
   const fetchUserViewLive = async (username) => {
     try {
       const response = await fetchViewLiveStreamByUsername(username);
@@ -34,6 +39,11 @@
         connectOBS.value = isReady;
         fetchUserViewLive(username);
       });
+
+      listenStreamMetrics((metrics) => {
+        metricsData.value = metrics;
+        console.log('Stream Metrics:', metrics);
+      });
     }
   };
 
@@ -52,6 +62,7 @@
   watch(() => {
     console.log('Connectobs : ', connectOBS.value);
     console.log('LiveServer : ', liveStatus.value);
+    console.log('live', liveStreamData);
   });
 </script>
 
@@ -65,6 +76,7 @@
         :liveStatus="liveStatus"
         :username="username"
         :liveStreamData="liveStreamData"
+        :metricsData="metricsData"
       />
     </div>
     <LiveChat :liveStreamData="liveStreamData.channel?.id" />
