@@ -101,7 +101,7 @@ const register = async (userData) => {
       const newUser = new User({
         email: userData.email,
         password: hash,
-        avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
+        avatar: "https://res.cloudinary.com/dg9imqwrd/image/upload/v1731636620/pgxv1tkwjvz7rkwy2ked.png",
         referralCode : referralCode,
         username: "user_" + referralCode
       });
