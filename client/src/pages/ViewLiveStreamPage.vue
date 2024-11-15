@@ -14,6 +14,7 @@
   } from '@/services/socketService';
 
   const route = useRoute();
+  const router = useRouter();
   const connectOBS = ref(null);
   const liveStatus = ref(null);
   const username = route.params.username;
@@ -22,10 +23,11 @@
   const fetchUserViewLive = async (username) => {
     try {
       const response = await fetchViewLiveStreamByUsername(username);
-      // if (!response.data?.channel?.isLive) {
-      //   router.push(`/user/${username}`);
-      // }
-      liveStreamData.value = response.data;
+      if (!response.success) {
+        router.push('/404');
+      } else {
+        liveStreamData.value = response.data;
+      }
     } catch (error) {
       console.log(error);
     }

@@ -186,7 +186,7 @@
       {{ formatView(video?.viewCount ?? props.metricsData?.currentViews) }} view
     </span>
     <span class="font-bold text-sm px-2">•</span>
-    <span class="text-primary">{{ video?.category.title }}</span>
+    <span class="text-primary">{{ video?.category.title || livestream?.category?.title }}</span>
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">

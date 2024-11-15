@@ -225,6 +225,10 @@ const getLivestreamByUserNameService = async (username) => {
           as: 'subscribe',
           attributes: [], // Exclude individual Subscribe attributes
         },
+        {
+          model: User,
+          attributes: ['username'],
+        },
       ]
     });
     console.log("channel.isLive: ", channel.isLive);

@@ -311,7 +311,11 @@
                   <div class="px-4 py-5">
                     <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                       <RouterLink
-                        to="/streaming/stream-setup"
+                        :to="
+                          !userStore.user?.isLive
+                            ? '/streaming/stream-setup'
+                            : '/streaming/dashboard-live'
+                        "
                         class="flex flex-row items-center gap-x-2 group cursor-pointer"
                       >
                         <GoLive />
