@@ -1,8 +1,9 @@
+const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set, get } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
-const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Sequelize } = db;
+const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize } = db;
 
 const createLivestream = async(data) => {
   try {
@@ -207,6 +208,28 @@ const getLivestreamByUserNameService = async (username) => {
     });
     const channel = await Channel.findOne({
       where: { userId: user.id},
+      attributes: {
+        include: [
+          [
+            // Count the number of subscribes for this channel
+            Sequelize.literal(`
+              (SELECT COUNT(*) FROM subscribes WHERE subscribes.channelId = Channel.id)`
+            ),
+            "followCount"
+          ]
+        ],
+      },
+      include: [
+        {
+          model: Subscribe,
+          as: 'subscribe',
+          attributes: [], // Exclude individual Subscribe attributes
+        },
+        {
+          model: User,
+          attributes: ['username'],
+        },
+      ]
     });
     console.log("channel.isLive: ", channel.isLive);
 
@@ -340,6 +363,140 @@ const updateLivestream = async(data) => {
   }
 }
 
+const getAllLivestreamSessionService = async (streamerId, page, pageSize, sortCondition) => {
+  try {
+    const listLivestream = await Livestream.findAndCountAll({
+      attributes: ["id", "createdAt", "duration"],
+      where: { streamerId },
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    // Map through the livestream list to add the 'timeLive' field
+    const enhancedList = listLivestream.rows
+    .filter(livestream => livestream.duration !== null)
+    .map(livestream => {
+      const createdAt = new Date(livestream.createdAt);
+      const duration = parseInt(livestream.duration, 10);
+      const endDateTime = new Date(createdAt.getTime() + duration * 60000);
+
+      // Manually format start date as "11 Nov 2024"
+      const day = String(createdAt.getDate()).padStart(2, '0');
+      const month = createdAt.toLocaleString('en-US', { month: 'short' });
+      const year = createdAt.getFullYear();
+      const formattedStartDate = `${day} ${month} ${year}`;
+
+      // Format times as "02:05 PM" and "03:30 PM"
+      const timeFormatter = new Intl.DateTimeFormat('en-US', {
+        hour: '2-digit', minute: '2-digit', hour12: true
+      });
+      const startTime = timeFormatter.format(createdAt);
+      const endTime = timeFormatter.format(endDateTime);
+
+      // Check if the end date is different from the start date
+      const endDay = String(endDateTime.getDate()).padStart(2, '0');
+      const endMonth = endDateTime.toLocaleString('en-US', { month: 'short' });
+      const endYear = endDateTime.getFullYear();
+      const formattedEndDate = `${endDay} ${endMonth} ${endYear}`;
+
+      // Construct "timeLive" based on whether the dates are the same or different
+      const timeLive = (formattedStartDate === formattedEndDate)
+        ? `${formattedStartDate} - ${startTime} to ${endTime}`
+        : `${formattedStartDate} - ${startTime} to ${formattedEndDate} - ${endTime}`;
+
+      return {
+        ...livestream.toJSON(),
+        timeLive,
+      };
+    });
+
+    return {
+      status: 200,
+      data: {
+        listLivestream: { ...listLivestream, rows: enhancedList },
+        totalPages: Math.ceil(listLivestream.count / pageSize)
+      },
+      message: 'Retrieve data success'
+    };
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
+
+const getLivestreamSessionDetailsService = async (livestreamId) => {
+  try {
+    const livestream = await Livestream.findOne({
+      where: { id: livestreamId },
+      attributes: {
+        include: [
+          [
+            Sequelize.literal(`(
+            SELECT AVG(rating) as ratings
+                FROM ratings
+                WHERE ratings.livestreamId = Livestream.id
+            )`),
+            'ratings'
+          ],
+          [
+            Sequelize.literal(`(
+            SELECT SUM(REPs) as REPs
+                FROM donations
+                WHERE donations.livestreamId = Livestream.id
+            )`),
+            'repsEarned'
+          ],
+        ],
+      }
+    })
+
+
+    let newFollowers = await countNewFollowersDuringStream(livestream.streamerId, livestream.createdAt, livestream.duration) || 0;
+    return {
+      status: 200,
+      data: {livestream, newFollowers},
+      message: 'Retrieve data success'
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+}
+
+const countNewFollowersDuringStream = async (channelId, createdAt, duration) => {
+  try {
+    const durationInMinutes = parseInt(duration, 10);
+    const streamStartTime = new Date(createdAt);
+    const streamEndTime = new Date(streamStartTime.getTime() + durationInMinutes * 60000);
+
+    const followerCount = await Subscribe.count({
+      where: {
+        channelId,
+        createdAt: {
+          [Op.between]: [streamStartTime, streamEndTime] // Filter by the stream's time range
+        }
+      }
+    });
+
+    return followerCount;
+  } catch (error) {
+    console.error(`Error counting followers for channel ${channelId}:`, error);
+    throw error;
+  }
+};
+
+
+
 module.exports = {
   getLivestreamService,
   getLivestreamByUserNameService,
@@ -347,5 +504,7 @@ module.exports = {
   getLivestreamStatistics,
   updateLivestream,
   getTopLivestreamService,
-  getAllLivestreamService
+  getAllLivestreamService,
+  getAllLivestreamSessionService,
+  getLivestreamSessionDetailsService
 }

@@ -80,9 +80,12 @@
 
   <div v-else class="bg-white shadow-lg p-6 rounded-md text-black space-y-2">
     <div class="space-y-4">
-      <div class="flex items-center space-x-1 text-primary cursor-pointer">
+      <div
+        @click="goBackToCountries"
+        class="flex items-center space-x-1 text-primary cursor-pointer"
+      >
         <i class="pi pi-angle-left pt-[1px]" />
-        <span @click="goBackToCountries">Back to countries</span>
+        <span>Back to countries</span>
       </div>
       <div class="text-lg font-bold whitespace-nowrap flex items-center gap-2">
         <span>{{ dataByIp[selectedCountryIndex].country }}</span>

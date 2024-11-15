@@ -7,7 +7,7 @@
   import FormCardPayment from '@/components/FormCardPayment.vue';
   import { usePopupStore, useGetRepsStore, useUserStore } from '@/stores';
   import { useCardStore } from '@/stores/card.store';
-import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
+  import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
 
   const props = defineProps({
     title: String,
@@ -22,19 +22,19 @@ import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
   const isCheckMark = ref(false);
 
   const setupIntentClientSecret = async () => {
-    const res = await getClientSecret()
-    if(res) {
+    const res = await getClientSecret();
+    if (res) {
       // console.log(res);
-      return res.data.data
+      return res.data.data;
     } else {
-      console.error("Get Client Secret failed");
+      console.error('Get Client Secret failed');
       return;
     }
-  }
+  };
 
-  const handleSaveCard = async() => {
+  const handleSaveCard = async () => {
     if (!cardForm.value || !cardForm.value.stripe) {
-      console.error("cardForm or Stripe is undefined");
+      console.error('cardForm or Stripe is undefined');
       return;
     }
 
@@ -61,22 +61,22 @@ import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
         const res = await createCardInfo(data);
 
         if (res && res.status === 200) {
-          cardStore.fetchCard()
+          cardStore.fetchCard();
           console.log('Card saved successfully.');
         } else {
           console.log('Insert failed');
         }
       } else {
-        console.error("Error: Confirmation failed");
+        console.error('Error: Confirmation failed');
       }
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
     }
-  }
+  };
 
-  const handleUseCardOneTime = async() => {
+  const handleUseCardOneTime = async () => {
     if (!cardForm.value || !cardForm.value.stripe) {
-      console.error("cardForm or Stripe is undefined");
+      console.error('cardForm or Stripe is undefined');
       return;
     }
 
@@ -89,34 +89,33 @@ import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
         billing_details: { name: cardName },
       });
 
-      console.log("Check payment ne: ", paymentMethod);
+      console.log('Check payment ne: ', paymentMethod);
 
-
-      return paymentMethod.paymentMethod.id
+      return paymentMethod.paymentMethod.id;
     } catch (error) {
-      console.error("Error:", error.message);
+      console.error('Error:', error.message);
     }
-  }
+  };
 
   const handleCheckout = async (paymentMethodId) => {
     const dataCheckout = {
       paymentMethodId: paymentMethodId,
       repPackageId: getRepsStore.selectedOption.id,
-    }
-    const res = await checkout(dataCheckout)
+    };
+    const res = await checkout(dataCheckout);
     if (res && res.status === 200) {
       userStore.user.REPs += getRepsStore.selectedOption.rep;
-    } else if(res.status === 201) {
+    } else if (res.status === 201) {
       // toast.info('Payment has been initiated, please wait.')
       console.log('Payment has been initiated, please wait.');
     } else {
       // toast.error("Payment failed!")
       console.log('Payment failed!');
     }
-  }
+  };
 
-  const toggleLoadPayment = async() => {
-    if(isCheckMark.value){
+  const toggleLoadPayment = async () => {
+    if (isCheckMark.value) {
       await handleSaveCard();
       await handleCheckout(cardStore.card.paymentMethodId);
     } else {
@@ -132,7 +131,6 @@ import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
 
     getRepsStore.clearSelectedOption();
   };
-
 </script>
 
 <template>
@@ -146,6 +144,7 @@ import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
       @hide="unlockScroll"
       @update:visible="toggleBuyREPs"
       :style="{ width: '40rem' }"
+      :dismissableMask="true"
     >
       <div class="space-y-4">
         <div class="text-base text-[#666666] font-bold">Order Summary</div>
@@ -179,7 +178,6 @@ import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
           :checked="isCheckMark"
           groupName="checkMark"
           @update:modelValue="(value) => (isCheckMark = value)"
-
         />
         <div class="flex justify-center mt-4">
           <button @click="toggleLoadPayment" class="btn w-1/3">Submit</button>

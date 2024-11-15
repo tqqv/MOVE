@@ -16,7 +16,6 @@
   const chartData = ref(null);
   const chartOptions = ref(null);
 
-  // Danh sách nhóm tuổi mặc định với viewerCount là 0
   const defaultAgeGroups = [
     { ageGroup: 'Under 18', viewerCount: 0 },
     { ageGroup: '18-24', viewerCount: 0 },

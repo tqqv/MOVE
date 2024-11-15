@@ -31,10 +31,10 @@
 </script>
 <template>
   <!-- Second Video Player -->
-  <div class="relative min-h-[560px] w-full max-w-full bg-black flex justify-center items-center">
+  <div class="relative  w-full max-w-full bg-black flex justify-center items-center">
     <video
       ref="frameVideo"
-      class="w-full h-full object-cover"
+      class="w-[70vw] h-[70%] object-cover"
       playsinline
       controls
       autoplay

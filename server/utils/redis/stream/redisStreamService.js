@@ -20,7 +20,7 @@ const updateStreamStats = async (channelId, action, field, amount) => {
                         await set(highestKey, newValue);
                     }
                 }
-                else if (field === 'totalLikes' || field === 'totalShares' || field === 'totalViews') {
+                else if (field === 'totalLikes' || field === 'totalShares' || field === 'totalViews' || field === 'newFollowers') {
                     newValue = await increment(key, amount);
                 }
                 else if (field === 'totalReps') {
@@ -73,8 +73,9 @@ const getStreamStats = async (channelId) => {
             totalReacts: parseInt(results[3][1] || '0'),
             totalShares: parseInt(results[4][1] || '0'),
             totalReps: parseInt(results[5][1] || '0'),
-            avgRates: parseInt(results[6][1] || '0'),
-            totalLikes: parseInt(results[7][1] || '0')
+            avgRates: parseFloat(results[6][1] || '0'),
+            totalLikes: parseInt(results[7][1] || '0'),
+            newFollowers: parseInt(results[8][1] || '0')
         };
         let liveStatus = await get(`channel_${channelId}_live_status`);
         console.log(statistics);

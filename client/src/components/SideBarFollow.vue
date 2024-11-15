@@ -32,11 +32,11 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[251px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[241px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
   >
-    <div class="flex flex-col p-4">
+    <div class="flex flex-col py-4 px-3">
       <div class="flex items-center my-1 justify-between">
-        <h2 class="uppercase text_subTitle text-[14px]">follow channels</h2>
+        <h2 class="uppercase text_subTitle text-[13px]">follow channels</h2>
         <i
           class="pi pi-arrow-left cursor-pointer text-[16px] p-2 rounded-full hover:bg-primary-light/30"
           style="font-weight: 800"
@@ -57,7 +57,7 @@
           >Sign up</Button
         >
       </div>
-      <div class="flex flex-col gap-y-4 my-5">
+      <div class="flex flex-col gap-y-4 my-3">
         <!-- NONE FOLLOWING CHANNEL -->
         <div
           v-if="userStore.followers.length === 0 && userStore.user"
@@ -76,12 +76,12 @@
           v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
-          class="flex items-center gap-x-3 cursor-pointer"
+          class="flex items-center justify-start gap-x-2 cursor-pointer hover:bg-primary-light/20 rounded-md p-1"
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
           <div
             :class="[
-              'flex items-center justify-center size-14 rounded-full p-[2px] flex-shrink-0',
+              'flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0',
               userFollower.followChannel.isLive
                 ? 'border-[3px] border-red'
                 : 'border-[3px] border-transparent',
@@ -90,16 +90,16 @@
             <img
               :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="size-11 rounded-full object-cover p-[1.5px]"
+              class="w-full h-full rounded-full object-cover"
             />
           </div>
 
-          <div class="flex flex-col gap-y-1 truncate">
-            <div class="flex flex-row gap-x-3">
-              <p class="text_para truncate">
+          <div class="flex flex-col truncate">
+            <div class="flex flex-row items-center gap-x-5">
+              <p class="text_para truncate" :title="userFollower.followChannel?.channelName">
                 {{ userFollower.followChannel?.channelName }}
               </p>
-              <verified v-if="userFollower.followChannel.popularCheck" class="mx-1 fill-blue" />
+              <verified width="16px" height="16px" v-if="userFollower.followChannel.popularCheck" class="mx-3 fill-blue" />
             </div>
             <div
               v-if="userFollower.isStreaming"
@@ -107,7 +107,7 @@
             >
               <p>Just move</p>
               •
-              <p class="">{{ userFollower.viewers }} viewers</p>
+              <p>{{ userFollower.viewers }} viewers</p>
             </div>
             <!-- STREAMING FASLE NÈ-->
             <div v-else class="flex flex-row text_secondary text-body text-[12px] gap-x-2">
@@ -121,11 +121,11 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[80px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[70px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col px-2">
       <div
-        class="flex items-center justify-center hover:bg-gray-light rounded-md my-2 py-5 px-3 cursor-pointer"
+        class="flex items-center justify-center hover:bg-gray-light rounded-md my-1.5 py-4 px-3 cursor-pointer"
         v-tooltip="'Expand sidebar '"
         @click="handleShow"
       >
@@ -152,22 +152,25 @@
       </RouterLink>
       <div class="flex flex-col gap-y-2 my-2 items-center">
         <RouterLink
+          v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
-          v-tooltip="userFollower.followChannel.channelName"
           :key="userFollower.id"
-          class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-3"
+          class="flex items-center justify-center gap-x-3 cursor-pointer hover:bg-primary-light/20 rounded-md p-1"
+          v-tooltip="userFollower.followChannel.channelName"
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
-             <div
+          <div
             :class="[
-              'flex items-center justify-center border-[3px] rounded-full flex-shrink-0 ',
-              userFollower.followChannel.isLive ? ' border-red' : 'border-transparent',
+              'flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0',
+              userFollower.followChannel.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
             ]"
           >
             <img
               :src="userFollower.followChannel?.avatar || 'default-avatar.png'"
               alt="Avatar"
-              class="size-10 rounded-full object-cover p-[1.5px]"
+              class="w-full h-full rounded-full object-cover"
             />
           </div>
         </RouterLink>

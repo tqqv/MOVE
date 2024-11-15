@@ -5,15 +5,20 @@ module.exports = (sequelize, DataTypes) => {
   class ViewVideo extends Model {
     static associate(models) {
         // Define relationships if necessary
-        this.belongsTo(models.User, {
-          as: 'viewVideoUser',
-          foreignKey: 'viewerId'
-        });
+      this.belongsTo(models.User, {
+        as: 'viewVideoUser',
+        foreignKey: 'viewerId'
+      });
 
-        this.belongsTo(models.Video, {
-            as: 'viewVideosVideo',
-            foreignKey: 'videoId'
-        });
+      this.belongsTo(models.Video, {
+          as: 'viewVideosVideo',
+          foreignKey: 'videoId'
+      });
+
+      this.belongsTo(models.Livestream, {
+        as: 'viewStream',
+        foreignKey: 'livestreamId'
+      });
     }
   }
   ViewVideo.init(
@@ -36,13 +41,23 @@ module.exports = (sequelize, DataTypes) => {
       },
       videoId: {
           type: DataTypes.UUID,
-          allowNull: false,
+          allowNull: true,
           references: {
               model: 'videos', // Reference to the categories table
               key: 'id',
           },
           onDelete: 'CASCADE',
           onUpdate: 'CASCADE',
+      },
+      livestreamId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+            model: 'livestreams', // Reference to the categories table
+            key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
       viewTime: {
         type:DataTypes.INTEGER,
