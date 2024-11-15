@@ -15,7 +15,9 @@
   const tabStore = useTabStore();
 
   const avatar = computed(
-    () => userStore.user?.avatar || 'https://img.upanh.tv/2024/06/18/user-avatar.png',
+    () =>
+      userStore.user?.avatar ||
+      'https://res.cloudinary.com/dg9imqwrd/image/upload/v1731636620/pgxv1tkwjvz7rkwy2ked.png',
   );
 
   const props = defineProps({

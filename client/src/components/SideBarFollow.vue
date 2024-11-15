@@ -76,7 +76,7 @@
           v-if="userStore.followers.length && userStore.user"
           v-for="userFollower in userStore.followers"
           :key="userFollower.id"
-          class="flex items-center justify-start gap-x-2 cursor-pointer hover:bg-primary-light/20 rounded-md py-2 px-1"
+          class="flex items-center justify-start gap-x-2 cursor-pointer hover:bg-primary-light/20 rounded-md p-1"
           :to="`/user/${userFollower.followChannel.User.username}`"
         >
           <div
