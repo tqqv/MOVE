@@ -259,16 +259,18 @@ const searchVideoChannel = async(data, limit, offset) => {
         'id',
         'imgUrl',
         'title',
-        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
-      ],
-      include: [
-        {
-          model: Video,
-          as: 'categoryVideos',
-          attributes: [],
-        }
+        [
+          sequelize.literal(`(
+            SELECT SUM(viewCount)
+            FROM videos AS categoryVideos
+            WHERE categoryVideos.categoryId = Category.id
+          )`),
+          'totalViews'
+        ]
       ],
       group: ['Category.id'],
+      limit: limitInt,
+      offset: offsetInt
     });
 
     const videos = await Video.findAll({
@@ -334,9 +336,19 @@ const searchVideoChannel = async(data, limit, offset) => {
         ]
       },
       order: [
-        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
+        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM subscribes
+            WHERE subscribes.channelId = Channel.id
+          )`),
+          'DESC'
+        ],  // co channel xep truoc
         ["username", "ASC"],
       ],
+      limit: limitInt,
+      offset: offsetInt,
     });
 
     return {

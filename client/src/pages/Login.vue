@@ -1,4 +1,5 @@
 <script setup>
+  import { watch } from 'vue';
   import LoginForm from '@/components/login/LoginPopup.vue';
   import SignupForm from '@/components/login/SignupPopup.vue';
   import Dialog from 'primevue/dialog';
@@ -9,25 +10,39 @@
   import TabPanel from 'primevue/tabpanel';
   import logoBlack from '@assets/logoBlack.svg';
   import { useTabStore } from '@/stores/tab.store';
+  import { usePopupStore } from '@/stores/popup.store';
+
   import { computed } from 'vue';
+  const tabStore = useTabStore();
 
   const scrollableTabs = [
     { title: 'Login', value: '0', component: LoginForm },
     { title: 'Sign Up', value: '1', component: SignupForm },
   ];
-  const tabStore = useTabStore();
-  const onTabChange = (event) => {
-    tabStore.setActiveTab(event.value);
-  };
+  const popupStore = usePopupStore();
   const activeTab = computed(() => tabStore.activeTab);
+
+  const onTabChange = (event) => {
+    console.log('Tab changed to:', event);
+    tabStore.setActiveTab(event);
+  };
 </script>
 
 <template>
-  <Dialog modal :draggable="false" class="w-[560px]">
+  <Dialog
+    :visible="popupStore.showLoginPopup"
+    :modal="true"
+    :draggable="false"
+    @update:visible="
+      popupStore.showLoginPopup = !popupStore.showLoginPopup && tabStore.clearActiveTab()
+    "
+    class="w-[560px]"
+    :dismissableMask="true"
+  >
     <template #header>
       <img :src="logoBlack" alt="Logo" class="h-8 mx-auto" />
     </template>
-    <Tabs :value="activeTab" @tab-change="onTabChange" scrollable class="mb-4">
+    <Tabs :value="activeTab" @update:value="onTabChange" scrollable class="mb-4">
       <TabList>
         <Tab v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
           {{ tab.title }}

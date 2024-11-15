@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService } = require("../services/livestreamService.js");
+const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService, getAllLivestreamService, getAllLivestreamSessionService, getLivestreamSessionDetailsService } = require("../services/livestreamService.js");
 
 
 const createLivestreamController = async (req, res, next) => {
@@ -30,7 +30,7 @@ const getAllLivestreamController = async (req, res, next) => {
     sortBy: req.query.sortBy || 'totalView',
     order: req.query.order || 'desc'
   };
-  const result = await getTopLivestreamService(page, pageSize, level, category, sortCondition);
+  const result = await getAllLivestreamService(page, pageSize, level, category, sortCondition);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
@@ -55,6 +55,27 @@ const updateLivestreamController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getAllLivestreamSessionController = async (req, res, next) => {
+  const streamerId = req.user.channelId;
+
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'createdAt',
+    order: req.query.order || 'desc'
+  };
+  const result = await getAllLivestreamSessionService(streamerId, page, pageSize, sortCondition);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getLivestreamSessionDetailController = async (req, res, next) => {
+  const livestreamId = req.params.livestreamId;
+  const result = await getLivestreamSessionDetailsService(livestreamId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   createLivestreamController,
   getLivestreamStatisticController,
@@ -62,5 +83,7 @@ module.exports = {
   updateLivestreamController,
   getLivestreamController,
   getLivestreamByUserController,
-  getAllLivestreamController
+  getAllLivestreamController,
+  getAllLivestreamSessionController,
+  getLivestreamSessionDetailController
 }

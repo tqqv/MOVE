@@ -14,7 +14,6 @@ userRouter.get("/getRequestChannelById", verifyUser, getRequestChannelController
 // userRouter.get("/viewUser/:username", viewUserController)
 
 userRouter.get("/getListFollower/", verifyUser, getListSubscribeOfUser)
-userRouter.get("/:username", verifyUser, checkExistUsername)
 
 // unsub/sub
 userRouter.post("/followChannel", verifyUser, followChannelController)
@@ -22,5 +21,7 @@ userRouter.post("/followCategory", verifyUser, followCategoryController)
 userRouter.get("/getAllInforFollow", verifyUser, getAllInforFollowController)
 
 userRouter.get("/checkUserFollowCate/:cateId", verifyUser, checkUserFollowCateController)
+userRouter.get("/:username", verifyUser, checkExistUsername)
+
 
 module.exports = userRouter;

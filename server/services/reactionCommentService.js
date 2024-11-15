@@ -35,7 +35,7 @@ const reactionComment = async(userId, commentId, reactionType) => {
 
       return {
         status: 200,
-        message: "Like comment successfully."
+        message: reactionType === 'like' ? "Like comment successfully." : "Dislike comment successfully."
       }
     }
 
@@ -46,7 +46,7 @@ const reactionComment = async(userId, commentId, reactionType) => {
 
         return {
           status: 200,
-          message: "Updated successfully.."
+          message: "Updated to like successfully."
         }
       }else {
         reactComment.reactionType = "dislike"
@@ -54,7 +54,7 @@ const reactionComment = async(userId, commentId, reactionType) => {
 
         return {
           status: 200,
-          message: "Updated successfully."
+          message: "Updated to dislike successfully."
         }
       }
     }

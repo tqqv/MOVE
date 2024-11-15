@@ -31,6 +31,7 @@
   const levelworkoutsId = ref(null);
   const usernameDetails = ref(null);
   const videos = ref([]);
+  const isCommentable = ref(null);
   let playerInstance = null;
   const isLoading = ref(true);
   let actualWatchTime = 0;
@@ -69,6 +70,7 @@
         };
         totalFollower.value = res.data.data.channel.followCount;
         channelId.value = res.data.data.channelId;
+        isCommentable.value = res.data.data.isCommentable;
       }
     } catch (error) {
       if (error.response && error.response.status === 404) {
@@ -186,7 +188,12 @@
         </div>
       </div>
       <div class="p-[20px]">
-        <OfflineTitle v-if="video" :video="video" @updateRate="fetchVideoById" />
+        <OfflineTitle
+          v-if="video"
+          :video="video"
+          @updateRate="fetchVideoById"
+          titleRate="Rate Video"
+        />
         <Divider />
         <VideoDetail
           v-if="channelDetails"
@@ -209,7 +216,7 @@
           </TabPanels>
         </Tabs>
         <Divider />
-        <CommentPage :videoId="videoId" />
+        <CommentPage :videoId="videoId" :isCommentable="isCommentable" />
       </div>
     </div>
     <div class="col-span-12 lg:col-span-4">

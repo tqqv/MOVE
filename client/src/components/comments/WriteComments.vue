@@ -5,12 +5,14 @@
   import { useUserStore } from '@/stores';
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
+  import { useTabStore } from '@/stores';
 
   const isPickerVisible = ref(false);
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
   const userStore = useUserStore();
   const popupStore = usePopupStore();
+  const tabStore = useTabStore();
 
   const avatar = computed(
     () => userStore.user?.avatar || 'https://img.upanh.tv/2024/06/18/user-avatar.png',
@@ -32,6 +34,7 @@
       required: true,
     },
     replyToUsername: String,
+    isCommentable: Boolean,
   });
 
   const parentId = ref(props.commentId || null);
@@ -59,6 +62,7 @@
   const handleSend = async () => {
     if (!userStore.user) {
       openLoginPopup();
+
       return;
     }
     const data = { content: commentText.value, parentId: parentId.value };
@@ -67,7 +71,11 @@
 
       if (response.data.success && response.data.data) {
         commentText.value = '';
+        const commentInput = document.getElementById('commentTextarea');
+        commentInput.value = '';
+        autoResize(commentInput);
         showActions.value = false;
+        commentInput.blur();
         const newComment = {
           ...response.data.data,
           userComments: {
@@ -88,8 +96,9 @@
   const handleCancel = () => {
     commentText.value = '';
     showActions.value = false;
-    const commentInput = document.getElementById('commentInput');
-    commentInput.innerText = '';
+    const commentInput = document.getElementById('commentTextarea');
+    commentInput.value = '';
+    autoResize(commentInput);
   };
 
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
@@ -108,9 +117,11 @@
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && isCommentNotEmpty.value) {
+    if (event.key === 'Enter' && !event.shiftKey && isCommentNotEmpty.value) {
       event.preventDefault();
       handleSend();
+    } else if (event.key === 'Enter' && event.shiftKey) {
+      autoResize(document.getElementById('commentTextarea'));
     }
   };
 
@@ -134,14 +145,19 @@
   <div class="space-y-6">
     <!-- WRITE COMMENTS -->
     <div class="relative grid grid-cols-[auto_1fr] gap-2 w-full py-2">
-      <div class="flex-shrink-0">
+      <div :class="['flex-shrink-0', !isCommentable ? 'opacity-50 pointer-events-none' : '']">
         <img v-if="avatar" :src="avatar" class="size-10 rounded-full object-cover" />
       </div>
-      <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
+      <div
+        :class="[
+          'flex-grow px-4 py-2 rounded-md bg-gray-dark/25',
+          !isCommentable ? 'opacity-50 pointer-events-none' : '',
+        ]"
+      >
         <textarea
+          id="commentTextarea"
           placeholder="Write a comment"
           class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
-          rows="1"
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"

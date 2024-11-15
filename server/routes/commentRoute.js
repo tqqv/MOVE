@@ -7,7 +7,8 @@ const commentRouter = express.Router();
 commentRouter.post("/reactionComment", verifyUser, reactionCommentController)
 commentRouter.post("/:videoId", verifyUser, commentOnVideoController);
 // commentRouter.post("/:videoId", commentOnVideoController);
-commentRouter.get("/", getChildCommentsByParentIdController);
-commentRouter.get("/:videoId", getVideoCommentController);
+commentRouter.get("/:userId", getChildCommentsByParentIdController);
+commentRouter.get("/:videoId/:userId", getVideoCommentController);
 
 module.exports = commentRouter;
+  

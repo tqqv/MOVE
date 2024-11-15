@@ -3,13 +3,16 @@
   import CommentItem from './CommentItem.vue';
   import { getAllComments, getAllChildComments } from '@/services/comment';
   import WriteComments from './WriteComments.vue';
-
+  import { useUserStore } from '@/stores';
   const props = defineProps({
     videoId: {
       type: [Number, String],
       required: true,
     },
+    isCommentable: Boolean,
   });
+  const userStore = useUserStore();
+  console.log(userStore.user?.id);
 
   const comments = ref([]);
   const childComments = ref({});
@@ -25,7 +28,7 @@
 
   const fetchComments = async () => {
     try {
-      const response = await getAllComments(props.videoId, {
+      const response = await getAllComments(props.videoId, userStore.user.id, {
         page: currentPage.value,
         pageSize: commentsPerPage.value,
       });
@@ -60,6 +63,7 @@
         });
 
         hasMoreComments.value = currentPage.value < response.data.data.totalPages;
+        console.log('fetch neeeeeeeeee', comments.value);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -77,7 +81,7 @@
     };
     loadingRepliesForComment.value[parentId] = true;
     try {
-      const response = await getAllChildComments(parentId, pageInfo);
+      const response = await getAllChildComments(parentId, userStore.user.id, pageInfo);
 
       if (response.data.success && response.data.data) {
         if (!childComments.value[parentId]) {
@@ -123,10 +127,6 @@
 
   watch(() => props.videoId, resetComments);
 
-  onMounted(() => {
-    fetchComments();
-  });
-
   const handleSendComment = (newComment) => {
     if (newComment) {
       comments.value.unshift(newComment);
@@ -146,18 +146,40 @@
       console.error('New comment is undefined or null');
     }
   };
+  watch(
+    () => userStore.user?.id,
+    (newUserId) => {
+      if (newUserId) {
+        fetchComments();
+      } else {
+        console.warn('User ID is undefined, cannot fetch comments');
+      }
+    },
+  );
+
+  onMounted(() => {
+    fetchComments();
+  });
 </script>
 
 <template>
-  <div class="space-y-8">
-    <WriteComments
+  
+
+  <div  class="space-y-8">
+    <p v-if="!isCommentable" class="font-bold italic text-[#666666] pb-2">
+    This video is not open for comments.
+  </p>
+    <WriteComments  
+      v-if="isCommentable"
       :videoId="videoId"
       :fetchChildComments="fetchChildComments"
       @sendComment="handleSendComment"
+      :isCommentable="isCommentable"
     />
 
     <CommentItem
       v-for="(comment, index) in comments"
+      v-if="comments.length > 0"
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
@@ -166,8 +188,12 @@
       :hasMoreChildComments="hasMoreChildComments[comment.id]"
       :loadingReplies="loadingRepliesForComment[comment.id]"
       :videoId="videoId"
-    />
+      @fetchComments="fetchComments"
+      :isCommentable="isCommentable"
 
+    /><p v-else class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
+    No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
+  </p>
     <div
       v-if="hasMoreComments && comments.length > 0"
       class="font-bold text-[13px] text-primary cursor-pointer pt-2"
@@ -176,4 +202,5 @@
       <span>Show more comments</span>
     </div>
   </div>
+  
 </template>

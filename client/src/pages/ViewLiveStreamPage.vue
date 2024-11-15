@@ -6,11 +6,9 @@
   import ViewLiveStreamContent from '@/components/viewLiveStream/ViewLiveStreamContent.vue';
   import { onMounted, ref, watch } from 'vue';
   import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
-  import { joinRoom, listenStreamReady } from '@/services/socketService';
-  import { connect } from 'socket.io-client';
+  import { joinRoom, listenChatHistory, listenStreamReady } from '@/services/socketService';
 
   const route = useRoute();
-  const router = useRouter();
   const connectOBS = ref(null);
   const liveStatus = ref(null);
   const username = route.params.username;
@@ -23,7 +21,6 @@
       //   router.push(`/user/${username}`);
       // }
       liveStreamData.value = response.data;
-      console.log(liveStreamData.value);
     } catch (error) {
       console.log(error);
     }
@@ -70,6 +67,6 @@
         :liveStreamData="liveStreamData"
       />
     </div>
-    <LiveChat />
+    <LiveChat :liveStreamData="liveStreamData.channel?.id" />
   </div>
 </template>
