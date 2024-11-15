@@ -753,7 +753,7 @@ const overviewAnalytic = async(channelId) => {
           avgView: avgViewStream
         }
       },
-      message: "Stream ended suceess"
+      message: "Retrieve overview successful."
     }
 
   } catch (error) {
