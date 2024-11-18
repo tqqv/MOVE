@@ -45,6 +45,7 @@
   };
   const { showFullText, displayedText, toggleText, isLongText, isTallText, textElement } =
     useReadMore(formatCommentText(props.comment.content), 300);
+  const userStore = useUserStore();
 
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
