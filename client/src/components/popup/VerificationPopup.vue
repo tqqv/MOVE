@@ -2,13 +2,14 @@
   import { ref, computed } from 'vue';
   import Dialog from 'primevue/dialog';
   import Button from 'primevue/button';
+  import { usePopupStore } from '@/stores';
 
   const data = {
     email: 'abc@gmail.com',
   };
+  const popupStore = usePopupStore();
 
   const code = ref('');
-  const showVerificationPopup = ref(false);
 
   const buttonColor = computed(() => {
     return code.value.trim() ? 'btn' : 'btnDisable';
@@ -21,14 +22,13 @@
 
 <template>
   <div>
-    <Button label="Show Verification Popup" @click="showVerificationPopup = true" />
-
     <Dialog
-      v-model:visible="showVerificationPopup"
+      :visible="popupStore.showVerificationPopup"
       header="Verify your email to keep account secure"
-      class="w-[568px]"
+      :style="{ width: '40rem' }"
+      :modal="true"
       :draggable="false"
-      :dismissableMask="true"
+      @update:visible="popupStore.toggleVerificationPopup()"
     >
       <div class="space-y-4">
         <span class="text_para">
