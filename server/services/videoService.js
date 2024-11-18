@@ -781,7 +781,7 @@ const getAgeData = async (videoId, days) => {
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 18 AND 24 THEN '18-24'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 25 AND 34 THEN '25-34'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 35 AND 44 THEN '35-44'
-          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'        
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) >64 THEN '64 above'
           ELSE 'Unknown'
         END
@@ -1300,7 +1300,93 @@ const getVideoWatchAlso = async (category, level, videoId) => {
 const renewTopVideos = async () => {
   try {
     let topVideosList = [];
-    // SCALE - OPTIMIZE BY LIMIT NUM OF CATEGORIES HERE.
+
+    // Tìm max_view từ tất cả các video trong 10 ngày qua
+    const maxView = await Video.findOne({
+      attributes: [[Sequelize.fn('MAX', Sequelize.col('viewCount')), 'max_view']],
+      where: {
+        createdAt: {
+          [Sequelize.Op.gte]: Sequelize.literal(`DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)`),
+        },
+        status: "public",
+      },
+    });
+
+    // Tìm max_share từ tất cả các video trong 10 ngày qua
+    const maxTotalShare = await Video.findOne({
+      attributes: [[Sequelize.fn('MAX', Sequelize.col('totalShare')), 'max_totalShare']],
+      where: {
+        createdAt: {
+          [Sequelize.Op.gte]: Sequelize.literal(`DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)`),
+        },
+        status: "public",
+      },
+    });
+
+    // Tìm max_rate từ tất cả các video trong 10 ngày qua
+    const maxAvgRating = await Rating.findOne({
+      attributes: [
+        [
+          Sequelize.fn(
+            'MAX',
+            Sequelize.fn(
+              'COALESCE',
+              Sequelize.literal(`(
+                SELECT AVG(rating)
+                FROM ratings AS r
+                INNER JOIN videos AS v ON r.videoId = v.id
+                WHERE v.createdAt >= DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)
+                  AND v.status = 'public'
+                GROUP BY r.videoId
+                ORDER BY AVG(rating) DESC
+                LIMIT 1
+              )`),
+              0
+            )
+          ),
+          'max_avg_rating'
+        ]
+      ]
+    });
+
+    // Tìm max_commentCount từ tất cả các video trong 10 ngày qua
+    const maxCommentCount = await Comment.findOne({
+      attributes: [
+        [Sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM comments c
+          INNER JOIN videos v ON c.videoId = v.id
+          WHERE v.createdAt >= DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)
+            AND v.status = 'public'
+          GROUP BY c.videoId
+          ORDER BY COUNT(*) DESC
+          LIMIT 1
+        )`), 'max_commentCount']
+      ]
+    });
+
+    // Tìm max_retentionRate từ tất cả các video trong 10 ngày qua
+    const maxRetentionRate = await ViewVideo.findOne({
+      attributes: [
+        [
+          Sequelize.literal(`(
+            SELECT MAX(avgRetention)
+            FROM (
+              SELECT
+                vw.videoId,
+                AVG(vw.viewTime / NULLIF(v.duration, 0)) AS avgRetention
+              FROM viewVideos vw
+              INNER JOIN videos v ON vw.videoId = v.id
+              WHERE vw.createdAt >= DATE_SUB(NOW(), INTERVAL 10 DAY)
+                AND v.status = 'public'
+                AND v.duration > 0 -- Loại bỏ video có duration bằng 0
+              GROUP BY vw.videoId
+            ) AS retentionData
+          )`),
+          'max_retentionRate'
+        ]
+      ]
+    });
     const categories = await Category.findAll();
     if (!categories || categories.length === 0) {
       return {
@@ -1314,28 +1400,48 @@ const renewTopVideos = async () => {
       const videos = await Video.findAll({
         where: {
           createdAt: {
-            [Sequelize.Op.gte]: Sequelize.literal("DATE_SUB(NOW(), INTERVAL 10 DAY)"), // Video được đăng trong 2 ngày qua
+            [Sequelize.Op.gte]: Sequelize.literal(`DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)`),
           },
-          status: "public", // Chỉ lấy video có trạng thái là public
-          categoryId: category.id // Lọc video theo category
+          status: "public",
+          categoryId: category.id
         },
         attributes: {
           include: [
-            // Tính điểm của video dựa trên các trọng số: viewCount, commentCount và totalShare
+            // Tính điểm của video dựa trên các trọng số, chuẩn hóa các yếu tố theo max value
             [
               Sequelize.literal(`(
-              Video.viewCount * ${WEIGHTS.VIEW} +
-              ( SELECT COUNT(*) FROM comments WHERE comments.videoId = Video.id ) * ${WEIGHTS.COMMENT} +
-              Video.totalShare * ${WEIGHTS.SHARE}
-              )`), 'score'
-            ], // Điểm được tính từ các yếu tố trên
+                (Video.viewCount / ${maxView?.dataValues?.max_view || 1}) * ${WEIGHTS.VIEW} +
+                (
+                  COALESCE((SELECT COUNT(*) FROM comments WHERE comments.videoId = Video.id), 0)
+                  / ${maxCommentCount?.dataValues?.max_commentCount || 1}
+                ) * ${WEIGHTS.COMMENT} +
+                (COALESCE(Video.totalShare, 0) / ${maxTotalShare?.dataValues?.max_totalShare || 1}) * ${WEIGHTS.SHARE} +
+                (
+                  COALESCE((SELECT AVG(rating) FROM ratings WHERE ratings.videoId = Video.id), 0)
+                  / ${maxAvgRating?.dataValues?.max_avg_rating || 1}
+                ) * ${WEIGHTS.RATE} +
+                (
+                  COALESCE(
+                  (
+                    SELECT AVG(vw.viewTime / NULLIF(v.duration, 0))
+                    FROM viewVideos vw
+                    INNER JOIN videos v ON vw.videoId = v.id
+                    WHERE vw.videoId = Video.id
+                  ), 0) / ${maxRetentionRate?.dataValues?.max_retentionRate || 1}
+                ) * ${WEIGHTS.RETENTION_RATE}
+              )`),
+              'score'
+            ],
             [
-              Sequelize.literal(`(
-                SELECT AVG(rating) as ratings
-                FROM ratings
-                WHERE ratings.videoId = Video.id
-                )`),
-                'ratings'
+              Sequelize.literal(`
+                COALESCE(
+                  (SELECT AVG(rating) as ratings
+                  FROM ratings
+                  WHERE ratings.videoId = Video.id),
+                  0
+                )
+              `),
+              'ratings'
             ]
           ],
         },
@@ -1361,10 +1467,14 @@ const renewTopVideos = async () => {
             model: Category,
             attributes: ['title'],
             as: 'category',
+          },
+          {
+            model: ViewVideo,
+            attributes: [],
+            as: 'viewVideo',
           }
         ],
       });
-
 
       // Lưu top video của category vào mảng kết quả
       topVideosList.push({
@@ -1386,6 +1496,7 @@ const renewTopVideos = async () => {
     };
   }
 };
+
 module.exports = {
   generateUploadLink,
   uploadThumbnailService,

@@ -31,7 +31,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
             }
 
             const videos = await _redis.hmget('video:details', videoIds);
-            const total = await _redis.zcard(cacheKey); // Total count of filtered videos
+            const total = await _redis.zcard(cacheKey) - 1; // Total count of filtered videos
 
             return {
                 status: 200,
@@ -103,7 +103,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const videos = await _redis.hmget('video:details', videoIds);
 
         // Calculate total results for pagination
-        const total = await _redis.zcard(cacheKey); // Total count of filtered videos
+        const total = await _redis.zcard(cacheKey) - 1; // Total count of filtered videos
 
         return {
             status: 200,
@@ -179,16 +179,17 @@ cron.schedule('*/30000 * * * *', async () => {
         console.log('Cron job started to renew top videos...');
         let result;
         try {
-            result = await renewTopVideos();
-          } catch (error) {
-            console.error('Error in cron job execution:', error);
-          }
+        result = await renewTopVideos();
+        } catch (error) {
+        console.error('Error in cron job execution:', error);
+        }
 
-        let videoHashMapDetails = await createHashmapFromDBData(result.data);
         if (result.status !== 200 || !result.data) {
             console.log('No top videos fetched.');
             return;
         }
+
+        let videoHashMapDetails = await createHashmapFromDBData(result.data);
         // const pipeline = _redis.pipeline();
         const categorySets = {};
         const levelSets = {};
@@ -230,8 +231,14 @@ cron.schedule('*/30000 * * * *', async () => {
             sortedSets.score.set(cleanedVideoId, parseFloat(score) || 0);
             sortedSets.viewCount.set(cleanedVideoId, parseInt(viewCount) || 0);
             sortedSets.duration.set(cleanedVideoId, parseInt(duration) || 0);
-            sortedSets.ratings.set(cleanedVideoId, parseInt(ratings) || 0);
+            sortedSets.ratings.set(cleanedVideoId, parseFloat(ratings) || 0);
         });
+
+        // renew redis sorted filter
+        const keys = await _redis.keys('temp:filtered:*');
+        if (keys.length > 0) {
+            await _redis.del(...keys);
+        }
 
         // Save to Redis
         const pipeline = _redis.pipeline();
