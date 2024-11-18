@@ -11,6 +11,11 @@
       default: true,
     },
   });
+  const currentSlide = ref(0);
+
+  const handleSlideChanged = (newIndex) => {
+    currentSlide.value = newIndex;
+  };
 </script>
 <template>
   <div class="box rounded-lg">
@@ -27,7 +32,10 @@
           <div class="flex bg-white shadow-lg overflow-hidden h-[300px]">
             <!-- Cột hình ảnh -->
 
-            <div class="thumbnail h-full w-full rounded-lg">
+            <div
+              class="thumbnail h-full w-full rounded-lg relative"
+              :class="{ 'w-2/3': currentSlide === i }"
+            >
               <RouterLink
                 :to="
                   slide.livestream
@@ -57,12 +65,12 @@
             <!-- Cột thông tin -->
 
             <div
-              v-show="!isImageFull"
-              class="info flex-col p-6 w-1/3 h-full justify-between hidden xl:block"
+              v-if="currentSlide === i"
+              class="info flex-col p-6 w-1/3 h-full justify-between hidden xl:block shadow-xl"
             >
               <div
                 v-if="slide.livestream?.livestreamChannel.isLive"
-                class="flex items-center space-x-2"
+                class="flex items-center space-x-2 pb-2"
               >
                 <div class="size-2 bg-red rounded-full"></div>
                 <h3 class="font-bold text-lg">Currently live</h3>
@@ -88,7 +96,7 @@
                           slide.livestream?.livestreamChannel.channelName
                         }}
                       </span>
-                      <Verified class="ml-1 mb-1 mr-2 fill-blue" />
+                      <Verified class="mt-1 fill-blue" />
                     </p>
                   </div>
                   <div>
