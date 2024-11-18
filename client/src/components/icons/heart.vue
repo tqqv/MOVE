@@ -1,7 +1,13 @@
 <script setup>
   const props = defineProps({
-    width: String,
-    height: String,
+    width: {
+      type: String,
+      default: '15.716px',
+    },
+    height: {
+      type: String,
+      default: '14.231',
+    },
     fill: String,
     stroke: String,
   });
@@ -9,8 +15,8 @@
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="15.716"
-    height="14.231"
+    :width="width"
+    :height="height"
     viewBox="0 0 15.716 14.231"
   >
     <g :class="[fill, stroke]">

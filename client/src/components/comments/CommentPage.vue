@@ -9,6 +9,7 @@
       type: [Number, String],
       required: true,
     },
+    isCommentable: Boolean,
   });
   const userStore = useUserStore();
   console.log(userStore.user?.id);
@@ -162,15 +163,23 @@
 </script>
 
 <template>
-  <div class="space-y-8">
-    <WriteComments
+  
+
+  <div  class="space-y-8">
+    <p v-if="!isCommentable" class="font-bold italic text-[#666666] pb-2">
+    This video is not open for comments.
+  </p>
+    <WriteComments  
+      v-if="isCommentable"
       :videoId="videoId"
       :fetchChildComments="fetchChildComments"
       @sendComment="handleSendComment"
+      :isCommentable="isCommentable"
     />
 
     <CommentItem
       v-for="(comment, index) in comments"
+      v-if="comments.length > 0"
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
@@ -180,8 +189,11 @@
       :loadingReplies="loadingRepliesForComment[comment.id]"
       :videoId="videoId"
       @fetchComments="fetchComments"
-    />
+      :isCommentable="isCommentable"
 
+    /><p v-else class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
+    No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
+  </p>
     <div
       v-if="hasMoreComments && comments.length > 0"
       class="font-bold text-[13px] text-primary cursor-pointer pt-2"
@@ -190,4 +202,5 @@
       <span>Show more comments</span>
     </div>
   </div>
+  
 </template>

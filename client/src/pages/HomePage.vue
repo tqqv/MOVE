@@ -4,14 +4,16 @@
 
   import Divider from '@/components/Divider.vue';
   import CategoryImage from '@/components/CategoryImage.vue';
-  import { getAllCategory, getAllVideos } from '@/services/video';
+  import { getDataSlider } from '@/services/home';
   import GirdVideo from '@/components/GirdVideo.vue';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { getAllCategoriesHaveView } from '@/services/browse';
+  import { getAllVideos } from '@/services/video';
 
   const categories = ref([]);
-  const videos = ref([]);
+  const dataSlider = ref([]);
   const isLoading = ref(true);
+  const videos = ref([]);
 
   const fetchAllCategoriesHaveView = async () => {
     try {
@@ -33,12 +35,25 @@
     } catch (error) {
       console.error(error.message);
     } finally {
+    }
+  };
+  const fetchDataSlider = async () => {
+    try {
+      const res = await getDataSlider();
+
+      if (res.data.success) {
+        dataSlider.value = res.data.data.updatedLivestreams;
+      }
+    } catch (error) {
+      console.error(error.message);
+    } finally {
       isLoading.value = false;
     }
   };
 
   onMounted(async () => {
     fetchAllCategoriesHaveView();
+    fetchDataSlider();
     fetchAllVideos();
   });
 </script>
@@ -54,7 +69,7 @@
         <SmallLoading />
       </div>
       <div v-else>
-        <Slider :videos="videos" />
+        <Slider :dataSlider="dataSlider" />
       </div>
     </div>
   </section>
@@ -82,7 +97,7 @@
         <Divider class="flex-grow mt-1" />
         <div><span class="font-bold text-[24px] whitespace-nowrap">Video you may like</span></div>
       </div>
-      <GirdVideo :videos="videos.slice(0, 6)" />
+      <GirdVideo :videos="videos.slice(0, 8)" />
     </div>
   </section>
 </template>

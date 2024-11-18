@@ -2,7 +2,10 @@
   const props = defineProps({
     width: String,
     height: String,
-    fill: String,
+    fill: {
+      type: String,
+      default: '#ee404c',
+    },
     stroke: String,
   });
 </script>
@@ -22,7 +25,7 @@
   >
     <g>
       <path
-        fill="#ee404c"
+        :fill="fill"
         d="M57.362 26.54 20.1 91.075a7.666 7.666 0 0 0 6.639 11.5h74.518a7.666 7.666 0 0 0 6.639-11.5L70.638 26.54a7.665 7.665 0 0 0-13.276 0z"
         opacity="1"
         data-original="#ee404c"

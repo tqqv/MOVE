@@ -16,8 +16,6 @@
 
   import { postReactionComment } from '@/services/comment';
   import { useUserStore, usePopupStore } from '@/stores';
-  import { useUserStore } from '@/stores';
-  import { usePopupStore } from '@/stores';
 
   dayjs.extend(relativeTime);
 
@@ -38,19 +36,16 @@
       type: [Number, String],
       required: true,
     },
+    isCommentable: Boolean,
   });
-  const userStore = useUserStore();
-  const popupStore = usePopupStore();
 
   const emit = defineEmits(['fetchComments']);
+  const formatCommentText = (text) => {
+    return text.replace(/\n/g, '<br/>');
+  };
+  const { showFullText, displayedText, toggleText, isLongText, isTallText, textElement } =
+    useReadMore(formatCommentText(props.comment.content), 300);
 
-  const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
-    props.comment.content,
-    300,
-  );
-
-  const userStore = useUserStore();
-  const popupStore = usePopupStore();
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
   const isShowMoreChild = ref(false);
@@ -228,7 +223,7 @@
       <img
         :src="comment?.userComments?.avatar"
         alt="Avatar"
-        class="size-12 object-cover rounded-full"
+        class="size-10 object-cover rounded-full"
       />
     </div>
 
@@ -253,22 +248,24 @@
         >
       </div>
       <!-- COMMENT -->
-      <p
+      <div
+        ref="textElement"
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="break-all text-sm text-black"
       >
-        {{ displayedText() }}
-        <span v-if="isLongText">
-          <button @click="toggleText" class="text-primary font-semibold ml-1">
+        <div ref="textElement" v-html="displayedText()" />
+        <div v-if="isLongText || isTallText">
+          <div v-if="!showFullText" class="text-[#666666]">...</div>
+          <button @click="toggleText" class="text-[#666666] hover:underline font-semibold">
             {{ showFullText ? 'Show less' : 'Read more' }}
           </button>
-        </span>
-      </p>
+        </div>
+      </div>
 
       <!-- Like/Dislike -->
       <div
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
-        class="flex gap-4 items-center"
+        :class="['flex gap-4 items-center', !isCommentable ? 'opacity-50 pointer-events-none' : '']"
       >
         <div class="flex gap-2" @click="toggleReaction('like')">
           <Like
@@ -331,6 +328,7 @@
         @sendComment="handleSendComment"
         :replyToUsername="replyToUsername"
         :videoId="videoId"
+        :isCommentable="isCommentable"
       />
       <div v-if="!isShowMoreChild">
         <CommentItem
@@ -341,6 +339,7 @@
           :childComments="props.childComments"
           :totalRepliesCount="props.totalRepliesCount"
           :videoId="videoId"
+          :isCommentable="isCommentable"
         />
       </div>
       <!-- Toggle to show/hide child comments -->
@@ -375,6 +374,7 @@
             :childComments="props.childComments"
             :totalRepliesCount="props.totalRepliesCount"
             :videoId="videoId"
+            :isCommentable="isCommentable"
           />
           <div
             v-if="hasMoreChildComments && !loadingReplies"

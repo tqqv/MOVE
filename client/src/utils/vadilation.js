@@ -83,3 +83,17 @@ export const updateChannelSchema = yup.object({
     .required('Channel name is required')
     .matches(/^[a-zA-Z0-9\s]*$/, 'Channel name cannot contain special characters'),
 });
+export const paymentSchema = yup.object({
+  cardName: yup
+    .string()
+    .matches(
+      /^[A-Z]+(?:\s[A-Z]+)*$/,
+      'Cardholder name must be uppercase, contain only letters without accents, and single spaces between words',
+    )
+    .trim('Cardholder name must not have leading or trailing spaces')
+    .min(3, 'Cardholder name must be at least 3 characters')
+    .max(50, 'Cardholder name must be less than 50 characters')
+    .required('Cardholder name is required'),
+
+  country: yup.string().required('Country is required'),
+});

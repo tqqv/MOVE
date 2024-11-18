@@ -9,10 +9,17 @@ export const formatTimeEndLive = (time) => {
   const date = new Date(time);
 
   return new Intl.DateTimeFormat('en-US', {
-    month: 'long', 
-    day: 'numeric', 
-    hour: 'numeric', 
+    month: 'long',
+    day: 'numeric',
+    hour: 'numeric',
     minute: '2-digit',
-    hour12: true, 
+    hour12: true,
   }).format(date);
+};
+
+export const formatTimeChatInLive = (time) => {
+  const date = new Date(time);
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  return `${hours}:${minutes}`;
 };

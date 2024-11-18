@@ -148,6 +148,7 @@
     :draggable="false"
     :style="{ width: '842px' }"
     @hide="handleClosePopup"
+    :dismissableMask="true"
   >
     <div class="grid grid-cols-10 gap-4">
       <div class="col-span-2">

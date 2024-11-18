@@ -6,8 +6,12 @@
   import ViewLiveStreamContent from '@/components/viewLiveStream/ViewLiveStreamContent.vue';
   import { onMounted, ref, watch } from 'vue';
   import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
-  import { joinRoom, listenStreamReady } from '@/services/socketService';
-  import { connect } from 'socket.io-client';
+  import {
+    joinRoom,
+    listenChatHistory,
+    listenStreamMetrics,
+    listenStreamReady,
+  } from '@/services/socketService';
 
   const route = useRoute();
   const router = useRouter();
@@ -15,15 +19,15 @@
   const liveStatus = ref(null);
   const username = route.params.username;
   const liveStreamData = ref([]);
-
+  const metricsData = ref([]);
   const fetchUserViewLive = async (username) => {
     try {
       const response = await fetchViewLiveStreamByUsername(username);
-      // if (!response.data?.channel?.isLive) {
-      //   router.push(`/user/${username}`);
-      // }
-      liveStreamData.value = response.data;
-      console.log(liveStreamData.value);
+      if (!response.success) {
+        router.push('/404');
+      } else {
+        liveStreamData.value = response.data;
+      }
     } catch (error) {
       console.log(error);
     }
@@ -36,6 +40,11 @@
         console.log('Received streamReady:', isReady);
         connectOBS.value = isReady;
         fetchUserViewLive(username);
+      });
+
+      listenStreamMetrics((metrics) => {
+        metricsData.value = metrics;
+        console.log('Stream Metrics:', metrics);
       });
     }
   };
@@ -55,6 +64,7 @@
   watch(() => {
     console.log('Connectobs : ', connectOBS.value);
     console.log('LiveServer : ', liveStatus.value);
+    console.log('live', liveStreamData);
   });
 </script>
 
@@ -68,8 +78,9 @@
         :liveStatus="liveStatus"
         :username="username"
         :liveStreamData="liveStreamData"
+        :metricsData="metricsData"
       />
     </div>
-    <LiveChat />
+    <LiveChat :liveStreamData="liveStreamData.channel?.id" />
   </div>
 </template>
