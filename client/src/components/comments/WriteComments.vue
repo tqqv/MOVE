@@ -15,7 +15,9 @@
   const tabStore = useTabStore();
 
   const avatar = computed(
-    () => userStore.user?.avatar || 'https://img.upanh.tv/2024/06/18/user-avatar.png',
+    () =>
+      userStore.user?.avatar ||
+      'https://res.cloudinary.com/dg9imqwrd/image/upload/v1731636620/pgxv1tkwjvz7rkwy2ked.png',
   );
 
   const props = defineProps({
@@ -71,7 +73,11 @@
 
       if (response.data.success && response.data.data) {
         commentText.value = '';
+        const commentInput = document.getElementById('commentTextarea');
+        commentInput.value = '';
+        autoResize(commentInput);
         showActions.value = false;
+        commentInput.blur();
         const newComment = {
           ...response.data.data,
           userComments: {
@@ -92,8 +98,9 @@
   const handleCancel = () => {
     commentText.value = '';
     showActions.value = false;
-    const commentInput = document.getElementById('commentInput');
-    commentInput.innerText = '';
+    const commentInput = document.getElementById('commentTextarea');
+    commentInput.value = '';
+    autoResize(commentInput);
   };
 
   const isCommentNotEmpty = computed(() => commentText.value.trim() !== '');
@@ -112,9 +119,11 @@
   };
 
   const handleKeyDown = (event) => {
-    if (event.key === 'Enter' && isCommentNotEmpty.value) {
+    if (event.key === 'Enter' && !event.shiftKey && isCommentNotEmpty.value) {
       event.preventDefault();
       handleSend();
+    } else if (event.key === 'Enter' && event.shiftKey) {
+      autoResize(document.getElementById('commentTextarea'));
     }
   };
 
@@ -148,9 +157,9 @@
         ]"
       >
         <textarea
+          id="commentTextarea"
           placeholder="Write a comment"
           class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
-          rows="1"
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"

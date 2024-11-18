@@ -35,6 +35,7 @@
 
   const showToast = () => {
     toast.info('You are not a streamer');
+    emit('closeAllPopups');
   };
 </script>
 
@@ -44,6 +45,7 @@
       <RouterLink
         :to="`/user/${props.user.username}`"
         class="flex flex-row gap-x-3 items-center pb-3"
+        @click="emit('closeAllPopups')"
       >
         <div class="flex items-center justify-center size-12 rounded-full flex-shrink-0">
           <img
@@ -63,6 +65,7 @@
             v-if="userStore.user.role === 'streamer'"
             to="/dashboard-streamer"
             class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
           >
             <dashboard class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
@@ -79,6 +82,7 @@
             <RouterLink
               to="/wallet/payment-method"
               class="flex flex-row items-center gap-x-2 group cursor-pointer"
+              @click="emit('closeAllPopups')"
             >
               <wallet class="fill-black group-hover:fill-primary" />
               <h1 class="mb-1 group-hover:text-primary">
@@ -92,6 +96,7 @@
           <RouterLink
             to="/personal-profile"
             class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
           >
             <setting class="fill-black group-hover:fill-primary" />
             <h1 class="group-hover:text-primary">Setting</h1>

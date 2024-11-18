@@ -208,6 +208,28 @@ const getLivestreamByUserNameService = async (username) => {
     });
     const channel = await Channel.findOne({
       where: { userId: user.id},
+      attributes: {
+        include: [
+          [
+            // Count the number of subscribes for this channel
+            Sequelize.literal(`
+              (SELECT COUNT(*) FROM subscribes WHERE subscribes.channelId = Channel.id)`
+            ),
+            "followCount"
+          ]
+        ],
+      },
+      include: [
+        {
+          model: Subscribe,
+          as: 'subscribe',
+          attributes: [], // Exclude individual Subscribe attributes
+        },
+        {
+          model: User,
+          attributes: ['username'],
+        },
+      ]
     });
     console.log("channel.isLive: ", channel.isLive);
 

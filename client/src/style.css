@@ -73,9 +73,15 @@
   }
 
   .select_custom {
-    @apply flex-1 px-1 py-[9px]  ring-1 ring-gray-dark rounded-md outline-none focus-within:ring-primary;
+    @apply flex-1 px-2 py-3 text-[14px]  ring-1 ring-gray-dark rounded-lg outline-none focus-within:ring-primary;
   }
 
+  .select_custom_error {
+    @apply bg-red/20 flex-1  text-[14px] text-[#626875]  px-2  py-3   ring-1  rounded-lg outline-none ring-red   focus:caret-red text-xs;
+  }
+  .select_custom_error option {
+    @apply bg-white;
+  }
   .btn_eyes {
     @apply flex justify-center items-center absolute top-1/2 right-2 transform -translate-y-1/2 z-20 px-3 cursor-pointer text-[#666666];
   }

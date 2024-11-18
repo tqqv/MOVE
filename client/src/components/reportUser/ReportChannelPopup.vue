@@ -3,7 +3,7 @@
   import { usePopupStore } from '@/stores';
   import Dialog from 'primevue/dialog';
   import ReportSuccess from './ReportSuccess.vue';
-import CheckboxCustom from '../CheckboxCustom.vue';
+  import CheckboxCustom from '../CheckboxCustom.vue';
 
   const props = defineProps({
     channelName: String,
@@ -31,6 +31,7 @@ import CheckboxCustom from '../CheckboxCustom.vue';
     v-model:visible="popupStore.showReportChannel"
     :header="`Report ${channelName}`"
     class="w-full md:w-[494px]"
+    :dismissableMask="true"
     ><div class="flex flex-col gap-y-4 my-2">
       <CheckboxCustom
         v-for="(option, index) in reportOptions"

@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       livestreamId: {
         type: DataTypes.UUID,
-        allowNull: true,
+        allowNull: false,
         references: {
           model: 'livestreams', // Tên bảng users
           key: 'id',      // Khóa chính từ bảng users
@@ -40,9 +40,15 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE', // Xóa follow khi user bị xóa
         onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
-      itemName: {
-        type: DataTypes.STRING(255),
-        allowNull: false
+      donationItemId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'donationItems', // Tên bảng users
+          key: 'id',      // Khóa chính từ bảng users
+        },
+        onDelete: 'CASCADE', // Xóa follow khi user bị xóa
+        onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
       },
       REPs: {
         type: DataTypes.INTEGER,
@@ -50,7 +56,7 @@ module.exports = (sequelize, DataTypes) => {
       },
       content: {
         type: DataTypes.TEXT,
-        allowNull: false
+        allowNull: true
       }
     },
     {

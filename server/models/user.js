@@ -152,6 +152,10 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.BOOLEAN,
         defaultValue: false,
       },
+      stripeCustomerId: {
+        type: DataTypes.STRING(255),
+        allowNull: true,
+      },
     },
     {
       sequelize,

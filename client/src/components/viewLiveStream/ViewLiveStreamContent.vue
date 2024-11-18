@@ -14,8 +14,9 @@
   const props = defineProps({
     username: String,
     connectOBS: String,
-    liveStatus: String,
-    liveStreamData: Array,
+    liveStatus: Boolean,
+    liveStreamData: Object,
+    metricsData: Object,
   });
 
   onMounted(() => {
@@ -23,32 +24,31 @@
   });
 </script>
 <template>
-  <div class="flex">
-    <LiveStreamScreen
-      v-if="
-        props.connectOBS === 'streamPublished' || (props.liveStatus && props.connectOBS == null)
-      "
-      :username="username"
-    />
-    <NoneLiveStream
-      v-if="
-        props.connectOBS === 'streamEnded' ||
-        props.connectOBS === 'streamReady' ||
-        props.connectOBS === 'null' ||
-        (props.connectOBS == null && !props.liveStatus)
-      "
-    />
-  </div>
+  <LiveStreamScreen
+    v-if="props.connectOBS === 'streamPublished' || (props.liveStatus && props.connectOBS == null)"
+    :username="username"
+  />
+  <NoneLiveStream
+    v-if="
+      props.connectOBS === 'streamEnded' ||
+      props.connectOBS === 'streamReady' ||
+      props.connectOBS === 'null' ||
+      (props.connectOBS == null && !props.liveStatus)
+    "
+  />
   <div class="container py-6">
     <OfflineTitle
+      v-if="props.liveStreamData?.livestream"
       :livestream="props.liveStreamData?.livestream"
+      :metricsData="props.metricsData"
       titleRate="Rate Stream"
       reportType="stream"
     />
-    <hr class="h-[2px] my-7 bg-gray-dark border-0" />
+    <hr v-if="props.liveStreamData?.livestream" class="h-[2px] my-7 bg-gray-dark border-0" />
     <VideoDetail
       v-if="props.liveStreamData.channel"
       :channelDetails="props.liveStreamData?.channel"
+      :usernameDetails="props.liveStreamData?.channel?.User?.username"
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">

@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         arrivalDate: {
             type: DataTypes.DATE,
-            defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+            // defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
         },
     },
     {
