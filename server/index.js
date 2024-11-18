@@ -20,6 +20,7 @@ const repPackageRouter = require("./routes/repPackageRoute.js");
 const featuredContentRouter = require("./routes/featuredContentRoute.js");
 const searchRouter = require("./routes/searchRoute.js");
 const donationItemRouter = require("./routes/donationItemRoute.js");
+const cashoutRoute = require("./routes/cashoutRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -60,6 +61,7 @@ app.use("/api/livestream", livestreamRouter);
 app.use("/api/payment", paymentRouter);
 app.use("/api/report", reportRouter);
 app.use("/api/repPackage", repPackageRouter);
+app.use("/api/cashout", cashoutRoute);
 
 app.use("/api/featuredContent", featuredContentRouter);
 app.use('/api/search', searchRouter)
