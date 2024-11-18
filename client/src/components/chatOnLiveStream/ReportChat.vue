@@ -80,7 +80,13 @@
 
   // REPLY
   const handleReply = () => {
-    emit('handleReplyChat', props.userChat.index, props.userChat.username, props.userChat.message);
+    emit(
+      'handleReplyChat',
+      props.userChat.index,
+      props.userChat.username,
+      props.userChat.channelName,
+      props.userChat.message,
+    );
     emit('handleOpenOptionChat', null);
   };
 
