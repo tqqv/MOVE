@@ -27,7 +27,14 @@
   );
 
   const handleDeleteCardInfor = async () => {
-    const res = await deleteCardInfo(cardStore.card.paymentMethodId);
+    const paymentMethodId = cardStore.card?.paymentMethodId;
+
+    if (!paymentMethodId) {
+      toast.error('Payment method or intent information is missing.');
+      return;
+    }
+
+    const res = await deleteCardInfo(paymentMethodId);
     if (res && res.status === 200) {
       toggleCloseRemove();
       cardStore.clearCard();
@@ -36,6 +43,12 @@
       toast.error('Card remove failed.');
     }
   };
+  watch(
+    () => cardStore.card,
+    (newCard) => {
+      console.log('Card updated:', newCard);
+    },
+  );
 </script>
 <template>
   <div class="card flex justify-center">
@@ -48,7 +61,6 @@
       @hide="unlockScroll"
       @update:visible="toggleCloseRemove"
       :style="{ width: '40rem' }"
-      :dismissableMask="true"
     >
       <div class="space-y-6">
         <span

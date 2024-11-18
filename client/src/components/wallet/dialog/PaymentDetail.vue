@@ -8,6 +8,7 @@
   import { createCardInfo, getClientSecret } from '@/services/payment';
   import { toast } from 'vue3-toastify';
   import { useCardStore } from '@/stores/card.store';
+  import { paymentSchema } from '@/utils/vadilation';
 
   const props = defineProps({
     isPaymentDetailsVisible: Boolean,
@@ -16,13 +17,14 @@
   const countries = ref([]);
 
   const cardStore = useCardStore();
-
+  const errors = ref();
   const emit = defineEmits(['closePayment']);
 
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');
   const toggleClosePayment = () => {
     emit('closePayment');
+    errors.value = '';
   };
 
   const loadCountries = async () => {
@@ -58,19 +60,39 @@
       return;
     }
   };
+  const validatePaymentData = async () => {
+    try {
+      await paymentSchema.validate(
+        {
+          cardName: cardForm.value.cardName,
+          country: cardForm.value.country.name,
+        },
+        { abortEarly: false },
+      );
+      errors.value = {};
+      return true;
+    } catch (validationErrors) {
+      const validationResult = {};
+      validationErrors.inner.forEach((error) => {
+        validationResult[error.path] = error.message;
+      });
+      errors.value = validationResult;
 
+      return false;
+    }
+  };
   const handleSubmit = async () => {
+    const isValid = await validatePaymentData();
+
     if (!cardForm.value || !cardForm.value.stripe) {
       console.error('cardForm or Stripe is undefined');
       return;
     }
 
-    const { cardNumber, cardName, stripe, country } = cardForm.value;
-
-    const clientSecret = await setupIntentClientSecret();
-    // console.log(clientSecret);
+    const { cardNumber, cardName, stripe, country, elements, isComplete } = cardForm.value;
 
     try {
+      const clientSecret = await setupIntentClientSecret();
       const confirm = await stripe.confirmCardSetup(clientSecret, {
         payment_method: {
           card: cardNumber,
@@ -84,7 +106,9 @@
           paymentMethodId: confirm.setupIntent.payment_method,
           country: country.name,
         };
-
+        if (!isComplete || !isValid) {
+          return;
+        }
         const res = await createCardInfo(data);
 
         if (res && res.status === 200) {
@@ -117,7 +141,7 @@
       :dismissableMask="true"
     >
       <div class="space-y-4">
-        <FormCardPayment ref="cardForm" />
+        <FormCardPayment ref="cardForm" :errors="errors" />
         <div class="text-xs">
           <span class="text-[#777777]">
             By submitting payment information you acknowledge that you have read, understood and
