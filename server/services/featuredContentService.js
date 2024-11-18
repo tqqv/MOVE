@@ -1,6 +1,6 @@
 const db = require("../models/index.js");
 const { get } = require("../utils/redis/base/redisBaseService.js");
-const { Video, Livestream, FeaturedContent, Channel, LevelWorkout, Category, sequelize } = db;
+const { Video, Livestream, FeaturedContent, Channel, LevelWorkout, Category, User, sequelize } = db;
 
 
 const createFeatureContentService = async(livestreamId, videoId, startAt, expireAt) => {
@@ -60,6 +60,12 @@ const getAllFeatureContentService = async (page, pageSize) => {
               as: 'livestreamChannel',
               attributes: [
                 'id', 'channelName', 'avatar', 'isLive', 'popularCheck'
+              ],
+              include: [
+                {
+                  model: User,
+                  attributes: ['username']
+                },
               ]
             },
             {
@@ -72,6 +78,7 @@ const getAllFeatureContentService = async (page, pageSize) => {
               as: 'category',
               attributes: ['title']
             },
+           
           ]
         },
         {
