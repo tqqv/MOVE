@@ -33,22 +33,43 @@ const createSetupIntent = async (userId) => {
 
 const createCardInfor = async(userId, cardName, paymentMethodId, country) => {
   try {
-    const paymentMethod = await retrievePaymentMethod(paymentMethodId)
+    if(!cardName || !paymentMethodId || !country){
+      return{
+        status: 400,
+        message: 'Not null.'
+      }
+    }
 
-    await PaymentCardInfor.create({
-      userId: userId,
-      cardNumber: paymentMethod.card.last4,
-      cardOwnerName: cardName,
-      cardType: paymentMethod.card.brand,
-      paymentMethodId: paymentMethodId,
-      expirationDate: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
-      country: country,
+    const user = await User.findOne({
+      where: {
+        id: userId
+      }
     })
 
-    return{
-      status: 200,
-      message: 'Card information created successfully.'
+    const paymentMethod = await retrievePaymentMethod(paymentMethodId)
+
+    if(paymentMethod.customer === user.stripeCustomerId){
+      await PaymentCardInfor.create({
+        userId: userId,
+        cardNumber: paymentMethod.card.last4,
+        cardOwnerName: cardName,
+        cardType: paymentMethod.card.brand,
+        paymentMethodId: paymentMethodId,
+        expirationDate: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
+        country: country,
+      })
+
+      return{
+        status: 200,
+        message: 'Card information created successfully.'
+      }
+    }else {
+      return{
+        status: 400,
+        message: 'This card no attach to customer Stripe of user'
+      }
     }
+
   } catch (error) {
     return {
       status: 500,

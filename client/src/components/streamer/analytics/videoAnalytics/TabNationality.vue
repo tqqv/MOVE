@@ -73,8 +73,11 @@
         <div v-if="isoCodes[stat.country]" class="text-base">{{ isoCodes[stat.country] }}</div>
         <div v-else class="pt-[5px]"><UnknowIcon /></div>
         <div
-          class="text-base cursor-pointer transition duration-200 ease-in-out hover:underline hover:text-primary"
-          @click="toggleCountry(index)"
+          :class="[
+            'text-base cursor-pointer transition duration-200 ease-in-out',
+            stat.country ? 'hover:underline hover:text-primary' : '',
+          ]"
+          @click="stat.country ? toggleCountry(index) : null"
         >
           {{ stat.country ? stat.country : 'Unknown' }}
         </div>
@@ -92,9 +95,12 @@
 
   <div v-else class="bg-white shadow-lg p-6 rounded-md text-black space-y-2">
     <div class="space-y-4">
-      <div class="flex items-center space-x-1 text-primary cursor-pointer">
+      <div
+        @click="goBackToCountries"
+        class="flex items-center space-x-1 text-primary cursor-pointer"
+      >
         <i class="pi pi-angle-left pt-[1px]" />
-        <span @click="goBackToCountries">Back to countries</span>
+        <span>Back to countries</span>
       </div>
       <div class="text-lg font-bold whitespace-nowrap flex items-center gap-2">
         <span>{{

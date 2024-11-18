@@ -163,12 +163,14 @@
 </script>
 
 <template>
-  <p v-if="!isCommentable" class="font-bold italic text-[#666666] pb-2">
-    This video is not open for comments.
-  </p>
+  
 
   <div  class="space-y-8">
-    <WriteComments
+    <p v-if="!isCommentable" class="font-bold italic text-[#666666] pb-2">
+    This video is not open for comments.
+  </p>
+    <WriteComments  
+      v-if="isCommentable"
       :videoId="videoId"
       :fetchChildComments="fetchChildComments"
       @sendComment="handleSendComment"

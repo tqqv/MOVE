@@ -145,19 +145,6 @@
     }
   };
 
-  // SEARCH
-
-  // const handleSearch = debounce((e) => {
-  //   searchData.value = e.target.value;
-  //   console.log(searchData.value);
-
-  //   if (searchData.value.trim() === '' && onFocused.value) {
-  //     isSearchPopupOpen.value = false;
-  //   } else {
-  //     isSearchPopupOpen.value = true;
-  //   }
-  // }, 500);
-
   const handleFocus = () => {
     onFocused.value = true;
     if (searchData.value.trim()) {
@@ -283,7 +270,7 @@
           </button>
         </div>
         <!-- Nav items -->
-        <div class="flex items-center justify-center md:items-stretch md:justify-start">
+        <div class="flex items-center w-1/3 justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
               <RouterLink
@@ -300,15 +287,13 @@
             </div>
           </div>
         </div>
-        <div
-          class="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-auto"
-        >
+        <div class="w-1/3 h-8 flex justify-center items-center">
           <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
-        <div class="items-center gap-x-6 hidden md:flex">
+        <div class="w-1/3 items-center justify-end gap-x-6 hidden md:flex">
           <!-- User -->
-          <div class="relative">
-            <InputGroup class="h-[40px] min-w-[292px] hidden xl:flex">
+          <div class="relative w-[292px] min-w-[120px]">
+            <InputGroup class="h-[40px] hidden md:flex">
               <InputText
                 class="text-sm"
                 id="search-menu-button"
@@ -356,7 +341,11 @@
                   <div class="px-4 py-5">
                     <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                       <RouterLink
-                        to="/streaming/stream-setup"
+                        :to="
+                          !userStore.user?.isLive
+                            ? '/streaming/stream-setup'
+                            : '/streaming/dashboard-live'
+                        "
                         class="flex flex-row items-center gap-x-2 group cursor-pointer"
                       >
                         <GoLive />
@@ -417,17 +406,17 @@
               </div>
             </div>
 
-            <div class="relative">
-              <OverlayBadge
-                value="4"
-                severity="danger"
-                class="inline-flex cursor-pointer"
-                size="small"
-                id="noti-menu-button"
-                @click="toggleNotiMenu"
-              >
-                <notification fill="fill-white" class="scale-110" />
-              </OverlayBadge>
+            <div class="relative" id="noti-menu-button">
+              <div class="relative cursor-pointer" @click="toggleNotiMenu">
+                <div class="mt-0.5">
+                  <notification fill="fill-white" class="scale-100" />
+                </div>
+                <div
+                  class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
+                >
+                  1
+                </div>
+              </div>
               <div
                 v-if="isNotiMenuOpen"
                 id="noti-menu"

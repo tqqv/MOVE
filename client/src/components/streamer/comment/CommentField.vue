@@ -54,15 +54,13 @@
       emit('handleSendCommentReply', newReply);
       emit('updateTotalRepliesCount', props.comment.totalRepliesCount + 1);
       commentText.value = '';
+      handleCancel();
       commentText.blur();
     } catch (error) {
       console.error('Error posting comment:', error);
     }
   };
-  const autoResize = (textarea) => {
-    textarea.style.height = 'auto';
-    textarea.style.height = `${textarea.scrollHeight}px`;
-  };
+
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' && !event.shiftKey && isCommentNotEmpty.value) {
       event.preventDefault();
@@ -70,6 +68,10 @@
     } else if (event.key === 'Enter' && event.shiftKey) {
       autoResize(document.getElementById('commentTextarea'));
     }
+  };
+  const autoResize = (textarea) => {
+    textarea.style.height = 'auto';
+    textarea.style.height = `${textarea.scrollHeight}px`;
   };
 </script>
 
@@ -83,9 +85,9 @@
       />
       <div class="flex-grow px-4 py-2 rounded-md bg-gray-dark/25">
         <textarea
+          id="commentTextarea"
           placeholder="Write a comment"
           class="flex-grow bg-transparent focus:outline-none placeholder:text-sm placeholder:font-normal placeholder:text-black/50 w-full h-12 resize-none"
-          rows="1"
           @focus="handleFocus"
           @input="handleCommentInput"
           v-model="commentText"
