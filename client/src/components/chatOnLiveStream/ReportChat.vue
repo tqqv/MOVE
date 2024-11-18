@@ -12,6 +12,7 @@
   const props = defineProps({
     userChat: Object,
     userReportId: String,
+    isChannelFollowed: Boolean,
   });
 
   const popupStore = usePopupStore();
@@ -166,8 +167,8 @@
         </RouterLink>
         <div
           class="flex justify-center size-9 items-center p-2 rounded-md border border-gray-dark cursor-pointer hover:bg-gray-light text-black"
-          v-tooltip.top="'Reply'"
-          @click="handleReply"
+          v-tooltip.top="isChannelFollowed ? 'Reply' : 'You need to follow to reply'"
+          @click="props.isChannelFollowed ? handleReply() : null"
         >
           <span>@</span>
         </div>
