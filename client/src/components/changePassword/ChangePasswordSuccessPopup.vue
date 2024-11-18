@@ -1,7 +1,9 @@
 <script setup>
+  import { ref } from 'vue';
   import Dialog from 'primevue/dialog';
   import Button from 'primevue/button';
   import { usePopupStore } from '@/stores/popup.store';
+
   const popupStore = usePopupStore();
 </script>
 <template>
