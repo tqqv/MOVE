@@ -2,7 +2,7 @@
   import { ref, onMounted, watch } from 'vue';
   import Divider from 'primevue/divider';
   import { usePopupStore, useGetRepsStore, useContryStore } from '@/stores';
-  import { getCardInfo } from '@/services/payment';
+  import { getCardInfo, getPaymentHistory } from '@/services/payment';
   import { useCardStore } from '@/stores/card.store';
 
   const emit = defineEmits(['toggleBuyREPs']);
@@ -10,6 +10,7 @@
     purchaseOptions: {
       type: Object,
     },
+    isFirstTime: Boolean,
   });
   const getRepsStore = useGetRepsStore();
   const popupStore = usePopupStore();
@@ -31,23 +32,22 @@
   //   isOpenBuyREPs.value = false;
   // };
 
+  const toggleBuyREPs = async () => {
+    popupStore.toggleSelectPaymentMethod();
 
-  const toggleBuyREPs = async(purchaseOptions) => {
-    await cardStore.fetchCard()
-    console.log(cardStore.card);
+    // await cardStore.fetchCard();
 
-    if(cardStore.card?.cardOwnerName){
-      popupStore.isHaveCard = true
-    } else {
-      popupStore.isHaveCard = false
-    }
+    // if (cardStore.card?.cardOwnerName) {
+    //   popupStore.isHaveCard = true;
+    // } else {
+    //   popupStore.isHaveCard = false;
+    // }
 
-    getRepsStore.setSelectedOption(purchaseOptions)
+    // getRepsStore.setSelectedOption(purchaseOptions);
 
-
-    emit('toggleBuyREPs', props.purchaseOptions);
-    popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
-    emit('toggleGetREPsMenu');
+    // emit('toggleBuyREPs', props.purchaseOptions);
+    // popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
+    // emit('toggleGetREPsMenu');
   };
 </script>
 <template>
@@ -63,10 +63,12 @@
           'text-sm text-red whitespace-nowrap': purchaseOptions,
         }"
       >
-        {{ purchaseOptions.discount*100 }}% discount
-        <span v-if="purchaseOptions.firstTime" class="text-red">for first time buyer!</span>
+        {{ purchaseOptions.discount * 100 }}% discount
+        <span v-if="isFirstTime" class="text-red">for first time buyer!</span>
       </p>
     </div>
-    <button @click="toggleBuyREPs(purchaseOptions)" class="btn w-[104px]">US${{ purchaseOptions.amount }}</button>
+    <button @click="toggleBuyREPs(purchaseOptions)" class="btn w-[104px]">
+      US${{ purchaseOptions.amount }}
+    </button>
   </div>
 </template>

@@ -26,23 +26,27 @@
   import GoLive from './icons/goLive.vue';
   import { useTabStore } from '@/stores/tab.store';
   import { useGetRepsStore } from '@/stores/getReps.store';
+  import { getPaymentHistory } from '@/services/payment';
 
   import GetREPS from './getReps/GetREPS.vue';
   import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
   import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
   import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
   import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
+  import SelectPaymentMethod from './getReps/dialog/SelectPaymentMethod.vue';
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
   const getRepsStore = useGetRepsStore();
-
+  const isOpenOrder = ref(false);
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isGetREPsMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
+  const isPaymentHistoryFetched = ref(false);
 
+  const isFirstTime = ref(false);
   // SEARCH
   const isSearchPopupOpen = ref(false);
   const onFocused = ref(false);
@@ -66,21 +70,30 @@
   const toggleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
+
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+
+    if (!isPaymentHistoryFetched.value) {
+      fetchPaymentHistory();
+      isPaymentHistoryFetched.value = true;
+    }
+
     if (!getRepsStore.purchaseOptions.length > 0) {
       getRepsStore.getRepPackages();
     }
   };
+
   const closeAllPopups = () => {
     isUserMenuOpen.value = false;
     isNotiMenuOpen.value = false;
     isSearchPopupOpen.value = false;
     isGetREPsMenuOpen.value = false;
     isCreateMenuOpen.value = false;
-    console.log('đóng nè');
   };
-
+  const toggleOpenOrder = () => {
+    isOpenOrder.value = !isOpenOrder.value;
+  };
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
     tabStore.setActiveTab('0');
@@ -169,6 +182,23 @@
       users.value = [];
     }
   }, 500);
+  const fetchPaymentHistory = async () => {
+    try {
+      const res = await getPaymentHistory();
+
+      if (res.status === 200) {
+        if (res.data.data.count > 0) {
+          isFirstTime.value = false;
+        } else {
+          isFirstTime.value = true;
+        }
+      } else {
+        return;
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy lịch sử thanh toán:', error);
+    }
+  };
 
   watch(
     () => searchData.value,
@@ -367,6 +397,7 @@
                 tabindex="-1"
               >
                 <GetREPS
+                  :isFirstTime="isFirstTime"
                   :isBackVisible="false"
                   v-if="isGetREPsMenuOpen"
                   @toggleGetREPsMenu="toggleGetREPsMenu"
@@ -503,22 +534,21 @@
   <UploadVideo />
   <VideoDetail />
   <!-- POPUP GET REPS -->
+  <SelectPaymentMethod title="Select payment method" />
   <CompletePurchaseNoInfo
     v-if="!popupStore.isHaveCard"
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
+    @toggleOpenOrder="toggleOpenOrder"
+    :isFirstTime="isFirstTime"
   />
   <CompletePurchaseHaveInfo
     v-else
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
+    @toggleOpenOrder="toggleOpenOrder"
+    :isFirstTime="isFirstTime"
   />
   <ProcessingPayment />
-  <!-- <OrderStatusPopup
-    :isOpenOrder="isOpenOrder"
-    :money="purchaseOptions.money"
-    :reps="purchaseOptions.reps"
-    :isOrderSuccessful="isOrderSuccessful"
-    @toggleOrder="toggleOrder"
-  /> -->
+  <OrderStatusPopup :isOpenOrder="isOpenOrder" @toggleOpenOrder="toggleOpenOrder" />
 </template>
