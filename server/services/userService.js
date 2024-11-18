@@ -1,6 +1,6 @@
 const { Op, where } = require("sequelize");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize, LevelWorkout } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize, LevelWorkout, Livestream } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 const { updateStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 
@@ -498,6 +498,11 @@ const getAllInforFollow = async(userId) => {
         model: LevelWorkout,
         as: 'levelWorkout', 
         attributes: ['levelWorkout'] 
+      },
+      {
+        model: Category,
+        as: 'category', 
+        attributes: ['title'] 
       }],
       limit: 8,
       order: [['createdAt', 'DESC']]
@@ -526,7 +531,44 @@ const getAllInforFollow = async(userId) => {
       order: [['createdAt', 'DESC']]
     });
 
-    if(!videos && !cate) {
+    const liveStreams = await Livestream.findAll({
+      where: {
+        streamerId: {
+          [Op.in]: listChannelId
+        },
+        isLive: 1
+      },
+      attributes: [
+        'streamerId',
+        'categoryId',
+        'title',
+        'thumbnailUrl',
+        'totalView',
+        'createdAt',
+      ],
+      include: [
+        {
+          model: LevelWorkout,
+          as: 'livestreamLevelWorkout',
+          attributes: ['levelWorkout']
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: [
+            'title',
+          ]
+        },
+        {
+          model: Channel,
+          as: 'livestreamChannel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    if(!videos && !cate && !liveStreams) {
       return {
         status: 200,
         data: null,
@@ -534,13 +576,12 @@ const getAllInforFollow = async(userId) => {
       }
     }
 
-    // thieu live stream ...
-
     return {
       status: 200,
       data: {
         categories: cate,
-        videos: videos
+        videos: videos,
+        livestreams: liveStreams,
       },
       message: "Get all infor successfully"
     }
