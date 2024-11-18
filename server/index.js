@@ -20,6 +20,7 @@ const repPackageRouter = require("./routes/repPackageRoute.js");
 const featuredContentRouter = require("./routes/featuredContentRoute.js");
 const searchRouter = require("./routes/searchRoute.js");
 const donationItemRouter = require("./routes/donationItemRoute.js");
+const donationRouter = require("./routes/donationRoute.js");
 const cashoutRoute = require("./routes/cashoutRoute.js");
 
 const app = express();
@@ -66,6 +67,7 @@ app.use("/api/cashout", cashoutRoute);
 app.use("/api/featuredContent", featuredContentRouter);
 app.use('/api/search', searchRouter)
 app.use("/api/donationItem", donationItemRouter);
+app.use("/api/donate", donationRouter);
 // init socket connection
 global._io.on('connection', connectSocket);
 
