@@ -17,13 +17,17 @@ export const usePopupStore = defineStore('popup', () => {
   const showReportSuccess = ref(false);
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
-  const isHaveCard = ref(false);
+  const isSelectPaymentMethod = ref(false);
 
+  const isHaveCard = ref(false);
+  const isOrderSuccessful = ref(true);
+  const isCancelPayment = ref(false);
   const toggleGetREPsMenuOpen = () => {
     showGetREPsMenuOpen.value = !showGetREPsMenuOpen.value;
   };
-  const tabStore = useTabStore();
-
+  const toggleSelectPaymentMethod = () => {
+    isSelectPaymentMethod.value = !isSelectPaymentMethod.value;
+  };
   const toggleLoadingPayment = () => {
     showLoadingPayment.value = !showLoadingPayment.value;
   };
@@ -143,5 +147,9 @@ export const usePopupStore = defineStore('popup', () => {
     isHaveCard,
     toggleGetREPsMenuOpen,
     showGetREPsMenuOpen,
+    isOrderSuccessful,
+    isCancelPayment,
+    isSelectPaymentMethod,
+    toggleSelectPaymentMethod,
   };
 });

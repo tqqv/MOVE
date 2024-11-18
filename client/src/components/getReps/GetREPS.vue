@@ -1,22 +1,23 @@
 <script setup>
   import BuyREPsCard from './BuyREPsCard.vue';
   import { ref } from 'vue';
-  import { usePopupStore, useGetRepsStore, useContryStore } from '@/stores';
+  import { useUserStore, useGetRepsStore, useContryStore, usePopupStore } from '@/stores';
 
   const props = defineProps({
     reps: {
       type: Number,
     },
     isBackVisible: Boolean,
+    isFirstTime: Boolean,
   });
 
   const emit = defineEmits(['toggleGetREPsMenu', 'toggleBuyREPs', 'toggleButtonGiftVisible']);
-  const popupStore = usePopupStore();
+  const userStore = useUserStore();
   const getRepsStore = useGetRepsStore();
   const countryStore = useContryStore();
+  const popupStore = usePopupStore();
 
   let hasFetchedCountries = false;
-  const isOrderSuccessful = ref(false);
 
   const toggleBuyREPs = (selectedOption) => {
     getRepsStore.setSelectedOption(selectedOption);
@@ -30,6 +31,10 @@
     emit('toggleGetREPsMenu');
   };
   const toggleGetREPsMenu = () => {
+    emit('toggleGetREPsMenu');
+  };
+  const selectOption = (option) => {
+    getRepsStore.setSelectedOption(option);
     emit('toggleGetREPsMenu');
   };
 </script>
@@ -57,16 +62,22 @@
       </div>
       <div class="space-y-2">
         <div class="text-base">
-          You have <span class="font-bold">{{ totalReps || 0 }} REP$</span>
+          You have <span class="font-bold">{{ userStore.user.REPs || 0 }} REP$</span>
         </div>
         <div class="text-sm text-[#777777]">Prices are shown in USD</div>
       </div>
     </div>
-    <div v-for="(option, index) in getRepsStore.purchaseOptions" :key="index" class="mt-4">
+    <div
+      v-for="(option, index) in getRepsStore.purchaseOptions"
+      :key="index"
+      class="mt-4"
+      @click="selectOption(option)"
+    >
       <BuyREPsCard
         :purchaseOptions="option"
         @toggleBuyREPs="toggleBuyREPs"
         @toggleGetREPsMenu="toggleGetREPsMenu"
+        :isFirstTime="isFirstTime"
       />
     </div>
   </div>

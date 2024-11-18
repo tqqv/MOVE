@@ -53,9 +53,17 @@ const checkout = async (data) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
+const getPaymentHistory = async () => {
+  try {
+    const response = await axios.get('payment/getpaymentHistory');
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createCardInfo,
+  getPaymentHistory,
   getCardInfo,
   getClientSecret,
   deleteCardInfo,
