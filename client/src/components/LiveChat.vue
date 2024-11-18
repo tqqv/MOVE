@@ -209,6 +209,10 @@
               v-for="(userChat, index) in chatMessages"
               :key="index"
               class="text-[13px] p-1 rounded hover:bg-gray-light relative"
+              :class="{
+                'bg-primary/20 hover:bg-primary/20':
+                  userStore.user?.username === userChat.replyTo?.username,
+              }"
               @mouseenter="hoveredIndex = index"
               @mouseleave="hoveredIndex = null"
             >
@@ -216,24 +220,13 @@
                 v-if="selectedIndex === index"
                 :userChat="userChat"
                 :userReportId="userStore.user?.id"
+                :isChannelFollowed="isChannelFollowed"
                 @handleOpenOptionChat="handleOpenOptionChat"
                 @handleReplyChat="replyChat"
               />
-              <div
-                v-if="userChat.replyTo"
-                class="flex gap-x-1 items-center mb-1.5 text-xs px-0.5 font-medium"
-                :class="{
-                  'text-primary': userStore.user?.username === userChat.replyTo?.username,
-                }"
-              >
+              <div v-if="userChat.replyTo" class="flex gap-x-1 items-center mb-1.5 text-xs px-0.5">
                 <div class="flex-shrink-0">
-                  <Chat
-                    :fill="
-                      userStore.user?.username === userChat.replyTo?.username
-                        ? '#13d0b4'
-                        : 'defaultColor'
-                    "
-                  />
+                  <Chat />
                 </div>
                 <p class="ml-1 whitespace-nowrap">Replying to</p>
                 <RouterLink :to="`/user/${userChat.replyTo?.username}`" target="_blank" class="">
