@@ -4,9 +4,10 @@
   import Navbar from '@/components/Navbar.vue';
   import SideBarFollow from '@/components/SideBarFollow.vue';
   import ViewLiveStreamContent from '@/components/viewLiveStream/ViewLiveStreamContent.vue';
-  import { onMounted, ref, watch } from 'vue';
+  import { onMounted, onUnmounted, ref, watch } from 'vue';
   import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
   import {
+    disconnectLivestream,
     joinRoom,
     listenChatHistory,
     listenStreamMetrics,
@@ -37,14 +38,14 @@
     if (liveStreamData.value?.channel?.id) {
       joinRoom(liveStreamData.value?.channel?.id);
       listenStreamReady((isReady) => {
-        console.log('Received streamReady:', isReady);
+        // console.log('Received streamReady:', isReady);
         connectOBS.value = isReady;
         fetchUserViewLive(username);
       });
 
       listenStreamMetrics((metrics) => {
         metricsData.value = metrics;
-        console.log('Stream Metrics:', metrics);
+        // console.log('Stream Metrics:', metrics);
       });
     }
   };
@@ -54,18 +55,16 @@
     joinLiveRoom();
   });
 
+  onUnmounted(async () => {
+    disconnectLivestream();
+  });
+
   watch(
     () => liveStreamData.value?.channel?.isLive,
     async (newLiveStatus) => {
       liveStatus.value = newLiveStatus;
     },
   );
-
-  watch(() => {
-    console.log('Connectobs : ', connectOBS.value);
-    console.log('LiveServer : ', liveStatus.value);
-    console.log('live', liveStreamData);
-  });
 </script>
 
 <template>

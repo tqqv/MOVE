@@ -20,7 +20,7 @@
   const userInformation = ref({});
   const loading = ref(true);
 
-  const emit = defineEmits(['handleOpenOptionChat']);
+  const emit = defineEmits(['handleOpenOptionChat', 'handleReplyChat']);
 
   const handleOpenReportChat = async () => {
     try {
@@ -78,6 +78,12 @@
     emit('handleOpenOptionChat');
   };
 
+  // REPLY
+  const handleReply = () => {
+    emit('handleReplyChat', props.userChat.index, props.userChat.username, props.userChat.message);
+    emit('handleOpenOptionChat', null);
+  };
+
   onMounted(async () => {
     await fetchChannelData();
   });
@@ -92,7 +98,7 @@
 </script>
 <template>
   <div
-    class="absolute shadow-md rounded-xl w-[92%] left-1/2 top-1/2 transform -translate-x-1/2 bg-white border border-gray-light z-30"
+    class="absolute shadow-md rounded-xl w-[92%] left-1/2 top-1/2 transform -translate-x-1/2 bg-white border border-gray-light z-[100]"
   >
     <div class="relative">
       <div
@@ -155,6 +161,7 @@
         <div
           class="flex justify-center size-9 items-center p-2 rounded-md border border-gray-dark cursor-pointer hover:bg-gray-light text-black"
           v-tooltip.top="'Reply'"
+          @click="handleReply"
         >
           <span>@</span>
         </div>

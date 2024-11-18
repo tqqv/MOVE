@@ -73,7 +73,6 @@ const connectSocket = (socket) => {
     socket.on('disconnecting', () => {
         const rooms = Array.from(socket.rooms);
         let validRoom = filterRoomsForDeletion(rooms);
-
         validRoom.forEach(async (key) => {
             const parts = key.split(':');
             const [, channelId, fields] = parts;
@@ -98,13 +97,15 @@ const connectSocket = (socket) => {
 
     socket.on('chatMessage', async (data) => {
         try {
-            const { channelId, message, userId, username, avatar } = data;
+            const { channelId, message, userId, username, avatar, replyTo, donation   } = data;
             validateMessage(message);
             const messageData = {
                 userId,
                 username,
                 message,
                 avatar,
+                replyTo,
+                donation, 
                 timestamp: Date.now()
             };
 
