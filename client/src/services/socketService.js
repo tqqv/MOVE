@@ -2,7 +2,7 @@ import livestreamSocket from '@/utils/socket';
 
 // LIVESTREAM SOCKET EVENTS
 const joinRoom = (channelId) => {
-  console.log('Joining room:', channelId);
+  // console.log('Joining room:', channelId);
   if (!livestreamSocket.connected) {
     livestreamSocket.connect();
   }
@@ -19,7 +19,7 @@ const listenStreamReady = (callback) => {
 
 const disconnectLivestream = () => {
   if (livestreamSocket.connected) {
-    livestreamSocket.emit('disconnecting');
+    livestreamSocket.on('disconnecting');
     livestreamSocket.disconnect();
   }
 };
