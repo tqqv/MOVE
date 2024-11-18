@@ -1,5 +1,5 @@
 const { renewTopVideos } = require("../../../services/videoService");
-const { set } = require("../base/redisBaseService");
+const { set, remove } = require("../base/redisBaseService");
 const _redis = require("../config");
 const cron = require('node-cron');
 
@@ -17,7 +17,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const stop = start + limit - 1;
 
         // Generate cache key for the filtered result
-        const cacheKey = `temp:filtered:${category || 'all'}:${level || 'all'}:${sortBy}:${sortDirection}`;
+        const cacheKey = `topvideo:temp:filtered:${category || 'all'}:${level || 'all'}:${sortBy}:${sortDirection}`;
 
         // Check if we have cached results
         const cachedResult = await _redis.exists(cacheKey);
@@ -31,7 +31,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
             }
 
             const videos = await _redis.hmget('video:details', videoIds);
-            const total = await _redis.zcard(cacheKey) - 1; // Total count of filtered videos
+            const total = await _redis.zcard(cacheKey); // Total count of filtered videos
 
             return {
                 status: 200,
@@ -54,16 +54,16 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         let filterKeys = [];
 
         if (category) {
-            filterKeys.push(`video:cate:${category.toLowerCase()}`);
+            filterKeys.push(`topvideo:cate:${category.toLowerCase()}`);
         }
         if (level) {
-            filterKeys.push(`video:level:${level.toLowerCase()}`);
+            filterKeys.push(`topvideo:level:${level.toLowerCase()}`);
         }
 
         // If we have multiple filters, we need to find the intersection
         let filteredIds;
         if (filterKeys.length > 1) {
-            const tempKey = `temp:${Date.now()}:filter`;
+            const tempKey = `topvideo:temp:${Date.now()}:filter`;
             await _redis.sinterstore(tempKey, ...filterKeys);
             filteredIds = await _redis.smembers(tempKey);
             await _redis.del(tempKey);
@@ -77,7 +77,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         }
 
         // Sort the results using the appropriate sorted set
-        const sortedSetKey = `video:by_${sortBy}`;
+        const sortedSetKey = `topvideo:by_${sortBy}`;
 
         if (filteredIds) {
             // If we have filters, we need to create a temporary sorted set with only our filtered IDs
@@ -103,7 +103,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const videos = await _redis.hmget('video:details', videoIds);
 
         // Calculate total results for pagination
-        const total = await _redis.zcard(cacheKey) - 1; // Total count of filtered videos
+        const total = await _redis.zcard(cacheKey); // Total count of filtered videos
 
         return {
             status: 200,
@@ -235,9 +235,9 @@ cron.schedule('*/30000 * * * *', async () => {
         });
 
         // renew redis sorted filter
-        const keys = await _redis.keys('temp:filtered:*');
+        const keys = await _redis.keys('topvideo:*');
         if (keys.length > 0) {
-            await _redis.del(...keys);
+            await _redis.unlink(...keys);
         }
 
         // Save to Redis
@@ -246,21 +246,21 @@ cron.schedule('*/30000 * * * *', async () => {
         // Save category sets
         Object.entries(categorySets).forEach(([category, videoIds]) => {
             if (videoIds.size > 0) {
-                pipeline.sadd(`video:cate:${category}`, ...Array.from(videoIds));
+                pipeline.sadd(`topvideo:cate:${category}`, ...Array.from(videoIds));
             }
         });
 
         // Save level sets
         Object.entries(levelSets).forEach(([level, videoIds]) => {
             if (videoIds.size > 0) {
-                pipeline.sadd(`video:level:${level}`, ...Array.from(videoIds));
+                pipeline.sadd(`topvideo:level:${level}`, ...Array.from(videoIds));
             }
         });
 
         // Save sorted sets
         Object.entries(sortedSets).forEach(([field, valueMap]) => {
             if (valueMap.size > 0) {
-                const key = `video:by_${field}`;
+                const key = `topvideo:by_${field}`;
                 const entries = Array.from(valueMap.entries()).flatMap(
                     ([id, score]) => [score, id]
                 );
@@ -278,6 +278,7 @@ cron.schedule('*/30000 * * * *', async () => {
             return acc;
         }, {});
 
+        await remove('video:details');
         pipeline.hset('video:details', videoDetails);
 
         await pipeline.exec();
