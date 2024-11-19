@@ -65,7 +65,7 @@
                 <div
                   class="p-2 cursor-pointer group hover:bg-primary/20 flex items-center rounded-md"
                   :class="{
-                    ' font-bold hover:bg-primary/20': route.path === subitem.link,
+                    ' font-bold hover:bg-primary/20': route.path.startsWith(subitem.link),
                   }"
                 >
                   <p class="text-sm">{{ subitem.name }}</p>

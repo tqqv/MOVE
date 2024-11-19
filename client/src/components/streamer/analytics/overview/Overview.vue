@@ -44,7 +44,7 @@
 
 <template>
   <div class="container">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-20 pt-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 pt-6">
       <div class="space-y-12">
         <!-- Overview Section -->
         <div>
@@ -91,7 +91,7 @@
         <div class="text-[22px] font-bold">Latest analytics</div>
 
         <!-- Latest Live Stream Card -->
-        <div class="bg-white shadow-lg p-8 rounded-md space-y-6">
+        <div class="bg-white shadow-lg p-8 rounded-md space-y-4">
           <div class="text-[18px] font-bold">Latest live stream</div>
           <div>
             <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
@@ -106,7 +106,9 @@
             </div>
             <div class="flex justify-between">
               <span class="text-base">Total REPs received</span>
-              <span class="text-base font-bold">{{ formatNumber(latestStream?.totalReps) }}</span>
+              <span class="text-base font-bold"
+                >{{ formatNumber(latestStream?.totalReps) }} REPs</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-base">Ratings</span>
@@ -116,18 +118,20 @@
               </div>
             </div>
           </div>
-          <div class="text-base text-primary">Go to live analytics</div>
+          <RouterLink :to="'/dashboard-streamer/live-stream-analytics'">
+            <div class="text-base text-primary pt-2">Go to live analytics</div></RouterLink
+          >
         </div>
 
         <!-- Latest Video Card -->
-        <div class="bg-white shadow-lg p-8 rounded-md mt-6 space-y-6">
+        <div class="bg-white shadow-lg p-8 rounded-md mt-6 space-y-4 mb-8">
           <span class="text-[18px] font-bold">Latest video</span>
-
-          <div class="relative overflow-hidden rounded-lg">
-            <img :src="latestVideo?.thumbnailUrl" class="object-cover w-full h-[265px]" />
-          </div>
+          <RouterLink :to="`/video/${latestVideo?.id}`">
+            <div class="relative overflow-hidden rounded-lg">
+              <img :src="latestVideo?.thumbnailUrl" class="object-cover w-full h-[300px]" /></div
+          ></RouterLink>
           <div class="text-base font-bold">{{ truncateDescripton(latestVideo?.title, 28) }}</div>
-          <div>
+          <div class="space-y-2">
             <div class="flex justify-between">
               <span class="text-base">Total views</span>
               <span class="text-base font-bold">{{ formatView(latestVideo?.viewCount) }}</span>
@@ -146,7 +150,9 @@
               </div>
             </div>
           </div>
-          <div class="text-base text-primary">Go to video analytics</div>
+          <RouterLink :to="`/dashboard-streamer/video-analytics/${latestVideo?.id}`">
+            <div class="text-base text-primary pt-2">Go to video analytics</div></RouterLink
+          >
         </div>
       </div>
     </div>
