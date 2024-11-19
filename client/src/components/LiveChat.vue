@@ -46,6 +46,7 @@
     listenChatHistory((chatHistory) => {
       console.log('Received chat history:', chatHistory);
       chatMessages.value = chatHistory;
+      console.log(chatMessages.value);
     });
   };
 
@@ -169,7 +170,7 @@
   <div
     v-if="openLiveChat"
     class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
-    :class="isStreamer ? 'h-[650px] rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -240,7 +241,7 @@
                   'absolute right-[-5px] top-[-8px] p-1 flex justify-center items-center border border-gray-dark rounded-md bg-white cursor-pointer z-20',
                   { 'opacity-50 ': !isChannelFollowed },
                 ]"
-                v-tooltip="isChannelFollowed ? 'Reply' : 'You need to follow to reply'"
+                v-tooltip.left="isChannelFollowed ? 'Reply' : 'You need to follow to reply'"
                 @click="
                   isChannelFollowed
                     ? replyChat(index, userChat.username, userChat.channelName, userChat.message)
