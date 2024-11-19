@@ -53,20 +53,21 @@ const isAgeValid = (dob) => {
 export const updateProfileSchema = yup.object({
   username: yup
     .string()
-    .required('Username is required')
+    .nullable()
     .min(6, 'Username must be at least 6 characters')
     .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
   fullName: yup
     .string()
-    .required('Username is required')
+    .nullable()
     .matches(/.*\s+.*/, 'Full name must contain at least one space')
     .matches(/^[\p{L}\s_.]*$/u, 'Full name cannot contain special characters'),
   city: yup
     .string()
+    .nullable()
     .matches(/^[\p{L}\s_.]*$/u, 'City cannot contain numbers or special characters'),
   dob: yup
     .string()
-    .required('Date of birth is required')
+    .nullable()
     .test('is-age-valid', 'User must be between 12 and 140 years old', (value) =>
       isAgeValid(value),
     ),
