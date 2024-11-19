@@ -27,7 +27,15 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                 : await _redis.zrange(cacheKey, start, stop);
 
             if (!videoIds.length) {
-                return { status: 200, data: [] };
+                return { 
+                    status: 200,
+                    data: {
+                        "listVideo": {
+                            "count": 0,
+                            "rows": []
+                        }
+                    }
+                };
             }
 
             const videos = await _redis.hmget('topvideo:details', videoIds);
@@ -39,14 +47,9 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                     "listVideo": {
                         "count": total,
                         "rows": videos.map(v => v && JSON.parse(v)).filter(Boolean)
-                    }
-                },
-                pagination: {
-                    total,
-                    page,
-                    limit,
+                    },
                     totalPages: Math.ceil(total / limit)
-                }
+                },
             };
         }
 
@@ -71,7 +74,15 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
 
         // If we have filters but no results, return empty
         if (filterKeys.length > 0 && (!filteredIds || !filteredIds.length)) {
-            return { status: 200, data: [] };
+            return { 
+                    status: 200,
+                    data: {
+                        "listVideo": {
+                            "count": 0,
+                            "rows": []
+                        }
+                    }
+            };
         }
 
         // Sort the results using the appropriate sorted set
@@ -112,14 +123,9 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                 "listVideo": {
                     "count": total,
                     "rows": videos.map(v => v && JSON.parse(v)).filter(Boolean)
-                }
-            },
-            pagination: {
-                total,
-                page,
-                limit,
+                },
                 totalPages: Math.ceil(total / limit)
-            }
+            },
         };
 
     } catch (error) {

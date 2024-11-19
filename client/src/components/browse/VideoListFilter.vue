@@ -65,6 +65,8 @@
         selectedOrder.value,
       );
       videos.value = response.data.data.listVideo.rows;
+      console.log(videos.value);
+
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       console.log(error);
