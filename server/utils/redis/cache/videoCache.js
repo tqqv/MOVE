@@ -30,7 +30,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                 return { status: 200, data: [] };
             }
 
-            const videos = await _redis.hmget('video:details', videoIds);
+            const videos = await _redis.hmget('topvideo:details', videoIds);
             const total = await _redis.zcard(cacheKey); // Total count of filtered videos
 
             return {
@@ -63,10 +63,8 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         // If we have multiple filters, we need to find the intersection
         let filteredIds;
         if (filterKeys.length > 1) {
-            const tempKey = `topvideo:temp:${Date.now()}:filter`;
-            await _redis.sinterstore(tempKey, ...filterKeys);
-            filteredIds = await _redis.smembers(tempKey);
-            await _redis.del(tempKey);
+            await _redis.sinterstore(cacheKey, ...filterKeys);
+            filteredIds = await _redis.smembers(cacheKey);
         } else if (filterKeys.length === 1) {
             filteredIds = await _redis.smembers(filterKeys[0]);
         }
@@ -80,8 +78,11 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const sortedSetKey = `topvideo:by_${sortBy}`;
 
         if (filteredIds) {
+            const tempFilterKey = `temp:filter:${Date.now()}`;
+            await _redis.sadd(tempFilterKey, ...filteredIds);
             // If we have filters, we need to create a temporary sorted set with only our filtered IDs
-            await _redis.zinterstore(cacheKey, 2, sortedSetKey, filterKeys[0], 'WEIGHTS', 1, 0);
+            await _redis.zinterstore(cacheKey, 2, sortedSetKey, tempFilterKey, 'WEIGHTS', 1, 0);
+            await _redis.del(tempFilterKey);
         } else {
             // If no filters, we can just copy the entire sorted set
             await _redis.zunionstore(cacheKey, 1, sortedSetKey);
@@ -100,7 +101,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         }
 
         // Get video details
-        const videos = await _redis.hmget('video:details', videoIds);
+        const videos = await _redis.hmget('topvideo:details', videoIds);
 
         // Calculate total results for pagination
         const total = await _redis.zcard(cacheKey); // Total count of filtered videos
@@ -174,7 +175,7 @@ const createHashmapFromDBData = async (data) => {
 }
 
 // Cấu hình cron job chạy mỗi 30 phút
-cron.schedule('*/30000 * * * *', async () => {
+cron.schedule('*/300000 * * * *', async () => {
     try {
         console.log('Cron job started to renew top videos...');
         let result;
@@ -278,8 +279,8 @@ cron.schedule('*/30000 * * * *', async () => {
             return acc;
         }, {});
 
-        await remove('video:details');
-        pipeline.hset('video:details', videoDetails);
+        await remove('topvideo:details');
+        pipeline.hset('topvideo:details', videoDetails);
 
         await pipeline.exec();
         console.log('Top videos updated and cached in Redis successfully.');
