@@ -38,4 +38,22 @@ const postForgotPassword = (data) => {
 const postResetPassword = (data) => {
   return axios.post('/auth/reset-password', data);
 };
-export { postSignup, postLogin, getLogout, getVerifyToken, postForgotPassword, postResetPassword };
+
+const sendMailVerify = (data) => {
+  return axios.post('/auth/mail-verify', data);
+};
+
+const acpVerifyMail = (token) => {
+  return axios.get(`/auth/verify-account/${token}`);
+};
+
+export {
+  postSignup,
+  postLogin,
+  getLogout,
+  getVerifyToken,
+  postForgotPassword,
+  postResetPassword,
+  sendMailVerify,
+  acpVerifyMail,
+};
