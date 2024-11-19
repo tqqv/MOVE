@@ -99,7 +99,12 @@
               <p class="text_para truncate" :title="userFollower.followChannel?.channelName">
                 {{ userFollower.followChannel?.channelName }}
               </p>
-              <verified width="16px" height="16px" v-if="userFollower.followChannel.popularCheck" class="mx-3 fill-blue" />
+              <verified
+                width="16px"
+                height="16px"
+                v-if="userFollower.followChannel.popularCheck"
+                class="mx-3 fill-blue"
+              />
             </div>
             <div
               v-if="userFollower.isStreaming"
