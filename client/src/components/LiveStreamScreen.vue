@@ -4,6 +4,7 @@
 
   const props = defineProps({
     username: String,
+    isStreamer: Boolean,
   });
 
   const frameVideo = ref(null);
@@ -30,21 +31,20 @@
   });
 </script>
 <template>
-  <div class="w-full">
-    <!-- Second Video Player -->
-    <div class="relative min-h-[560px] w-full max-w-full bg-black flex justify-center items-center">
-      <video
-        ref="frameVideo"
-        class="w-full h-full object-cover"
-        playsinline
-        controls
-        autoplay
-        muted
-        controlsList="nodownload noplaybackrate"
-      ></video>
-      <div class="absolute top-3 left-3 bg-red text-white px-3 py-1 rounded-md text-sm">
-        <span>Live</span>
-      </div>
+  <!-- Second Video Player -->
+  <div class="relative w-full max-w-full bg-black flex justify-center items-center">
+    <video
+      ref="frameVideo"
+      class="w-[70vw] h-[70%] object-cover"
+      :class="{ 'h-full': isStreamer }"
+      playsinline
+      controls
+      autoplay
+      muted
+      controlsList="nodownload noplaybackrate"
+    ></video>
+    <div class="absolute top-3 left-3 bg-red text-white px-3 py-1 rounded-md text-sm">
+      <span>Live</span>
     </div>
   </div>
 </template>

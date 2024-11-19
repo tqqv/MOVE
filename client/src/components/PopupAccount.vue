@@ -8,6 +8,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+  const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
   const router = useRouter();
@@ -16,7 +17,9 @@
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       userStore.clearUserData();
-      toast.success(response.data.message || 'Logout successful!');
+
+      toast.success(response?.data.message || 'Logout successful!');
+      emit('closeAllPopups');
       router.push('/');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
@@ -32,6 +35,7 @@
 
   const showToast = () => {
     toast.info('You are not a streamer');
+    emit('closeAllPopups');
   };
 </script>
 
@@ -41,12 +45,16 @@
       <RouterLink
         :to="`/user/${props.user.username}`"
         class="flex flex-row gap-x-3 items-center pb-3"
+        @click="emit('closeAllPopups')"
       >
-        <img
-          :src="props.user.avatar"
-          :alt="props.user.username"
-          class="rounded-full object-cover size-12"
-        />
+        <div class="flex items-center justify-center size-12 rounded-full flex-shrink-0">
+          <img
+            :src="props.user.avatar"
+            :alt="props.user.username"
+            alt="Avatar"
+            class="w-full h-full rounded-full object-cover"
+          />
+        </div>
         <h1 class="text_subTitle whitespace-nowrap">{{ props.user.username }}</h1>
         <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
       </RouterLink>
@@ -57,6 +65,7 @@
             v-if="userStore.user.role === 'streamer'"
             to="/dashboard-streamer"
             class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
           >
             <dashboard class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
@@ -73,6 +82,7 @@
             <RouterLink
               to="/wallet/payment-method"
               class="flex flex-row items-center gap-x-2 group cursor-pointer"
+              @click="emit('closeAllPopups')"
             >
               <wallet class="fill-black group-hover:fill-primary" />
               <h1 class="mb-1 group-hover:text-primary">
@@ -86,6 +96,7 @@
           <RouterLink
             to="/personal-profile"
             class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
           >
             <setting class="fill-black group-hover:fill-primary" />
             <h1 class="group-hover:text-primary">Setting</h1>

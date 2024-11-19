@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { ref, watch } from 'vue';
 
   import verified from '@/components/icons/verified.vue';
   import Dislike from '@/components/icons/dislike.vue';
@@ -7,6 +7,8 @@
   import { formatDate } from '@/utils/calculatorDate';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import CommentField from './CommentField.vue';
+  import { postReactionComment } from '@/services/comment';
+
   import { useReadMore } from '@/utils';
 
   const props = defineProps({
@@ -19,6 +21,9 @@
   });
 
   const openReplyField = ref({});
+  // const likeCount = ref(props.replies.likeCount);
+  const likeCount = ref({});
+  const userReactionType = ref({});
   const expandedReplies = ref({});
 
   const handleOpenReplyField = (replyId) => {
@@ -34,6 +39,48 @@
       }
     }
   };
+
+  const toggleReaction = async (type, replyId) => {
+    const data = { commentId: replyId, reactionType: type };
+    console.log(replyId);
+
+    try {
+      const response = await postReactionComment(data);
+      if (response.status === 200) {
+        // Cập nhật likeCount theo id của reply
+        if (type === 'like') {
+          if (userReactionType.value[replyId] === 'like') {
+            likeCount.value[replyId] -= 1;
+          } else if (userReactionType.value[replyId] === 'dislike') {
+            likeCount.value[replyId] += 1;
+          } else {
+            likeCount.value[replyId] += 1;
+          }
+        } else if (type === 'dislike') {
+          if (userReactionType.value[replyId] === 'like') {
+            likeCount.value[replyId] -= 1;
+          }
+        }
+
+        userReactionType.value[replyId] = userReactionType.value[replyId] === type ? null : type;
+      }
+    } catch (error) {
+      console.error('Error updating reaction');
+    }
+  };
+  watch(() => {
+    if (props.replies.length) {
+      props.replies.forEach((reply) => {
+        if (!(reply.id in likeCount.value)) {
+          likeCount.value[reply.id] = reply.likeCount;
+        }
+        if (!(reply.id in userReactionType.value)) {
+          userReactionType.value[reply.id] = reply.userReactionType;
+        }
+      });
+    }
+  });
+
   const toggleReadMore = (replyId) => {
     expandedReplies.value[replyId] = !expandedReplies.value[replyId];
   };
@@ -69,31 +116,33 @@
             ? reply.content
             : reply.content.slice(0, 300)
         }}
-        <span
-          v-if="reply.content.length > 300"
-          class="text-primary cursor-pointer"
+         <div v-if="!expandedReplies[reply.id] && reply.content.length > 300"
+                        class="text-[#666666]">...</div>
+        <div
+          class="text-[#666666] hover:underline font-semibold cursor-pointer"
           @click="toggleReadMore(reply.id)"
         >
-          {{ expandedReplies[reply.id] ? 'Read Less' : 'Read More' }}
-        </span>
+          {{ expandedReplies[reply.id] ? 'Show less' : 'Read More' }}
+        </div>
       </p>
       <!-- LIKE DISLIKE -->
       <div class="flex gap-4 items-center mt-2">
-        <div class="flex gap-2" @click="toggleLike">
+        <div class="flex gap-2" @click="toggleReaction('like', reply.id)">
           <Like
-            class="cursor-pointer"
-            :fill="reply.isLike ? '#13CEB3' : 'white'"
-            :stroke="reply.isLike ? 'none' : '#13D0B4'"
+            class="cursor-pointer hover:scale-110"
+            :fill="userReactionType[reply.id] === 'like' ? '#13CEB3' : 'white'"
+            :stroke="userReactionType[reply.id] === 'like' ? 'none' : '#13D0B4'"
           />
-          <span>{{ reply.like }}</span>
+          <div class="mt-1">
+            <span class="items-center text-primary">{{ likeCount[reply.id] }}</span>
+          </div>
         </div>
-        <div class="flex gap-2" @click="toggleDislike">
+        <div class="flex gap-2" @click="toggleReaction('dislike', reply.id)">
           <Dislike
-            class="cursor-pointer mt-1"
-            :fill="reply.isDisLike ? '#13CEB3' : 'white'"
-            :stroke="reply.isDisLike ? 'none' : '#13D0B4'"
+            class="cursor-pointer mt-1 hover:scale-110"
+            :fill="userReactionType[reply.id] === 'dislike' ? '#13CEB3' : 'white'"
+            :stroke="userReactionType[reply.id] === 'dislike' ? 'none' : '#13D0B4'"
           />
-          <span>{{ reply.dislike }}</span>
         </div>
         <!-- <i class="pi pi-ellipsis-v text-md text-primary cursor-pointer"></i> -->
 

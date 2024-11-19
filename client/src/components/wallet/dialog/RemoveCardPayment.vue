@@ -1,12 +1,16 @@
 <script setup>
   import { watch } from 'vue';
   import Dialog from 'primevue/dialog';
+  import { deleteCardInfo } from '@/services/payment';
+  import { toast } from 'vue3-toastify';
+  import { useCardStore } from '@/stores/card.store';
 
   const props = defineProps({
     isRemoveVisible: Boolean,
     title: String,
   });
   const emit = defineEmits(['closeRemove']);
+  const cardStore = useCardStore();
 
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');
@@ -19,6 +23,30 @@
     (newVal) => {
       if (newVal) lockScroll();
       else unlockScroll();
+    },
+  );
+
+  const handleDeleteCardInfor = async () => {
+    const paymentMethodId = cardStore.card?.paymentMethodId;
+
+    if (!paymentMethodId) {
+      toast.error('Payment method or intent information is missing.');
+      return;
+    }
+
+    const res = await deleteCardInfo(paymentMethodId);
+    if (res && res.status === 200) {
+      toggleCloseRemove();
+      cardStore.clearCard();
+      toast.success('Card removed successfully.');
+    } else {
+      toast.error('Card remove failed.');
+    }
+  };
+  watch(
+    () => cardStore.card,
+    (newCard) => {
+      console.log('Card updated:', newCard);
     },
   );
 </script>
@@ -41,7 +69,7 @@
         >
         <div class="flex items-center gap-x-4 justify-end">
           <div @click="toggleCloseRemove" class="text-base text-primary cursor-pointer">Cancel</div>
-          <div class="btn cursor-pointer">Remove</div>
+          <div @click="handleDeleteCardInfor" class="btn cursor-pointer">Remove</div>
         </div>
       </div>
     </Dialog>

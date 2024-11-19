@@ -1,4 +1,5 @@
 export { usePopupStore } from './popup.store';
+import { useLoadingStore } from './globalLoading.store';
 export { useTabStore } from './tab.store';
 export { useVideoStore } from './video.store';
 export { useUserStore } from './user.store';
@@ -8,3 +9,5 @@ export { useLevelWorkoutStore } from './levelWorkout.store';
 export { useGetRepsStore } from './getReps.store';
 export { useContryStore } from './country.store';
 export { useLiveStreamStore } from './liveStream.store';
+export { useLoadingStore } from './globalLoading.store';
+export { useCardStore } from './card.store';

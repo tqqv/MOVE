@@ -1,5 +1,7 @@
 const db = require("../models/index.js");
-const { Video, Rating, Livestream } = db;
+const { set } = require("../utils/redis/base/redisBaseService.js");
+const StreamKeys = require("../utils/redis/key/streamKey.js");
+const { Video, Rating, Livestream, sequelize } = db;
 
 
 const createRatingOnVideo = async(userId, videoId, rating) => {
@@ -117,6 +119,18 @@ const createRatingOnStream = async(userId, livestreamId, rating) => {
       foundRating.rating = rating;
       await foundRating.save();
 
+      const [avgRatingResult] = await Rating.findAll({
+        attributes: [
+          [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']
+        ],
+        where: {
+          livestreamId: livestreamId
+        }
+      });
+
+      const avgRating = parseFloat(avgRatingResult.dataValues.avgRating || 0).toFixed(2);
+      await set(StreamKeys.avgRates(foundStream.streamerId), avgRating);
+
       return {
         status: 200,
         data: foundRating,
@@ -129,6 +143,17 @@ const createRatingOnStream = async(userId, livestreamId, rating) => {
         rating: rating
       });
 
+      const [avgRatingResult] = await Rating.findAll({
+        attributes: [
+          [sequelize.fn('AVG', sequelize.col('rating')), 'avgRating']
+        ],
+        where: {
+          livestreamId: livestreamId
+        }
+      });
+
+      const avgRating = parseFloat(avgRatingResult.dataValues.avgRating || 0).toFixed(2);
+      await set(StreamKeys.avgRates(foundStream.channelId), avgRating);
       return {
         status: 200,
         data: newRating,
@@ -136,6 +161,8 @@ const createRatingOnStream = async(userId, livestreamId, rating) => {
       };
     }
   } catch (error) {
+    console.log(error);
+
     return {
       status: 500,
       data: null,

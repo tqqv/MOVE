@@ -32,7 +32,8 @@ const reportChatMessagesController = async(req, res, next) => {
   const userId  = req.user.id;
   const content = req.body.content;
   const reportTypeId = req.body.reportTypeId;
-  const result = await reportChatMessages(userId, content, reportTypeId);
+  const accountId = req.body.accountId;
+  const result = await reportChatMessages(userId, content, reportTypeId, accountId);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

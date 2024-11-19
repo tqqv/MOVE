@@ -6,6 +6,8 @@ export const useTabStore = defineStore('tabStore', () => {
   const setActiveTab = (value) => {
     activeTab.value = value;
   };
-
-  return { activeTab, setActiveTab };
+  const clearActiveTab = () => {
+    activeTab.value = '0';
+  };
+  return { activeTab, setActiveTab, clearActiveTab };
 });

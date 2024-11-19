@@ -1,19 +1,20 @@
 <script setup>
   import { watch, computed } from 'vue';
   import Dialog from 'primevue/dialog';
+  import { usePopupStore, useGetRepsStore, useUserStore } from '@/stores';
 
+  const popupStore = usePopupStore();
+  const userStore = useUserStore();
+  const getRepsStore = useGetRepsStore();
   const props = defineProps({
     isOpenOrder: Boolean,
-    money: Number,
-    reps: Number,
-    isOrderSuccessful: Boolean,
   });
 
-  const emit = defineEmits(['toggleOrder']);
+  const emit = defineEmits(['toggleOpenOrder']);
 
-  const title = computed(() => (props.isOrderSuccessful ? 'Order success' : 'Order failed'));
+  const title = computed(() => (popupStore.isOrderSuccessful ? 'Order success' : 'Order failed'));
   const description = computed(() =>
-    props.isOrderSuccessful
+    popupStore.isOrderSuccessful
       ? 'Thank you for completing the transaction! Your REPs have been successfully added to your account. If you have any questions or need further assistance, please contact us.'
       : 'Sorry, your transaction was unsuccessful. Please check your payment information or try again later. If you need assistance, please contact us for help.',
   );
@@ -22,7 +23,7 @@
   const unlockScroll = () => (document.body.style.overflow = 'auto');
 
   const closeOrder = () => {
-    emit('toggleOrder');
+    emit('toggleOpenOrder');
   };
 
   watch(
@@ -45,14 +46,17 @@
       @hide="unlockScroll"
       @update:visible="closeOrder"
       :style="{ width: '40rem' }"
+      :dismissableMask="true"
     >
       <div class="space-y-6">
         <!-- Order Status Message -->
         <div class="text-base text-[#666666] font-bold">
-          <template v-if="isOrderSuccessful">
-            Your purchase of {{ reps }} REPs is successful!
+          <template v-if="popupStore.isOrderSuccessful">
+            Your purchase of {{ getRepsStore.selectedOption.rep }} REPs is successful!
           </template>
-          <template v-else> Your purchase of {{ reps }} REPs was not successful! </template>
+          <template v-else>
+            Your purchase of {{ getRepsStore.selectedOption.rep }} REPs was not successful!
+          </template>
         </div>
 
         <!-- Description -->

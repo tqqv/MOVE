@@ -11,10 +11,17 @@
   import { getVideoAnalyticsById } from '@services/video';
   import rate from '@components/icons/rate.vue';
   import { useRoute } from 'vue-router';
-  import { formatView, formatRating, formatDatePosted, formatAvgViewTime } from '@/utils';
+  import {
+    formatView,
+    formatRating,
+    formatDatePosted,
+    formatAvgViewTime,
+    formatNumber,
+  } from '@/utils';
   import TabAge from './TabAge.vue';
   import TabCountry from './TabCountry.vue';
   import Filter from '@/components/Filter.vue';
+  import TabNationality from './TabNationality.vue';
 
   const route = useRoute();
   const videoId = route.params.videoId;
@@ -25,6 +32,7 @@
   const genderStats = ref(null);
   const ageStats = ref(null);
   const countryStats = ref(null);
+  const dataByIp = ref(null);
 
   const sortByTime = [
     { id: 1, name: 'All time' },
@@ -36,7 +44,7 @@
   const scrollableTabs = [
     { title: 'Gender', value: '0', component: TabGender },
     { title: 'Age', value: '1', component: TabAge },
-    { title: 'Nationality', value: '2', component: TabCountry },
+    { title: 'Nationality', value: '2', component: TabNationality },
     { title: 'Country', value: '3', component: TabCountry },
   ];
   const selectedSortByTime = ref(sortByTime[0].days);
@@ -60,7 +68,14 @@
       genderStats.value = response.data.viewersData.genderData;
 
       ageStats.value = response.data.viewersData.ageData;
-      countryStats.value = response.data.viewersData.countryData;
+      console.log(ageStats.value);
+
+      countryStats.value = response.data.viewersData.countryData.sort((a, b) => {
+        if (a.country === null) return 1;
+        if (b.country === null) return -1;
+        return a.country.localeCompare(b.country);
+      });
+      dataByIp.value = response.data.viewersData.dataByIp;
     } catch (error) {
       toast.error(error.message);
     }
@@ -102,9 +117,7 @@
         <div class="pt-6 space-y-4">
           <div class="flex justify-between">
             <span class="text-sm uppercase text-[#666666]">Views</span>
-            <span class="text-sm">{{
-              formatView(videosDetails.viewCount + videosDetails.totalViewer)
-            }}</span>
+            <span class="text-sm">{{ formatView(videosDetails.viewCount) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-sm uppercase text-[#666666]">avg. view time</span>
@@ -154,6 +167,7 @@
                   :totalViewer="videosDetails.totalViewer"
                   :ageStats="ageStats"
                   :countryStats="countryStats"
+                  :dataByIp="dataByIp"
                 />
               </TabPanel>
             </TabPanels>

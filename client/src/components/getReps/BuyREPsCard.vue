@@ -2,15 +2,19 @@
   import { ref, onMounted, watch } from 'vue';
   import Divider from 'primevue/divider';
   import { usePopupStore, useGetRepsStore, useContryStore } from '@/stores';
+  import { getCardInfo, getPaymentHistory } from '@/services/payment';
+  import { useCardStore } from '@/stores/card.store';
 
   const emit = defineEmits(['toggleBuyREPs']);
   const props = defineProps({
     purchaseOptions: {
       type: Object,
     },
+    isFirstTime: Boolean,
   });
   const getRepsStore = useGetRepsStore();
   const popupStore = usePopupStore();
+  const cardStore = useCardStore();
 
   // console.log(getRepsStore.selectedOption);
 
@@ -27,10 +31,23 @@
   //   isLoadPayment.value = !isLoadPayment.value;
   //   isOpenBuyREPs.value = false;
   // };
-  const toggleBuyREPs = () => {
-    emit('toggleBuyREPs', props.purchaseOptions);
-    popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
-    emit('toogleGetREPsMenu');
+
+  const toggleBuyREPs = async () => {
+    popupStore.toggleSelectPaymentMethod();
+
+    // await cardStore.fetchCard();
+
+    // if (cardStore.card?.cardOwnerName) {
+    //   popupStore.isHaveCard = true;
+    // } else {
+    //   popupStore.isHaveCard = false;
+    // }
+
+    // getRepsStore.setSelectedOption(purchaseOptions);
+
+    // emit('toggleBuyREPs', props.purchaseOptions);
+    // popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
+    // emit('toggleGetREPsMenu');
   };
 </script>
 <template>
@@ -38,18 +55,20 @@
 
   <div class="flex items-center w-full justify-between">
     <div class="mr-4">
-      <p class="font-bold text-lg text-black">{{ purchaseOptions.reps }} REP$</p>
+      <p class="font-bold text-lg text-black">{{ purchaseOptions.rep }} REP$</p>
       <p
-        v-if="purchaseOptions.discount"
+        v-if="purchaseOptions.discount !== 1"
         :class="{
-          'text-sm whitespace-nowrap text-[#666666]': !purchaseOptions.firstTime,
-          'text-sm text-red whitespace-nowrap': purchaseOptions.firstTime,
+          'text-sm whitespace-nowrap text-[#666666]': !purchaseOptions,
+          'text-sm text-red whitespace-nowrap': purchaseOptions,
         }"
       >
-        {{ purchaseOptions.discount }}% discount
-        <span v-if="purchaseOptions.firstTime" class="text-red">for first time buyer!</span>
+        {{ purchaseOptions.discount * 100 }}% discount
+        <span v-if="isFirstTime" class="text-red">for first time buyer!</span>
       </p>
     </div>
-    <button @click="toggleBuyREPs" class="btn w-[104px]">US${{ purchaseOptions.money }}</button>
+    <button @click="toggleBuyREPs(purchaseOptions)" class="btn w-[104px]">
+      US${{ purchaseOptions.amount }}
+    </button>
   </div>
 </template>

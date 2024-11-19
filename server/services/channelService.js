@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { listSubscribeOfUser } = require("./userService.js");
-const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, Livestream, sequelize } = db;
+const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, Livestream, sequelize, ViewVideo, Comment, Donation } = db;
 const { v4: uuidv4 } = require('uuid');
 const { remove, get, set } = require("../utils/redis/base/redisBaseService.js");
 const {  takeFinalSnapshot } = require("../utils/redis/stream/redisStreamService.js");
@@ -259,16 +259,18 @@ const searchVideoChannel = async(data, limit, offset) => {
         'id',
         'imgUrl',
         'title',
-        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
-      ],
-      include: [
-        {
-          model: Video,
-          as: 'categoryVideos',
-          attributes: [],
-        }
+        [
+          sequelize.literal(`(
+            SELECT SUM(viewCount)
+            FROM videos AS categoryVideos
+            WHERE categoryVideos.categoryId = Category.id
+          )`),
+          'totalViews'
+        ]
       ],
       group: ['Category.id'],
+      limit: limitInt,
+      offset: offsetInt
     });
 
     const videos = await Video.findAll({
@@ -334,9 +336,19 @@ const searchVideoChannel = async(data, limit, offset) => {
         ]
       },
       order: [
-        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],  // co channel xep truoc
+        [sequelize.literal("Channel.id IS NOT NULL"), "DESC"],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM subscribes
+            WHERE subscribes.channelId = Channel.id
+          )`),
+          'DESC'
+        ],  // co channel xep truoc
         ["username", "ASC"],
       ],
+      limit: limitInt,
+      offset: offsetInt,
     });
 
     return {
@@ -546,6 +558,212 @@ const endStream = async(data) => {
   }
 }
 
+const overviewAnalytic = async(channelId) => {
+  try {
+    let avgViewVideo;
+    let viewVideo;
+    let avgViewStream;
+    let viewStream;
+    let totalRepEarn = 0;
+    const videos = await Video.findAll({
+      where: {
+        channelId: channelId
+      },
+      attributes: [
+        'id',
+        'channelId',
+      ],
+    })
+
+    if(videos.length > 0) {
+      const listVideoId = videos.map(video => video.id);
+
+      const totalVideoView = await Video.findOne({
+        where: {
+          channelId: channelId
+        },
+        attributes: [
+          [sequelize.fn('SUM', sequelize.col('viewCount')), 'totalVideoView']
+        ],
+        raw: true
+      });
+
+      viewVideo = totalVideoView.totalVideoView
+
+      const avgViewTime = await ViewVideo.findOne({
+        where: {
+          videoId: {
+            [Op.in]: listVideoId
+          }
+        },
+        attributes: [
+          [sequelize.fn('AVG', sequelize.col('viewTime')), 'avgViewTime']
+        ],
+        raw: true
+      });
+
+      const repEarnFromVideo = await Comment.findOne({
+        where: {
+          videoId: {
+            [Op.in]: listVideoId
+          }
+        },
+        attributes: [
+          [sequelize.fn('Sum', sequelize.col('rep')), 'repEarn']
+        ],
+        raw: true
+      })
+
+      totalRepEarn += parseInt(repEarnFromVideo.repEarn)
+      avgViewVideo = avgViewTime.avgViewTime
+    }
+
+    const livestreams = await Livestream.findAll({
+      where: {
+        streamerId: channelId
+      },
+      attributes: [
+        'id',
+        'streamerId',
+      ],
+    })
+
+    if(livestreams.length > 0) {
+      const listlivestreamId = livestreams.map(livestream => livestream.id);
+
+      const totalStreamView = await Livestream.findOne({
+        where: {
+          streamerId: channelId
+        },
+        attributes: [
+          [sequelize.fn('SUM', sequelize.col('totalView')), 'totalStreamView']
+        ],
+        raw: true
+      });
+
+      viewStream = totalStreamView.totalStreamView
+
+      const avgViewTime = await ViewVideo.findOne({
+        where: {
+          livestreamId: {
+            [Op.in]: listlivestreamId
+          }
+        },
+        attributes: [
+          [sequelize.fn('AVG', sequelize.col('viewTime')), 'avgViewTime']
+        ],
+        raw: true
+      });
+
+      const repEarnFromStream = await Donation.findOne({
+        where: {
+          livestreamId: {
+            [Op.in]: listlivestreamId
+          }
+        },
+        attributes: [
+          [sequelize.fn('Sum', sequelize.col('REPs')), 'repEarn']
+        ],
+        raw: true
+      })
+
+      totalRepEarn += parseInt(repEarnFromStream.repEarn)
+      avgViewStream = avgViewTime.avgViewTime
+    }
+
+    const latestVideos = await Video.findAll({
+      where: {
+        channelId: channelId,
+        status: 'public'
+      },
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT SUM(rep)
+              FROM comments
+              WHERE comments.videoId = Video.id
+            )`),
+            'totalReps'
+          ],
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      limit: 1
+    });
+
+    const latestStream = await Livestream.findAll({
+      where: {
+        streamerId: channelId
+      },
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.livestreamId = Livestream.id
+            )`),
+            'ratings'
+          ],
+          [
+            sequelize.literal(`(
+              SELECT SUM(REPs)
+              FROM donations
+              WHERE donations.livestreamId = Livestream.id
+            )`),
+            'totalReps'
+          ],
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      limit: 1
+    })
+
+    const followerCount = await Subscribe.count({
+      where: {
+        channelId: channelId
+      }
+    });
+
+
+    return {
+      status: 200,
+      data: {
+        overview: {
+          followerCount,
+          totalRepEarn
+        },
+        latestVideos,
+        latestStream,
+        videoSummary: {
+          totalVideoView: viewVideo,
+          avgView: avgViewVideo
+        },
+        streamSummary: {
+          totalStreamView: viewStream,
+          avgView: avgViewStream
+        }
+      },
+      message: "Retrieve overview successful."
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createChannel,
   listSubscribeOfChannel,
@@ -557,5 +775,6 @@ module.exports = {
   createStreamKey,
   validateStreamKey,
   endStream,
-  generatedStreamKey
+  generatedStreamKey,
+  overviewAnalytic,
 }

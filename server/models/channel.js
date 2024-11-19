@@ -22,6 +22,8 @@ module.exports = (sequelize, DataTypes) => {
 
             this.hasMany(models.Report, { foreignKey: 'targetChannelId', as: 'channelReport' });
 
+            this.hasMany(models.Withdraw, { foreignKey: 'channelId', as: 'channelWithdraw' });
+
 
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
@@ -70,6 +72,10 @@ module.exports = (sequelize, DataTypes) => {
             isLive: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
+            },
+            rep: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0
             },
             popularCheck: {
                 type: DataTypes.BOOLEAN,

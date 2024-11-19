@@ -5,14 +5,14 @@
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
+  import { getAllDonationItems } from '@/services/donationItem';
+
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
+  import DonateModal from './DonateModal.vue';
+  import GetREPS from './getReps/GetREPS.vue';
   const props = defineProps({
-    isButtonGiftREPsVisible: {
-      type: Boolean,
-      default: false,
-    },
     isUserAction: {
       type: Boolean,
       default: false,
@@ -46,12 +46,35 @@
   const userStore = useUserStore();
   const popupStore = usePopupStore();
   const username = computed(() => userStore.user?.username);
+  const isButtonGiftVisible = ref(false);
+  const donationItems = ref({});
+  const isGetREPsMenuOpen = ref(false);
+  const toggleGetREPsMenu = () => {
+    isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
+  };
 
+  const toggleButtonGiftVisible = () => {
+    isButtonGiftVisible.value = !isButtonGiftVisible.value;
+    fetchAllDonationItems();
+  };
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
   };
   const closeMenu = () => {
     isMenuVisible.value = false;
+  };
+  const fetchAllDonationItems = async () => {
+    try {
+      const response = await getAllDonationItems();
+
+      if (response.status === 200) {
+        donationItems.value = response.data.data;
+      } else {
+        console.error(response.data.message);
+      }
+    } catch (error) {
+      console.error('Error fetching donation items:', error);
+    }
   };
 
   const followChannel = async () => {
@@ -61,13 +84,13 @@
       });
 
       if (response.status === 200) {
-        toast.success(response.message);
+        toast.success(response.data.message);
         isFilled.value = !isFilled.value;
         emit('updateFollowers');
         userStore.loadFollowers();
       } else {
         isFilled.value = !isFilled.value;
-        toast.success(response.message);
+        toast.success(response.data.message);
         emit('updateFollowers');
         userStore.loadFollowers();
       }
@@ -90,9 +113,7 @@
   });
   watch(
     () => props.usernameDetails,
-    (newVal) => {
-      console.log('Channel details changed:', newVal);
-    },
+    (newVal) => {},
   );
   onMounted(() => {
     if (userStore.user) {
@@ -104,28 +125,40 @@
 <template>
   <div class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
-      <div class="relative inline-block">
-        <div
-          :class="[
-            'flex items-center justify-center w-16 h-16 rounded-full',
-            channelDetails?.isLive ? 'border-[3px] border-red' : '',
-          ]"
-        >
-          <img
-            :src="channelDetails ? channelDetails.avatar : avatarDetails"
-            alt="Avatar"
-            class="w-full h-full rounded-full object-cover p-[1.5px]"
-          />
-          <Live
+      <RouterLink :to="`/user/${usernameDetails}`">
+        <div class="relative inline-block">
+          <div
+            :class="[
+              'flex items-center justify-center size-16 rounded-full p-[2px] flex-shrink-0',
+              channelDetails?.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
+            ]"
+          >
+            <img
+              :src="channelDetails ? channelDetails.avatar : avatarDetails"
+              alt="Avatar"
+              class="w-full h-full rounded-full object-cover"
+            />
+            <Live
+              v-if="channelDetails?.isLive"
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
+            />
+          </div>
+
+          <RouterLink
             v-if="channelDetails?.isLive"
-            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
-          />
+            :to="`/live/${usernameDetails}`"
+            class="size-16 bg-transparent rounded-full absolute top-0"
+          ></RouterLink>
         </div>
-      </div>
+      </RouterLink>
       <div>
         <p class="text-[20px] flex items-center gap-x-4">
-          <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>
-          <Verified v-if="channelDetails?.popularCheck" class="fill-blue" />
+          <RouterLink :to="`/user/${usernameDetails}`" class="">{{
+            channelDetails ? channelDetails.channelName : usernameDetails
+          }}</RouterLink>
+          <Verified v-if="channelDetails?.popularCheck" class="fill-blue mt-0.5" />
           <span v-if="channelDetails" class="whitespace-nowrap">
             {{ channelDetails.isLive ? 'is now online' : 'is now offline' }}
           </span>
@@ -157,13 +190,35 @@
       >
         <share class="mr-1" /> Share
       </div>
-      <div
-        v-if="username !== props.usernameDetails"
-        class="btn text-[13px] font-bold flex items-center cursor-pointer"
-      >
-        Gift REPs <i class="pi pi-angle-right" />
+      <div class="relative">
+        <div
+          @click="toggleButtonGiftVisible"
+          v-if="username !== props.usernameDetails"
+          class="btn text-[13px] font-bold flex items-center cursor-pointer"
+        >
+          Gift REPs <i class="pi pi-angle-right" />
+        </div>
+        <DonateModal
+          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          v-if="isButtonGiftVisible"
+          @toggleButtonGiftVisible="toggleButtonGiftVisible"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+          :donationItems="donationItems"
+        />
+        <GetREPS
+          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          v-if="isGetREPsMenuOpen"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+          @toggleBuyREPs="popupStore.toggleBuyREPs"
+          @toggleButtonGiftVisible="toggleButtonGiftVisible"
+          :isBackVisible="true"
+        />
       </div>
-      <ReportChannel v-if="hiddenReport" :channelId="channelDetails.id" :channelName="channelDetails.channelName" />
+      <ReportChannel
+        v-if="hiddenReport"
+        :channelId="channelDetails.id"
+        :channelName="channelDetails.channelName"
+      />
     </div>
   </div>
 </template>

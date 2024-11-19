@@ -3,7 +3,13 @@
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
   import { useLiveStreamStore, useStreamerStore, useUserStore } from '@/stores';
-  import { joinRoom, listenStreamMetrics, listenStreamReady } from '@/services/socketService';
+  import {
+    disconnectLivestream,
+    joinRoom,
+    listenStreamMetrics,
+    listenStreamReady,
+  } from '@/services/socketService';
+import { useRoute } from 'vue-router';
 
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
@@ -43,7 +49,7 @@
 
       listenStreamMetrics((metrics) => {
         metricsData.value = metrics;
-        console.log('Stream Metrics:', metrics);
+        // console.log('Stream Metrics:', metrics);
       });
     }
   };
@@ -51,6 +57,10 @@
   onMounted(async () => {
     await streamerStore.fetchProfileChannel();
     handleConnectOBS();
+  });
+
+  onUnmounted(async () => {
+    disconnectLivestream();
   });
 
   watch(
@@ -85,9 +95,18 @@
       }
     },
   );
-  // watch(() => {
-  //   console.log(elapsedTime.value);
-  // });
+
+  // Re-fetch data when route changes
+  const route = useRoute();
+  watch(
+    () => route.fullPath,
+    async (newPath) => {
+      if (newPath.includes('dashboard-live')) {
+        await streamerStore.fetchProfileChannel();
+        handleConnectOBS();
+      }
+    },
+  );
 </script>
 
 <template>

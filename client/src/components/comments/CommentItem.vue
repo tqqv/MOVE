@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, watch, onMounted, computed } from 'vue';
   import Verified from '@/components/icons/verified.vue';
   import Gift from '../icons/gift.vue';
   import Like from '../icons/like.vue';
@@ -13,6 +13,9 @@
   import axiosInstance from '@/services/axios';
   import ReportDialog from '@/components/ReportDialog.vue';
   import { useReadMore } from '@/utils';
+
+  import { postReactionComment } from '@/services/comment';
+  import { useUserStore, usePopupStore } from '@/stores';
 
   dayjs.extend(relativeTime);
 
@@ -33,11 +36,16 @@
       type: [Number, String],
       required: true,
     },
+    isCommentable: Boolean,
   });
-  const { displayedText, toggleText, isLongText, showFullText } = useReadMore(
-    props.comment.content,
-    300,
-  );
+
+  const emit = defineEmits(['fetchComments']);
+  const formatCommentText = (text) => {
+    return text.replace(/\n/g, '<br/>');
+  };
+  const { showFullText, displayedText, toggleText, isLongText, isTallText, textElement } =
+    useReadMore(formatCommentText(props.comment.content), 300);
+  const userStore = useUserStore();
 
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
@@ -55,24 +63,57 @@
   const selectedReportComment = ref(null);
   const selectedCommentId = ref(null);
 
+  const likeCount = ref(props.comment.likeCount);
+  const userReactionType = ref(props.comment.userReactionType);
+  const openLoginPopup = () => {
+    popupStore.openLoginPopup();
+  };
   const toggleReportComment = (commentId) => {
     selectedCommentId.value = commentId;
     openReportComment.value = !openReportComment.value;
   };
   const openPopupReport = () => {
+    if (!userStore.user) {
+      popupStore.openLoginPopup();
+
+      return;
+    }
     isReportVisible.value = !isReportVisible.value;
     openReportComment.value = false;
     getAllReportTypes();
   };
+
+  const toggleReaction = async (type) => {
+    if (!userStore.user) {
+      openLoginPopup();
+      return;
+    }
+    const data = { commentId: props.comment.id, reactionType: type };
+    try {
+      const response = await postReactionComment(data);
+      if (response.status === 200) {
+        if (type === 'like') {
+          if (userReactionType.value === 'like') {
+            likeCount.value -= 1;
+          } else if (userReactionType.value === 'dislike') {
+            likeCount.value += 1;
+          } else {
+            likeCount.value += 1;
+          }
+        } else if (type === 'dislike') {
+          if (userReactionType.value === 'like') {
+            likeCount.value -= 1;
+          }
+        }
+
+        userReactionType.value = userReactionType.value === type ? null : type;
+      }
+    } catch (error) {
+      toast.error('Error updating reaction');
+    }
+  };
+
   //===========///
-  const toggleLike = () => {
-    props.comment.isLike = !props.comment.isLike;
-    if (props.comment.isLike) props.comment.isDisLike = false;
-  };
-  const toggleDislike = () => {
-    props.comment.isDisLike = !props.comment.isDisLike;
-    if (props.comment.isDisLike) props.comment.isLike = false;
-  };
 
   const timeFromNow = (createdAt) => {
     return dayjs(createdAt, 'YYYY-MM-DD HH:mm:ss').fromNow();
@@ -208,37 +249,41 @@
         >
       </div>
       <!-- COMMENT -->
-      <p
+      <div
+        ref="textElement"
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="break-all text-sm text-black"
       >
-        {{ displayedText() }}
-        <span v-if="isLongText">
-          <button @click="toggleText" class="text-primary font-semibold ml-1">
+        <div ref="textElement" v-html="displayedText()" />
+        <div v-if="isLongText || isTallText">
+          <div v-if="!showFullText" class="text-[#666666]">...</div>
+          <button @click="toggleText" class="text-[#666666] hover:underline font-semibold">
             {{ showFullText ? 'Show less' : 'Read more' }}
           </button>
-        </span>
-      </p>
+        </div>
+      </div>
+
       <!-- Like/Dislike -->
       <div
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
-        class="flex gap-4 items-center"
+        :class="['flex gap-4 items-center', !isCommentable ? 'opacity-50 pointer-events-none' : '']"
       >
-        <div class="flex gap-2" @click="toggleLike">
+        <div class="flex gap-2" @click="toggleReaction('like')">
           <Like
-            class="cursor-pointer"
-            :fill="comment.isLike ? '#13CEB3' : 'white'"
-            :stroke="comment.isLike ? 'none' : '#13D0B4'"
+            class="cursor-pointer hover:scale-110"
+            :fill="userReactionType === 'like' ? '#13CEB3' : 'white'"
+            :stroke="userReactionType === 'like' ? 'none' : '#13D0B4'"
           />
-          <span>{{ comment.like }}</span>
+          <div>
+            <span class="items-center text-primary text-[13px]">{{ likeCount }}</span>
+          </div>
         </div>
-        <div class="flex gap-2" @click="toggleDislike">
+        <div class="flex gap-2" @click="toggleReaction('dislike')">
           <Dislike
-            class="cursor-pointer mt-1"
-            :fill="comment.isDisLike ? '#13CEB3' : 'white'"
-            :stroke="comment.isDisLike ? 'none' : '#13D0B4'"
+            class="cursor-pointer mt-1 hover:scale-110"
+            :fill="userReactionType === 'dislike' ? '#13CEB3' : 'white'"
+            :stroke="userReactionType === 'dislike' ? 'none' : '#13D0B4'"
           />
-          <span>{{ comment.dislike }}</span>
         </div>
         <div class="relative">
           <div>
@@ -284,6 +329,7 @@
         @sendComment="handleSendComment"
         :replyToUsername="replyToUsername"
         :videoId="videoId"
+        :isCommentable="isCommentable"
       />
       <div v-if="!isShowMoreChild">
         <CommentItem
@@ -294,6 +340,7 @@
           :childComments="props.childComments"
           :totalRepliesCount="props.totalRepliesCount"
           :videoId="videoId"
+          :isCommentable="isCommentable"
         />
       </div>
       <!-- Toggle to show/hide child comments -->
@@ -328,6 +375,7 @@
             :childComments="props.childComments"
             :totalRepliesCount="props.totalRepliesCount"
             :videoId="videoId"
+            :isCommentable="isCommentable"
           />
           <div
             v-if="hasMoreChildComments && !loadingReplies"

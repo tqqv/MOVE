@@ -1,6 +1,7 @@
 const intervals = {};   // Lưu trữ các bộ đếm setInterval cho mỗi channelId
 
 const { get } = require("../utils/redis/base/redisBaseService");
+const { getChatHistory, handleChatMessage, validateMessage } = require("../utils/redis/stream/redisChatService");
 const { updateStreamStats, getStreamStats, filterRoomsForDeletion } = require("../utils/redis/stream/redisStreamService");
 
 const getNumOfConnectInAllRooms = () => {
@@ -35,11 +36,16 @@ const logClientCount = () => {
 // Xử lý khi một client tham gia vào channel
 const onClientJoinChannel = async (socket, channelId) => {
     let currentView = await get(`channelStreamId:${channelId}:currentViews`);
+    broadcastStreamStats(channelId);
     // Nếu đây là client đầu tiên, khởi tạo setInterval
-    if (currentView == 1) {
+    if (currentView >= 1) {
         intervals[channelId] = setInterval(() => broadcastStreamStats(channelId), 30000);
     }
     socket.join(channelId);
+
+    // Lấy chat history
+    const messageHistory = await getChatHistory(channelId);
+    socket.emit('message_history', messageHistory);
 };
 
 // Xử lý khi một client rời khỏi channel
@@ -67,7 +73,6 @@ const connectSocket = (socket) => {
     socket.on('disconnecting', () => {
         const rooms = Array.from(socket.rooms);
         let validRoom = filterRoomsForDeletion(rooms);
-
         validRoom.forEach(async (key) => {
             const parts = key.split(':');
             const [, channelId, fields] = parts;
@@ -89,7 +94,37 @@ const connectSocket = (socket) => {
         // socket.join(channelId);
         await onClientJoinChannel(socket, channelId);
     })
+
+    socket.on('chatMessage', async (data) => {
+        try {
+            const { channelId, message, userId, username, avatar,channelName , replyTo, donation   } = data;
+            validateMessage(message);
+            const messageData = {
+                userId,
+                username,
+                message,
+                avatar,
+                channelName,
+                replyTo,
+                donation, 
+                timestamp: Date.now()
+            };
+
+            // Xử lý và lưu message
+            await handleChatMessage(channelId, messageData);
+            // Broadcast message
+            _io.to(channelId).emit('newMessage', messageData);
+
+        } catch (error) {
+            socket.emit('error', 'Could not send message');
+        }
+    });
+
+    socket.on('leaveRoom', (channelId) => {
+        socket.leave(channelId);
+    });
 }
+
 
 module.exports = {
     connectSocket,
