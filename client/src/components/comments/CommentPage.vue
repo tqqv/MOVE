@@ -130,18 +130,20 @@
   const handleSendComment = (newComment) => {
     if (newComment) {
       comments.value.unshift(newComment);
-
+      newComment.likeCount = newComment.likeCount || 0;
       // Cập nhật tổng số bình luận con cho bình luận cha
       if (newComment.parentId) {
         totalRepliesCount.value[newComment.parentId] =
           (totalRepliesCount.value[newComment.parentId] || 0) + 1;
-        n;
+     
 
         const parentComment = comments.value.find((comment) => comment.id === newComment.parentId);
         if (parentComment) {
           parentComment.totalRepliesCount = (parentComment.totalRepliesCount || 0) + 1; // Cập nhật tổng số bình luận con
         }
-      }
+      }  
+     console.log(newComment);
+     
     } else {
       console.error('New comment is undefined or null');
     }
