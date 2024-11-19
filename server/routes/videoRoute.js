@@ -19,7 +19,7 @@ const { getUploadLink,
   getVideoWatchAlsoController,
   deleteMultipleVideos,
   getTopVideoController,
-  getStateByCountryAndVideoIdFromIpController
+  getStateByCountryAndVideoIdFromIpController,
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');

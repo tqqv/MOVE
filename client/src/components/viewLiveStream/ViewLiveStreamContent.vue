@@ -14,8 +14,8 @@
   const props = defineProps({
     username: String,
     connectOBS: String,
-    liveStatus: String,
-    liveStreamData: Array,
+    liveStatus: Boolean,
+    liveStreamData: Object,
     metricsData: Object,
   });
 
