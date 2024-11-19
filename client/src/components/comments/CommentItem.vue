@@ -147,6 +147,7 @@
   const handleSendComment = async (newComment) => {
     if (newComment) {
       newComment.isNew = true;
+      newComment.likeCount = newComment.likeCount || 0;
 
       if (parentIdReply.value && props.childComments[parentIdReply.value]) {
         props.childComments[parentIdReply.value].unshift(newComment);
@@ -170,9 +171,7 @@
       if (response.status === 200) {
         reportTypeVideos.value = response.data.data;
       }
-    } catch (error) {
-      toast.error(error.message);
-    }
+    } catch (error) {}
   };
   const handleSubmitReportComment = async () => {
     if (selectedReportComment.value.id) {
@@ -184,11 +183,8 @@
         if (response.status === 200) {
           isReportVisible.value = false;
           isReportSuccessVisible.value = true;
-          toast.success(response.data.message);
         }
-      } catch (error) {
-        toast.error(error.message);
-      }
+      } catch (error) {}
     }
   };
   const closeReportSuccess = () => {

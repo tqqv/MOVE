@@ -8,6 +8,8 @@
   import GirdVideo from '@/components/GirdVideo.vue';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { getAllCategoriesHaveView } from '@/services/browse';
+  import { getTopVideo } from '@/services/browse';
+  import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
   import { getAllVideos } from '@/services/video';
 
   const categories = ref([]);
@@ -25,12 +27,13 @@
       console.error(error.message);
     }
   };
-  const fetchAllVideos = async () => {
+  const fetchTopVideos = async () => {
     try {
-      const res = await getAllVideos();
+      const res = await getTopVideo();
+      console.log(res);
 
-      if (res.data.success) {
-        videos.value = res.data.data;
+      if (res.status === 200) {
+        videos.value = res.data.data.listVideo.rows.slice(0, 5);
       }
     } catch (error) {
       console.error(error.message);
@@ -54,7 +57,7 @@
   onMounted(async () => {
     fetchAllCategoriesHaveView();
     fetchDataSlider();
-    fetchAllVideos();
+    // fetchAllVideos();
   });
 </script>
 

@@ -32,6 +32,8 @@
 
   const handleSendCommentReply = async (newReply) => {
     newReply.isNew = true;
+    newReply.likeCount = newReply.likeCount || 0;
+
     if (openReplyField.value) {
       const isExisting = props.replies.some((reply) => reply.id === newReply.id);
       if (!isExisting) {
@@ -118,7 +120,8 @@
         }}
          <div v-if="!expandedReplies[reply.id] && reply.content.length > 300"
                         class="text-[#666666]">...</div>
-        <div
+        <div           v-if="reply.content.length > 300"
+ 
           class="text-[#666666] hover:underline font-semibold cursor-pointer"
           @click="toggleReadMore(reply.id)"
         >

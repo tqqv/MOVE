@@ -237,7 +237,7 @@ const getVideoWatchAlsoController = async(req, res, next) => {
 
 const getTopVideoController = async(req, res, next) => {
   const page = req.query.page || 1;
-  const pageSize = req.query.pageSize || 10;
+  const pageSize = req.query.pageSize || 12;
   const level = req.query.level;
   const category = req.query.category;
   // updateAt = desc same as Most recent
