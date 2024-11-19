@@ -27,7 +27,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                 : await _redis.zrange(cacheKey, start, stop);
 
             if (!videoIds.length) {
-                return { 
+                return {
                     status: 200,
                     data: {
                         "listVideo": {
@@ -74,7 +74,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
 
         // If we have filters but no results, return empty
         if (filterKeys.length > 0 && (!filteredIds || !filteredIds.length)) {
-            return { 
+            return {
                     status: 200,
                     data: {
                         "listVideo": {
@@ -181,7 +181,7 @@ const createHashmapFromDBData = async (data) => {
 }
 
 // Cấu hình cron job chạy mỗi 30 phút
-cron.schedule('*/300000 * * * *', async () => {
+cron.schedule('*/30000 * * * *', async () => {
     try {
         console.log('Cron job started to renew top videos...');
         let result;
