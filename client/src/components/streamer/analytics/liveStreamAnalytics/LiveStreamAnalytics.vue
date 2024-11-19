@@ -9,15 +9,20 @@
   import TabGender from '@components/streamer/analytics/liveStreamAnalytics/TabGender.vue';
   import { useTabStore } from '@/stores/tab.store';
   import rate from '@components/icons/rate.vue';
-  import { formatView, formatRating, formatDatePosted, formatAvgViewTime } from '@/utils';
-  import TabAge from '@components/streamer/analytics/videoAnalytics/TabAge.vue';
-  import TabCountry from '@components/streamer/analytics/videoAnalytics/TabCountry.vue';
+  import { formatView, formatRating, formatAvgViewTime } from '@/utils';
+  import TabAge from '@components/streamer/analytics/liveStreamAnalytics/TabAge.vue';
+  import TabCountry from '@components/streamer/analytics/liveStreamAnalytics/TabCountry.vue';
   import Filter from '@/components/Filter.vue';
   import { getAllLivestreamSession, getLiveStreamAnalytics } from '@/services/liveStream';
 
   const liveStreamDetails = ref([{}]);
   const page = ref(1);
-  const pageSize = ref(100);
+  const pageSize = ref(200);
+  const ageStats = ref(null);
+  const genderStats = ref(null);
+  const dataByIp = ref(null);
+
+  const liveStreamId = ref(null);
   const overviewStats = [
     { title: 'Total REPs earned' },
     { title: 'New followers' },
@@ -64,6 +69,11 @@
       overviewStats[1].value = response.data.data.newFollowers;
       overviewStats[2].value = response.data.data.livestream.totalShare;
       overviewStats[3].value = response.data.data.livestream.highestViewAtSameTime;
+      ageStats.value = response.data.data.data.ageData;
+      genderStats.value = response.data.data.data.genderData;
+      dataByIp.value = response.data.data.data.dataByIp;
+
+      liveStreamId.value = response.data.data.livestream.id;
     } catch (error) {
       log.error(error.message);
     }
@@ -91,6 +101,7 @@
           @change="handleSortTimeChange"
           class="flex-1"
           optionLabel="timeLive"
+          @fetchAllLivestreamSession="fetchAllLivestreamSession"
         />
       </div>
     </div>
@@ -110,7 +121,7 @@
           </div>
           <div class="flex justify-between">
             <span class="text-xs text-[#666666] uppercase">avg. view time</span>
-            <span class="text-sm">NULL</span>
+            <span class="text-sm">{{ formatAvgViewTime(liveStreamDetails.avgView) }}</span>
           </div>
           <div class="flex justify-between">
             <span class="text-xs text-[#666666] uppercase">Ratings</span>
@@ -152,12 +163,12 @@
         <TabPanels>
           <TabPanel v-for="tab in scrollableTabs" :key="tab.value" :value="tab.value">
             <component
-              v-if="ageStats"
               :is="tab.component"
               :genderStats="genderStats"
-              :totalViewer="videosDetails.totalViewer"
+              :totalViewer="liveStreamDetails.totalViewer"
               :ageStats="ageStats"
-              :countryStats="countryStats"
+              :dataByIp="dataByIp"
+              :liveStreamId="liveStreamId"
             />
           </TabPanel>
         </TabPanels>

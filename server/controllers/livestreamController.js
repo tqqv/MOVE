@@ -71,6 +71,8 @@ const getAllLivestreamSessionController = async (req, res, next) => {
 
 const getLivestreamSessionDetailController = async (req, res, next) => {
   const livestreamId = req.params.livestreamId;
+  console.log("..................");
+  
   const result = await getLivestreamSessionDetailsService(livestreamId);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);

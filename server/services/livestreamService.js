@@ -363,11 +363,12 @@ const updateLivestream = async(data) => {
   }
 }
 
+
 const getAllLivestreamSessionService = async (streamerId, page, pageSize, sortCondition) => {
   try {
     const listLivestream = await Livestream.findAndCountAll({
       attributes: ["id", "createdAt", "duration"],
-      where: { streamerId, isLive: false },
+      where: { streamerId, isLive: false,duration: { [Sequelize.Op.ne]: null } },
       order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
@@ -442,14 +443,15 @@ const getAgeData = async (livestreamId) => {
       attributes: []
     }],
     attributes: [
-      [Sequelize.literal(`
+     [Sequelize.literal(`
         CASE
-          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) < 18 THEN '<18'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) < 18 THEN 'Under 18'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 18 AND 24 THEN '18-24'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 25 AND 34 THEN '25-34'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 35 AND 44 THEN '35-44'
-          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'
-          ELSE '>64'
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'        
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) >64 THEN '64 above'
+          ELSE 'Unknown'
         END
       `), 'ageGroup'],
       [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
@@ -490,11 +492,6 @@ const getDataCountryByIp = async (livestreamId) => {
     livestreamId,
   };
 
-  if (days) {
-    whereCondition.createdAt = {
-      [Op.gte]: sequelize.literal(`NOW() - INTERVAL ${days} DAY`)
-    };
-  }
   const countryData = await ViewVideo.findAll({
     where: whereCondition,
     attributes: [
@@ -570,6 +567,14 @@ const getLivestreamSessionDetailsService = async (livestreamId) => {
                   WHERE viewVideos.livestreamId = Livestream.id
               )`),
               'avgView'
+          ],
+          [
+            Sequelize.literal(`(
+              SELECT COUNT(*) as totalViewer
+                FROM viewVideos
+                WHERE viewVideos.livestreamId = Livestream.id
+            )`),
+            'totalViewer'
           ]
         ],
       }

@@ -7,6 +7,7 @@ const { set } = require('../utils/redis/base/redisBaseService');
 
 const livestreamRouter = express.Router();
 
+livestreamRouter.get('/streamDetails/:livestreamId', verifyStreamer, getLivestreamSessionDetailController)
 livestreamRouter.post('/chat', async (req, res) => {
     try {
         // Hard code test data
@@ -82,7 +83,6 @@ livestreamRouter.get('/clear', async () => {
 })
 livestreamRouter.get('/all', getAllLivestreamController)
 livestreamRouter.get('/streamSessions', verifyStreamer, getAllLivestreamSessionController)
-livestreamRouter.get('/streamDetails/:livestreamId', verifyStreamer, getLivestreamSessionDetailController)
 livestreamRouter.get('/getStateFromIp/:livestreamId', verifyStreamer, getStateByCountryAndStreamIdFromIpController)// get state ở đây
 livestreamRouter.get('/info/:username', verifyStreamer, getLivestreamController)
 livestreamRouter.get('/:username', getLivestreamByUserController)

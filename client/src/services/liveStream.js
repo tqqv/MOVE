@@ -74,12 +74,24 @@ const getAllLivestreamSession = async (page, pageSize) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-const getLiveStreamAnalytics = async (livestreamId) => {
+const getLiveStreamAnalytics = async (livestreamId, days) => {
   try {
-    const response = await axios.get(`/livestream/streamDetails/${livestreamId}`);
+    const response = await axios.get(`/livestream/streamDetails/${livestreamId}`, {
+      params: { days },
+    });
     return response;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getStateFromIP = async (livestreamId, country) => {
+  try {
+    const response = await axios.get(`/livestream/getStateFromIP/${livestreamId}`, {
+      params: { country },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
   }
 };
 export {
@@ -91,4 +103,5 @@ export {
   getLiveStream,
   getAllLivestreamSession,
   getLiveStreamAnalytics,
+  getStateFromIP,
 };
