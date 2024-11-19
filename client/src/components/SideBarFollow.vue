@@ -57,7 +57,7 @@
           >Sign up</Button
         >
       </div>
-      <div class="flex flex-col gap-y-4 my-3">
+      <div class="flex flex-col gap-y-2 my-3">
         <!-- NONE FOLLOWING CHANNEL -->
         <div
           v-if="userStore.followers.length === 0 && userStore.user"
@@ -99,12 +99,7 @@
               <p class="text_para truncate" :title="userFollower.followChannel?.channelName">
                 {{ userFollower.followChannel?.channelName }}
               </p>
-              <verified
-                width="16px"
-                height="16px"
-                v-if="userFollower.followChannel.popularCheck"
-                class="mx-3 fill-blue"
-              />
+              <verified width="16px" height="16px" v-if="userFollower.followChannel.popularCheck" class="mx-3 fill-blue flex-shrink-0" />
             </div>
             <div
               v-if="userFollower.isStreaming"

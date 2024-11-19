@@ -32,6 +32,7 @@ import Following from '@/pages/Following.vue';
 import SearchTotal from '@/components/search/SearchTotal.vue';
 import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
+import VerifyEmail from '@/components/VerifyEmail.vue';
 
 const routes = [
   // User router
@@ -81,6 +82,8 @@ const routes = [
   // LIVE STREAM LAYOUT
   { path: '/live/:username', component: ViewLiveStreamPage },
   { path: '/reset-password/:token', component: ResetPassword },
+  { path: '/verify-email/:token', component: VerifyEmail },
+
   // Streamer router
   {
     path: '/dashboard-streamer',

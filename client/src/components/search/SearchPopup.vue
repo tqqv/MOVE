@@ -81,7 +81,10 @@
                 <h1 class="truncate text-ellipsis">{{ user.Channel.channelName }}</h1>
                 <h1 class="truncate italic text-footer text-[11px]">@{{ user.username }}</h1>
               </div>
-              <verified v-if="user.Channel?.popularCheck" class="fill-blue scale-90 mr-1" />
+              <verified
+                v-if="user.Channel?.popularCheck"
+                class="fill-blue scale-90 mr-1 flex-shrink-0"
+              />
             </div>
             <h1 v-else class="truncate">{{ user.username }}</h1>
           </div>

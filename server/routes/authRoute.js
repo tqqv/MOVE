@@ -26,7 +26,7 @@ authRouter.get("/logout", verifyUser, logoutController);
 
 // verify email
 authRouter.post("/mail-verify", verifyUser, sendMailVerifyController);
-authRouter.get("/verify-account/:token", verifyAccountController);
+authRouter.get("/verify-account/:token", verifyUser , verifyAccountController);
 // forgot pasword
 authRouter.get("/verify-token/:token", verifyTokenRsController);
 authRouter.post("/forgot-password", sendMailForgotPass);

@@ -14,6 +14,18 @@
   import { updateProfileSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
   import DatePicker from 'primevue/datepicker';
+  import { sendMailVerify } from '@/services/auth';
+
+  const props = defineProps({
+    isEmailSent: {
+      type: Boolean,
+      required: true,
+    },
+    handleVerifiedEmail: {
+      type: Function,
+      required: true,
+    },
+  });
 
   const userStore = useUserStore();
   const profileData = ref({
@@ -27,6 +39,8 @@
     avatar: '',
     dob: '',
   });
+
+  const emailVerified = computed(() => userStore?.user?.isVerified);
 
   const initialProfileData = ref({ ...profileData.value });
   const countries = ref([]);
@@ -50,9 +64,18 @@
     }
   };
 
-  // DISABLED EMAIL
-  const handleSetDisabledEmail = () => {};
+  // VERIFY EMAIL
+  const emit = defineEmits(['verifyEmail']);
 
+  const handleEmailVerification = () => {
+    emit('verifyEmail', profileData.value.email);
+  };
+
+  const handleEmailClick = () => {
+    if (!props.isEmailSent) {
+      handleEmailVerification();
+    }
+  };
   // UPDATE GENDER
   function updateSelection(value) {
     profileData.value.gender = value;
@@ -137,6 +160,7 @@
     const isValid = await validateProfileData();
     if (!isValid) {
       toast.error('Please check the information again');
+
       return;
     }
 
@@ -153,6 +177,8 @@
         }
       } catch (error) {
         toast.error('Failed to update profile');
+      } finally {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   };
@@ -160,6 +186,7 @@
   onMounted(async () => {
     await userStore.fetchUserProfile();
     loadCountries();
+    console.log(emailVerified.value);
 
     if (userStore.user) {
       updateProfileData(userStore.user);
@@ -233,7 +260,10 @@
         <!-- USERNAME -->
         <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <div class="relative text-[14px] rounded-lg">
+          <div
+            class="relative text-[14px] rounded-lg"
+            :class="errors.username ? 'error_password' : 'normal_password'"
+          >
             <input
               v-model="profileData.username"
               type="text"
@@ -258,17 +288,17 @@
             <input
               v-model="profileData.email"
               type="email"
-              disabled
-              class="password_custom bg-gray-light"
-              :class="{ 'italic text-body ': !profileData.email }"
+              :disabled="emailVerified"
+              class="password_custom"
+              :class="[!emailVerified ? ' ' : 'italic text-body bg-gray-light']"
               required
             />
             <p
-              v-show="!profileData.email"
-              @click="handleSetDisabledEmail"
-              class="absolute text-[13px] right-3 top-2 mt-1 text-primary cursor-pointer"
+              v-show="!emailVerified"
+              @click="handleEmailClick"
+              class="absolute text-[13px] right-3 top-2 mt-1 text-primary cursor-pointer hover:text-primary-light"
             >
-              Setup email
+              {{ isEmailSent ? 'Email verification sent' : 'Verify email' }}
             </p>
           </div>
         </div>
@@ -284,7 +314,6 @@
               type="text"
               placeholder="Enter full name"
               class="password_custom capitalize"
-              required
               @input="(e) => capitalizeInput(e, 'fullName')"
             />
             <Warning
@@ -410,6 +439,7 @@
 <style scoped>
   :deep(.p-inputtext) {
     border: 1.6px solid #dee3e9 !important;
+    height: 45px;
   }
   :deep(.p-inputtext:focus) {
     border-color: #13d0b4 !important;
