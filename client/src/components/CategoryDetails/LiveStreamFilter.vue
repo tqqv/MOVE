@@ -68,12 +68,23 @@
       console.log(response);
 
       livestreams.value = response.data.data.livestreamsWithStats;
-      totalPage.value = response.data.totalPages;
+      totalPage.value = response.data.data.totalPages;
+      console.log(totalPage.value);
+
+      console.log(totalPage.value);
     } catch (error) {
       console.log(error);
     }
   };
-
+  watch(
+    () => props.categoryTitle,
+    (newCategoryTitle, oldCategoryTitle) => {
+      if (newCategoryTitle !== oldCategoryTitle) {
+        currentPage.value = 1;
+        fetchLiveStream();
+      }
+    },
+  );
   watch(levelWorkoutOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
       selectLevelWorkoutOptions.value = newOptions[0].value || '';
@@ -126,7 +137,7 @@
       :totalRecords="totalPage * pageSize"
       @page="onPageChange"
     />
-    <div v-if="!livestreams.length" class="h-full flex justify-center items-center mt-20">
+    <div v-if="!livestreams.length" class="h-full flex justify-center items-center mt-18">
       <EmptyPage
         title="There are no matching live streams"
         subTitle="Try different keywords or remove search filters"

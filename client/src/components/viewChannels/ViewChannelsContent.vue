@@ -100,6 +100,7 @@
       @updateFollowers="fetchChannelData"
       :hiddenReport="true"
       class="pl-3"
+      isGiftVisivle="false"
     />
     <div>
       <div class="mt-2">

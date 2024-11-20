@@ -38,6 +38,7 @@
       type: Boolean,
       default: false,
     },
+    isGiftVisivle: Boolean,
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -193,20 +194,20 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="username !== props.usernameDetails"
+          v-if="username !== props.usernameDetails && !isGiftVisivle"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
         </div>
         <DonateModal
-          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isButtonGiftVisible"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           @toggleGetREPsMenu="toggleGetREPsMenu"
           :donationItems="donationItems"
         />
         <GetREPS
-          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isGetREPsMenuOpen"
           @toggleGetREPsMenu="toggleGetREPsMenu"
           @toggleBuyREPs="popupStore.toggleBuyREPs"

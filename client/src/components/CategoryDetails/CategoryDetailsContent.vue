@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, markRaw, onMounted } from 'vue';
+  import { ref, markRaw, onMounted, watch } from 'vue';
   import Tabs from 'primevue/tabs';
   import TabList from 'primevue/tablist';
   import Tab from 'primevue/tab';
@@ -13,12 +13,8 @@
   import { useRoute } from 'vue-router';
 
   const route = useRoute();
-  const categoryTitle = route.params.category;
-  const props = defineProps({
-    categoryTitle: {
-      type: String,
-    },
-  });
+  const categoryTitle = ref(route.params.category);
+
   const categoryDetail = ref({});
 
   const tabs = ref([
@@ -31,13 +27,20 @@
       const response = await getCategoryByTitle(title);
 
       categoryDetail.value = response.data;
+      console.log(categoryDetail.value);
     } catch (error) {
       console.error(error.message);
     }
   };
-
+  watch(
+    () => route.params.category,
+    (newCategory) => {
+      categoryTitle.value = newCategory;
+      fetchCategoryByTitle(newCategory);
+    },
+  );
   onMounted(() => {
-    fetchCategoryByTitle(categoryTitle);
+    fetchCategoryByTitle(categoryTitle.value);
   });
 </script>
 
