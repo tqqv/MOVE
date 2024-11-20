@@ -353,7 +353,7 @@
               </div>
               <div
                 id="reps-menu"
-                class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="reps-menu-button"
@@ -376,7 +376,7 @@
                 </div>
 
                 <div
-                  class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                  class="absolute right-0 z-10 mt-6 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
                   v-if="isCreateMenuOpen"
                   id="create-menu"
                 >
@@ -554,3 +554,9 @@
   <ProcessingPayment />
   <OrderStatusPopup :isOpenOrder="isOpenOrder" @toggleOpenOrder="toggleOpenOrder" />
 </template>
+
+<style>
+  .p-inputtext {
+    color: #000000 ;
+  }
+</style>
