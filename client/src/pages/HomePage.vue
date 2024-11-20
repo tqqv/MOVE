@@ -41,11 +41,21 @@
       isLoading.value = false;
     }
   };
+  const fetchVideoYouMayLike = async () => {
+    try {
+      const res = await getTopVideo();
 
+      if (res.data.success) {
+        videos.value = res.data.data.listVideo.rows;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
   onMounted(async () => {
     fetchAllCategoriesHaveView();
     fetchDataSlider();
-    // fetchAllVideos();
+    fetchVideoYouMayLike();
   });
 </script>
 
