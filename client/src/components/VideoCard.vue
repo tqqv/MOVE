@@ -118,7 +118,7 @@
           <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
             video.levelWorkout?.levelWorkout || video.livestreamLevelWorkout?.levelWorkout
           }}</span>
-          <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
+          <span v-if="video.duration" class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
             genreDuration(video.duration)
           }}</span>
         </div>

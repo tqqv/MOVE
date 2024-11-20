@@ -1,4 +1,4 @@
-const { Op } = require("sequelize");
+const { Op, fn, col } = require("sequelize");
 const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set, get } = require("../utils/redis/base/redisBaseService.js");
@@ -148,39 +148,61 @@ const getLivestreamService = async (username) => {
 const getAllLivestreamService = async (page, pageSize, level, category, sortCondition) => {
   try {
     const listLivestream = await Livestream.findAndCountAll({
-      attributes: ["title", "description", "thumbnailUrl", "isLive", "totalView"],
+      attributes: [
+        "title",
+        "description",
+        "thumbnailUrl",
+        "isLive",
+        "totalView",
+        [Sequelize.literal('(SELECT AVG(rating) FROM ratings WHERE ratings.livestreamId = Livestream.id)'), 'avgRates'], // Tính trung bình avgRates
+      ],
       where: { isLive: true },
       include: [
         {
           model: Channel,
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
-          as: 'livestreamChannel'
+          attributes: ["channelName", "avatar", "isLive", "popularCheck"],
+          as: "livestreamChannel",
+          include: [
+            {
+              model: User,
+              attributes: ["username"],
+            },
+          ],
         },
         {
           model: LevelWorkout,
           attributes: ["levelWorkout"],
-          as: 'livestreamLevelWorkout',
-          where: level ? {levelWorkout: level} : {}
+          as: "livestreamLevelWorkout",
+          where: level ? { levelWorkout: level } : {},
         },
         {
           model: Category,
           attributes: ["title"],
-          as: 'category',
-          where: category ? {title: category} : {}
-        }
+          as: "category",
+          where: category ? { title: category } : {},
+        },
+        {
+          model: Rating,
+          attributes: [],
+          as: "streamRator",
+        },
       ],
-      order: [[sortCondition.sortBy, sortCondition.order]],
+      group: ["Livestream.id"], // Nhóm theo Livestream ID để tính trung bình
+      order: [
+        sortCondition.sortBy === "avgRates"
+          ? [Sequelize.literal("avgRates"), sortCondition.order] // Sắp xếp theo avgRates
+          : [sortCondition.sortBy, sortCondition.order], // Sắp xếp theo các trường khác
+      ],
       offset: (page - 1) * pageSize,
-      limit: pageSize * 1,
+      limit: pageSize,
     });
 
+    // Không cần xử lý thêm với Redis vì đã sort trong DB
     const livestreamsWithStats = await Promise.all(listLivestream.rows.map(async (livestream) => {
       const currentViews = await get(`channelStreamId:${livestream.streamerId}:currentViews`);
-      const avgRates = await get(`channelStreamId:${livestream.streamerId}:avgRates`);
       return {
         ...livestream.toJSON(),
         currentViews:currentViews || 0,
-        avgRates,
       };
     }));
 
@@ -231,7 +253,6 @@ const getLivestreamByUserNameService = async (username) => {
         },
       ]
     });
-    console.log("channel.isLive: ", channel.isLive);
 
     if(channel.isLive) {
       const livestream = await Livestream.findOne(
@@ -449,7 +470,7 @@ const getAgeData = async (livestreamId) => {
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 18 AND 24 THEN '18-24'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 25 AND 34 THEN '25-34'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 35 AND 44 THEN '35-44'
-          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'        
+          WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) BETWEEN 45 AND 54 THEN '45-54'
           WHEN (YEAR(CURDATE()) - YEAR(viewVideoUser.dob)) >64 THEN '64 above'
           ELSE 'Unknown'
         END
