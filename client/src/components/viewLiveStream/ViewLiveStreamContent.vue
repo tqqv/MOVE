@@ -49,6 +49,7 @@
       v-if="props.liveStreamData.channel"
       :channelDetails="props.liveStreamData?.channel"
       :usernameDetails="props.liveStreamData?.channel?.User?.username"
+      :channelId="props.liveStreamData?.channel?.id"
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">
