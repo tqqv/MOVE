@@ -44,7 +44,7 @@
 
   const checkFollowCate = async (cateId) => {
     const response = await getCheckFollowCate(cateId);
-
+    userStore.loadFollowCategories();
     if (response.success) {
       isFilled.value = response.data.follow;
     }

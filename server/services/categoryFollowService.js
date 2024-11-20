@@ -1,4 +1,4 @@
-const { Model } = require("sequelize");
+const { Model, Sequelize } = require("sequelize");
 const db = require("../models/index.js");
 const { Category, CategoryFollow } = db;
 
@@ -11,19 +11,23 @@ const getCateFollowByUserIdService = async(userId) => {
             {
                 model: Category,
                 as: 'category',
-                attributes: ['id', 'title']
+                attributes: [
+                  'id', 'title', 'imgUrl', 
+                  [
+                    Sequelize.literal(`(
+                    SELECT SUM(viewCount) 
+                    FROM videos 
+                    WHERE videos.categoryId = category.id
+                    )`), 'totalViews'
+                  ]
+                ]
             }
         ],
-        order: [[sortCondition.sortBy, sortCondition.order]],
-        offset: (page - 1) * pageSize,
-        limit: pageSize * 1,
+        order: [["createdAt", "desc"]],
       });
     return {
       status: 200,
-      data: {
-        followedCateList,
-        totalPages: Math.ceil(followedCateList.count / pageSize)
-    },
+      data: followedCateList,
       message: "Get list successfully."
     }
   } catch (error) {

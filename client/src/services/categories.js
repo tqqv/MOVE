@@ -16,4 +16,13 @@ const getCategoryByTitle = async (title) => {
     return { error: true, message: error.message };
   }
 };
-export { getAllCategories, getCategoryByTitle };
+
+const getAllFollowCategories = async () => {
+  try {
+    const response = await axios.get('/categoryFollow/getAllInforFollow');
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+export { getAllCategories, getCategoryByTitle, getAllFollowCategories };
