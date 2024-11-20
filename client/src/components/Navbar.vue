@@ -415,9 +415,7 @@
                 </div>
                 <div
                   class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
-                >
-                  1
-                </div>
+                ></div>
               </div>
               <div
                 v-if="isNotiMenuOpen"
@@ -452,7 +450,7 @@
               <div
                 v-if="isUserMenuOpen"
                 id="user-menu"
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="user-menu-button"

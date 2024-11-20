@@ -27,19 +27,7 @@
       console.error(error.message);
     }
   };
-  const fetchTopVideos = async () => {
-    try {
-      const res = await getTopVideo();
-      console.log(res);
 
-      if (res.status === 200) {
-        videos.value = res.data.data.listVideo.rows.slice(0, 5);
-      }
-    } catch (error) {
-      console.error(error.message);
-    } finally {
-    }
-  };
   const fetchDataSlider = async () => {
     try {
       const res = await getDataSlider();
@@ -63,7 +51,7 @@
 
 <template>
   <section>
-    <div class="container">
+    <div class="container items-center">
       <div class="flex items-center">
         <span class="font-bold text-[24px] pr-8">Featured</span>
         <Divider class="flex-grow mt-1" />
@@ -71,7 +59,7 @@
       <div class="flex justify-center items-center h-[300px]" v-if="isLoading">
         <SmallLoading />
       </div>
-      <div v-else>
+      <div class="mt-14" v-else>
         <Slider :dataSlider="dataSlider" />
       </div>
     </div>

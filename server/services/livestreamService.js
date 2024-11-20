@@ -197,12 +197,16 @@ const getAllLivestreamService = async (page, pageSize, level, category, sortCond
       limit: pageSize,
     });
 
-    // Không cần xử lý thêm với Redis vì đã sort trong DB
+    // Calculate total pages
+    const totalLivestreams = listLivestream.count.reduce((sum, item) => sum + item.count, 0); // Sum all counts
+    const totalPages = Math.ceil(totalLivestreams / pageSize); // Calculate total pages
+
+    // Fetch livestreams with stats
     const livestreamsWithStats = await Promise.all(listLivestream.rows.map(async (livestream) => {
       const currentViews = await get(`channelStreamId:${livestream.streamerId}:currentViews`);
       return {
         ...livestream.toJSON(),
-        currentViews:currentViews || 0,
+        currentViews: currentViews || 0,
       };
     }));
 
@@ -210,7 +214,7 @@ const getAllLivestreamService = async (page, pageSize, level, category, sortCond
       status: 200,
       data: {
         livestreamsWithStats,
-        totalPages: Math.ceil(listLivestream.count/pageSize)
+        totalPages, // Correctly calculated totalPages
       },
       message: 'Retrieve data success'
     };

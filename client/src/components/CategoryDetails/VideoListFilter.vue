@@ -65,12 +65,21 @@
         selectedSortBy.value,
         selectedOrder.value,
       );
-      videos.value = response.data.listVideo.rows;
+      videos.value = response.data.data.listVideo.rows;
       totalPage.value = response.data.totalPages;
     } catch (error) {
       console.log(error);
     }
   };
+  watch(
+    () => props.categoryTitle,
+    (newCategoryTitle, oldCategoryTitle) => {
+      if (newCategoryTitle !== oldCategoryTitle) {
+        currentPage.value = 1;
+        fetchVideos();
+      }
+    },
+  );
 
   watch(levelWorkoutOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
@@ -127,7 +136,7 @@
       :totalRecords="totalPage * pageSize"
       @page="onPageChange"
     />
-    <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
+    <div v-if="!videos.length" class="h-full flex justify-center items-center mt-18">
       <EmptyPage
         title="There are no matching videos"
         subTitle="Try different keywords or remove search filters"
