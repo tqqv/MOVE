@@ -7,6 +7,7 @@
   import { useLevelWorkoutStore } from '@/stores';
   import Paginator from 'primevue/paginator';
   import NotFoundPage from '@/pages/EmptyPage.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const categoriesStore = useCategoriesStore();
   const levelWorkoutStore = useLevelWorkoutStore();
@@ -35,7 +36,7 @@
   const totalPages = ref(0);
   const page = ref(1);
   const pageSize = 12;
-
+  const loading = ref(true);
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(sortByOptions[0].sortBy);
@@ -72,6 +73,8 @@
       totalPages.value = result.data.data.totalPages;
     } catch (error) {
       console.error('Error fetching videos:', error);
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -111,7 +114,18 @@
 
 <template>
   <div class="space-y-2">
-    <div class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between">
+    <div
+      v-if="levelWorkoutStore.loading || categoriesStore.loading"
+      class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between"
+    >
+      <Skeleton width="8rem" height="2.6rem"></Skeleton>
+      <div class="flex flex-col lg:flex-row gap-6 mb-3">
+        <Skeleton width="13.5rem" height="2.6rem"></Skeleton>
+        <Skeleton width="13.5rem" height="2.6rem"></Skeleton>
+        <Skeleton width="13.5rem" height="2.6rem"></Skeleton>
+      </div>
+    </div>
+    <div v-else class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between">
       <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
       <div class="flex flex-col lg:flex-row gap-6 mb-3">
         <Filter
@@ -134,29 +148,42 @@
         />
       </div>
     </div>
-    <div v-if="videos.length > 0">
-      <GirdVideo
-        :totalPages="totalPages"
-        :videos="videos"
-        :channelDetails="props.channelDetails"
-        :page="page"
-        :pageSize="pageSize"
-        @page-change="onPageChange"
-      />
-      <Paginator
-        v-if="totalPages > 1"
-        :rows="pageSize"
-        :first="(page - 1) * pageSize"
-        :totalRecords="totalPages * pageSize"
-        @page="onPageChange"
-      />
-    </div>
 
-    <div v-else class="h-full flex justify-center items-center mt-20">
-      <NotFoundPage
-        title="There are no matching videos"
-        subTitle="Try different keywords or remove search filters"
-      />
+    <div
+      v-if="loading"
+      class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5 my-8 px-2 mt-3"
+    >
+      <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
+        <Skeleton width="100%" height="100%"></Skeleton>
+        <Skeleton width="5rem" height="1rem"></Skeleton>
+        <Skeleton width="8rem" height="1rem"></Skeleton>
+      </div>
     </div>
+    <template v-else>
+      <div v-if="videos.length > 0">
+        <GirdVideo
+          :totalPages="totalPages"
+          :videos="videos"
+          :channelDetails="props.channelDetails"
+          :page="page"
+          :pageSize="pageSize"
+          @page-change="onPageChange"
+        />
+        <Paginator
+          v-if="totalPages > 1"
+          :rows="pageSize"
+          :first="(page - 1) * pageSize"
+          :totalRecords="totalPages * pageSize"
+          @page="onPageChange"
+        />
+      </div>
+
+      <div v-else class="h-full flex justify-center items-center mt-20">
+        <NotFoundPage
+          title="There are no matching videos"
+          subTitle="Try different keywords or remove search filters"
+        />
+      </div>
+    </template>
   </div>
 </template>

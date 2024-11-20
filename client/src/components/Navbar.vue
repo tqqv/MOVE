@@ -385,7 +385,7 @@
                       <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                         <RouterLink
                           :to="
-                            !userStore.user?.isLive
+                            !userStore.user?.Channel?.isLive
                               ? '/streaming/stream-setup'
                               : '/streaming/dashboard-live'
                           "
@@ -415,7 +415,9 @@
                 </div>
                 <div
                   class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
-                ></div>
+                >
+                  4
+                </div>
               </div>
               <div
                 v-if="isNotiMenuOpen"

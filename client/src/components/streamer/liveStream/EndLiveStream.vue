@@ -71,8 +71,8 @@
         <hr class="h-px bg-gray-dark border-0 my-7" />
         <div class="grid grid-cols-2 gap-y-8 gap-x-16 mb-7 items-start ml-7">
           <InformationLiveStream
-            :duration="liveStreamStore.liveStreamData?.duration"
-      :liveStatus="liveStatus"
+            :liveStreamData="liveStreamStore.liveStreamData"
+            :liveStatus="liveStatus"
             :metricsData="metricsData"
           />
         </div>
