@@ -415,7 +415,9 @@
                 </div>
                 <div
                   class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
-                ></div>
+                >
+                  4
+                </div>
               </div>
               <div
                 v-if="isNotiMenuOpen"
