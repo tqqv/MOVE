@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createPayment, createCardInfor, getCardInfoByUserId, createSetupIntent, deleteCardInfo } = require("../services/paymentService");
+const { createPayment, createCardInfor, getCardInfoByUserId, createSetupIntent, deleteCardInfo, getPaymentHistory } = require("../services/paymentService");
 
 const createPaymentController = async(req, res, next) => {
   const userId  = req.user.id;
@@ -44,10 +44,22 @@ const deleteCardInfoController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getPaymentHistoryController = async(req, res, next) => {
+  const userId = req.user.id;
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const startDate = req.query.startDate || null;
+  const endDate = req.query.endDate || null;
+  const result = await getPaymentHistory(userId, page, pageSize, startDate, endDate);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   createPaymentController,
   createCardInforController,
   getCardInfoByUserIdController,
   createSetupIntentController,
   deleteCardInfoController,
+  getPaymentHistoryController,
 }

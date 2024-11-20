@@ -39,7 +39,10 @@
       const result = await getRateStreamOfUser(props.livestreamId);
       if (result && result.data) {
         dataRate.value = result.data.rating;
+        console.log(result.data.rating);
+
         isRated.value = dataRate.value > 0;
+        console.log(isRated.value);
       } else {
         dataRate.value = null;
         isRated.value = false;
@@ -87,7 +90,7 @@
     },
   );
   onMounted(() => {
-    if (props.videoId && userStore.user) {
+    if ((props.videoId || props.livestreamId) && userStore.user) {
       fetchUserRating(props.videoId);
     }
   });

@@ -164,17 +164,12 @@
               v-if="props.connectOBS === 'streamReady' || props.liveStatus === 'streamReady'"
               class="flex w-full p-4"
             >
-              <LiveStreamScreen :username="userStore.user.username" />
+              <LiveStreamScreen :isStreamer="true" :username="userStore.user.username" />
             </div>
             <!-- YOUR SCREEN -->
             <div class="pt-2 pb-6 px-8">
               <div class="flex w-full items-center justify-between gap-x-3">
                 <p class="font-semibold">Your screen</p>
-                <div
-                  class="p-2 flex justify-center items-center rounded-full cursor-pointer hover:bg-gray-light"
-                >
-                  <i class="pi pi-arrow-down-left-and-arrow-up-right-to-center text-body"></i>
-                </div>
               </div>
             </div>
           </div>

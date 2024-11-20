@@ -21,7 +21,7 @@
 
   const mergedStats = computed(() => {
     return defaultStats.map((defaultStat) => {
-      const foundStat = props.genderStats.find((stat) => {
+      const foundStat = props.genderStats?.find((stat) => {
         return stat.genderGroup === defaultStat.genderGroup;
       });
 

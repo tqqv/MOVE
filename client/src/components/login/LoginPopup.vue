@@ -10,13 +10,13 @@
   import Warning from '../icons/warning.vue';
 
   const userStore = useUserStore();
-  const showLoginWithEmail = ref(false);
+  // const showLoginWithEmail = ref(false);
   const showPassword = ref(false);
   const popupStore = usePopupStore();
 
-  const handleLoginWithEmail = () => {
-    showLoginWithEmail.value = true;
-  };
+  // const handleLoginWithEmail = () => {
+  //   showLoginWithEmail.value = true;
+  // };
 
   // HANDLE LOGIN
   const submitLoginForm = async (values) => {
@@ -29,6 +29,7 @@
       } else {
         userStore.fetchUserProfile();
         userStore.loadFollowers();
+        userStore.loadFollowCategories();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
       }
@@ -67,12 +68,7 @@
       <hr class="flex-grow border-t border-[#CCCCCC]" />
     </div>
     <!-- Login Email  -->
-    <Form
-      v-if="showLoginWithEmail"
-      @submit="submitLoginForm"
-      :validation-schema="loginSchema"
-      class="w-full mt-4 space-y-4"
-    >
+    <Form @submit="submitLoginForm" :validation-schema="loginSchema" class="w-full mt-4 space-y-4">
       <div class="flex flex-col gap-y-4">
         <div class="flex flex-col gap-y-2">
           <Field name="email" v-slot="{ field, errors }">
@@ -123,7 +119,7 @@
             <span v-if="errors.length" class="error_message">{{ errors[0] }}</span>
           </Field>
         </div>
-        <div>
+        <div class="flex justify-end">
           <span @click="openForgotPassword" class="text-link text-sm cursor-pointer"
             >Forgot password?</span
           >
@@ -134,8 +130,8 @@
       </div>
     </Form>
 
-    <button @click="handleLoginWithEmail" v-else class="text-link font-bold uppercase text-sm">
+    <!-- <button @click="handleLoginWithEmail" v-else class="text-link font-bold uppercase text-sm">
       Log in with Email
-    </button>
+    </button> -->
   </div>
 </template>

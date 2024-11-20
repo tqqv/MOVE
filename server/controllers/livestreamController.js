@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService, getAllLivestreamService, getAllLivestreamSessionService, getLivestreamSessionDetailsService } = require("../services/livestreamService.js");
+const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService, getAllLivestreamService, getAllLivestreamSessionService, getLivestreamSessionDetailsService, getStateByCountryAndStreamIdFromIp } = require("../services/livestreamService.js");
 
 
 const createLivestreamController = async (req, res, next) => {
@@ -71,7 +71,18 @@ const getAllLivestreamSessionController = async (req, res, next) => {
 
 const getLivestreamSessionDetailController = async (req, res, next) => {
   const livestreamId = req.params.livestreamId;
+  console.log("..................");
+  
   const result = await getLivestreamSessionDetailsService(livestreamId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getStateByCountryAndStreamIdFromIpController = async(req, res, next) => {
+  const livestreamId = req.params.livestreamId
+  const country = req.query.country
+
+  const result = await getStateByCountryAndStreamIdFromIp(livestreamId, country)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -85,5 +96,6 @@ module.exports = {
   getLivestreamByUserController,
   getAllLivestreamController,
   getAllLivestreamSessionController,
-  getLivestreamSessionDetailController
+  getLivestreamSessionDetailController,
+  getStateByCountryAndStreamIdFromIpController
 }

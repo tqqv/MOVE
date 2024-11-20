@@ -96,9 +96,9 @@
           >
           <span
             v-if="video.channel?.popularCheck || video.livestreamChannel?.popularCheck"
-            class="mb-1 ml-3"
+            class="ml-3"
           >
-            <verified fill="fill-blue" />
+            <verified fill="fill-blue flex-shrink-0" width="14px" />
           </span>
         </div>
 
@@ -118,7 +118,7 @@
           <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
             video.levelWorkout?.levelWorkout || video.livestreamLevelWorkout?.levelWorkout
           }}</span>
-          <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
+          <span v-if="video.duration" class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
             genreDuration(video.duration)
           }}</span>
         </div>

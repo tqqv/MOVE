@@ -8,6 +8,8 @@
   import GirdVideo from '@/components/GirdVideo.vue';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { getAllCategoriesHaveView } from '@/services/browse';
+  import { getTopVideo } from '@/services/browse';
+  import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
   import { getAllVideos } from '@/services/video';
 
   const categories = ref([]);
@@ -25,18 +27,7 @@
       console.error(error.message);
     }
   };
-  const fetchAllVideos = async () => {
-    try {
-      const res = await getAllVideos();
 
-      if (res.data.success) {
-        videos.value = res.data.data;
-      }
-    } catch (error) {
-      console.error(error.message);
-    } finally {
-    }
-  };
   const fetchDataSlider = async () => {
     try {
       const res = await getDataSlider();
@@ -54,13 +45,13 @@
   onMounted(async () => {
     fetchAllCategoriesHaveView();
     fetchDataSlider();
-    fetchAllVideos();
+    // fetchAllVideos();
   });
 </script>
 
 <template>
   <section>
-    <div class="container">
+    <div class="container items-center">
       <div class="flex items-center">
         <span class="font-bold text-[24px] pr-8">Featured</span>
         <Divider class="flex-grow mt-1" />
@@ -68,7 +59,7 @@
       <div class="flex justify-center items-center h-[300px]" v-if="isLoading">
         <SmallLoading />
       </div>
-      <div v-else>
+      <div class="mt-14" v-else>
         <Slider :dataSlider="dataSlider" />
       </div>
     </div>

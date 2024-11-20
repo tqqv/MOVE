@@ -24,24 +24,31 @@
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
   import GoLive from './icons/goLive.vue';
-  import { useTabStore } from '@/stores/tab.store';  import { useGetRepsStore } from '@/stores/getReps.store';
+  import { useTabStore } from '@/stores/tab.store';
+  import { useGetRepsStore } from '@/stores/getReps.store';
+  import { getPaymentHistory } from '@/services/payment';
 
   import GetREPS from './getReps/GetREPS.vue';
   import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
   import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
   import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
   import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
+  import SelectPaymentMethod from './getReps/dialog/SelectPaymentMethod.vue';
+  import Stream from './icons/Stream.vue';
+
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
   const getRepsStore = useGetRepsStore();
-
+  const isOpenOrder = ref(false);
   const isMobileMenuOpen = ref(false);
   const isUserMenuOpen = ref(false);
   const isGetREPsMenuOpen = ref(false);
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
+  const isPaymentHistoryFetched = ref(false);
 
+  const isFirstTime = ref(false);
   // SEARCH
   const isSearchPopupOpen = ref(false);
   const onFocused = ref(false);
@@ -50,7 +57,6 @@
   const videos = ref([]);
   const users = ref([]);
   // SEARCH
-
 
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
@@ -66,21 +72,30 @@
   const toggleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
   };
+
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
-    if(!getRepsStore.purchaseOptions.length > 0){
-      getRepsStore.getRepPackages()
+
+    if (!isPaymentHistoryFetched.value) {
+      fetchPaymentHistory();
+      isPaymentHistoryFetched.value = true;
+    }
+
+    if (!getRepsStore.purchaseOptions.length > 0) {
+      getRepsStore.getRepPackages();
     }
   };
+
   const closeAllPopups = () => {
     isUserMenuOpen.value = false;
     isNotiMenuOpen.value = false;
     isSearchPopupOpen.value = false;
     isGetREPsMenuOpen.value = false;
     isCreateMenuOpen.value = false;
-    console.log('đóng nè');
   };
-
+  const toggleOpenOrder = () => {
+    isOpenOrder.value = !isOpenOrder.value;
+  };
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
     tabStore.setActiveTab('0');
@@ -132,19 +147,6 @@
     }
   };
 
-  // SEARCH
-
-  // const handleSearch = debounce((e) => {
-  //   searchData.value = e.target.value;
-  //   console.log(searchData.value);
-
-  //   if (searchData.value.trim() === '' && onFocused.value) {
-  //     isSearchPopupOpen.value = false;
-  //   } else {
-  //     isSearchPopupOpen.value = true;
-  //   }
-  // }, 500);
-
   const handleFocus = () => {
     onFocused.value = true;
     if (searchData.value.trim()) {
@@ -182,6 +184,23 @@
       users.value = [];
     }
   }, 500);
+  const fetchPaymentHistory = async () => {
+    try {
+      const res = await getPaymentHistory();
+
+      if (res.status === 200) {
+        if (res.data.data.count > 0) {
+          isFirstTime.value = false;
+        } else {
+          isFirstTime.value = true;
+        }
+      } else {
+        return;
+      }
+    } catch (error) {
+      console.error('Lỗi khi lấy lịch sử thanh toán:', error);
+    }
+  };
 
   watch(
     () => searchData.value,
@@ -253,7 +272,7 @@
           </button>
         </div>
         <!-- Nav items -->
-        <div class="flex items-center justify-center md:items-stretch md:justify-start">
+        <div class="flex items-center w-1/3 justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
               <RouterLink
@@ -270,15 +289,13 @@
             </div>
           </div>
         </div>
-        <div
-          class="absolute left-1/2 transform -translate-x-1/2 top-1/2 -translate-y-1/2 h-8 w-auto"
-        >
+        <div class="w-1/3 h-8 flex justify-center items-center">
           <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
-        <div class="items-center gap-x-6 hidden md:flex">
+        <div class="w-1/3 items-center justify-end gap-x-6 hidden md:flex">
           <!-- User -->
-          <div class="relative">
-            <InputGroup class="h-[40px] min-w-[292px] hidden xl:flex">
+          <div class="relative w-[292px] min-w-[120px]">
+            <InputGroup class="h-[40px] hidden md:flex">
               <InputText
                 class="text-sm"
                 id="search-menu-button"
@@ -309,42 +326,7 @@
               />
             </div>
           </div>
-          <template v-if="userStore.user?.role == 'streamer'">
-            <div class="relative">
-              <div>
-                <button class="btn leading-none" @click="toggleCreateMenu" id="create-menu-button">
-                  Create
-                </button>
-              </div>
 
-              <div
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
-                v-if="isCreateMenuOpen"
-                id="create-menu"
-              >
-                <div class="shadow-lg rounded-md w-[180px]">
-                  <div class="px-4 py-5">
-                    <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
-                      <RouterLink
-                        to="/streaming/stream-setup"
-                        class="flex flex-row items-center gap-x-2 group cursor-pointer"
-                      >
-                        <GoLive />
-                        <h1 class="group-hover:text-primary">Go Live</h1>
-                      </RouterLink>
-                      <button
-                        class="flex flex-row items-center gap-x-2 group cursor-pointer"
-                        @click="popupStore.openUploadVideoPopup"
-                      >
-                        <upload />
-                        <h1 class="group-hover:text-primary">Upload a video</h1>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
           <!-- Guest -->
           <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
@@ -352,7 +334,7 @@
 
           <!-- User -->
           <template v-else>
-            <div v-if="userStore.user?.role == 'user'" class="relative">
+            <div v-if="userStore.user?.role == 'user' || 'streamer'" class="relative">
               <div
                 v-if="userStore.user?.REPs === 0"
                 @click="toggleGetREPsMenu"
@@ -371,13 +353,14 @@
               </div>
               <div
                 id="reps-menu"
-                class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="reps-menu-button"
                 tabindex="-1"
               >
                 <GetREPS
+                  :isFirstTime="isFirstTime"
                   :isBackVisible="false"
                   v-if="isGetREPsMenuOpen"
                   @toggleGetREPsMenu="toggleGetREPsMenu"
@@ -386,17 +369,54 @@
               </div>
             </div>
 
-            <div class="relative">
-              <OverlayBadge
-                value="4"
-                severity="danger"
-                class="inline-flex cursor-pointer"
-                size="small"
-                id="noti-menu-button"
-                @click="toggleNotiMenu"
-              >
-                <notification fill="fill-white" class="scale-110" />
-              </OverlayBadge>
+            <template v-if="userStore.user?.role == 'streamer'">
+              <div class="relative">
+                <div class="cursor-pointer" @click="toggleCreateMenu" id="create-menu-button">
+                  <Stream />
+                </div>
+
+                <div
+                  class="absolute right-0 z-10 mt-6 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                  v-if="isCreateMenuOpen"
+                  id="create-menu"
+                >
+                  <div class="shadow-lg rounded-md w-[180px]">
+                    <div class="px-4 py-5">
+                      <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
+                        <RouterLink
+                          :to="
+                            !userStore.user?.isLive
+                              ? '/streaming/stream-setup'
+                              : '/streaming/dashboard-live'
+                          "
+                          class="flex flex-row items-center gap-x-2 group cursor-pointer"
+                        >
+                          <GoLive />
+                          <h1 class="group-hover:text-primary">Go Live</h1>
+                        </RouterLink>
+                        <button
+                          class="flex flex-row items-center gap-x-2 group cursor-pointer"
+                          @click="popupStore.openUploadVideoPopup"
+                        >
+                          <upload />
+                          <h1 class="group-hover:text-primary">Upload a video</h1>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <div class="relative" id="noti-menu-button">
+              <div class="relative cursor-pointer" @click="toggleNotiMenu">
+                <div class="mt-0.5">
+                  <notification fill="fill-white" class="scale-100" />
+                </div>
+                <div
+                  class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
+                ></div>
+              </div>
               <div
                 v-if="isNotiMenuOpen"
                 id="noti-menu"
@@ -430,7 +450,7 @@
               <div
                 v-if="isUserMenuOpen"
                 id="user-menu"
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="user-menu-button"
@@ -514,22 +534,27 @@
   <UploadVideo />
   <VideoDetail />
   <!-- POPUP GET REPS -->
+  <SelectPaymentMethod title="Select payment method" />
   <CompletePurchaseNoInfo
     v-if="!popupStore.isHaveCard"
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
+    @toggleOpenOrder="toggleOpenOrder"
+    :isFirstTime="isFirstTime"
   />
   <CompletePurchaseHaveInfo
     v-else
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
+    @toggleOpenOrder="toggleOpenOrder"
+    :isFirstTime="isFirstTime"
   />
   <ProcessingPayment />
-  <!-- <OrderStatusPopup
-    :isOpenOrder="isOpenOrder"
-    :money="purchaseOptions.money"
-    :reps="purchaseOptions.reps"
-    :isOrderSuccessful="isOrderSuccessful"
-    @toggleOrder="toggleOrder"
-  /> -->
+  <OrderStatusPopup :isOpenOrder="isOpenOrder" @toggleOpenOrder="toggleOpenOrder" />
 </template>
+
+<style>
+  .p-inputtext {
+    color: #000000 !important;
+  }
+</style>

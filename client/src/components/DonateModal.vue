@@ -1,9 +1,12 @@
 <script setup>
   import { ref } from 'vue';
   import Button from 'primevue/button';
+  import { useGetRepsStore } from '@/stores/getReps.store';
 
   import { useUserStore } from '@/stores';
   const userStore = useUserStore();
+  const getRepsStore = useGetRepsStore();
+
   const props = defineProps({
     donationItems: {
       type: Object,
@@ -25,6 +28,9 @@
     emit('toggleButtonGiftVisible');
 
     emit('toggleGetREPsMenu');
+    if (!getRepsStore.purchaseOptions.length > 0) {
+      getRepsStore.getRepPackages();
+    }
   };
 
   const selectedValue = ref(null);

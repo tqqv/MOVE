@@ -101,7 +101,7 @@ const register = async (userData) => {
       const newUser = new User({
         email: userData.email,
         password: hash,
-        avatar: "https://img.upanh.tv/2024/06/18/user-avatar.png",
+        avatar: "https://res.cloudinary.com/dg9imqwrd/image/upload/v1731636620/pgxv1tkwjvz7rkwy2ked.png",
         referralCode : referralCode,
         username: "user_" + referralCode
       });
@@ -224,7 +224,7 @@ const sendMailVerify = async (email, id) => {
 
     const verificationToken = generateVerificationToken(id, email);
 
-    const verificationUrl = `${process.env.CLIENT_HOST}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.CLIENT_HOST}/verify-email/${verificationToken}`;
 
     const mailOptions = {
       from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
@@ -234,7 +234,10 @@ const sendMailVerify = async (email, id) => {
         <h2 style="color: #04ddb2;">Reset Your Password</h2>
         <p>Dear ${email},</p>
         <p>Please click the link below to verify your email address:</p>
-        <a href="${verificationUrl}">${verificationUrl}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">Reset Password</a>
+      <a href="${verificationUrl}" 
+          style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">
+         Verify email
+        </a>
         <p>This link will expire in 15 minutes.</p>
         <p>Thank you,<br> Move Team</p>
       `,
@@ -256,9 +259,15 @@ const sendMailVerify = async (email, id) => {
   }
 };
 
-const verifyAccount = async (token) => {
+const verifyAccount = async (userId, token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    if(userId !== decoded.userId){
+      return {
+        status: 404,
+        message: "Not right"
+      }
+    }
     const user = await User.findByPk(decoded.userId);
     if (!user) {
       return {

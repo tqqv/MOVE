@@ -29,7 +29,7 @@ const createStripeSetupIntent = async(customerId) => {
 const createStripePaymentIntent = async(customerId, paymentMethodId, amount) => {
   try {
     const payment = await stripe.paymentIntents.create({
-      amount: amount*100,
+      amount: amount*10,
       currency: 'usd',
       payment_method: paymentMethodId,
       customer: customerId,
@@ -64,10 +64,61 @@ const detachPaymentMethod = async(paymentMethodId) => {
   }
 }
 
+const createStripeAccountId = async() => {
+  try {
+    const account = await stripe.accounts.create({
+      type: 'express',
+      country: 'US',
+      email: 'linhpro200294@gmail.com',
+    });
+    // return account.id
+    return {
+      status: 200,
+      data: account.id,
+      message: "Successful"
+    }
+  } catch (error) {
+    // return error.message
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+async function createPayout(accountId) {
+  try {
+    const payout = await stripe.payouts.create({
+      amount: 5000,
+      currency: "usd",
+      destination: accountId, // ID của tài khoản mà bạn đã lưu từ phía user
+    });
+    console.log('Payout created:', payout);
+    // return payout;
+    return {
+      status: 200,
+      data: payout,
+      message: "Successful"
+    }
+  } catch (error) {
+    console.error('Error creating payout:', error);
+    // throw error;
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+
 module.exports = {
   createStripeCustomerId,
   createStripeSetupIntent,
   retrievePaymentMethod,
   createStripePaymentIntent,
   detachPaymentMethod,
+  createStripeAccountId,
+  createPayout
 }

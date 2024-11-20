@@ -20,7 +20,7 @@
     />
     <h3 class="mt-2 text_subTitle">{{ category.title || category.category?.title }}</h3>
     <p class="text_secondary">
-      {{ category.totalViews || category.category?.totalViews || '1' }}
+      {{ category.totalViews || category.category?.totalViews || '0' }}
       {{ category.totalViews || category.category?.totalViews > 1 ? 'views' : 'view' }}
     </p>
   </router-link>
