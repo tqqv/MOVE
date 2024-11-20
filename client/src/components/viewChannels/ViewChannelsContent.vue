@@ -14,6 +14,7 @@
   import { useUserStore } from '@/stores/user.store';
 
   import { getListFollowOfChannel } from '@/services/streamer';
+  import Skeleton from 'primevue/skeleton';
   const tabs = ref([
     { title: 'Videos', component: markRaw(TabVideoList), value: '0' },
     { title: 'About', component: markRaw(TabAbout), value: '1' },
@@ -29,28 +30,34 @@
   const usernameDetails = ref({});
   const avatarDetails = ref({});
   const followChannelDetails = ref({});
-
+  const loading = ref(true);
   const errorData = ref(null);
 
   const fetchChannelData = async () => {
-    const result = await getProfilebyUsername(username.value);
-
-    if (result.error) {
-      errorData.value = result.message;
-      router.push('/404');
-    } else {
-      channelDetails.value = result.data.Channel;
-      usernameDetails.value = result.data.username;
-      avatarDetails.value = result.data.avatar;
-      if (channelDetails.value !== null) {
-        channelId.value = result.data.Channel.id;
+    loading.value = true;
+    try {
+      const result = await getProfilebyUsername(username.value);
+      if (result.error) {
+        errorData.value = result.message;
+        router.push('/404');
+      } else {
+        channelDetails.value = result.data.Channel;
+        usernameDetails.value = result.data.username;
+        avatarDetails.value = result.data.avatar;
+        if (channelDetails.value !== null) {
+          channelId.value = result.data.Channel.id;
+        }
       }
+    } catch (error) {
+      console.error('Error fetching channel data:', error);
+      errorData.value = 'An unexpected error occurred.';
+    } finally {
+      loading.value = false;
     }
   };
 
   const fetchListFollowOfChannel = async (channelId) => {
     const result = await getListFollowOfChannel(channelId);
-
     if (result.error) {
       errorData.value = result.message || 'Error occurred';
     } else if (result.data && result.data.length > 0) {
@@ -89,7 +96,21 @@
 
 <template>
   <section class="px-10 flex-grow">
+    <div v-if="loading" class="flex justify-between items-center">
+      <div class="flex items-center gap-x-4 px-3">
+        <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+        <div class="flex flex-col gap-y-2">
+          <Skeleton width="20rem" class="mb-2"></Skeleton>
+          <Skeleton width="6rem" class="mb-2"></Skeleton>
+        </div>
+      </div>
+      <div class="flex gap-x-12">
+        <Skeleton width="5rem" height="2.5rem"> </Skeleton>
+        <Skeleton width="1rem" height="2.5rem"></Skeleton>
+      </div>
+    </div>
     <VideoDetail
+      v-else
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"
       :channelDetails="channelDetails"
