@@ -53,9 +53,16 @@ const checkout = async (data) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-const getPaymentHistory = async () => {
+const getPaymentHistory = async (page, pageSize, startDate, endDate) => {
   try {
-    const response = await axios.get('payment/getpaymentHistory');
+    const response = await axios.get('payment/getpaymentHistory', {
+      params: {
+        page,
+        pageSize,
+        startDate,
+        endDate,
+      },
+    });
     return response;
   } catch (error) {
     return { error: true, status: error.response.status, message: error.response.data.message };
