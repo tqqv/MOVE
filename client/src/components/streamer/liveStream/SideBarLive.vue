@@ -85,7 +85,7 @@
 
   const handleGoHome = () => {
     emit('updateStatusLive', 'beforeLive');
-    // router.push('/');
+    router.push('/');
   };
 
   watch(
@@ -210,10 +210,9 @@
             </div>
           </div>
           <div class="flex flex-col gap-y-2">
-            <RouterLink
+            <div
               v-for="item in menuItems"
               :key="item.name"
-              :to="item.link"
               replace
               class="flex items-center gap-x-3 py-2 px-2 rounded-lg cursor-pointer hover:bg-gray-light"
               :class="{ 'bg-primary/20 hover:bg-primary/20': route.path === item.link }"
@@ -225,7 +224,7 @@
                 <component :is="item.icon" :fill="route.path === item.link ? '#fff' : '#000'" />
               </div>
               <p class="font-medium">{{ item.name }}</p>
-            </RouterLink>
+            </div>
           </div>
         </div>
       </div>
