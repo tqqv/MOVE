@@ -75,8 +75,7 @@
 
           <div
             v-if="currentSlide === i"
-            :class="{ visible: currentSlide === i }"
-            class="info flex-col p-6 w-1/3 h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
+            class="flex-col p-6 w-1/3 h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
           >
             <div
               v-if="slide.livestream?.livestreamChannel.isLive"
@@ -158,28 +157,5 @@
   .next span,
   .prev span {
     color: #13d0b4;
-  }
-
-  /* Hiệu ứng cho thumbnail */
-  .thumbnail {
-    opacity: 0;
-    transform: scale(0.9);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  .thumbnail.visible {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  .info {
-    opacity: 0;
-    transform: translateX(50px);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  .info.visible {
-    opacity: 1;
-    transform: translateX(0); /* Trở lại vị trí ban đầu */
   }
 </style>
