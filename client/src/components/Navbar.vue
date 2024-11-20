@@ -557,6 +557,6 @@
 
 <style>
   .p-inputtext {
-    color: #000000 ;
+    color: #000000 !important;
   }
 </style>

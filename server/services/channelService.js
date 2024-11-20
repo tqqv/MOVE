@@ -275,7 +275,8 @@ const searchVideoChannel = async(data, limit, offset) => {
 
     const videos = await Video.findAll({
       where: {
-        title: { [Op.like]: `%${normalData}%` }
+        title: { [Op.like]: `%${normalData}%` },
+        status: 'public'
       },
       include: [
         {
