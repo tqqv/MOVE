@@ -8,7 +8,7 @@
   const props = defineProps({
     liveInfo: Array,
     elapsedTime: Number,
-    duration: Number,
+    liveStreamData: Object,
     metricsData: Object,
     liveStatus: String,
   });
@@ -19,22 +19,29 @@
     <div class="flex size-8 justify-center items-center bg-primary rounded-full">
       <Eye fill="white" />
     </div>
-    <div class="flex flex-col">
-      <p v-if="liveStatus === 'streamEnded'" class="font-medium">
-        {{ metricsData?.totalViews ?? '0' }}
+    <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
+      <p class="font-medium">
+        {{ liveStreamData?.totalView ?? '0' }}
       </p>
-      <p v-else class="font-medium">{{ metricsData?.currentViews ?? '0' }}</p>
-
+      <p class="text-sm">Total views</p>
+    </div>
+    <div v-else class="flex flex-col">
+      <p class="font-medium">{{ metricsData?.currentViews ?? '0' }}</p>
       <p class="text-sm">views</p>
     </div>
   </div>
+
   <div class="flex justify-start items-center gap-x-3">
     <div class="flex size-8 justify-center items-center bg-primary rounded-full">
       <Like fill="white" width="20px" />
     </div>
-    <div class="flex flex-col">
-      <p class="font-medium">23</p>
-      <p class="text-sm">likes</p>
+    <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
+      <p class="font-medium">{{ liveStreamData?.avgRates ?? '0' }}</p>
+      <p class="text-sm">Ave rating</p>
+    </div>
+    <div v-else class="flex flex-col">
+      <p class="font-medium">{{ metricsData?.avgRates ?? '0' }}</p>
+      <p class="text-sm">Ave rating</p>
     </div>
   </div>
   <div class="flex justify-start items-center gap-x-3">
@@ -50,15 +57,15 @@
     <div class="flex size-8 justify-center items-center bg-primary rounded-full">
       <Clock fill="white" />
     </div>
-    <div v-if="elapsedTime >= 0" class="flex flex-col">
+    <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
       <p class="font-medium">
-        {{ elapsedTime > 0 ? formatTimeInStream(elapsedTime) : '00:00:00' }}
+        {{ formatTimeInStream(liveStreamData?.duration) }}
       </p>
       <p class="text-sm">live</p>
     </div>
-    <div v-if="duration" class="flex flex-col">
+    <div v-else class="flex flex-col">
       <p class="font-medium">
-        {{ formatTimeInStream(duration) }}
+        {{ elapsedTime > 0 ? formatTimeInStream(elapsedTime) : '00:00:00' }}
       </p>
       <p class="text-sm">live</p>
     </div>

@@ -385,7 +385,7 @@
                       <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                         <RouterLink
                           :to="
-                            !userStore.user?.isLive
+                            !userStore.user?.Channel?.isLive
                               ? '/streaming/stream-setup'
                               : '/streaming/dashboard-live'
                           "
