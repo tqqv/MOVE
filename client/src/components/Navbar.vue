@@ -34,6 +34,8 @@
   import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
   import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
   import SelectPaymentMethod from './getReps/dialog/SelectPaymentMethod.vue';
+  import Stream from './icons/Stream.vue';
+
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
@@ -324,46 +326,7 @@
               />
             </div>
           </div>
-          <template v-if="userStore.user?.role == 'streamer'">
-            <div class="relative">
-              <div>
-                <button class="btn leading-none" @click="toggleCreateMenu" id="create-menu-button">
-                  Create
-                </button>
-              </div>
 
-              <div
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
-                v-if="isCreateMenuOpen"
-                id="create-menu"
-              >
-                <div class="shadow-lg rounded-md w-[180px]">
-                  <div class="px-4 py-5">
-                    <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
-                      <RouterLink
-                        :to="
-                          !userStore.user?.isLive
-                            ? '/streaming/stream-setup'
-                            : '/streaming/dashboard-live'
-                        "
-                        class="flex flex-row items-center gap-x-2 group cursor-pointer"
-                      >
-                        <GoLive />
-                        <h1 class="group-hover:text-primary">Go Live</h1>
-                      </RouterLink>
-                      <button
-                        class="flex flex-row items-center gap-x-2 group cursor-pointer"
-                        @click="popupStore.openUploadVideoPopup"
-                      >
-                        <upload />
-                        <h1 class="group-hover:text-primary">Upload a video</h1>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
           <!-- Guest -->
           <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
@@ -371,7 +334,7 @@
 
           <!-- User -->
           <template v-else>
-            <div v-if="userStore.user?.role == 'user'" class="relative">
+            <div v-if="userStore.user?.role == 'user' || 'streamer'" class="relative">
               <div
                 v-if="userStore.user?.REPs === 0"
                 @click="toggleGetREPsMenu"
@@ -405,6 +368,45 @@
                 />
               </div>
             </div>
+
+            <template v-if="userStore.user?.role == 'streamer'">
+              <div class="relative">
+                <div class="cursor-pointer" @click="toggleCreateMenu" id="create-menu-button">
+                  <Stream />
+                </div>
+
+                <div
+                  class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                  v-if="isCreateMenuOpen"
+                  id="create-menu"
+                >
+                  <div class="shadow-lg rounded-md w-[180px]">
+                    <div class="px-4 py-5">
+                      <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
+                        <RouterLink
+                          :to="
+                            !userStore.user?.isLive
+                              ? '/streaming/stream-setup'
+                              : '/streaming/dashboard-live'
+                          "
+                          class="flex flex-row items-center gap-x-2 group cursor-pointer"
+                        >
+                          <GoLive />
+                          <h1 class="group-hover:text-primary">Go Live</h1>
+                        </RouterLink>
+                        <button
+                          class="flex flex-row items-center gap-x-2 group cursor-pointer"
+                          @click="popupStore.openUploadVideoPopup"
+                        >
+                          <upload />
+                          <h1 class="group-hover:text-primary">Upload a video</h1>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
 
             <div class="relative" id="noti-menu-button">
               <div class="relative cursor-pointer" @click="toggleNotiMenu">
