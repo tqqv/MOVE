@@ -10,6 +10,10 @@ module.exports = (sequelize, DataTypes) => {
           foreignKey: 'videoId',
           as: 'video'
         });
+
+        this.belongsTo(models.Livestream, {
+          foreignKey: 'livestreamId' // adjust based on your actual foreign key
+        });
     }
   }
   Rating.init(
