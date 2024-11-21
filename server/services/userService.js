@@ -489,6 +489,18 @@ const getAllInforFollow = async(userId) => {
         },
         status: 'public',
       },
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ],
+        ],
+      },
       include: [{
         model: Channel,
         as: 'channel',
@@ -545,6 +557,12 @@ const getAllInforFollow = async(userId) => {
         'thumbnailUrl',
         'totalView',
         'createdAt',
+        [sequelize.literal(`(
+          SELECT AVG(rating)
+          FROM ratings
+          WHERE ratings.livestreamId = Livestream.id
+        )`),
+        'ratings']
       ],
       include: [
         {
@@ -563,6 +581,10 @@ const getAllInforFollow = async(userId) => {
           model: Channel,
           as: 'livestreamChannel',
           attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }]
         }
       ],
       order: [['createdAt', 'DESC']]
