@@ -279,6 +279,7 @@
                 to="/following"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 aria-current="page"
+                v-if="userStore.user"
                 >Following</RouterLink
               >
               <RouterLink

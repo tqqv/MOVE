@@ -23,7 +23,7 @@
       <router-link
         :to="
           video.livestreamChannel
-            ? `/live/${video.livestreamChannel.channelName}`
+            ? `/live/${video.livestreamChannel.User.username}`
             : `/video/${video.id}`
         "
       >
