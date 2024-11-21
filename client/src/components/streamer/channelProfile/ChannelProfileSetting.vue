@@ -13,6 +13,8 @@
   import Warning from '@/components/icons/warning.vue';
   import { copyToClipboard } from '@/utils/copyToClipboard';
   import Random from '@/components/icons/random.vue';
+  import Skeleton from 'primevue/skeleton';
+  import SmallLoading from '@/components/icons/smallLoading.vue';
 
   const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
@@ -28,7 +30,7 @@
   });
   const initialProfileData = ref({ ...profileData.value });
   const errors = ref({});
-
+  const loading = ref(false);
   // VALIDATION
   const validateChannelData = async () => {
     try {
@@ -42,6 +44,7 @@
       });
       errors.value = validationResult;
       return false;
+    } finally {
     }
   };
 
@@ -66,14 +69,12 @@
     if (!selectedFile) return;
 
     isLoadingAvatar.value = true;
-
     try {
       const data = await uploadAvatar(selectedFile);
       if (data.secure_url) {
         profileData.value.avatar = data.secure_url;
       } else {
         isLoadingAvatar.value = false;
-        console.error(error);
       }
     } catch (error) {
       isLoadingAvatar.value = false;
@@ -99,6 +100,7 @@
     const changedFields = getChangedFields(profileData.value, initialProfileData.value);
     if (Object.keys(changedFields).length > 0) {
       try {
+        loading.value = true;
         const response = await updateChannelProfile(changedFields);
         if (!response.error) {
           initialProfileData.value = { ...profileData.value };
@@ -109,7 +111,9 @@
       } catch (error) {
         toast.error('Failed to update profile');
       } finally {
+        loading.value = false;
         await streamerStore.fetchProfileChannel();
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   };
@@ -155,12 +159,19 @@
         Your stream key connects your stream to MOVE. Never share your stream key with anyone or
         show it on stream!
       </p>
-      <div class="flex justify-center mt-6 mb-2 gap-x-4">
+      <div v-if="streamerStore.loading" class="flex gap-x-3 mt-4">
+        <Skeleton width="26.7rem" height="3rem"></Skeleton>
+        <Skeleton shape="circle" size="3rem"></Skeleton>
+        <Skeleton shape="circle" size="3rem"></Skeleton>
+      </div>
+      <div v-else class="flex justify-center mt-6 mb-2 gap-x-4">
         <input
           v-model="profileData.streamKey"
           :type="showStreamKey ? 'text' : 'password'"
           class="input_custom"
-          autocomplete="false"
+          autocomplete="off"
+          readonly
+          onfocus="this.removeAttribute('readonly');"
           disabled
         />
         <div
@@ -194,7 +205,9 @@
             >
               <div class="custom-spinner w-8"></div>
             </div>
+            <Skeleton v-if="streamerStore.loading" shape="circle" size="5rem"></Skeleton>
             <img
+              v-else
               :src="profileData.avatar"
               :alt="profileData.channelName"
               class="size-20 rounded-full object-cover"
@@ -225,9 +238,17 @@
         <div class="flex flex-col gap-y-3">
           <div class="flex flex-col gap-y-1">
             <label for="" class="text_subTitle">Username</label>
+
             <p class="text_subLabel">Name that will display on your username & MOVE</p>
           </div>
+          <Skeleton
+            v-if="streamerStore.loading"
+            width="34.6rem"
+            height="3rem"
+            class="my-2"
+          ></Skeleton>
           <div
+            v-else
             class="relative text-[14px] rounded-lg"
             :class="errors.username ? 'error_password' : 'normal_password'"
           >
@@ -235,7 +256,9 @@
               v-model="profileData.username"
               type="text"
               class="password_custom"
-              autocomplete="false"
+              autocomplete="off"
+              readonly
+              onfocus="this.removeAttribute('readonly');"
               required
             />
             <Warning
@@ -251,7 +274,14 @@
             <label for="channelName" class="text_subTitle">Channel name</label>
             <p class="text_subLabel">Name that will display on your channel & MOVE</p>
           </div>
+          <Skeleton
+            v-if="streamerStore.loading"
+            width="34.6rem"
+            height="3rem"
+            class="my-2"
+          ></Skeleton>
           <div
+            v-else
             class="relative text-[14px] rounded-lg"
             :class="errors.channelName ? 'error_password' : 'normal_password'"
           >
@@ -271,7 +301,14 @@
             >
             <p class="text_subLabel">Tell us a little bit about yourself</p>
           </div>
+          <Skeleton
+            v-if="streamerStore.loading"
+            width="34.7rem"
+            height="9rem"
+            class="my-2"
+          ></Skeleton>
           <textarea
+            v-else
             v-model="profileData.bio"
             type="text"
             class="input_custom h-32 resize-none"
@@ -289,8 +326,15 @@
           </div>
           <div class="flex flex-col gap-y-6">
             <div class="flex items-center gap-x-3">
-              <FacebookIcon class="cursor-pointer" />
+              <FacebookIcon class="cursor-pointer flex-shrink-0" />
+              <Skeleton
+                v-if="streamerStore.loading"
+                width="27rem"
+                height="3rem"
+                class="my-2"
+              ></Skeleton>
               <input
+                v-else
                 v-model="profileData.facebookUrl"
                 placeholder="www.facebook.com/facebook"
                 type="text"
@@ -298,8 +342,15 @@
               />
             </div>
             <div class="flex items-center gap-x-3">
-              <InstagramIcon class="cursor-pointer" />
+              <InstagramIcon class="cursor-pointer flex-shrink-0" />
+              <Skeleton
+                v-if="streamerStore.loading"
+                width="27rem"
+                height="3rem"
+                class="my-2"
+              ></Skeleton>
               <input
+                v-else
                 v-model="profileData.instaUrl"
                 placeholder="www.instagram.com/instagram"
                 type="text"
@@ -307,8 +358,15 @@
               />
             </div>
             <div class="flex items-center gap-x-3">
-              <YoutubeIcon class="cursor-pointer" />
+              <YoutubeIcon class="cursor-pointer flex-shrink-0" />
+              <Skeleton
+                v-if="streamerStore.loading"
+                width="27rem"
+                height="3rem"
+                class="my-2"
+              ></Skeleton>
               <input
+                v-else
                 v-model="profileData.youtubeUrl"
                 placeholder="www.youtube.com/youtube"
                 type="text"
@@ -322,10 +380,14 @@
       <Button
         :disabled="!isProfileChanged"
         type="submit"
-        label="Save settings"
         class="btn w-full lg:w-1/3 mt-8 whitespace-nowrap"
         :class="{ 'bg-footer': !isProfileChanged }"
-      />
+      >
+        <template #default>
+          <SmallLoading v-if="loading" fill="white" fill_second="#13d0b4" />
+          <span v-else>Save settings</span>
+        </template>
+      </Button>
     </div>
   </form>
 </template>

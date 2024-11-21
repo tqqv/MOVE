@@ -57,7 +57,7 @@ const editProfile = async (id, data) => {
       }
     }
 
-    if(user.email && user.isVerified) {
+    if(user.email && user.isVerified && data.email) {
       return {
         status: 400,
         data: null,
@@ -66,11 +66,11 @@ const editProfile = async (id, data) => {
     }
 
     if(data.username){
-      if (data.username.length < 3 || data.username.length > 32) {
+      if (data.username.length < 3 || data.username.length > 32 ||  /[A-Z]/.test(data.username)) {
         return {
           status: 400,
           data: null,
-          message: "Must be between 3 and 32 in length."
+          message: "Must be between 3 and 32 in length and cannot contain uppercase letters."
         }
       } else if (!validateUsername(data.username)) {
         return {

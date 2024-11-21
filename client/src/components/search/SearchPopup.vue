@@ -1,6 +1,7 @@
 <script setup>
   import { ref, watch } from 'vue';
   import verified from '@icons/verified.vue';
+  import SmallLoading from '../icons/smallLoading.vue';
 
   const props = defineProps({
     categories: {
@@ -19,6 +20,7 @@
       default: () => [],
     },
     searchData: String,
+    loading: Boolean,
   });
 </script>
 
@@ -93,7 +95,8 @@
       </div>
       <!-- SEARCH  -->
       <div class="flex gap-x-3 pb-1 pt-1 mt-3">
-        <i class="ml-2 pi pi-search text-lg text-primary font-semibold"></i>
+        <SmallLoading class="ml-2" v-if="props.loading" />
+        <i v-else class="ml-2 pi pi-search text-lg text-primary font-semibold"></i>
         <h1>
           All results for <span class="font-semibold">{{ searchData }}</span>
         </h1>
@@ -101,7 +104,8 @@
     </div>
     <div v-else class="px-2 py-3 text-sm">
       <div class="flex gap-x-3 pb-1 pt-1">
-        <i class="ml-2 pi pi-search text-lg text-primary font-semibold"></i>
+        <SmallLoading class="ml-2" v-if="props.loading" />
+        <i v-else class="ml-2 pi pi-search text-lg text-primary font-semibold"></i>
         <h1>
           Not found <span class="font-semibold">{{ searchData }}</span>
         </h1>

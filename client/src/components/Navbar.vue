@@ -17,7 +17,7 @@
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import { useUserStore } from '@/stores/user.store';
-  import { RouterLink } from 'vue-router';
+  import { RouterLink, useRouter } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
   import { debounce } from '@/utils';
   import { searchInformation } from '@/services/search';
@@ -47,6 +47,7 @@
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
   const isPaymentHistoryFetched = ref(false);
+  const router = useRouter();
 
   const isFirstTime = ref(false);
   // SEARCH
@@ -56,6 +57,7 @@
   const categories = ref([]);
   const videos = ref([]);
   const users = ref([]);
+  const loading = ref(true);
   // SEARCH
 
   const toggleMobileMenu = () => {
@@ -169,6 +171,7 @@
 
   const debouncedSearch = debounce(async (newSearchData) => {
     if (newSearchData) {
+      loading.value = true;
       try {
         const response = await searchInformation(newSearchData, 2, 0);
         const data = response.data.data;
@@ -177,13 +180,17 @@
         users.value = data.users;
       } catch (error) {
         console.error('Error fetching search results:', error);
+      } finally {
+        loading.value = false;
       }
     } else {
       categories.value = [];
       videos.value = [];
       users.value = [];
+      loading.value = false;
     }
   }, 500);
+
   const fetchPaymentHistory = async () => {
     try {
       const res = await getPaymentHistory();
@@ -211,7 +218,10 @@
 
   const performSearch = () => {
     if (searchData.value.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+      router.push({
+        path: '/search',
+        query: { q: searchData.value.trim() },
+      });
       isSearchPopupOpen.value = false;
     }
   };
@@ -319,6 +329,7 @@
               tabindex="-1"
             >
               <SearchPopup
+                :loading="loading"
                 :categories="categories"
                 :videos="videos"
                 :users="users"

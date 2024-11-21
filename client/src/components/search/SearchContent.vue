@@ -5,11 +5,13 @@
   import ChannelList from '../ChannelList.vue';
   import { useRoute } from 'vue-router';
   import { searchInformation } from '@/services/search';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import notFound from '../icons/not-found.vue';
   import SearchVideo from './SearchVideo.vue';
   import VideoCard from '../VideoCard.vue';
   import EmptyPage from '@/pages/EmptyPage.vue';
+  import SmallLoading from '../icons/smallLoading.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const route = useRoute();
   const query = ref(route.query.q || '');
@@ -18,9 +20,10 @@
   const videos = ref([]);
   const loading = ref(true);
 
-  onMounted(async () => {
+  const fetchSearchResults = async () => {
     if (query.value) {
       try {
+        loading.value = true;
         const response = await searchInformation(query.value, 8, 0);
         const data = response.data.data;
         categories.value = data.categories;
@@ -32,11 +35,31 @@
         loading.value = false;
       }
     } else {
+      categories.value = [];
+      videos.value = [];
+      users.value = [];
       loading.value = false;
     }
+  };
+
+  watch(
+    () => route.query.q,
+    (newQuery) => {
+      query.value = newQuery || '';
+      fetchSearchResults();
+    },
+  );
+
+  onMounted(() => {
+    fetchSearchResults();
   });
 </script>
 <template>
+  <section class="mx-8">
+    <div class="flex flex-col gap-y-4">
+      <div></div>
+    </div>
+  </section>
   <section
     v-if="query && (categories.length || users.length || videos.length) && !loading"
     class="flex-grow"

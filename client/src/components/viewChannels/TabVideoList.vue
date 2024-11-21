@@ -127,7 +127,7 @@
     </div>
     <div v-else class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between">
       <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
-      <div class="flex flex-col lg:flex-row gap-6 mb-3">
+      <div class="flex flex-col lg:flex-row gap-6">
         <Filter
           title="LEVEL"
           :options="levelWorkoutOptions"
