@@ -55,7 +55,11 @@ export const updateProfileSchema = yup.object({
     .string()
     .nullable()
     .min(6, 'Username must be at least 6 characters')
-    .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
+    .max(32, 'Username must be at most 32 characters')
+    .matches(
+      /^[a-z0-9_.]*$/,
+      'Username must not contain uppercase letters, spaces, or special characters',
+    ),
   fullName: yup
     .string()
     .nullable()
@@ -76,9 +80,13 @@ export const updateProfileSchema = yup.object({
 export const updateChannelSchema = yup.object({
   username: yup
     .string()
-    .required('Username is required')
+    .nullable()
     .min(6, 'Username must be at least 6 characters')
-    .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
+    .max(32, 'Username must be at most 32 characters')
+    .matches(
+      /^[a-z0-9_.]*$/,
+      'Username must not contain uppercase letters, spaces, or special characters',
+    ),
   channelName: yup
     .string()
     .required('Channel name is required')

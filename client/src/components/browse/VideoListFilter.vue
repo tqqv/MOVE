@@ -136,31 +136,20 @@
         <p>Sort & Filter</p>
       </button>
     </div>
-    <div
-      v-if="loading"
-      class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5 my-8"
-    >
-      <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
-        <Skeleton width="100%" height="100%"></Skeleton>
-        <Skeleton width="5rem" height="1rem"></Skeleton>
-        <Skeleton width="8rem" height="1rem"></Skeleton>
-      </div>
-    </div>
-    <template v-else>
-      <GirdVideo v-if="videos.length > 0" :videos="videos" />
-      <Paginator
-        v-if="totalPage > 1"
-        :rows="pageSize"
-        :first="(currentPage - 1) * pageSize"
-        :totalRecords="totalPage * pageSize"
-        @page="onPageChange"
+
+    <GirdVideo :videos="videos" :loading="loading" />
+    <Paginator
+      v-if="totalPage > 1"
+      :rows="pageSize"
+      :first="(currentPage - 1) * pageSize"
+      :totalRecords="totalPage * pageSize"
+      @page="onPageChange"
+    />
+    <div v-if="!videos.length && !loading" class="h-full flex justify-center items-center mt-20">
+      <EmptyPage
+        title="There are no matching videos"
+        subTitle="Try different keywords or remove search filters"
       />
-      <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
-        <EmptyPage
-          title="There are no matching videos"
-          subTitle="Try different keywords or remove search filters"
-        />
-      </div>
-    </template>
+    </div>
   </div>
 </template>
