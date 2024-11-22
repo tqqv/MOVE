@@ -55,7 +55,7 @@
       emit('updateTotalRepliesCount', props.comment.totalRepliesCount + 1);
       commentText.value = '';
       handleCancel();
-      commentText.blur();
+      commentText.blur;
     } catch (error) {
       console.error('Error posting comment:', error);
     }

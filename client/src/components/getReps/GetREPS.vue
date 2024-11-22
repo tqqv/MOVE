@@ -41,7 +41,7 @@
 <template>
   <div class="shadow-lg rounded-lg w-[411px] p-5">
     <div>
-      <div v-if="isBackVisible" class="relative pb-4">
+      <div v-if="isBackVisible" class="relative pb-2">
         <div @click="toggleBack" class="flex items-center cursor-pointer text-primary">
           <i class="pi pi-angle-left text-2xl font-bold"></i>
           <span class="text-sm">Back</span>
@@ -50,11 +50,11 @@
           @click="toggleGetREPsMenu"
           class="pi pi-times text-[20px] absolute right-[16px] top-[15%] cursor-pointer"
         />
-        <h1 class="font-bold text-2xl">Buy REP$</h1>
+        <h1 class="font-bold text-xl">Buy REP$</h1>
       </div>
 
       <div v-else class="relative pb-4">
-        <h1 class="font-bold text-2xl">Buy REP$</h1>
+        <h1 class="font-bold text_subTitle">Buy REP$</h1>
         <i
           @click="toggleGetREPsMenu"
           class="pi pi-times text-[20px] absolute right-[16px] top-[15%] cursor-pointer"

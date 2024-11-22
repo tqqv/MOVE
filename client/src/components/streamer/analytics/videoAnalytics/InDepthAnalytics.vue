@@ -17,6 +17,7 @@
     formatDatePosted,
     formatAvgViewTime,
     formatNumber,
+    truncateDescripton,
   } from '@/utils';
   import TabAge from './TabAge.vue';
   import TabCountry from './TabCountry.vue';
@@ -75,7 +76,11 @@
         if (b.country === null) return -1;
         return a.country.localeCompare(b.country);
       });
-      dataByIp.value = response.data.viewersData.dataByIp;
+      dataByIp.value = response.data.viewersData.dataByIp.sort((a, b) => {
+        if (a.country === null) return 1;
+        if (b.country === null) return -1;
+        return a.country.localeCompare(b.country);
+      });
     } catch (error) {
       toast.error(error.message);
     }
@@ -110,11 +115,13 @@
           <img :src="videosDetails.thumbnailUrl" class="object-cover w-full h-full" />
         </div>
 
-        <div>
-          <div class="text-base font-bold">{{ videosDetails.title }}</div>
+        <div class="space-y-2">
+          <div class="text-base font-bold truncate" :title="videosDetails.title">
+            {{ truncateDescripton(videosDetails.title, 55) }}
+          </div>
           <div class="text-[#666666] text-sm">{{ videosDetails.category?.title }}</div>
         </div>
-        <div class="pt-6 space-y-4">
+        <div class="pt-2 space-y-4">
           <div class="flex justify-between">
             <span class="text-sm uppercase text-[#666666]">Views</span>
             <span class="text-sm">{{ formatView(videosDetails.viewCount) }}</span>

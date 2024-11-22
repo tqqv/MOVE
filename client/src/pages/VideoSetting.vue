@@ -2,6 +2,7 @@
   import { ref, onMounted, watch } from 'vue';
   import { formatRating, formatDatePosted } from '@/utils';
   import rate from '@/components/icons/rate.vue';
+  import Skeleton from 'primevue/skeleton';
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
   import Filter from '@/components/Filter.vue';
@@ -26,6 +27,13 @@
   const showConfirmDialog = ref(false);
   const showConfirmDialogMulti = ref(false);
   const fadeIn = ref(false);
+  const isLoading = ref(true);
+  const pageSizeOptions = [
+    { id: 1, name: 10, value: 10 },
+    { id: 2, name: 20, value: 20 },
+    { id: 3, name: 30, value: 30 },
+  ];
+  const selectedPageSize = ref(pageSizeOptions[0].value);
   let previousLength = 0;
 
   const confirmModal = (videoId) => {
@@ -83,13 +91,6 @@
     }
   };
 
-  const pageSizeOptions = [
-    { id: 1, name: 10, value: 10 },
-    { id: 2, name: 20, value: 20 },
-    { id: 3, name: 30, value: 30 },
-  ];
-  const selectedPageSize = ref(pageSizeOptions[0].value);
-
   const fetchVideos = async () => {
     try {
       const response = await getVideoSetting(currentPage.value, selectedPageSize.value);
@@ -98,6 +99,8 @@
       totalPage.value = response.data.totalPages;
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      isLoading.value = false;
     }
   };
   const openConfirmDialog = (videoId) => {
@@ -137,11 +140,13 @@
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
+      fetchVideos();
     }
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
+      fetchVideos();
     }
   };
   const handleClickShareFacebook = async (videoId) => {
@@ -192,7 +197,7 @@
     }
     previousLength = newVal.length;
   });
-  watch(selectedPageSize, () => {
+  watch([selectedPageSize], () => {
     currentPage.value = 1;
     fetchVideos();
   });
@@ -211,13 +216,32 @@
       <span class="text-nowrap">Delete video(s)</span>
     </button>
   </div>
-  <div v-if="videos.length > 0" class="card">
+  <div class="card mt-4" v-for="n in 10" :key="n" v-if="isLoading">
+    <div class="px-4 flex align-center items-center gap-x-6">
+      <Skeleton width="25px" height="25px"></Skeleton>
+      <Skeleton width="200px" height="100px"></Skeleton>
+      <div class="pl-[65px]">
+        <Skeleton width="15rem"></Skeleton>
+        <Skeleton width="5rem" class="mt-2"></Skeleton>
+        <div class="flex gap-x-4 mt-2">
+          <Skeleton width="5rem"></Skeleton>
+          <Skeleton width="5rem"></Skeleton>
+        </div>
+      </div>
+      <Skeleton width="5rem" class="ml-[270px]"></Skeleton>
+      <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+      <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+      <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+    </div>
+  </div>
+  <div v-if="videos.length > 0 && !isLoading" class="card">
     <DataTable
       v-model:selection="selectedProduct"
       :value="videos"
       rowGroupMode="subheader"
       dataKey="id"
-      tableStyle="min-width: 50rem"
+      tableStyle="min-width: 50rem; position: relative; overflow: visible"
+      class="relative overflow-visible"
     >
       <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
       <Column header="Videos">
@@ -227,7 +251,7 @@
       </Column>
       <Column header="Details">
         <template #body="{ data }">
-          <h1 class="font-bold">{{ data.title }}</h1>
+          <h1 class="font-bold truncate w-[400px]">{{ data.title }}</h1>
           <h1 v-if="data.category">{{ data.category.title }}</h1>
           <div class="flex gap-3 mt-2">
             <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4" v-if="data.levelWorkout">
@@ -274,7 +298,7 @@
         </template>
       </Column>
       <Column class="w-[136px] !text-end">
-        <template #body="{ data }">
+        <template #body="{ data, index }">
           <div class="video-settings">
             <div class="flex justify-between">
               <div class="relative">
@@ -284,7 +308,10 @@
                 ></button>
                 <div
                   v-if="isShareVisible"
-                  class="absolute w-[200px] bottom-7 right-0 bg-white p-4 rounded-lg border-primary-light border-2"
+                  :class="[
+                    index === 0 ? 'bottom-[-20px]' : 'bottom-7',
+                    'absolute w-[200px] right-7 bg-white p-4 rounded-lg border-primary-light border-2',
+                  ]"
                 >
                   <div class="flex justify-between items-center mb-3">
                     <h3 class="font-bold text-[16px]">Share via</h3>
@@ -364,7 +391,7 @@
         </div>
       </template>
     </DataTable>
-    <div class="flex justify-end gap-x-12 items-center px-12 pt-3">
+    <div class="flex justify-end gap-x-12 items-center px-12 pt-3 mb-[20px]">
       <Filter
         :title="'Rows per page'"
         :options="pageSizeOptions"
@@ -394,7 +421,7 @@
       </div>
     </div>
   </div>
-  <div v-else class="px-[16px]">
+  <div v-else-if="videos.length === 0 && !isLoading" class="px-[16px]">
     <h3 class="italic">You have not uploaded any videos yet.</h3>
     <button
       class="flex flex-row items-center gap-x-2 btn hover:bg-primary outline-none mt-3"

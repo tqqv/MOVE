@@ -97,13 +97,14 @@ const connectSocket = (socket) => {
 
     socket.on('chatMessage', async (data) => {
         try {
-            const { channelId, message, userId, username, avatar, replyTo, donation   } = data;
+            const { channelId, message, userId, username, avatar,channelName , replyTo, donation   } = data;
             validateMessage(message);
             const messageData = {
                 userId,
                 username,
                 message,
                 avatar,
+                channelName,
                 replyTo,
                 donation, 
                 timestamp: Date.now()

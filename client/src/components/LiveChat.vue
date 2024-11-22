@@ -46,6 +46,7 @@
     listenChatHistory((chatHistory) => {
       console.log('Received chat history:', chatHistory);
       chatMessages.value = chatHistory;
+      console.log(chatMessages.value);
     });
   };
 
@@ -65,10 +66,13 @@
         return;
       }
       if (!inputMessage.value.trim()) return;
+      console.log('123');
+
       const messageData = {
         userId: userStore.user.id,
         username: userStore.user.username,
-        avatar: userStore.user.avatar,
+        avatar: userStore.user?.Channel?.avatar || userStore.user.avatar,
+        channelName: userStore.user?.Channel?.channelName || null,
         message: inputMessage.value,
         timestamp: Date.now(),
         replyTo: replyTo.value || null,
@@ -140,14 +144,14 @@
     }
   };
   // REPLY CHAT
-  const replyChat = (index, username, message) => {
+  const replyChat = (index, username, channelName, message) => {
     if (replyIndex.value === index) {
       replyIndex.value = null;
       replyTo.value = null;
     } else {
       chatInputRef.value?.focus();
       replyIndex.value = index;
-      replyTo.value = { username, message };
+      replyTo.value = channelName ? { channelName, username, message } : { username, message };
     }
   };
 
@@ -166,7 +170,7 @@
   <div
     v-if="openLiveChat"
     class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
-    :class="isStreamer ? 'h-[650px] rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -206,6 +210,12 @@
               v-for="(userChat, index) in chatMessages"
               :key="index"
               class="text-[13px] p-1 rounded hover:bg-gray-light relative"
+              :class="{
+                'bg-primary/20 hover:bg-primary/20':
+                  userStore.user?.username &&
+                  userChat.replyTo?.username &&
+                  userStore.user?.username === userChat.replyTo?.username,
+              }"
               @mouseenter="hoveredIndex = index"
               @mouseleave="hoveredIndex = null"
             >
@@ -213,22 +223,17 @@
                 v-if="selectedIndex === index"
                 :userChat="userChat"
                 :userReportId="userStore.user?.id"
+                :isChannelFollowed="isChannelFollowed"
                 @handleOpenOptionChat="handleOpenOptionChat"
                 @handleReplyChat="replyChat"
               />
               <div v-if="userChat.replyTo" class="flex gap-x-1 items-center mb-1.5 text-xs px-0.5">
-                <div class="flex-shrink-0"><Chat /></div>
+                <div class="flex-shrink-0">
+                  <Chat />
+                </div>
                 <p class="ml-1 whitespace-nowrap">Replying to</p>
-                <RouterLink
-                  :to="`/user/${userChat.replyTo?.username}`"
-                  target="_blank"
-                  class=""
-                  :class="{
-                    'bg-primary text-black':
-                      userStore.user?.username === userChat.replyTo?.username,
-                  }"
-                >
-                  @{{ userChat.replyTo.username }}
+                <RouterLink :to="`/user/${userChat.replyTo?.username}`" target="_blank" class="">
+                  @{{ userChat.replyTo.channelName || userChat.replyTo.username }}
                 </RouterLink>
                 <p class="truncate">: {{ userChat.replyTo.message }}</p>
               </div>
@@ -238,9 +243,11 @@
                   'absolute right-[-5px] top-[-8px] p-1 flex justify-center items-center border border-gray-dark rounded-md bg-white cursor-pointer z-20',
                   { 'opacity-50 ': !isChannelFollowed },
                 ]"
-                v-tooltip="isChannelFollowed ? 'Reply' : 'You need to follow to reply'"
+                v-tooltip.left="isChannelFollowed ? 'Reply' : 'You need to follow to reply'"
                 @click="
-                  isChannelFollowed ? replyChat(index, userChat.username, userChat.message) : null
+                  isChannelFollowed
+                    ? replyChat(index, userChat.username, userChat.channelName, userChat.message)
+                    : null
                 "
               >
                 <Reply />
@@ -258,7 +265,7 @@
                       class="font-bold truncate cursor-pointer"
                       @click="handleOpenOptionChat(index)"
                     >
-                      {{ userChat.username }}
+                      {{ userChat.channelName || userChat.username }}
                     </h2>
                     <p class="text-black">:</p>
                   </div>
@@ -327,7 +334,7 @@
                   <Reply />
                   <div class="flex gap-x-1">
                     <p>Replying to</p>
-                    <p>@{{ replyTo.username }}</p>
+                    <p>@{{ replyTo.channelName || replyTo.username }}</p>
                   </div>
                 </div>
                 <div

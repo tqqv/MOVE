@@ -27,6 +27,7 @@
       const result = await getStateFromIP(videoId, country);
       if (result.status == 200) {
         states.value = result.data.data;
+        console.log(states.value);
       }
     } catch (error) {
       console.error('Failed to fetch state data:', error);
@@ -62,9 +63,9 @@
         <div class="text-base">{{ isoCodes[stat.country] }}</div>
         <div
           class="text-base cursor-pointer transition duration-200 ease-in-out hover:underline hover:text-primary"
-          @click="toggleCountry(index)"
+          @click="stat.country ? toggleCountry(index) : null"
         >
-          {{ stat.country }}
+          {{ stat.country ? stat.country : 'Unknown' }}
         </div>
       </div>
       <div class="flex flex-col items-start">

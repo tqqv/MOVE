@@ -29,28 +29,34 @@
   const usernameDetails = ref({});
   const avatarDetails = ref({});
   const followChannelDetails = ref({});
-
+  const loading = ref(true);
   const errorData = ref(null);
 
   const fetchChannelData = async () => {
-    const result = await getProfilebyUsername(username.value);
-
-    if (result.error) {
-      errorData.value = result.message;
-      router.push('/404');
-    } else {
-      channelDetails.value = result.data.Channel;
-      usernameDetails.value = result.data.username;
-      avatarDetails.value = result.data.avatar;
-      if (channelDetails.value !== null) {
-        channelId.value = result.data.Channel.id;
+    loading.value = true;
+    try {
+      const result = await getProfilebyUsername(username.value);
+      if (result.error) {
+        errorData.value = result.message;
+        router.push('/404');
+      } else {
+        channelDetails.value = result.data.Channel;
+        usernameDetails.value = result.data.username;
+        avatarDetails.value = result.data.avatar;
+        if (channelDetails.value !== null) {
+          channelId.value = result.data.Channel.id;
+        }
       }
+    } catch (error) {
+      console.error('Error fetching channel data:', error);
+      errorData.value = 'An unexpected error occurred.';
+    } finally {
+      loading.value = false;
     }
   };
 
   const fetchListFollowOfChannel = async (channelId) => {
     const result = await getListFollowOfChannel(channelId);
-
     if (result.error) {
       errorData.value = result.message || 'Error occurred';
     } else if (result.data && result.data.length > 0) {
@@ -100,6 +106,8 @@
       @updateFollowers="fetchChannelData"
       :hiddenReport="true"
       class="pl-3"
+      isGiftVisivle="false"
+      :loading="loading"
     />
     <div>
       <div class="mt-2">
@@ -110,7 +118,6 @@
           <TabPanels>
             <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
               <component
-                v-if="channelId"
                 :is="tab.component"
                 :channelDetails="channelDetails"
                 :channelId="channelId"

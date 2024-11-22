@@ -3,8 +3,15 @@
   import Navbar from '@/components/Navbar.vue';
   import SideBarLive from '@/components/streamer/liveStream/SideBarLive.vue';
   import { useLiveStreamStore, useStreamerStore, useUserStore } from '@/stores';
-  import { joinRoom, listenStreamMetrics, listenStreamReady } from '@/services/socketService';
+  import {
+    disconnectLivestream,
+    joinRoom,
+    listenStreamMetrics,
+    listenStreamReady,
+  } from '@/services/socketService';
+  import { useRoute } from 'vue-router';
 
+  const route = useRoute();
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
   const connectOBS = ref(null);
@@ -32,10 +39,12 @@
   };
 
   // CONNECT OBS
-  const handleConnectOBS = () => {
+  const handleConnectOBS = async () => {
+    if (!streamerStore.streamerChannel?.id) {
+      await streamerStore.fetchProfileChannel();
+    }
     if (streamerStore.streamerChannel?.id) {
       joinRoom(streamerStore.streamerChannel.id);
-
       listenStreamReady((isReady) => {
         streamerStore.fetchProfileChannel();
         connectOBS.value = isReady;
@@ -43,7 +52,7 @@
 
       listenStreamMetrics((metrics) => {
         metricsData.value = metrics;
-        console.log('Stream Metrics:', metrics);
+        // console.log('Stream Metrics:', metrics);
       });
     }
   };
@@ -53,30 +62,41 @@
     handleConnectOBS();
   });
 
+  onUnmounted(async () => {
+    disconnectLivestream();
+  });
+
   watch(
-    () => streamerStore.streamerChannel?.liveStatus,
-    async (newLiveStatus) => {
-      liveStatus.value = newLiveStatus;
-      if (newLiveStatus === 'streamPublished') {
-        try {
-          const username = streamerStore.streamerChannel?.User?.username;
-          if (username) {
-            await liveStreamStore.fetchLiveStreamData(username);
-            if (newLiveStatus === 'streamPublished' && liveStreamStore.liveStreamData?.createdAt) {
-              startTimer();
+    () => streamerStore.streamerChannel,
+    async (newChannel) => {
+      const newLiveStatus = newChannel?.liveStatus;
+      if (newLiveStatus) {
+        liveStatus.value = newLiveStatus;
+        if (newLiveStatus === 'streamPublished') {
+          try {
+            const username = newChannel?.User?.username;
+            if (username) {
+              await liveStreamStore.fetchLiveStreamData(username);
+              if (
+                liveStatus.value === 'streamPublished' &&
+                liveStreamStore.liveStreamData?.createdAt
+              ) {
+                startTimer();
+              }
             }
+          } catch (error) {
+            console.error('Error fetching live stream data:', error);
           }
-        } catch (error) {
-          console.error('Error fetching live stream data:', error);
         }
       }
     },
+    { deep: true },
   );
 
-  // watch(() => {
-  //   console.log('livestatus: ', liveStatus.value);
-  //   console.log('connectobs: ', connectOBS.value);
-  // });
+  watch(() => {
+    console.log('livestatus: ', liveStatus.value);
+    console.log('connectobs: ', connectOBS.value);
+  });
   watch(
     () => streamerStore.streamerChannel?.User?.username,
     (newUsername) => {
@@ -85,9 +105,17 @@
       }
     },
   );
-  // watch(() => {
-  //   console.log(elapsedTime.value);
-  // });
+
+  // Re-fetch data when route changes
+  watch(
+    () => route.fullPath,
+    async (newPath) => {
+      if (newPath.includes('dashboard-live')) {
+        await streamerStore.fetchProfileChannel();
+        handleConnectOBS();
+      }
+    },
+  );
 </script>
 
 <template>

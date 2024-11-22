@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
   import LiveChat from '@/components/LiveChat.vue';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import InformationLiveStream from './InformationLiveStream.vue';
@@ -14,6 +14,8 @@
 
   const userStore = useUserStore();
   const streamerStore = useStreamerStore();
+
+  const liveStreamData = computed(() => streamerStore?.streamerChannel?.id);
 </script>
 <template>
   <div class="px-10 flex items-center flex-col">
@@ -36,39 +38,32 @@
       >
         <div class="flex flex-col w-full p-4">
           <!-- SCREEN DONT" CONNET OBS -->
-          <div
+          <NotConnectScreen
             v-if="
               (props.connectOBS == null || props.connectOBS == 'null') && props.liveStatus == null
             "
-            class="flex w-full"
-          >
-            <NotConnectScreen />
-          </div>
+          />
           <!-- SCREEN CONNECT OBCS -->
-          <div
-            v-if="
-              props.connectOBS === 'streamPublished' ||
-              props.liveStatus === 'streamPublished' ||
-              props.liveStatus === 'streamReady'
-            "
-            class="flex w-full"
-          >
-            <LiveStreamScreen :username="userStore.user.username" />
+          <div class="flex w-full">
+            <LiveStreamScreen
+              v-if="
+                props.connectOBS === 'streamPublished' ||
+                props.liveStatus === 'streamPublished' ||
+                props.liveStatus === 'streamReady'
+              "
+              :username="userStore.user.username"
+              :isStreamer="true"
+            />
           </div>
-          <div class="mt-5 px-2">
+          <div class="mt-5 px-2 mb-2">
             <div class="flex w-full items-center justify-between gap-x-3">
               <p class="font-semibold">Your screen</p>
-              <div
-                class="p-2 flex justify-center items-center rounded-full cursor-pointer hover:bg-gray-light"
-              >
-                <i class="pi pi-arrow-down-left-and-arrow-up-right-to-center text-body"></i>
-              </div>
             </div>
           </div>
         </div>
       </div>
       <!-- CHAT -->
-      <LiveChat :liveStreamData="streamerStore.streamerChannel?.id" :isStreamer="true" />
+      <LiveChat :liveStreamData="liveStreamData" :isStreamer="true" />
     </div>
   </div>
 </template>

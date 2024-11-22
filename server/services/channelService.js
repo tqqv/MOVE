@@ -275,7 +275,8 @@ const searchVideoChannel = async(data, limit, offset) => {
 
     const videos = await Video.findAll({
       where: {
-        title: { [Op.like]: `%${normalData}%` }
+        title: { [Op.like]: `%${normalData}%` },
+        status: 'public'
       },
       include: [
         {
@@ -529,6 +530,7 @@ const endStream = async(data) => {
     }
 
     // REDIS HANDLING
+    let avgRates = await get(`channelStreamId:${channel.id}:currentViews`);
     let liveStatus = await get(`channel_${channel.id}_live_status`);
     if (liveStatus == 'streamPublished') {
       // FINAL SNAPSHOT
@@ -547,7 +549,9 @@ const endStream = async(data) => {
     channel.save();
     return {
       status: 200,
-      data: {channel, livestream},
+      data: {channel, 
+        livestream: { ...livestream.toJSON(), avgRates },
+      },
       message: "Stream ended suceess"
     }
   } catch (error) {

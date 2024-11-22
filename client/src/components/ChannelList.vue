@@ -11,8 +11,9 @@
 
 <template>
   <div class="grid grid-cols-1 lg:grid-cols-4 gap-4">
-    <div
+    <RouterLink
       v-for="user in users"
+      :to="`/user/${user.username}`"
       :key="user.id"
       class="flex items-center gap-x-4 mb-4 p-3 cursor-pointer hover:bg-gray-light/60 rounded-lg"
     >
@@ -48,10 +49,13 @@
           <h1 class="text-[16px] truncate">
             {{ user.Channel?.channelName || user.username }}
           </h1>
-          <Verified v-if="user.Channel && user.Channel.popularCheck" class="fill-blue mb-1 mr-1" />
+          <Verified
+            v-if="user.Channel && user.Channel.popularCheck"
+            class="fill-blue mb-1 mr-1 flex-shrink-0"
+          />
         </div>
         <p class="text_secondary text-xs">{{ user.Channel?.followCount || '0' }} followers</p>
       </div>
-    </div>
+    </RouterLink>
   </div>
 </template>
