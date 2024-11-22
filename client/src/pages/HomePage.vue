@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import Slider from '@/components/Slider.vue';
 
   import Divider from '@/components/Divider.vue';
@@ -14,14 +14,14 @@
 
   const categories = ref([]);
   const dataSlider = ref([]);
-  const isLoading = ref(true);
+  const isLoadingSlider = ref(false);
   const videos = ref([]);
 
   const fetchAllCategoriesHaveView = async () => {
     try {
       const res = await getAllCategoriesHaveView();
       if (res.success) {
-        categories.value = res.data;
+        categories.value = res.data.slice(0, 6);
       }
     } catch (error) {
       console.error(error.message);
@@ -29,6 +29,7 @@
   };
 
   const fetchDataSlider = async () => {
+    isLoadingSlider.value = true;
     try {
       const res = await getDataSlider();
 
@@ -38,7 +39,7 @@
     } catch (error) {
       console.error(error.message);
     } finally {
-      isLoading.value = false;
+      isLoadingSlider.value = false;
     }
   };
   const fetchVideoYouMayLike = async () => {
@@ -57,6 +58,12 @@
     fetchDataSlider();
     fetchVideoYouMayLike();
   });
+  // watch(isLoadingSlider, (newVal, oldVal) => {
+  //   console.log(`isLoadingSlider changed from ${oldVal} to ${newVal}`);
+  //   if (!newVal) {
+  //     console.log('Slider has finished loading.');
+  //   }
+  // });
 </script>
 
 <template>
@@ -66,11 +73,9 @@
         <span class="font-bold text-[24px] pr-8">Featured</span>
         <Divider class="flex-grow mt-1" />
       </div>
-      <div class="flex justify-center items-center h-[300px]" v-if="isLoading">
-        <SmallLoading />
-      </div>
-      <div class="mt-14" v-else>
-        <Slider :dataSlider="dataSlider" />
+
+      <div class="mt-14">
+        <Slider :dataSlider="dataSlider" :isLoadingSlider="isLoadingSlider" />
       </div>
     </div>
   </section>
