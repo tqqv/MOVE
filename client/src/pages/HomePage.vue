@@ -93,7 +93,7 @@
       <div
         class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
       >
-        <CategoryImage :categories="categories" :loading="isLoading" :qualitySkeleton="6" />
+        <CategoryImage :categories="categories" :loading="isLoadingSlider" :qualitySkeleton="6" />
       </div>
     </div>
   </section>
@@ -103,7 +103,7 @@
         <Divider class="flex-grow mt-1" />
         <div><span class="font-bold text-[24px] whitespace-nowrap">Video you may like</span></div>
       </div>
-      <GirdVideo :videos="videos.slice(0, 8)" />
+      <GirdVideo :videos="videos.slice(0, 8)" :loading="isLoadingSlider" />
     </div>
   </section>
 </template>

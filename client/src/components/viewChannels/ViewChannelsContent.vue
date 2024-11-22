@@ -79,15 +79,18 @@
   watch(
     () => route.params.username,
     async (newUsername) => {
-      username.value = newUsername;
-      activeTab.value = '0';
-      await fetchChannelData();
-      if (channelDetails.value !== null) {
-        channelId.value = channelDetails.value.id;
-        await fetchListFollowOfChannel(channelId.value);
+      if (newUsername !== username.value) {
+        username.value = newUsername;
+        activeTab.value = '0';
+        await fetchChannelData();
+        if (channelDetails.value !== null) {
+          channelId.value = channelDetails.value.id;
+          await fetchListFollowOfChannel(channelId.value);
+        }
       }
     },
   );
+
   const onTabChange = (event) => {
     activeTab.value = event;
   };

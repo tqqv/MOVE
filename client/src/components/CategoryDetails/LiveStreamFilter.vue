@@ -34,7 +34,7 @@
   const pageSize = ref(12);
 
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
-
+  const isLoadingLive = ref(false);
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(props.sortByOptions[0].sortBy);
   const selectedOrder = ref(props.sortByOptions[0].order);
@@ -56,6 +56,7 @@
 
   // FETCH Live
   const fetchLiveStream = async () => {
+    isLoadingLive.value = true;
     try {
       const response = await props.fetchLiveStreamFunction(
         currentPage.value,
@@ -65,15 +66,13 @@
         selectedSortBy.value,
         selectedOrder.value,
       );
-      console.log(response);
 
       livestreams.value = response.data.data.livestreamsWithStats;
       totalPage.value = response.data.data.totalPages;
-      console.log(totalPage.value);
-
-      console.log(totalPage.value);
     } catch (error) {
       console.log(error);
+    } finally {
+      isLoadingLive.value = false;
     }
   };
   watch(
@@ -129,7 +128,7 @@
         <p>Sort & Filter</p>
       </button>
     </div>
-    <GirdVideo v-if="livestreams.length > 0" :videos="livestreams" />
+    <GirdVideo v-if="livestreams.length > 0" :videos="livestreams" :loading="isLoadingLive" />
     <Paginator
       v-if="totalPage > 1"
       :rows="pageSize"
@@ -137,7 +136,7 @@
       :totalRecords="totalPage * pageSize"
       @page="onPageChange"
     />
-    <div v-if="!livestreams.length" class="h-full flex justify-center items-center mt-18">
+    <div v-if="!livestreams.length" class="h-full flex justify-center items-center">
       <EmptyPage
         title="There are no matching live streams"
         subTitle="Try different keywords or remove search filters"
