@@ -48,40 +48,7 @@
         <span class="font-bold text-[24px]">Live channel</span>
       </div>
       <div v-if="isLoading" class="grid gap-4 mt-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div>
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-        <div>
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-        <div>
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-        <div>
+        <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
           <Skeleton height="200px" />
           <div class="flex mt-4">
             <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
@@ -108,40 +75,7 @@
         </div>
       </div>
       <div v-if="isLoading" class="grid gap-4 mt-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div>
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-        <div>
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-        <div>
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-        <div>
+        <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
           <Skeleton height="200px" />
           <div class="flex mt-4">
             <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>

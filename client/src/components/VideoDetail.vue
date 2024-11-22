@@ -12,6 +12,7 @@
   import ReportChannel from './ReportChannel.vue';
   import DonateModal from './DonateModal.vue';
   import GetREPS from './getReps/GetREPS.vue';
+  import Skeleton from 'primevue/skeleton';
   const props = defineProps({
     isUserAction: {
       type: Boolean,
@@ -39,6 +40,10 @@
       default: false,
     },
     isGiftVisivle: Boolean,
+    loading: {
+      type: Boolean,
+      required: true,
+    },
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -124,7 +129,17 @@
 </script>
 
 <template>
-  <div class="block lg:flex items-center space-x-4 mb-3 w-full">
+  <div v-if="props.loading" class="flex justify-between items-center">
+    <div class="flex items-center gap-x-4 px-3">
+      <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+      <div class="flex flex-col gap-y-2">
+        <Skeleton width="20rem" class="mb-2"></Skeleton>
+        <Skeleton width="6rem" class="mb-2"></Skeleton>
+      </div>
+    </div>
+    <Skeleton width="12rem" height="1.4rem"></Skeleton>
+  </div>
+  <div v-else class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
       <RouterLink :to="`/user/${usernameDetails}`">
         <div class="relative inline-block">

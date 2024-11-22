@@ -335,6 +335,7 @@
                 :videos="videos"
                 :users="users"
                 :searchData="searchData"
+                @closeAllPopups="closeAllPopups"
               />
             </div>
           </div>

@@ -114,20 +114,9 @@
 
 <template>
   <div class="space-y-2">
-    <div
-      v-if="levelWorkoutStore.loading || categoriesStore.loading"
-      class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between"
-    >
-      <Skeleton width="8rem" height="2.6rem"></Skeleton>
-      <div class="flex flex-col lg:flex-row gap-6 mb-3">
-        <Skeleton width="13.5rem" height="2.6rem"></Skeleton>
-        <Skeleton width="13.5rem" height="2.6rem"></Skeleton>
-        <Skeleton width="13.5rem" height="2.6rem"></Skeleton>
-      </div>
-    </div>
-    <div v-else class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between">
+    <div class="flex flex-col-reverse lg:flex-row flex-grow items-center justify-between">
       <div class="whitespace-nowrap text-2xl font-bold text-black">All videos</div>
-      <div class="flex flex-col lg:flex-row gap-6">
+      <div class="flex flex-col lg:flex-row gap-6 mb-3">
         <Filter
           title="LEVEL"
           :options="levelWorkoutOptions"
