@@ -14,7 +14,6 @@
   import { useUserStore } from '@/stores/user.store';
 
   import { getListFollowOfChannel } from '@/services/streamer';
-  import Skeleton from 'primevue/skeleton';
   const tabs = ref([
     { title: 'Videos', component: markRaw(TabVideoList), value: '0' },
     { title: 'About', component: markRaw(TabAbout), value: '1' },
@@ -96,21 +95,7 @@
 
 <template>
   <section class="px-10 flex-grow">
-    <div v-if="loading" class="flex justify-between items-center">
-      <div class="flex items-center gap-x-4 px-3">
-        <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-        <div class="flex flex-col gap-y-2">
-          <Skeleton width="20rem" class="mb-2"></Skeleton>
-          <Skeleton width="6rem" class="mb-2"></Skeleton>
-        </div>
-      </div>
-      <div class="flex gap-x-12">
-        <Skeleton width="5rem" height="2.5rem"> </Skeleton>
-        <Skeleton width="1rem" height="2.5rem"></Skeleton>
-      </div>
-    </div>
     <VideoDetail
-      v-else
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"
       :channelDetails="channelDetails"
@@ -122,6 +107,7 @@
       :hiddenReport="true"
       class="pl-3"
       isGiftVisivle="false"
+      :loading="loading"
     />
     <div>
       <div class="mt-2">

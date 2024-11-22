@@ -11,11 +11,12 @@
   import { getCategoryByTitle } from '@services/categories';
 
   import { useRoute } from 'vue-router';
+  import Skeleton from 'primevue/skeleton';
 
   const route = useRoute();
   const categoryTitle = ref(route.params.category);
-
   const categoryDetail = ref({});
+  const loading = ref(true);
 
   const tabs = ref([
     { title: 'Videos', component: markRaw(TabVideos), value: '0' },
@@ -24,12 +25,14 @@
 
   const fetchCategoryByTitle = async (title) => {
     try {
+      const loading = ref(true);
       const response = await getCategoryByTitle(title);
-
       categoryDetail.value = response.data;
       console.log(categoryDetail.value);
     } catch (error) {
       console.error(error.message);
+    } finally {
+      loading.value = false;
     }
   };
   watch(
@@ -46,7 +49,15 @@
 
 <template>
   <section class="px-10 flex-grow mr-14 space-y-4">
-    <div class="flex items-center pl-4">
+    <div v-if="loading" class="flex items-start pl-4 gap-x-4">
+      <Skeleton width="9.2rem" height="13rem"></Skeleton>
+      <div class="flex flex-col gap-y-2">
+        <Skeleton width="4rem" height="1rem"></Skeleton>
+        <Skeleton width="10rem" height="1rem"></Skeleton>
+        <Skeleton width="6rem" height="1.4rem" class="mt-3"></Skeleton>
+      </div>
+    </div>
+    <div v-else class="flex items-center pl-4">
       <CategorySelected
         :categoryDetail="categoryDetail[0]"
         @updateFollow="fetchCategoryByTitle(categoryTitle)"

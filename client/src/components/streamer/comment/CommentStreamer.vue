@@ -5,6 +5,7 @@
   import { useStreamerStore } from '@/stores';
   import { getAllCommentOfStreamer } from '@/services/comment';
   import EmptyPage from '@/pages/EmptyPage.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const responsesOptions = [
     { id: 1, name: 'All responses', value: '' },
@@ -28,7 +29,7 @@
   const currentPage = ref(1);
   const totalComments = ref(0);
   const totalPage = ref();
-
+  const loading = ref(true);
   const selectedPageSize = ref(pageSizeOptions[0].name);
   const selectedResponsesOptions = ref(responsesOptions[0].value);
   const selectedSortOptions = ref(sortOptions[0].value);
@@ -36,6 +37,7 @@
   const fetchAllCommentStreamer = async () => {
     const streamerId = streamerStore.streamerChannel.id;
     try {
+      loading.value = true;
       const response = await getAllCommentOfStreamer(
         streamerId,
         selectedPageSize.value,
@@ -48,6 +50,8 @@
       totalPage.value = response.data.totalPages;
     } catch (error) {
       console.log(error);
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -110,7 +114,34 @@
             </tr>
           </thead>
 
-          <tbody>
+          <tbody v-if="loading">
+            <tr v-for="n in 4" key="n" class="bg-white border-b-[1px] border-gray-dark">
+              <td class="w-[50%] px-6 py-4 font-normal align-top text-gray-900">
+                <div class="flex item-center">
+                  <Skeleton shape="circle" size="3.6rem" class="mr-2"></Skeleton>
+                  <div class="flex flex-col gap-y-2">
+                    <Skeleton width="10rem"></Skeleton>
+                    <Skeleton width="20rem" height="4rem"></Skeleton>
+                    <Skeleton width="14rem"></Skeleton>
+                  </div>
+                </div>
+              </td>
+              <td class="w-[16%] px-6 py-4 align-top">
+                <Skeleton width="10rem" height="3rem"></Skeleton>
+              </td>
+              <td class="px-6 py-4 align-top">
+                <div class="flex gap-x-3">
+                  <Skeleton width="15rem" height="7rem"></Skeleton>
+                  <div class="flex flex-col gap-y-3">
+                    <Skeleton width="8rem" height="1rem"></Skeleton>
+                    <Skeleton width="3rem" height="1rem"></Skeleton>
+                    <Skeleton width="10rem" height="1rem"></Skeleton>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tbody v-if="!loading">
             <CommentRow
               v-for="comment in comments"
               :key="comment.id"
@@ -121,10 +152,10 @@
         </table>
       </div>
     </div>
-    <div v-if="!comments.length" class="h-full flex justify-center items-center mt-20">
-      <EmptyPage title="No videos found" subTitle="Upload a new video to manage comments" />
+    <div v-if="!comments.length && !loading" class="h-full flex justify-center items-center mt-20">
+      <EmptyPage title="No comments" subTitle="Please wait for new comments to manage comments." />
     </div>
-    <div v-else class="flex justify-end gap-x-12 items-center px-12 pt-3">
+    <div v-if="comments.length" class="flex justify-end gap-x-12 items-center px-12 pt-3">
       <Filter
         :title="'Rows per page'"
         :options="pageSizeOptions"

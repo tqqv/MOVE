@@ -5,11 +5,13 @@
   import ChannelList from '../ChannelList.vue';
   import { useRoute } from 'vue-router';
   import { searchInformation } from '@/services/search';
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import notFound from '../icons/not-found.vue';
   import SearchVideo from './SearchVideo.vue';
   import VideoCard from '../VideoCard.vue';
   import EmptyPage from '@/pages/EmptyPage.vue';
+  import SmallLoading from '../icons/smallLoading.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const route = useRoute();
   const query = ref(route.query.q || '');
@@ -18,9 +20,10 @@
   const videos = ref([]);
   const loading = ref(true);
 
-  onMounted(async () => {
+  const fetchSearchResults = async () => {
     if (query.value) {
       try {
+        loading.value = true;
         const response = await searchInformation(query.value, 8, 0);
         const data = response.data.data;
         categories.value = data.categories;
@@ -32,22 +35,53 @@
         loading.value = false;
       }
     } else {
+      categories.value = [];
+      videos.value = [];
+      users.value = [];
       loading.value = false;
     }
+  };
+
+  watch(
+    () => route.query.q,
+    (newQuery) => {
+      query.value = newQuery || '';
+      fetchSearchResults();
+    },
+  );
+
+  onMounted(() => {
+    fetchSearchResults();
   });
 </script>
 <template>
-  <section
-    v-if="query && (categories.length || users.length || videos.length) && !loading"
-    class="flex-grow"
-  >
+  <section class="flex-grow h-full">
     <div class="container">
       <div>
         <div class="flex items-center gap-x-[30px]">
           <h1 class="text_title flex-shrink-0">Search results for {{ query }}</h1>
           <Divider />
         </div>
-        <div class="my-2">
+        <div
+          v-if="loading"
+          class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5 my-8"
+        >
+          <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
+            <Skeleton height="200px" />
+            <div class="flex mt-4">
+              <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+              <div>
+                <Skeleton width="10rem" class="mb-2"></Skeleton>
+                <Skeleton width="5rem" class="mb-2"></Skeleton>
+                <Skeleton height=".5rem"></Skeleton>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div
+          v-if="query && (categories.length || users.length || videos.length) && !loading"
+          class="my-2"
+        >
           <!-- CATEGORIES -->
           <div v-if="categories.length" class="">
             <div class="flex justify-between items-center">
@@ -105,14 +139,14 @@
         </div>
       </div>
     </div>
+    <div
+      v-if="!query || (query && !categories.length && !videos.length && !users.length && !loading)"
+      class="h-[80%] flex justify-center items-center"
+    >
+      <EmptyPage
+        title="No results found"
+        subTitle="Try different keywords or remove search filters"
+      />
+    </div>
   </section>
-  <div
-    v-if="!query || (query && !categories.length && !videos.length && !users.length && !loading)"
-    class="h-full flex justify-center items-center"
-  >
-    <EmptyPage
-      title="No results found"
-      subTitle="Try different keywords or remove search filters"
-    />
-  </div>
 </template>
