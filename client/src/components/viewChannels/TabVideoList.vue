@@ -66,9 +66,7 @@
         selectLevelWorkoutOptions.value,
         selectCategoryOptions.value,
       );
-
       const fetchedVideos = result.data.data.videos.rows;
-
       videos.value = fetchedVideos;
       totalPages.value = result.data.data.totalPages;
     } catch (error) {
@@ -138,41 +136,30 @@
       </div>
     </div>
 
-    <div
-      v-if="loading"
-      class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5 my-8 px-2 mt-3"
-    >
-      <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
-        <Skeleton width="100%" height="100%"></Skeleton>
-        <Skeleton width="5rem" height="1rem"></Skeleton>
-        <Skeleton width="8rem" height="1rem"></Skeleton>
-      </div>
+    <div>
+      <GirdVideo
+        :totalPages="totalPages"
+        :videos="videos"
+        :channelDetails="props.channelDetails"
+        :page="page"
+        :pageSize="pageSize"
+        @page-change="onPageChange"
+        :loading="loading"
+      />
+      <Paginator
+        v-if="totalPages > 1 && videos.length > 0"
+        :rows="pageSize"
+        :first="(page - 1) * pageSize"
+        :totalRecords="totalPages * pageSize"
+        @page="onPageChange"
+      />
     </div>
-    <template v-else>
-      <div v-if="videos.length > 0">
-        <GirdVideo
-          :totalPages="totalPages"
-          :videos="videos"
-          :channelDetails="props.channelDetails"
-          :page="page"
-          :pageSize="pageSize"
-          @page-change="onPageChange"
-        />
-        <Paginator
-          v-if="totalPages > 1"
-          :rows="pageSize"
-          :first="(page - 1) * pageSize"
-          :totalRecords="totalPages * pageSize"
-          @page="onPageChange"
-        />
-      </div>
 
-      <div v-else class="h-full flex justify-center items-center mt-20">
-        <NotFoundPage
-          title="There are no matching videos"
-          subTitle="Try different keywords or remove search filters"
-        />
-      </div>
-    </template>
+    <div v-if="!videos.length && !loading" class="h-full flex justify-center items-center mt-20">
+      <NotFoundPage
+        title="There are no matching videos"
+        subTitle="Try different keywords or remove search filters"
+      />
+    </div>
   </div>
 </template>
