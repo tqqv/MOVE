@@ -10,6 +10,7 @@
   import { toast } from 'vue3-toastify';
   import { createLiveStream, endLiveStream, updateLiveStream } from '@/services/liveStream';
   import { formatTimeInStream } from '@/utils';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     connectOBS: String,
@@ -186,7 +187,11 @@
         <!-- SET UP USER -->
         <hr class="h-px my-8 bg-gray-dark border-0" />
         <div class="flex flex-col gap-y-7">
-          <div class="flex items-center gap-x-4">
+          <div v-if="streamerStore.loading" class="flex items-center gap-x-4">
+            <Skeleton shape="circle" size="3rem"></Skeleton>
+            <Skeleton height="2.3rem" width="10rem"></Skeleton>
+          </div>
+          <div v-else class="flex items-center gap-x-4">
             <RouterLink
               class="hover:text-primary"
               :to="`/user/${streamerStore.streamerChannel?.User?.username}`"
@@ -304,10 +309,9 @@
       <hr class="h-px my-3 bg-gray-dark border-0" />
       <!-- MAIN -->
       <div class="flex flex-col gap-y-2">
-        <router-link
+        <div
           v-for="item in menuItems"
           :key="item.name"
-          :to="item.link"
           class="flex justify-center items-center gap-x-3 py-3 px-3 rounded-lg cursor-pointer hover:bg-gray-light"
           :class="{ 'bg-primary/20 hover:bg-primary/20': route.path === item.link }"
           v-tooltip="item.name"
@@ -318,7 +322,7 @@
           >
             <component :is="item.icon" :fill="route.path === item.link ? '#fff' : '#000'" />
           </div>
-        </router-link>
+        </div>
       </div>
       <!-- GO LIVE -->
       <hr class="h-px my-4 bg-gray-dark border-0" />
