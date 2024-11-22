@@ -12,6 +12,7 @@
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
+  import Skeleton from 'primevue/skeleton';
   import TabAbout from '@/components/viewChannels/TabAbout.vue';
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
@@ -34,6 +35,7 @@
   const isCommentable = ref(null);
   let playerInstance = null;
   const isLoading = ref(true);
+  const isVideoLoading = ref(true);
   let actualWatchTime = 0;
   let lastUpdateTime = 0;
   let hasWatchedFiveMinutes = false;
@@ -54,6 +56,7 @@
 
   const fetchVideoById = async () => {
     try {
+      isVideoLoading.value = true;
       const res = await axiosInstance.get(`video/${videoId.value}`);
       if (res.status === 200) {
         video.value = res.data.data;
@@ -78,6 +81,8 @@
       } else {
         toast.error(error.message);
       }
+    } finally {
+      isVideoLoading.value = false;
     }
   };
 
@@ -150,6 +155,9 @@
       actualWatchTime = 0;
       lastUpdateTime = 0;
       hasWatchedFiveMinutes = false;
+      playerInstance.setCurrentTime(0).then(() => {
+        playerInstance.pause();
+      });
     });
   };
 
@@ -188,15 +196,50 @@
         </div>
       </div>
       <div class="p-[20px]">
+        <div v-if="isVideoLoading">
+          <div>
+            <div class="flex justify-between">
+              <Skeleton width="20rem" class="mb-2"></Skeleton>
+              <Skeleton width="5rem"></Skeleton>
+            </div>
+            <Skeleton width="15rem" class="mb-2"></Skeleton>
+            <div class="flex justify-between">
+              <div class="flex gap-2 items-center">
+                <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+                <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+              </div>
+              <div class="flex gap-4 items-center">
+                <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+                <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+                <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+              </div>
+            </div>
+          </div>
+        </div>
         <OfflineTitle
-          v-if="video"
+          v-else-if="video && !isVideoLoading"
           :video="video"
           @updateRate="fetchVideoById"
           titleRate="Rate Video"
         />
         <Divider />
+        <div v-if="isVideoLoading">
+          <div class="flex items-center justify-between">
+            <div class="flex mt-4 items-center">
+              <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+              <div>
+                <Skeleton width="10rem" class="mb-2"></Skeleton>
+                <Skeleton width="5rem" class="mb-2"></Skeleton>
+              </div>
+            </div>
+            <div class="flex gap-4 items-center">
+              <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+              <Skeleton width="5rem" height="30px" class="mb-2 rounded-xl"></Skeleton>
+            </div>
+          </div>
+        </div>
         <VideoDetail
-          v-if="channelDetails"
+          v-else-if="channelDetails && !isVideoLoading"
           :channelDetails="channelDetails"
           :isButtonGiftREPsVisible="true"
           :totalFollower="totalFollower"
@@ -207,24 +250,112 @@
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">
-            <Tab value="about">About</Tab>
+            <div v-if="isVideoLoading" class="mt-5">
+              <Skeleton width="5rem" class="mb-2"></Skeleton>
+            </div>
+            <Tab v-else-if="!isVideoLoading && channelDetails" value="about">About</Tab>
           </TabList>
           <TabPanels class="p-0">
-            <TabPanel value="about"
-              ><TabAbout class="mt-3" v-if="channelDetails" :channelDetails="channelDetails"
-            /></TabPanel>
+            <TabPanel value="about">
+              <div v-if="isVideoLoading" class="mt-3">
+                <div class="grid grid-cols-10 gap-6 pt-2">
+                  <div class="col-span-7">
+                    <Skeleton height="75px" class="mb-2 rounded-xl"></Skeleton>
+                  </div>
+                  <div class="col-span-3">
+                    <Skeleton height="15px" class="mb-3 rounded-xl"></Skeleton>
+                    <div class="flex items-center gap-4">
+                      <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
+                      <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
+                      <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <TabAbout
+                class="mt-3"
+                v-else-if="!isVideoLoading && channelDetails"
+                :channelDetails="channelDetails"
+              />
+            </TabPanel>
           </TabPanels>
         </Tabs>
         <Divider />
-        <CommentPage :videoId="videoId" :isCommentable="isCommentable" />
+        <div v-if="isVideoLoading">
+          <div class="grid grid-cols-12 items-center">
+            <Skeleton shape="circle" size="4rem" class="col-span-1"></Skeleton>
+            <Skeleton height="50px" class="col-span-11"></Skeleton>
+          </div>
+          <div class="flex gap-x-4 items-center mt-10">
+            <Skeleton shape="circle" size="4rem"></Skeleton>
+            <div>
+              <Skeleton width="10rem" class="mb-2"></Skeleton>
+              <Skeleton width="5rem" class="mb-2"></Skeleton>
+              <div class="flex items-center gap-4">
+                <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
+                <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
+                <Skeleton shape="circle" size="2.5rem" class="mr-2"></Skeleton>
+              </div>
+            </div>
+          </div>
+        </div>
+        <CommentPage
+          v-else-if="videoId && !isVideoLoading"
+          :videoId="videoId"
+          :isCommentable="isCommentable"
+        />
       </div>
     </div>
-    <div class="col-span-12 lg:col-span-3 ">
+    <div class="col-span-12 lg:col-span-3">
       <div class="p-[10px]">
         <h3 class="font-bold mb-2 uppercase px-2 py-3">watch also</h3>
-        <div>
-          <VideoCard v-if="videos" :videos="videos" />
+        <div v-if="isVideoLoading" class="grid gap-4 mt-3 px-2">
+          <div>
+            <Skeleton height="200px" />
+            <div class="flex mt-4">
+              <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+              <div>
+                <Skeleton width="10rem" class="mb-2"></Skeleton>
+                <Skeleton width="5rem" class="mb-2"></Skeleton>
+                <Skeleton height=".5rem"></Skeleton>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Skeleton height="200px" />
+            <div class="flex mt-4">
+              <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+              <div>
+                <Skeleton width="10rem" class="mb-2"></Skeleton>
+                <Skeleton width="5rem" class="mb-2"></Skeleton>
+                <Skeleton height=".5rem"></Skeleton>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Skeleton height="200px" />
+            <div class="flex mt-4">
+              <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+              <div>
+                <Skeleton width="10rem" class="mb-2"></Skeleton>
+                <Skeleton width="5rem" class="mb-2"></Skeleton>
+                <Skeleton height=".5rem"></Skeleton>
+              </div>
+            </div>
+          </div>
+          <div>
+            <Skeleton height="200px" />
+            <div class="flex mt-4">
+              <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+              <div>
+                <Skeleton width="10rem" class="mb-2"></Skeleton>
+                <Skeleton width="5rem" class="mb-2"></Skeleton>
+                <Skeleton height=".5rem"></Skeleton>
+              </div>
+            </div>
+          </div>
         </div>
+        <VideoCard v-else-if="videos && !isVideoLoading" :videos="videos" />
       </div>
     </div>
   </div>

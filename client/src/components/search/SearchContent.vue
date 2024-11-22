@@ -6,11 +6,8 @@
   import { useRoute } from 'vue-router';
   import { searchInformation } from '@/services/search';
   import { onMounted, ref, watch } from 'vue';
-  import notFound from '../icons/not-found.vue';
-  import SearchVideo from './SearchVideo.vue';
   import VideoCard from '../VideoCard.vue';
   import EmptyPage from '@/pages/EmptyPage.vue';
-  import SmallLoading from '../icons/smallLoading.vue';
   import Skeleton from 'primevue/skeleton';
 
   const route = useRoute();
@@ -97,7 +94,7 @@
             <div
               class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             >
-              <CategoryImage :categories="categories" />
+              <CategoryImage :categories="categories" :loading="loading" qualitySkeleton="3" />
             </div>
           </div>
           <hr v-if="categories.length" class="h-px my-10 bg-gray-dark border-0" />

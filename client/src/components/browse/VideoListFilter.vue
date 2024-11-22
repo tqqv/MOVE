@@ -1,5 +1,5 @@
 <script setup>
-  import { computed, onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
   import Paginator from 'primevue/paginator';
@@ -7,6 +7,7 @@
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
   import Skeleton from 'primevue/skeleton';
+  import { loadMoreScroll } from '@/utils';
 
   const props = defineProps({
     title: {
@@ -29,8 +30,10 @@
   const videos = ref([]);
   const currentPage = ref(1);
   const totalPage = ref();
-  const pageSize = ref(12);
+  const pageSize = ref(8);
   const loading = ref(true);
+  const loadingMore = ref(false);
+  const isFetchingMore = ref(false);
 
   const categoryOptions = computed(() => categoriesStore.categoryOptions);
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
@@ -39,15 +42,6 @@
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(props.sortByOptions[0].value);
   const selectedOrder = ref(props.sortByOptions[0].order);
-
-  const onPageChange = (event) => {
-    const newPage = event.page + 1;
-    if (newPage <= totalPage.value) {
-      currentPage.value = newPage;
-      fetchVideos();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
 
   // CREATE PARAM TO BE
   const handleSortChange = (newValue) => {
@@ -68,8 +62,6 @@
         selectedOrder.value,
       );
       videos.value = response.data.data.listVideo.rows;
-      console.log(videos.value);
-
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       console.log(error);
@@ -77,6 +69,36 @@
       loading.value = false;
     }
   };
+
+  // LOADING MORE
+  async function loadMoreData() {
+    if (isFetchingMore.value || currentPage.value >= totalPage.value) return;
+    isFetchingMore.value = true;
+    loadingMore.value = true;
+    currentPage.value += 1;
+
+    try {
+      const response = await props.fetchVideosFunction(
+        currentPage.value,
+        pageSize.value,
+        selectLevelWorkoutOptions.value,
+        selectCategoryOptions.value,
+        selectedSortBy.value,
+        selectedOrder.value,
+      );
+      if (response.data?.data?.listVideo?.rows) {
+        videos.value.push(...response.data.data.listVideo.rows);
+        totalPage.value = response.data.data.totalPages;
+      } else {
+        console.error('Invalid response structure:', response);
+      }
+    } catch (error) {
+      console.error('Error loading more data:', error);
+    } finally {
+      isFetchingMore.value = false;
+      loadingMore.value = false;
+    }
+  }
 
   watch(categoryOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectCategoryOptions.value) {
@@ -104,6 +126,11 @@
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
     await fetchVideos();
+    window.addEventListener('scroll', loadMoreScroll(loadMoreData, 200));
+  });
+
+  onUnmounted(() => {
+    window.removeEventListener('scroll', loadMoreScroll(loadMoreData, 200));
   });
 </script>
 
@@ -136,9 +163,11 @@
         <p>Sort & Filter</p>
       </button>
     </div>
+
+    <GirdVideo :videos="videos" :loading="loading" />
     <div
-      v-if="loading"
-      class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5 my-8"
+      v-if="loadingMore"
+      class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5"
     >
       <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
         <Skeleton height="200px" />
@@ -152,21 +181,11 @@
         </div>
       </div>
     </div>
-    <template v-else>
-      <GirdVideo v-if="videos.length > 0" :videos="videos" />
-      <Paginator
-        v-if="totalPage > 1"
-        :rows="pageSize"
-        :first="(currentPage - 1) * pageSize"
-        :totalRecords="totalPage * pageSize"
-        @page="onPageChange"
+    <div v-if="!videos.length && !loading" class="h-full flex justify-center items-center mt-20">
+      <EmptyPage
+        title="There are no matching videos"
+        subTitle="Try different keywords or remove search filters"
       />
-      <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
-        <EmptyPage
-          title="There are no matching videos"
-          subTitle="Try different keywords or remove search filters"
-        />
-      </div>
-    </template>
+    </div>
   </div>
 </template>
