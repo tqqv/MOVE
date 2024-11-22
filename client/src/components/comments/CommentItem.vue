@@ -217,17 +217,20 @@
     }"
   >
     <div class="flex-shrink-0">
-      <img
-        :src="comment?.userComments?.avatar"
-        alt="Avatar"
-        class="size-10 object-cover rounded-full"
-      />
+      <RouterLink :to="`/user/${comment.userComments?.username}`">
+        <img
+          :src="comment?.userComments?.avatar"
+          alt="Avatar"
+          class="size-10 object-cover rounded-full"
+      /></RouterLink>
     </div>
 
     <div class="space-y-2 w-full">
       <!-- USERNAME -->
       <div class="flex justify-between items-center gap-x-4 w-fit">
-        <h1 class="font-bold">{{ comment.userComments?.username }}</h1>
+        <RouterLink :to="`/user/${comment.userComments?.username}`">
+          <h1 class="font-bold">{{ comment.userComments?.username }}</h1></RouterLink
+        >
         <span v-if="comment.userComments?.isVerified">
           <Verified class="fill-blue" />
         </span>

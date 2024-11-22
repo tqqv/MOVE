@@ -209,11 +209,13 @@
     <!-- COMMENT -->
     <td class="w-[50%] px-6 py-4 font-normal align-top text-gray-900">
       <div class="flex gap-x-4">
+        <RouterLink :to="`/user/${comment.userComments?.username}`">
+
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
           alt="avatar"
           class="size-14 object-cover rounded-full flex-shrink-0"
-        />
+        /></RouterLink>
         <!-- RIGHT COMMENT -->
         <div class="flex flex-col flex-grow gap-y-1">
           <!-- REPS SENDER -->
@@ -225,10 +227,11 @@
             <h1 class="text-white font-bold text-[10px]">REPs Sender</h1>
           </div>
           <!-- USERNAME -->
-          <div class="flex items-center gap-x-4">
+          <div class="flex items-center gap-x-4">        <RouterLink :to="`/user/${comment.userComments?.username}`">
+
             <h1 class="font-bold">
               {{ comment.channelComments?.channelName || comment.userComments?.username }}
-            </h1>
+            </h1></RouterLink>
             <span v-if="comment.channelComments?.popularCheck" class="mb-1">
               <verified fill="fill-blue" />
             </span>
