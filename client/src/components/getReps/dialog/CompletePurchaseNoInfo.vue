@@ -9,6 +9,7 @@
   import { useCardStore } from '@/stores/card.store';
   import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
   import { paymentSchema } from '@/utils/vadilation';
+  import smallLoading from '@/components/icons/smallLoading.vue';
 
   const props = defineProps({
     title: String,
@@ -29,6 +30,7 @@
   const cardStore = useCardStore();
   const userStore = useUserStore();
   const errors = ref();
+  const isLoandingSubmit = ref(false);
 
   const cardForm = ref(null);
 
@@ -124,7 +126,6 @@
       console.error('Error:', error.message);
     }
   };
-  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
   const handleCheckout = async (paymentMethodId) => {
     try {
@@ -137,7 +138,6 @@
       //  hiển thị popup loading
       popupStore.showLoadingPayment = true;
       popupStore.showOpenBuyREPs = false;
-      await sleep(3000);
       //cancel
       if (popupStore.isCancelPayment) return;
       const res = await checkout(dataCheckout);
@@ -165,18 +165,24 @@
   };
 
   const toggleLoadPayment = async () => {
+    isLoandingSubmit.value = true;
+
     const isValid = await validatePaymentData();
     const { cardNumber, cardName, stripe, country, isComplete } = cardForm.value;
 
     if (isCheckMark.value) {
       if (!isComplete || !isValid) {
+        isLoandingSubmit.value = false;
+
         return;
       }
       await handleSaveCard();
       await cardStore.fetchCard();
 
       if (!cardStore.card?.paymentMethodId) {
-        console.error('Không tìm thấy paymentMethodId sau khi lưu thẻ.');
+        console.error('paymentMethodId not found after saving card.');
+        isLoandingSubmit.value = false;
+
         return;
       }
       await handleCheckout(cardStore.card?.paymentMethodId);
@@ -184,6 +190,8 @@
       const paymentMethodId = await handleUseCardOneTime();
 
       if (!isComplete || !isValid) {
+        isLoandingSubmit.value = false;
+
         return;
       }
       await handleCheckout(paymentMethodId);
@@ -240,6 +248,7 @@
         <div class="text-base text-[#666666] font-bold">Payment Details</div>
 
         <FormCardPayment ref="cardForm" :errors="errors" />
+
         <div class="text-xs">
           <span class="text-[#777777]">
             By submitting payment information you acknowledge that you have read, understood and
@@ -256,7 +265,10 @@
           @update:modelValue="(value) => (isCheckMark = value)"
         />
         <div class="flex justify-center mt-4">
-          <button @click="toggleLoadPayment" class="btn w-1/3">Submit</button>
+          <button @click="toggleLoadPayment" class="btn w-1/3">
+            <smallLoading v-if="isLoandingSubmit" fill="white" fill_second="#13d0b4" />
+            <span v-else>Submit</span>
+          </button>
         </div>
       </div>
     </Dialog>

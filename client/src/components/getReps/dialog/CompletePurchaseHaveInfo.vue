@@ -44,15 +44,13 @@
 
   const handleCheckout = async (paymentMethodId) => {
     try {
-      // Thiết lập data cho checkout
       const dataCheckout = {
         paymentMethodId: paymentMethodId,
         repPackageId: getRepsStore.selectedOption.id,
       };
 
-      // Bắt đầu quá trình thanh toán, hiển thị popup loading
       popupStore.showLoadingPayment = true;
-      popupStore.showOpenBuyREPs = false; // Ẩn popup "Order Success"
+      popupStore.showOpenBuyREPs = false;
       await sleep(3000);
       //cancel
       if (popupStore.isCancelPayment) return;
@@ -120,23 +118,26 @@
         <div class="text-base text-[#666666] font-bold">Payment Details</div>
         <div class="space-y-12">
           <!-- CHOOSE CARD -->
-          <div class="flex gap-x-4 py-2 items-center">
-            <div
-              v-if="cardStore.card.cardType === 'visa'"
-              class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center"
-            >
-              <VisaIcon />
-            </div>
-            <div v-else class="cursor-pointer border border-[#CCCCCC] rounded-md p-2">
-              <MasterCardIcon />
-            </div>
-            <div class="flex justify-between items-center text-sm w-full">
-              <div>
-                Visa ending with <span class="font-bold">{{ cardStore.card.cardNumber }}</span>
+          <div>
+            <div class="flex gap-x-4 py-4 items-center">
+              <div
+                v-if="cardStore.card.cardType === 'visa'"
+                class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center"
+              >
+                <VisaIcon />
+              </div>
+              <div v-else class="cursor-pointer border border-[#CCCCCC] rounded-md p-2">
+                <MasterCardIcon />
+              </div>
+              <div class="flex justify-between items-center text-sm w-full">
+                <div>
+                  Visa ending with <span class="font-bold">{{ cardStore.card.cardNumber }}</span>
+                </div>
+                <div class="text-sm text-primary cursor-pointer">Change</div>
               </div>
             </div>
+            <span class="text-sm text-primary cursor-pointer">Change payment method</span>
           </div>
-          <span class="text-sm text-primary cursor-pointer">Change payment method</span>
 
           <!-- submit -->
           <div class="space-y-4">
