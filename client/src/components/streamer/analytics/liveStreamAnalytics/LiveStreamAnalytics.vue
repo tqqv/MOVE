@@ -9,7 +9,7 @@
   import TabGender from '@components/streamer/analytics/liveStreamAnalytics/TabGender.vue';
   import { useTabStore } from '@/stores/tab.store';
   import rate from '@components/icons/rate.vue';
-  import { formatView, formatRating, formatAvgViewTime } from '@/utils';
+  import { formatView, formatRating, formatAvgViewTime, truncateDescripton } from '@/utils';
   import TabAge from '@components/streamer/analytics/liveStreamAnalytics/TabAge.vue';
   import TabCountry from '@components/streamer/analytics/liveStreamAnalytics/TabCountry.vue';
   import Filter from '@/components/Filter.vue';
@@ -112,7 +112,9 @@
       <div class="bg-white shadow-lg p-6 rounded-md space-y-6">
         <div class="space-y-2">
           <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
-          <div class="text-base font-bold">{{ liveStreamDetails.title }}</div>
+          <div class="text-base font-bold" :title="liveStreamDetails.title">
+            {{ truncateDescripton(liveStreamDetails.title, 40) }}
+          </div>
         </div>
         <div class="space-y-4">
           <div class="flex justify-between">
