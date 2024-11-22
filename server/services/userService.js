@@ -57,7 +57,7 @@ const editProfile = async (id, data) => {
       }
     }
 
-    if(user.email && user.isVerified) {
+    if(user.email && user.isVerified && data.email) {
       return {
         status: 400,
         data: null,
@@ -66,11 +66,11 @@ const editProfile = async (id, data) => {
     }
 
     if(data.username){
-      if (data.username.length < 3 || data.username.length > 32) {
+      if (data.username.length < 3 || data.username.length > 32 ||  /[A-Z]/.test(data.username)) {
         return {
           status: 400,
           data: null,
-          message: "Must be between 3 and 32 in length."
+          message: "Must be between 3 and 32 in length and cannot contain uppercase letters."
         }
       } else if (!validateUsername(data.username)) {
         return {
@@ -489,6 +489,18 @@ const getAllInforFollow = async(userId) => {
         },
         status: 'public',
       },
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ],
+        ],
+      },
       include: [{
         model: Channel,
         as: 'channel',
@@ -545,6 +557,12 @@ const getAllInforFollow = async(userId) => {
         'thumbnailUrl',
         'totalView',
         'createdAt',
+        [sequelize.literal(`(
+          SELECT AVG(rating)
+          FROM ratings
+          WHERE ratings.livestreamId = Livestream.id
+        )`),
+        'ratings']
       ],
       include: [
         {
@@ -563,6 +581,10 @@ const getAllInforFollow = async(userId) => {
           model: Channel,
           as: 'livestreamChannel',
           attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }]
         }
       ],
       order: [['createdAt', 'DESC']]

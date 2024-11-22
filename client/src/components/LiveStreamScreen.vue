@@ -5,6 +5,8 @@
   const props = defineProps({
     username: String,
     isStreamer: Boolean,
+    isSlider: Boolean,
+    class: String,
   });
 
   const frameVideo = ref(null);
@@ -36,7 +38,7 @@
     <video
       ref="frameVideo"
       class="w-[70vw] h-[70%] object-cover"
-      :class="{ 'h-full': isStreamer }"
+      :class="{ 'h-full ': isStreamer, 'h-full max-w-none': isSlider }"
       playsinline
       controls
       autoplay

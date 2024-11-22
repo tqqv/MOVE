@@ -9,6 +9,7 @@
   import { toast } from 'vue3-toastify';
   import { useCardStore } from '@/stores/card.store';
   import { paymentSchema } from '@/utils/vadilation';
+  import smallLoading from '@/components/icons/smallLoading.vue';
 
   const props = defineProps({
     isPaymentDetailsVisible: Boolean,
@@ -19,7 +20,7 @@
   const cardStore = useCardStore();
   const errors = ref();
   const emit = defineEmits(['closePayment']);
-
+  const isLoandingSubmit = ref(false);
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');
   const toggleClosePayment = () => {
@@ -82,10 +83,13 @@
     }
   };
   const handleSubmit = async () => {
+    isLoandingSubmit.value = true;
     const isValid = await validatePaymentData();
 
     if (!cardForm.value || !cardForm.value.stripe) {
       console.error('cardForm or Stripe is undefined');
+      isLoandingSubmit.value = false;
+
       return;
     }
 
@@ -107,6 +111,8 @@
           country: country.name,
         };
         if (!isComplete || !isValid) {
+          isLoandingSubmit.value = false;
+
           return;
         }
         const res = await createCardInfo(data);
@@ -123,6 +129,8 @@
       }
     } catch (error) {
       console.error('Error:', error.message);
+    } finally {
+      isLoandingSubmit.value = false;
     }
   };
 </script>
@@ -152,7 +160,10 @@
           <span class="text-primary"> Refund Policy</span>.
         </div>
         <div class="flex justify-center mt-4">
-          <button @click="handleSubmit" class="btn w-1/3">Submit</button>
+          <button @click="handleSubmit" class="btn w-1/3">
+            <smallLoading v-if="isLoandingSubmit" fill="white" fill_second="#13d0b4" />
+            <span v-else>Submit</span>
+          </button>
         </div>
       </div>
     </Dialog>

@@ -17,7 +17,7 @@
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import { useUserStore } from '@/stores/user.store';
-  import { RouterLink } from 'vue-router';
+  import { RouterLink, useRouter } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
   import { debounce } from '@/utils';
   import { searchInformation } from '@/services/search';
@@ -47,6 +47,7 @@
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
   const isPaymentHistoryFetched = ref(false);
+  const router = useRouter();
 
   const isFirstTime = ref(false);
   // SEARCH
@@ -56,6 +57,7 @@
   const categories = ref([]);
   const videos = ref([]);
   const users = ref([]);
+  const loading = ref(true);
   // SEARCH
 
   const toggleMobileMenu = () => {
@@ -169,6 +171,7 @@
 
   const debouncedSearch = debounce(async (newSearchData) => {
     if (newSearchData) {
+      loading.value = true;
       try {
         const response = await searchInformation(newSearchData, 2, 0);
         const data = response.data.data;
@@ -177,13 +180,17 @@
         users.value = data.users;
       } catch (error) {
         console.error('Error fetching search results:', error);
+      } finally {
+        loading.value = false;
       }
     } else {
       categories.value = [];
       videos.value = [];
       users.value = [];
+      loading.value = false;
     }
   }, 500);
+
   const fetchPaymentHistory = async () => {
     try {
       const res = await getPaymentHistory();
@@ -211,7 +218,10 @@
 
   const performSearch = () => {
     if (searchData.value.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+      router.push({
+        path: '/search',
+        query: { q: searchData.value.trim() },
+      });
       isSearchPopupOpen.value = false;
     }
   };
@@ -279,6 +289,7 @@
                 to="/following"
                 class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
                 aria-current="page"
+                v-if="userStore.user"
                 >Following</RouterLink
               >
               <RouterLink
@@ -319,10 +330,12 @@
               tabindex="-1"
             >
               <SearchPopup
+                :loading="loading"
                 :categories="categories"
                 :videos="videos"
                 :users="users"
                 :searchData="searchData"
+                @closeAllPopups="closeAllPopups"
               />
             </div>
           </div>
@@ -385,7 +398,7 @@
                       <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                         <RouterLink
                           :to="
-                            !userStore.user?.isLive
+                            !userStore.user?.Channel?.isLive
                               ? '/streaming/stream-setup'
                               : '/streaming/dashboard-live'
                           "
@@ -416,7 +429,7 @@
                 <div
                   class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
                 >
-                  1
+                  4
                 </div>
               </div>
               <div
@@ -452,7 +465,7 @@
               <div
                 v-if="isUserMenuOpen"
                 id="user-menu"
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="user-menu-button"
@@ -557,6 +570,6 @@
 
 <style>
   .p-inputtext {
-    color: #000000 ;
+    color: #000000 !important;
   }
 </style>

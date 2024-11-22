@@ -43,16 +43,19 @@
 
     if (elementType === 'cardNumber' && event.brand) {
       cardBrand.value = event.brand;
+      if (event.brand !== 'visa' && event.brand !== 'mastercard') {
+        errors.value.cardNumber = 'Your card number is incomplete.';
+      }
     }
     isComplete.value = event.complete;
-    // console.log(isComplete.value);
   };
 
   onMounted(async () => {
     stripe.value = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
     elements.value = stripe.value.elements();
-
-    cardNumber.value = elements.value.create('cardNumber');
+    cardNumber.value = elements.value.create('cardNumber', {
+      placeholder: 'Enter your card number',
+    });
     cardNumber.value.mount('#card-number-element');
     cardNumber.value.addEventListener('change', (event) =>
       handleElementChange(event, 'cardNumber'),
@@ -166,8 +169,8 @@
           <div
             class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center"
             :class="{
-              'opacity-50':
-                cardBrand === 'mastercard' || cardBrand === 'unknown' || cardBrand === null,
+              'opacity-100': cardBrand === 'visa',
+              'opacity-50': cardBrand !== 'visa' || cardBrand !== null,
             }"
           >
             <VisaIcon />
@@ -175,7 +178,8 @@
           <div
             class="cursor-pointer border border-[#CCCCCC] rounded-md p-2"
             :class="{
-              'opacity-50': cardBrand === 'visa' || cardBrand === 'unknown' || cardBrand === null,
+              'opacity-100': cardBrand === 'mastercard',
+              'opacity-50': cardBrand !== 'mastercard' || cardBrand !== null,
             }"
           >
             <MasterCardIcon />

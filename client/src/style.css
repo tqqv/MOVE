@@ -1,3 +1,7 @@
+html {
+  overflow-y: scroll;
+}
+
 @layer tailwind-base, primevue, tailwind-utilities;
 
 @layer tailwind-base {

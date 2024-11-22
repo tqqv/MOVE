@@ -6,6 +6,7 @@
   import EmptyPage from '@/pages/EmptyPage.vue';
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     title: {
@@ -29,6 +30,7 @@
   const currentPage = ref(1);
   const totalPage = ref();
   const pageSize = ref(12);
+  const loading = ref(true);
 
   const categoryOptions = computed(() => categoriesStore.categoryOptions);
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
@@ -56,6 +58,7 @@
   // FETCH VIDEO
   const fetchVideos = async () => {
     try {
+      loading.value = true;
       const response = await props.fetchVideosFunction(
         currentPage.value,
         pageSize.value,
@@ -70,6 +73,8 @@
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       console.log(error);
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -131,7 +136,8 @@
         <p>Sort & Filter</p>
       </button>
     </div>
-    <GirdVideo v-if="videos.length > 0" :videos="videos" />
+
+    <GirdVideo :videos="videos" :loading="loading" />
     <Paginator
       v-if="totalPage > 1"
       :rows="pageSize"
@@ -139,7 +145,7 @@
       :totalRecords="totalPage * pageSize"
       @page="onPageChange"
     />
-    <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
+    <div v-if="!videos.length && !loading" class="h-full flex justify-center items-center mt-20">
       <EmptyPage
         title="There are no matching videos"
         subTitle="Try different keywords or remove search filters"

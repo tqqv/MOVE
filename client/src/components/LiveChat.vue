@@ -212,6 +212,8 @@
               class="text-[13px] p-1 rounded hover:bg-gray-light relative"
               :class="{
                 'bg-primary/20 hover:bg-primary/20':
+                  userStore.user?.username &&
+                  userChat.replyTo?.username &&
                   userStore.user?.username === userChat.replyTo?.username,
               }"
               @mouseenter="hoveredIndex = index"
