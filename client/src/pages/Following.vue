@@ -74,21 +74,8 @@
           <span class="font-bold text-[24px]">Lastest videos</span>
         </div>
       </div>
-      <div v-if="isLoading" class="grid gap-4 mt-5 grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-        <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
-          <Skeleton height="200px" />
-          <div class="flex mt-4">
-            <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
-            <div>
-              <Skeleton width="10rem" class="mb-2"></Skeleton>
-              <Skeleton width="5rem" class="mb-2"></Skeleton>
-              <Skeleton height=".5rem"></Skeleton>
-            </div>
-          </div>
-        </div>
-      </div>
-      <GirdVideo :videos="videosFollow" v-if="!isLoading && videosFollow.length > 0" />
-      <div class="mt-3" v-else-if="!isLoading && videosFollow.length === 0">
+      <GirdVideo :videos="videosFollow" :loading="isLoading" />
+      <div class="mt-3" v-if="!isLoading && videosFollow.length === 0">
         <span class="italic">There are no active active videos at the moment.</span>
       </div>
     </div>
@@ -101,25 +88,13 @@
           <span class="font-bold text-[24px]">Categories</span>
         </div>
       </div>
+
       <div
-        class="mt-4 grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
-        v-if="isLoading"
+        class="grid gap-x-12 gap-y-10 pt-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
       >
-        <div v-for="i in 6" :key="i">
-          <Skeleton height="300px" width="100%" />
-          <div class="mt-2">
-            <Skeleton width="10rem" class="mb-2"></Skeleton>
-            <Skeleton width="5rem" class="mb-2"></Skeleton>
-          </div>
-        </div>
+        <CategoryImage :categories="catesFollow" :loading="isLoading" :qualitySkeleton="6" />
       </div>
-      <div
-        class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
-        v-if="catesFollow.length > 0"
-      >
-        <CategoryImage :categories="catesFollow" v-if="!isLoading && catesFollow.length > 0" />
-      </div>
-      <div class="mt-3" v-else-if="!isLoading && catesFollow.length === 0">
+      <div class="mt-3" v-if="!isLoading && catesFollow.length === 0">
         <span class="italic">There are no active categories at the moment.</span>
       </div>
     </div>
