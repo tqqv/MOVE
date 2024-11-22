@@ -133,7 +133,6 @@
                 <div>
                   Visa ending with <span class="font-bold">{{ cardStore.card.cardNumber }}</span>
                 </div>
-                <div class="text-sm text-primary cursor-pointer">Change</div>
               </div>
             </div>
             <span class="text-sm text-primary cursor-pointer">Change payment method</span>
