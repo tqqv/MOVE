@@ -6,6 +6,7 @@
     formatAvgViewTime,
     formatView,
     formatNumber,
+    truncateDescripton,
   } from '@/utils';
   import rate from '@/components/icons/rate.vue';
   import rep from '@/components/icons/rep.vue';
@@ -128,7 +129,9 @@
           <template #body="{ data }">
             <div class="space-y-4">
               <div>
-                <h1 class="font-bold">{{ data.title }}</h1>
+                <h1 :title="data.title" class="font-bold">
+                  {{ truncateDescripton(data.title, 23) }}
+                </h1>
                 <h1 v-if="data.category">{{ data.category.title }}</h1>
               </div>
               <div>{{ formatDatePosted(data.createdAt) }}</div>

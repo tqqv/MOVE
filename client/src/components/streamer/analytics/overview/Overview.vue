@@ -96,7 +96,7 @@
           <div>
             <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
             <span class="text-[16px] font-bold">{{
-              truncateDescripton(latestStream?.title, 45)
+              truncateDescripton(latestStream?.title, 55)
             }}</span>
           </div>
           <div class="space-y-2">
