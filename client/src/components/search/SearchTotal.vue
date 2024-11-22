@@ -26,7 +26,6 @@
   const loadingMore = ref(false);
 
   async function loadMoreData() {
-    console.log(totalPage);
     if (!isFetchingMore.value && query.value && page.value < totalPage.value) {
       isFetchingMore.value = true;
       page.value += 1;
