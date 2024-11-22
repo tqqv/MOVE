@@ -22,6 +22,11 @@
       type: Array,
       required: true,
     },
+    categoryTitle: {
+      type: String,
+      required: true,
+    },
+    isVisibleCategory: Boolean,
   });
 
   const categoriesStore = useCategoriesStore();
@@ -57,7 +62,7 @@
         currentPage.value,
         pageSize.value,
         selectLevelWorkoutOptions.value,
-        selectCategoryOptions.value,
+        selectCategoryOptions.value || props.categoryTitle,
         selectedSortBy.value,
         selectedOrder.value,
       );
@@ -82,7 +87,7 @@
         currentPage.value,
         pageSize.value,
         selectLevelWorkoutOptions.value,
-        selectCategoryOptions.value,
+        selectCategoryOptions.value || props.categoryTitle,
         selectedSortBy.value,
         selectedOrder.value,
       );
@@ -99,7 +104,15 @@
       loadingMore.value = false;
     }
   }
-
+  watch(
+    () => props.categoryTitle,
+    (newCategoryTitle, oldCategoryTitle) => {
+      if (newCategoryTitle !== oldCategoryTitle) {
+        currentPage.value = 1;
+        fetchVideos();
+      }
+    },
+  );
   watch(categoryOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectCategoryOptions.value) {
       selectCategoryOptions.value = newOptions[0].value || '';
@@ -147,6 +160,7 @@
           @change="selectLevelWorkoutOptions = $event.value"
         />
         <Filter
+          v-if="isVisibleCategory"
           title="CATEGORY"
           :options="categoryOptions"
           @change="selectCategoryOptions = $event.title"
