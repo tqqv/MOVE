@@ -138,7 +138,8 @@ const searchVideo = async (data, page, pageSize) => {
       const normalData = data.trim().toLowerCase();
       const videos = await Video.findAndCountAll({
         where: {
-          title: { [Op.like]: `%${normalData}%` }
+          title: { [Op.like]: `%${normalData}%` },
+          status: 'public'
         },
         include: [
           {

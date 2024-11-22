@@ -7,6 +7,7 @@
   import { useLevelWorkoutStore } from '@/stores';
   import Paginator from 'primevue/paginator';
   import NotFoundPage from '@/pages/EmptyPage.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const categoriesStore = useCategoriesStore();
   const levelWorkoutStore = useLevelWorkoutStore();
@@ -35,7 +36,7 @@
   const totalPages = ref(0);
   const page = ref(1);
   const pageSize = 12;
-
+  const loading = ref(true);
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(sortByOptions[0].sortBy);
@@ -65,13 +66,13 @@
         selectLevelWorkoutOptions.value,
         selectCategoryOptions.value,
       );
-
       const fetchedVideos = result.data.data.videos.rows;
-
       videos.value = fetchedVideos;
       totalPages.value = result.data.data.totalPages;
     } catch (error) {
       console.error('Error fetching videos:', error);
+    } finally {
+      loading.value = false;
     }
   };
 
@@ -134,7 +135,8 @@
         />
       </div>
     </div>
-    <div v-if="videos.length > 0">
+
+    <div>
       <GirdVideo
         :totalPages="totalPages"
         :videos="videos"
@@ -142,9 +144,10 @@
         :page="page"
         :pageSize="pageSize"
         @page-change="onPageChange"
+        :loading="loading"
       />
       <Paginator
-        v-if="totalPages > 1"
+        v-if="totalPages > 1 && videos.length > 0"
         :rows="pageSize"
         :first="(page - 1) * pageSize"
         :totalRecords="totalPages * pageSize"
@@ -152,7 +155,7 @@
       />
     </div>
 
-    <div v-else class="h-full flex justify-center items-center mt-20">
+    <div v-if="!videos.length && !loading" class="h-full flex justify-center items-center mt-20">
       <NotFoundPage
         title="There are no matching videos"
         subTitle="Try different keywords or remove search filters"

@@ -10,6 +10,8 @@
   import Warning from './icons/warning.vue';
   import FollowToChat from './chatOnLiveStream/FollowToChat.vue';
   import ReportChat from './chatOnLiveStream/ReportChat.vue';
+  import Reply from './icons/reply.vue';
+  import Chat from './icons/chat.vue';
 
   const props = defineProps({
     isStreamer: Boolean,
@@ -30,15 +32,21 @@
   const showFollowPopup = ref(false);
   const errorMessage = ref('');
   // open report chat
-  const showReportChat = ref(false);
+  const hoveredIndex = ref(false);
   const selectedIndex = ref(null);
+  const replyIndex = ref(null);
+  const chatInputRef = ref(null);
+  // handle reply
+  const replyTo = ref(null);
   const handleOpenLiveChat = () => {
     openLiveChat.value = !openLiveChat.value;
   };
 
   const fetchChat = () => {
     listenChatHistory((chatHistory) => {
+      console.log('Received chat history:', chatHistory);
       chatMessages.value = chatHistory;
+      console.log(chatMessages.value);
     });
   };
 
@@ -53,20 +61,26 @@
 
   const handleSendMessage = () => {
     try {
-      if (!isChannelFollowed.value && props.liveStreamData != userStore.user?.Channel?.id) {
+      if (!isChannelFollowed.value) {
         showFollowPopup.value = true;
         return;
       }
       if (!inputMessage.value.trim()) return;
+      console.log('123');
+
       const messageData = {
         userId: userStore.user.id,
         username: userStore.user.username,
-        avatar: userStore.user.avatar,
+        avatar: userStore.user?.Channel?.avatar || userStore.user.avatar,
+        channelName: userStore.user?.Channel?.channelName || null,
         message: inputMessage.value,
         timestamp: Date.now(),
+        replyTo: replyTo.value || null,
       };
       sendMessage(props.liveStreamData, messageData);
       inputMessage.value = '';
+      replyTo.value = null;
+      replyIndex.value = null;
       const textarea = document.querySelector('textarea');
       textarea.style.height = 'auto';
     } catch (error) {
@@ -98,9 +112,9 @@
 
   // check follow user
   const isChannelFollowed = computed(() => {
-    return userStore.followers.some((channel) =>
-      channel.channelId === props.liveStreamData ? props.liveStreamData.toString() : null,
-    );
+    if (!userStore.followers || !props.liveStreamData) return false;
+    if (props.liveStreamData === userStore.user?.Channel?.id) return true;
+    return userStore.followers.some((channel) => channel.channelId === props.liveStreamData);
   });
 
   const closeLiveToChatPopUp = () => {
@@ -129,10 +143,25 @@
       selectedIndex.value = index;
     }
   };
+  // REPLY CHAT
+  const replyChat = (index, username, channelName, message) => {
+    if (replyIndex.value === index) {
+      replyIndex.value = null;
+      replyTo.value = null;
+    } else {
+      chatInputRef.value?.focus();
+      replyIndex.value = index;
+      replyTo.value = channelName ? { channelName, username, message } : { username, message };
+    }
+  };
 
+  const closeReply = () => {
+    replyIndex.value = null;
+    replyTo.value = null;
+  };
 
-  onMounted(() => {
-    fetchChat();
+  onMounted(async () => {
+    await fetchChat();
     fetchNewChat();
   });
 </script>
@@ -141,7 +170,7 @@
   <div
     v-if="openLiveChat"
     class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
-    :class="isStreamer ? 'h-[650px] rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -172,18 +201,57 @@
         :class="{ 'max-h-[440px]  h-[70px]': isStreamer }"
       >
         <div
-          class="flex flex-col-reverse px-3 py-3 h-full overflow-y-auto overflow-x-hidden scrollbar-custom"
+          class="flex flex-col-reverse px-2 py-3 h-full relative overflow-y-auto overflow-x-hidden scrollbar-custom"
           ref="chatContainerRef"
           @scroll="handleScroll"
         >
-          <div class="flex flex-col gap-y-5">
-            <div v-for="(userChat, index) in chatMessages" :key="index" class="text-[13px]">
+          <div class="flex flex-col gap-y-3">
+            <div
+              v-for="(userChat, index) in chatMessages"
+              :key="index"
+              class="text-[13px] p-1 rounded hover:bg-gray-light relative"
+              :class="{
+                'bg-primary/20 hover:bg-primary/20':
+                  userStore.user?.username &&
+                  userChat.replyTo?.username &&
+                  userStore.user?.username === userChat.replyTo?.username,
+              }"
+              @mouseenter="hoveredIndex = index"
+              @mouseleave="hoveredIndex = null"
+            >
               <ReportChat
                 v-if="selectedIndex === index"
                 :userChat="userChat"
                 :userReportId="userStore.user?.id"
+                :isChannelFollowed="isChannelFollowed"
                 @handleOpenOptionChat="handleOpenOptionChat"
+                @handleReplyChat="replyChat"
               />
+              <div v-if="userChat.replyTo" class="flex gap-x-1 items-center mb-1.5 text-xs px-0.5">
+                <div class="flex-shrink-0">
+                  <Chat />
+                </div>
+                <p class="ml-1 whitespace-nowrap">Replying to</p>
+                <RouterLink :to="`/user/${userChat.replyTo?.username}`" target="_blank" class="">
+                  @{{ userChat.replyTo.channelName || userChat.replyTo.username }}
+                </RouterLink>
+                <p class="truncate">: {{ userChat.replyTo.message }}</p>
+              </div>
+              <div
+                v-if="hoveredIndex === index"
+                :class="[
+                  'absolute right-[-5px] top-[-8px] p-1 flex justify-center items-center border border-gray-dark rounded-md bg-white cursor-pointer z-20',
+                  { 'opacity-50 ': !isChannelFollowed },
+                ]"
+                v-tooltip.left="isChannelFollowed ? 'Reply' : 'You need to follow to reply'"
+                @click="
+                  isChannelFollowed
+                    ? replyChat(index, userChat.username, userChat.channelName, userChat.message)
+                    : null
+                "
+              >
+                <Reply />
+              </div>
               <div class="inline-block mr-1">
                 <div class="flex gap-x-1.5 truncate">
                   <h1 class="text-body">{{ formatTimeChatInLive(userChat.timestamp) }}</h1>
@@ -197,13 +265,13 @@
                       class="font-bold truncate cursor-pointer"
                       @click="handleOpenOptionChat(index)"
                     >
-                      {{ userChat.username }}
+                      {{ userChat.channelName || userChat.username }}
                     </h2>
                     <p class="text-black">:</p>
                   </div>
                 </div>
               </div>
-              <span class="text-black break-words">{{ userChat.message }}</span>
+              <span class="text-black break-words leading-relaxed">{{ userChat.message }}</span>
             </div>
           </div>
         </div>
@@ -245,7 +313,7 @@
         <!-- HIDDEN AFTER FOLLOW -->
         <div v-if="!isStreamer" class="flex justify-start items-center gap-x-3 ml-3">
           <p class="font-bold text-[13px]">Follow to chat</p>
-          <i class="pi pi-question-circle text-[0.8rem]"></i>
+          <i class="pi pi-question-circle text-[0.8rem] mt-0.5"></i>
         </div>
         <form class="flex flex-col mt-3 relative group" @submit.prevent="handleSendMessage">
           <!-- NON FOLLOW CHANNEL -->
@@ -253,8 +321,37 @@
             :showFollowPopup="showFollowPopup"
             :liveStreamData="props.liveStreamData"
             @closeLiveToChatPopUp="closeLiveToChatPopUp"
-            v-if="showFollowPopup && props.liveStreamData != userStore.user?.Channel?.id"
+            v-if="showFollowPopup"
           />
+          <!-- REPLY -->
+          <div
+            class="absolute h-20 w-full p-2 rounded-t-md top-[-74px] bg-white border-gray-dark border border-b-0 z-10"
+            v-if="replyIndex !== null"
+          >
+            <div class="flex flex-col text-black font-semibold">
+              <div class="flex text-sm justify-between">
+                <div class="flex items-center gap-x-2">
+                  <Reply />
+                  <div class="flex gap-x-1">
+                    <p>Replying to</p>
+                    <p>@{{ replyTo.channelName || replyTo.username }}</p>
+                  </div>
+                </div>
+                <div
+                  class="flex justify-center items-end text-black p-1 hover:bg-gray-light rounded-full cursor-pointer"
+                  @click="closeReply"
+                >
+                  <i class="pi pi-times text-sm"></i>
+                </div>
+              </div>
+              <div class="flex text-body text-[11px] px-2 mt-0.5">
+                <div class="text-xs p-1 rounded relative">
+                  <span class="line-clamp-2">{{ replyTo.message }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <!--  ERROR -->
           <div
             class="absolute h-12 w-full rounded-t-md top-[-42px] bg-white border-gray-dark border border-b-0 z-10"
             v-if="errorMessage"
@@ -268,11 +365,11 @@
             class="relative px-2 w-full"
             :class="{
               'px-2 py-1 shadow-md z-20 border border-t-0 border-gray-dark rounded-b-md':
-                (showFollowPopup && props.liveStreamData != userStore.user?.Channel?.id) ||
-                errorMessage,
+                showFollowPopup || errorMessage || replyIndex !== null,
             }"
           >
             <textarea
+              ref="chatInputRef"
               v-model="inputMessage"
               @keydown.enter.exact.prevent="handleSendMessage"
               @keydown.shift.enter.stop

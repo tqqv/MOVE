@@ -22,5 +22,5 @@ export const useStreamerStore = defineStore('streamer', () => {
     }
   };
 
-  return { streamerChannel, fetchProfileChannel };
+  return { loading, streamerChannel, fetchProfileChannel };
 });

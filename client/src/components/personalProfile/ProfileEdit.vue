@@ -14,6 +14,20 @@
   import { updateProfileSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
   import DatePicker from 'primevue/datepicker';
+  import { sendMailVerify } from '@/services/auth';
+  import Skeleton from 'primevue/skeleton';
+  import SmallLoading from '../icons/smallLoading.vue';
+
+  const props = defineProps({
+    isEmailSent: {
+      type: Boolean,
+      required: true,
+    },
+    handleVerifiedEmail: {
+      type: Function,
+      required: true,
+    },
+  });
 
   const userStore = useUserStore();
   const profileData = ref({
@@ -28,12 +42,14 @@
     dob: '',
   });
 
+  const emailVerified = computed(() => userStore?.user?.isVerified);
+
   const initialProfileData = ref({ ...profileData.value });
   const countries = ref([]);
   const states = ref([]);
   const isLoadingAvatar = ref(false);
   const errors = ref({});
-
+  const isLoading = ref(false);
   // VALIDATION
   const validateProfileData = async () => {
     try {
@@ -50,9 +66,18 @@
     }
   };
 
-  // DISABLED EMAIL
-  const handleSetDisabledEmail = () => {};
+  // VERIFY EMAIL
+  const emit = defineEmits(['verifyEmail']);
 
+  const handleEmailVerification = () => {
+    emit('verifyEmail', profileData.value.email);
+  };
+
+  const handleEmailClick = () => {
+    if (!props.isEmailSent) {
+      handleEmailVerification();
+    }
+  };
   // UPDATE GENDER
   function updateSelection(value) {
     profileData.value.gender = value;
@@ -143,6 +168,7 @@
     const changedFields = getChangedFields(profileData.value, initialProfileData.value);
     if (Object.keys(changedFields).length > 0) {
       try {
+        isLoading.value = true;
         const response = await updateProfile(changedFields);
         if (!response.error) {
           initialProfileData.value = { ...profileData.value };
@@ -153,6 +179,9 @@
         }
       } catch (error) {
         toast.error('Failed to update profile');
+      } finally {
+        isLoading.value = false;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     }
   };
@@ -160,6 +189,7 @@
   onMounted(async () => {
     await userStore.fetchUserProfile();
     loadCountries();
+    console.log(emailVerified.value);
 
     if (userStore.user) {
       updateProfileData(userStore.user);
@@ -203,7 +233,9 @@
           >
             <div class="custom-spinner w-8"></div>
           </div>
+          <Skeleton v-if="userStore.loading" shape="circle" size="5rem"></Skeleton>
           <img
+            v-else
             :src="profileData.avatar"
             :alt="profileData.username"
             class="size-20 rounded-full object-cover"
@@ -233,7 +265,12 @@
         <!-- USERNAME -->
         <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Username</label>
-          <div class="relative text-[14px] rounded-lg">
+          <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
+          <div
+            v-else
+            class="relative text-[14px] rounded-lg"
+            :class="errors.username ? 'error_password' : 'normal_password'"
+          >
             <input
               v-model="profileData.username"
               type="text"
@@ -251,31 +288,35 @@
         <!-- EMAIL -->
         <div class="flex flex-col gap-y-2">
           <label for="email" class="text_para">Email</label>
+          <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
           <div
+            v-else
             class="relative text-[14px] rounded-lg"
             :class="errors.email ? 'error_password' : 'normal_password'"
           >
             <input
               v-model="profileData.email"
               type="email"
-              disabled
-              class="password_custom bg-gray-light"
-              :class="{ 'italic text-body ': !profileData.email }"
+              :disabled="emailVerified"
+              class="password_custom"
+              :class="[!emailVerified ? ' ' : 'italic text-body bg-gray-light']"
               required
             />
             <p
-              v-show="!profileData.email"
-              @click="handleSetDisabledEmail"
-              class="absolute text-[13px] right-3 top-2 mt-1 text-primary cursor-pointer"
+              v-show="!emailVerified"
+              @click="handleEmailClick"
+              class="absolute text-[13px] right-3 top-2 mt-1 text-primary cursor-pointer hover:text-primary-light"
             >
-              Setup email
+              {{ isEmailSent ? 'Email verification sent' : 'Verify email' }}
             </p>
           </div>
         </div>
         <!-- FULLNAME -->
         <div class="flex flex-col gap-y-2">
           <label for="username" class="text_para">Full name</label>
+          <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
           <div
+            v-else
             class="relative text-[14px] rounded-lg"
             :class="errors.fullName ? 'error_password' : 'normal_password'"
           >
@@ -284,7 +325,6 @@
               type="text"
               placeholder="Enter full name"
               class="password_custom capitalize"
-              required
               @input="(e) => capitalizeInput(e, 'fullName')"
             />
             <Warning
@@ -308,7 +348,11 @@
           <!-- GENDER -->
           <div class="flex flex-col gap-y-2">
             <label for="gender" class="text_para">Gender</label>
-            <div class="flex gap-x-10">
+            <div v-if="userStore.loading" class="flex items-center gap-x-3">
+              <Skeleton shape="circle" size="2rem"></Skeleton>
+              <Skeleton height="1.8rem" width="5rem"></Skeleton>
+            </div>
+            <div v-else class="flex gap-x-10">
               <CheckboxCustom
                 label="Male"
                 groupName="gender"
@@ -326,18 +370,9 @@
           <!-- DATE OF BIRTH -->
           <div class="flex flex-col gap-y-2 w-full md:w-1/2">
             <label for="gender" class="text_para">Date of birth</label>
-            <!-- <div
-              class="relative text-[14px] rounded-lg"
-              :class="errors.dob ? 'error_password' : 'normal_password'"
-            >
-              <input
-                v-model="profileData.dob"
-                class="password_custom w-full text-[14px]"
-                type="date"
-                name=""
-              />
-            </div> -->
+            <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
             <DatePicker
+              v-else
               v-model="profileData.dob"
               dateFormat="yy-mm-dd"
               :class="{ 'error-border': errors.dob }"
@@ -346,7 +381,8 @@
             <span v-if="errors.dob" class="error_message">{{ errors.dob }}</span>
           </div>
           <!-- COUNTRY VS STATE -->
-          <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
+          <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
+          <div v-else class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
             <div class="flex flex-col gap-y-2 w-full md:w-1/2">
               <label for="gender" class="text_para">Country</label>
               <select
@@ -375,7 +411,9 @@
           <!-- CITY -->
           <div class="flex flex-col w-full md:w-1/2 gap-y-2">
             <label for="city" class="text_para">City</label>
+            <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
             <div
+              v-else
               class="relative text-[14px] rounded-lg"
               :class="errors.city ? 'error_password' : 'normal_password'"
             >
@@ -395,12 +433,12 @@
           </div>
         </div>
       </div>
-      <Button
-        :disabled="!isProfileChanged"
-        type="submit"
-        label="Save settings"
-        class="btn w-full md:w-1/2 mt-8"
-      />
+      <Button :disabled="!isProfileChanged" type="submit" class="btn w-full md:w-1/4 mt-8">
+        <template #default>
+          <SmallLoading v-if="isLoading" fill="white" fill_second="#13d0b4" />
+          <span v-else>Save settings</span>
+        </template></Button
+      >
     </div>
     <ChangePasswordPopup />
     <ChangePasswordSuccessPopup />
@@ -410,6 +448,7 @@
 <style scoped>
   :deep(.p-inputtext) {
     border: 1.6px solid #dee3e9 !important;
+    height: 45px;
   }
   :deep(.p-inputtext:focus) {
     border-color: #13d0b4 !important;

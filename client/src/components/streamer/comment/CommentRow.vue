@@ -80,7 +80,10 @@
 
   // SEND COMMENT
   const handleSendCommentReply = async (newReply) => {
-    newReply.isNew = true;
+    
+    newReply.isNew = true;    
+    newReply.likeCount = newReply.likeCount || 0;
+
     if (openViewAllComment.value) {
       const isExisting = replies.value.some((reply) => reply.id === newReply.id);
       if (!isExisting) {
@@ -119,7 +122,7 @@
     currentPage.value++;
     loadingReplies.value = true;
     try {
-      const response = await getReplyCommentOfVideo(commentId, currentPage.value);
+      const response = await getReplyCommentOfVideo(userStore.user.id, commentId, currentPage.value);
       // CHECK COMMENT EXIST DON'T RENDER AGAIN
       const existingCommentIds = replies.value.map((reply) => reply.id);
       const newComments = response.data.comments.rows.filter(
@@ -133,11 +136,11 @@
       loadingReplies.value = false;
     }
   };
-
   ///REPORT
   const getAllReportTypes = async () => {
     try {
       const response = await axiosInstance.get('report/getListReport?type=videos');
+      
       if (response.status === 200) {
         reportTypeVideos.value = response.data.data;
       }

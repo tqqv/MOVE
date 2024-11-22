@@ -1,6 +1,6 @@
 const { Op, where } = require("sequelize");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize, LevelWorkout } = db;
+const { User, RequestChannel, Channel, Subscribe, Video, CategoryFollow, Category, sequelize, LevelWorkout, Livestream } = db;
 const validateUsername = require("../middlewares/validateUsername.js");
 const { updateStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 
@@ -57,7 +57,7 @@ const editProfile = async (id, data) => {
       }
     }
 
-    if(user.email && user.isVerified) {
+    if(user.email && user.isVerified && data.email) {
       return {
         status: 400,
         data: null,
@@ -66,11 +66,11 @@ const editProfile = async (id, data) => {
     }
 
     if(data.username){
-      if (data.username.length < 3 || data.username.length > 32) {
+      if (data.username.length < 3 || data.username.length > 32 ||  /[A-Z]/.test(data.username)) {
         return {
           status: 400,
           data: null,
-          message: "Must be between 3 and 32 in length."
+          message: "Must be between 3 and 32 in length and cannot contain uppercase letters."
         }
       } else if (!validateUsername(data.username)) {
         return {
@@ -489,6 +489,18 @@ const getAllInforFollow = async(userId) => {
         },
         status: 'public',
       },
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'ratings'
+          ],
+        ],
+      },
       include: [{
         model: Channel,
         as: 'channel',
@@ -498,6 +510,11 @@ const getAllInforFollow = async(userId) => {
         model: LevelWorkout,
         as: 'levelWorkout', 
         attributes: ['levelWorkout'] 
+      },
+      {
+        model: Category,
+        as: 'category', 
+        attributes: ['title'] 
       }],
       limit: 8,
       order: [['createdAt', 'DESC']]
@@ -526,7 +543,54 @@ const getAllInforFollow = async(userId) => {
       order: [['createdAt', 'DESC']]
     });
 
-    if(!videos && !cate) {
+    const liveStreams = await Livestream.findAll({
+      where: {
+        streamerId: {
+          [Op.in]: listChannelId
+        },
+        isLive: 1
+      },
+      attributes: [
+        'streamerId',
+        'categoryId',
+        'title',
+        'thumbnailUrl',
+        'totalView',
+        'createdAt',
+        [sequelize.literal(`(
+          SELECT AVG(rating)
+          FROM ratings
+          WHERE ratings.livestreamId = Livestream.id
+        )`),
+        'ratings']
+      ],
+      include: [
+        {
+          model: LevelWorkout,
+          as: 'livestreamLevelWorkout',
+          attributes: ['levelWorkout']
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: [
+            'title',
+          ]
+        },
+        {
+          model: Channel,
+          as: 'livestreamChannel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }]
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    if(!videos && !cate && !liveStreams) {
       return {
         status: 200,
         data: null,
@@ -534,13 +598,12 @@ const getAllInforFollow = async(userId) => {
       }
     }
 
-    // thieu live stream ...
-
     return {
       status: 200,
       data: {
         categories: cate,
-        videos: videos
+        videos: videos,
+        livestreams: liveStreams,
       },
       message: "Get all infor successfully"
     }

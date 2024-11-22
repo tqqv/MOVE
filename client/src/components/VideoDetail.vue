@@ -12,6 +12,7 @@
   import ReportChannel from './ReportChannel.vue';
   import DonateModal from './DonateModal.vue';
   import GetREPS from './getReps/GetREPS.vue';
+  import Skeleton from 'primevue/skeleton';
   const props = defineProps({
     isUserAction: {
       type: Boolean,
@@ -37,6 +38,11 @@
     hiddenReport: {
       type: Boolean,
       default: false,
+    },
+    isGiftVisivle: Boolean,
+    loading: {
+      type: Boolean,
+      required: true,
     },
   });
 
@@ -123,32 +129,52 @@
 </script>
 
 <template>
-  <div class="block lg:flex items-center space-x-4 mb-3 w-full">
+  <div v-if="props.loading" class="flex justify-between items-center">
+    <div class="flex items-center gap-x-4 px-3">
+      <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+      <div class="flex flex-col gap-y-2">
+        <Skeleton width="20rem" class="mb-2"></Skeleton>
+        <Skeleton width="6rem" class="mb-2"></Skeleton>
+      </div>
+    </div>
+    <Skeleton width="12rem" height="1.4rem"></Skeleton>
+  </div>
+  <div v-else class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
-
       <RouterLink :to="`/user/${usernameDetails}`">
         <div class="relative inline-block">
-        <div
-          :class="[
-            'flex items-center justify-center size-16 rounded-full p-[2px] flex-shrink-0',
-            channelDetails?.isLive ? 'border-[3px] border-red' : 'border-[3px] border-transparent',
-          ]"
-        >
-          <img
-            :src="channelDetails ? channelDetails.avatar : avatarDetails"
-            alt="Avatar"
-            class="w-full h-full rounded-full object-cover"
-          />
-          <Live
+          <div
+            :class="[
+              'flex items-center justify-center size-16 rounded-full p-[2px] flex-shrink-0',
+              channelDetails?.isLive
+                ? 'border-[3px] border-red'
+                : 'border-[3px] border-transparent',
+            ]"
+          >
+            <img
+              :src="channelDetails ? channelDetails.avatar : avatarDetails"
+              alt="Avatar"
+              class="w-full h-full rounded-full object-cover"
+            />
+            <Live
+              v-if="channelDetails?.isLive"
+              class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
+            />
+          </div>
+
+          <RouterLink
             v-if="channelDetails?.isLive"
-            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
-          />
+            :to="`/live/${usernameDetails}`"
+            class="size-16 bg-transparent rounded-full absolute top-0"
+          ></RouterLink>
         </div>
-      </div></RouterLink>
+      </RouterLink>
       <div>
         <p class="text-[20px] flex items-center gap-x-4">
-          <span class="">{{ channelDetails ? channelDetails.channelName : usernameDetails }}</span>
-          <Verified v-if="channelDetails?.popularCheck" class="fill-blue" />
+          <RouterLink :to="`/user/${usernameDetails}`" class="">{{
+            channelDetails ? channelDetails.channelName : usernameDetails
+          }}</RouterLink>
+          <Verified v-if="channelDetails?.popularCheck" class="fill-blue mt-0.5" />
           <span v-if="channelDetails" class="whitespace-nowrap">
             {{ channelDetails.isLive ? 'is now online' : 'is now offline' }}
           </span>
@@ -183,20 +209,20 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="username !== props.usernameDetails"
+          v-if="username !== props.usernameDetails && !isGiftVisivle"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
         </div>
         <DonateModal
-          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isButtonGiftVisible"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           @toggleGetREPsMenu="toggleGetREPsMenu"
           :donationItems="donationItems"
         />
         <GetREPS
-          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isGetREPsMenuOpen"
           @toggleGetREPsMenu="toggleGetREPsMenu"
           @toggleBuyREPs="popupStore.toggleBuyREPs"

@@ -1,11 +1,23 @@
 <script setup>
+  import { ref, watch } from 'vue';
   import { getMostViewOfVideo } from '@/services/browse';
   import VideoListFilter from './VideoListFilter.vue';
+
   const props = defineProps({
     categoryTitle: {
       type: String,
     },
   });
+
+  const currentCategoryTitle = ref(props.categoryTitle);
+
+  watch(
+    () => props.categoryTitle,
+    (newCategoryTitle) => {
+      currentCategoryTitle.value = newCategoryTitle;
+    },
+  );
+
   const sortByOptions = [
     { id: 1, name: 'Most recent' },
     { id: 2, name: 'Views (High to Low)', sortBy: 'viewCount', order: 'desc' },
@@ -16,10 +28,9 @@
     { id: 7, name: 'Ratings (Low to High)', sortBy: 'ratings', order: 'asc' },
   ];
 </script>
-
 <template>
   <VideoListFilter
-    :categoryTitle="categoryTitle"
+    :categoryTitle="currentCategoryTitle"
     :fetchVideosFunction="getMostViewOfVideo"
     :sortByOptions="sortByOptions"
   />

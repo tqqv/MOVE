@@ -19,7 +19,7 @@
       });
 
       if (response.status === 200) {
-        toast.success(response.message);
+        toast.success('Follow successfully');
         isFollowed.value = true;
         userStore.loadFollowers();
         emit('closeLiveToChatPopUp');

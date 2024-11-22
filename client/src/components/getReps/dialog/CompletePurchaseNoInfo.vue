@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted, watch } from 'vue';
+  import { ref, watch, computed } from 'vue';
   import Dialog from 'primevue/dialog';
 
   import Divider from 'primevue/divider';
@@ -8,40 +8,74 @@
   import { usePopupStore, useGetRepsStore, useUserStore } from '@/stores';
   import { useCardStore } from '@/stores/card.store';
   import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
+  import { paymentSchema } from '@/utils/vadilation';
+  import smallLoading from '@/components/icons/smallLoading.vue';
 
   const props = defineProps({
     title: String,
+    isFirstTime: Boolean,
   });
+
+  const currentDate = computed(() => {
+    const date = new Date();
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  });
+
   const popupStore = usePopupStore();
   const getRepsStore = useGetRepsStore();
   const cardStore = useCardStore();
   const userStore = useUserStore();
+  const errors = ref();
+  const isLoandingSubmit = ref(false);
 
   const cardForm = ref(null);
 
   const isCheckMark = ref(false);
+  const emit = defineEmits(['toggleOpenOrder']);
 
   const setupIntentClientSecret = async () => {
     const res = await getClientSecret();
     if (res) {
-      // console.log(res);
       return res.data.data;
     } else {
       console.error('Get Client Secret failed');
       return;
     }
   };
+  const validatePaymentData = async () => {
+    try {
+      await paymentSchema.validate(
+        {
+          cardName: cardForm.value.cardName,
+          country: cardForm.value.country.name,
+        },
+        { abortEarly: false },
+      );
+      errors.value = {};
+      return true;
+    } catch (validationErrors) {
+      const validationResult = {};
+      validationErrors.inner.forEach((error) => {
+        validationResult[error.path] = error.message;
+      });
+      errors.value = validationResult;
 
+      return false;
+    }
+  };
   const handleSaveCard = async () => {
     if (!cardForm.value || !cardForm.value.stripe) {
-      console.error('cardForm or Stripe is undefined');
       return;
     }
 
-    const { cardNumber, cardName, stripe, country } = cardForm.value;
+    const { stripe, elements, cardNumber, cardExpiry, cardCvc, cardName, country, isComplete } =
+      cardForm.value;
 
     const clientSecret = await setupIntentClientSecret();
-    // console.log(clientSecret);
 
     try {
       const confirm = await stripe.confirmCardSetup(clientSecret, {
@@ -62,9 +96,7 @@
 
         if (res && res.status === 200) {
           cardStore.fetchCard();
-          console.log('Card saved successfully.');
         } else {
-          console.log('Insert failed');
         }
       } else {
         console.error('Error: Confirmation failed');
@@ -80,7 +112,7 @@
       return;
     }
 
-    const { cardNumber, cardName, stripe, country } = cardForm.value;
+    const { cardNumber, cardName, stripe, country, isComplete } = cardForm.value;
 
     try {
       const paymentMethod = await stripe.createPaymentMethod({
@@ -89,8 +121,6 @@
         billing_details: { name: cardName },
       });
 
-      console.log('Check payment ne: ', paymentMethod);
-
       return paymentMethod.paymentMethod.id;
     } catch (error) {
       console.error('Error:', error.message);
@@ -98,39 +128,92 @@
   };
 
   const handleCheckout = async (paymentMethodId) => {
-    const dataCheckout = {
-      paymentMethodId: paymentMethodId,
-      repPackageId: getRepsStore.selectedOption.id,
-    };
-    const res = await checkout(dataCheckout);
-    if (res && res.status === 200) {
-      userStore.user.REPs += getRepsStore.selectedOption.rep;
-    } else if (res.status === 201) {
-      // toast.info('Payment has been initiated, please wait.')
-      console.log('Payment has been initiated, please wait.');
-    } else {
-      // toast.error("Payment failed!")
-      console.log('Payment failed!');
+    try {
+      // Thiết lập data cho checkout
+      const dataCheckout = {
+        paymentMethodId: paymentMethodId,
+        repPackageId: getRepsStore.selectedOption?.id,
+      };
+
+      //  hiển thị popup loading
+      popupStore.showLoadingPayment = true;
+      popupStore.showOpenBuyREPs = false;
+      //cancel
+      if (popupStore.isCancelPayment) return;
+      const res = await checkout(dataCheckout);
+
+      // Kiểm tra kết quả trả về từ API
+      if (res && res.status === 200) {
+        userStore.user.REPs += getRepsStore.selectedOption?.rep;
+        // console.log('Payment successful.');
+        emit('toggleOpenOrder'); // Hiện popup "Order Success"
+        popupStore.isOrderSuccessful = true;
+      } else if (res.status === 201) {
+        // console.log('Payment has been initiated, please wait.');
+        emit('toggleOpenOrder'); // Hiện popup "Order Pending"
+      } else {
+        // console.log('Payment failed!');
+        emit('toggleOpenOrder'); // Hiện popup "Payment Failed"
+        popupStore.isOrderSuccessful = false;
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error.message);
+      emit('toggleOpenOrder');
+    } finally {
+      popupStore.showLoadingPayment = false;
     }
   };
 
   const toggleLoadPayment = async () => {
+    isLoandingSubmit.value = true;
+
+    const isValid = await validatePaymentData();
+    const { cardNumber, cardName, stripe, country, isComplete } = cardForm.value;
+
     if (isCheckMark.value) {
+      if (!isComplete || !isValid) {
+        isLoandingSubmit.value = false;
+
+        return;
+      }
       await handleSaveCard();
-      await handleCheckout(cardStore.card.paymentMethodId);
+      await cardStore.fetchCard();
+
+      if (!cardStore.card?.paymentMethodId) {
+        console.error('paymentMethodId not found after saving card.');
+        isLoandingSubmit.value = false;
+
+        return;
+      }
+      await handleCheckout(cardStore.card?.paymentMethodId);
     } else {
       const paymentMethodId = await handleUseCardOneTime();
+
+      if (!isComplete || !isValid) {
+        isLoandingSubmit.value = false;
+
+        return;
+      }
       await handleCheckout(paymentMethodId);
     }
 
-    popupStore.showLoadingPayment = !popupStore.showLoadingPayment;
+    // Đảm bảo ẩn popup loading sau khi thanh toán
+    popupStore.showLoadingPayment = false;
     popupStore.showOpenBuyREPs = false;
   };
+
   const toggleBuyREPs = () => {
     popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
-
     getRepsStore.clearSelectedOption();
+    errors.value = '';
   };
+  watch(
+    () => cardStore.card,
+    (newCard) => {
+      if (!newCard) {
+      }
+    },
+  );
 </script>
 
 <template>
@@ -144,26 +227,28 @@
       @hide="unlockScroll"
       @update:visible="toggleBuyREPs"
       :style="{ width: '40rem' }"
-      :dismissableMask="true"
     >
       <div class="space-y-4">
         <div class="text-base text-[#666666] font-bold">Order Summary</div>
         <div class="flex justify-between">
-          <div class="font-bold text-base">{{ getRepsStore.selectedOption.rep }} REP$</div>
-          <div class="text-base">US${{ getRepsStore.selectedOption.amount }}</div>
+          <div class="font-bold text-base">{{ getRepsStore.selectedOption?.rep }} REP$</div>
+          <div class="text-base">US${{ getRepsStore.selectedOption?.amount }}</div>
         </div>
       </div>
-      <div class="text-sm text-[#777777]">One-time charge on 20 Jul 2020.</div>
+      <div v-if="isFirstTime" class="text-sm text-[#777777]">
+        One-time charge on {{ currentDate }}.
+      </div>
       <Divider />
       <div class="flex gap-x-6 justify-end">
         <div>Total</div>
-        <div class="text-base font-bold">US${{ getRepsStore.selectedOption.amount }}</div>
+        <div class="text-base font-bold">US${{ getRepsStore.selectedOption?.amount }}</div>
       </div>
 
       <div class="space-y-4">
         <div class="text-base text-[#666666] font-bold">Payment Details</div>
 
-        <FormCardPayment ref="cardForm" />
+        <FormCardPayment ref="cardForm" :errors="errors" />
+
         <div class="text-xs">
           <span class="text-[#777777]">
             By submitting payment information you acknowledge that you have read, understood and
@@ -180,7 +265,10 @@
           @update:modelValue="(value) => (isCheckMark = value)"
         />
         <div class="flex justify-center mt-4">
-          <button @click="toggleLoadPayment" class="btn w-1/3">Submit</button>
+          <button @click="toggleLoadPayment" class="btn w-1/3">
+            <smallLoading v-if="isLoandingSubmit" fill="white" fill_second="#13d0b4" />
+            <span v-else>Submit</span>
+          </button>
         </div>
       </div>
     </Dialog>

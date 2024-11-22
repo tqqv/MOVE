@@ -15,6 +15,7 @@
     class: {
       type: [Array, String],
     },
+    optionLabel: { type: String, default: 'name' },
   });
   const selectedOption = ref(null);
   watch(selectedOption, (newValue) => {
@@ -22,8 +23,17 @@
       emit('change', newValue);
     }
   });
+  watch(
+    () => props.options,
+    (newOptions) => {
+      if (newOptions && newOptions.length > 0) {
+        selectedOption.value = newOptions[0];
+      }
+    },
+  );
+
   onMounted(() => {
-    if (props.options.length > 0) {
+    if (props.options && props.options.length > 0) {
       selectedOption.value = props.options[0];
     }
   });
@@ -37,7 +47,7 @@
     <Dropdown
       v-model="selectedOption"
       :options="props.options"
-      optionLabel="name"
+      :optionLabel="optionLabel"
       class="w-[150px] border-primary custom-dropdown text-xs"
       :class="class"
     ></Dropdown>

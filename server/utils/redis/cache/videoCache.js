@@ -1,5 +1,5 @@
 const { renewTopVideos } = require("../../../services/videoService");
-const { set } = require("../base/redisBaseService");
+const { set, remove } = require("../base/redisBaseService");
 const _redis = require("../config");
 const cron = require('node-cron');
 
@@ -17,7 +17,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         const stop = start + limit - 1;
 
         // Generate cache key for the filtered result
-        const cacheKey = `temp:filtered:${category || 'all'}:${level || 'all'}:${sortBy}:${sortDirection}`;
+        const cacheKey = `topvideo:temp:filtered:${category || 'all'}:${level || 'all'}:${sortBy}:${sortDirection}`;
 
         // Check if we have cached results
         const cachedResult = await _redis.exists(cacheKey);
@@ -27,10 +27,18 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                 : await _redis.zrange(cacheKey, start, stop);
 
             if (!videoIds.length) {
-                return { status: 200, data: [] };
+                return {
+                    status: 200,
+                    data: {
+                        "listVideo": {
+                            "count": 0,
+                            "rows": []
+                        }
+                    }
+                };
             }
 
-            const videos = await _redis.hmget('video:details', videoIds);
+            const videos = await _redis.hmget('topvideo:details', videoIds);
             const total = await _redis.zcard(cacheKey); // Total count of filtered videos
 
             return {
@@ -39,14 +47,9 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                     "listVideo": {
                         "count": total,
                         "rows": videos.map(v => v && JSON.parse(v)).filter(Boolean)
-                    }
-                },
-                pagination: {
-                    total,
-                    page,
-                    limit,
+                    },
                     totalPages: Math.ceil(total / limit)
-                }
+                },
             };
         }
 
@@ -54,34 +57,43 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         let filterKeys = [];
 
         if (category) {
-            filterKeys.push(`video:cate:${category.toLowerCase()}`);
+            filterKeys.push(`topvideo:cate:${category.toLowerCase()}`);
         }
         if (level) {
-            filterKeys.push(`video:level:${level.toLowerCase()}`);
+            filterKeys.push(`topvideo:level:${level.toLowerCase()}`);
         }
 
         // If we have multiple filters, we need to find the intersection
         let filteredIds;
         if (filterKeys.length > 1) {
-            const tempKey = `temp:${Date.now()}:filter`;
-            await _redis.sinterstore(tempKey, ...filterKeys);
-            filteredIds = await _redis.smembers(tempKey);
-            await _redis.del(tempKey);
+            await _redis.sinterstore(cacheKey, ...filterKeys);
+            filteredIds = await _redis.smembers(cacheKey);
         } else if (filterKeys.length === 1) {
             filteredIds = await _redis.smembers(filterKeys[0]);
         }
 
         // If we have filters but no results, return empty
         if (filterKeys.length > 0 && (!filteredIds || !filteredIds.length)) {
-            return { status: 200, data: [] };
+            return {
+                    status: 200,
+                    data: {
+                        "listVideo": {
+                            "count": 0,
+                            "rows": []
+                        }
+                    }
+            };
         }
 
         // Sort the results using the appropriate sorted set
-        const sortedSetKey = `video:by_${sortBy}`;
+        const sortedSetKey = `topvideo:by_${sortBy}`;
 
         if (filteredIds) {
+            const tempFilterKey = `temp:filter:${Date.now()}`;
+            await _redis.sadd(tempFilterKey, ...filteredIds);
             // If we have filters, we need to create a temporary sorted set with only our filtered IDs
-            await _redis.zinterstore(cacheKey, 2, sortedSetKey, filterKeys[0], 'WEIGHTS', 1, 0);
+            await _redis.zinterstore(cacheKey, 2, sortedSetKey, tempFilterKey, 'WEIGHTS', 1, 0);
+            await _redis.del(tempFilterKey);
         } else {
             // If no filters, we can just copy the entire sorted set
             await _redis.zunionstore(cacheKey, 1, sortedSetKey);
@@ -100,7 +112,7 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
         }
 
         // Get video details
-        const videos = await _redis.hmget('video:details', videoIds);
+        const videos = await _redis.hmget('topvideo:details', videoIds);
 
         // Calculate total results for pagination
         const total = await _redis.zcard(cacheKey); // Total count of filtered videos
@@ -111,14 +123,9 @@ const getFilteredSortedTopVideos = async (criteria, sortBy, page = 1, limit = 10
                 "listVideo": {
                     "count": total,
                     "rows": videos.map(v => v && JSON.parse(v)).filter(Boolean)
-                }
-            },
-            pagination: {
-                total,
-                page,
-                limit,
+                },
                 totalPages: Math.ceil(total / limit)
-            }
+            },
         };
 
     } catch (error) {
@@ -179,16 +186,17 @@ cron.schedule('*/30000 * * * *', async () => {
         console.log('Cron job started to renew top videos...');
         let result;
         try {
-            result = await renewTopVideos();
-          } catch (error) {
-            console.error('Error in cron job execution:', error);
-          }
+        result = await renewTopVideos();
+        } catch (error) {
+        console.error('Error in cron job execution:', error);
+        }
 
-        let videoHashMapDetails = await createHashmapFromDBData(result.data);
         if (result.status !== 200 || !result.data) {
             console.log('No top videos fetched.');
             return;
         }
+
+        let videoHashMapDetails = await createHashmapFromDBData(result.data);
         // const pipeline = _redis.pipeline();
         const categorySets = {};
         const levelSets = {};
@@ -230,8 +238,14 @@ cron.schedule('*/30000 * * * *', async () => {
             sortedSets.score.set(cleanedVideoId, parseFloat(score) || 0);
             sortedSets.viewCount.set(cleanedVideoId, parseInt(viewCount) || 0);
             sortedSets.duration.set(cleanedVideoId, parseInt(duration) || 0);
-            sortedSets.ratings.set(cleanedVideoId, parseInt(ratings) || 0);
+            sortedSets.ratings.set(cleanedVideoId, parseFloat(ratings) || 0);
         });
+
+        // renew redis sorted filter
+        const keys = await _redis.keys('topvideo:*');
+        if (keys.length > 0) {
+            await _redis.unlink(...keys);
+        }
 
         // Save to Redis
         const pipeline = _redis.pipeline();
@@ -239,21 +253,21 @@ cron.schedule('*/30000 * * * *', async () => {
         // Save category sets
         Object.entries(categorySets).forEach(([category, videoIds]) => {
             if (videoIds.size > 0) {
-                pipeline.sadd(`video:cate:${category}`, ...Array.from(videoIds));
+                pipeline.sadd(`topvideo:cate:${category}`, ...Array.from(videoIds));
             }
         });
 
         // Save level sets
         Object.entries(levelSets).forEach(([level, videoIds]) => {
             if (videoIds.size > 0) {
-                pipeline.sadd(`video:level:${level}`, ...Array.from(videoIds));
+                pipeline.sadd(`topvideo:level:${level}`, ...Array.from(videoIds));
             }
         });
 
         // Save sorted sets
         Object.entries(sortedSets).forEach(([field, valueMap]) => {
             if (valueMap.size > 0) {
-                const key = `video:by_${field}`;
+                const key = `topvideo:by_${field}`;
                 const entries = Array.from(valueMap.entries()).flatMap(
                     ([id, score]) => [score, id]
                 );
@@ -271,7 +285,8 @@ cron.schedule('*/30000 * * * *', async () => {
             return acc;
         }, {});
 
-        pipeline.hset('video:details', videoDetails);
+        await remove('topvideo:details');
+        pipeline.hset('topvideo:details', videoDetails);
 
         await pipeline.exec();
         console.log('Top videos updated and cached in Redis successfully.');

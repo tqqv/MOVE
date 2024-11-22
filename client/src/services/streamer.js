@@ -36,11 +36,19 @@ const changeStreamKey = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
+const getOverviewAnalytic = async () => {
+  try {
+    const response = await axios.get('/channel/overview');
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   getProfileChannel,
   updateChannelProfile,
   getListFollowOfChannel,
   getViewChannel,
   changeStreamKey,
+  getOverviewAnalytic,
 };

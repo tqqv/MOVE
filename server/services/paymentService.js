@@ -1,6 +1,7 @@
+const { Op, fn, literal, col } = require("sequelize");
 const db = require("../models/index.js");
 const { createStripeCustomerId, createStripeSetupIntent, retrievePaymentMethod, createStripePaymentIntent, detachPaymentMethod } = require("./stripeService.js");
-const { PaymentCardInfor, User, RepPackage, Payment } = db;
+const { PaymentCardInfor, User, RepPackage, Payment, sequelize } = db;
 
 const createSetupIntent = async (userId) => {
   try {
@@ -32,22 +33,43 @@ const createSetupIntent = async (userId) => {
 
 const createCardInfor = async(userId, cardName, paymentMethodId, country) => {
   try {
-    const paymentMethod = await retrievePaymentMethod(paymentMethodId)
+    if(!cardName || !paymentMethodId || !country){
+      return{
+        status: 400,
+        message: 'Not null.'
+      }
+    }
 
-    await PaymentCardInfor.create({
-      userId: userId,
-      cardNumber: paymentMethod.card.last4,
-      cardOwnerName: cardName,
-      cardType: paymentMethod.card.brand,
-      paymentMethodId: paymentMethodId,
-      expirationDate: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
-      country: country,
+    const user = await User.findOne({
+      where: {
+        id: userId
+      }
     })
 
-    return{
-      status: 200,
-      message: 'Card information created successfully.'
+    const paymentMethod = await retrievePaymentMethod(paymentMethodId)
+
+    if(paymentMethod.customer === user.stripeCustomerId){
+      await PaymentCardInfor.create({
+        userId: userId,
+        cardNumber: paymentMethod.card.last4,
+        cardOwnerName: cardName,
+        cardType: paymentMethod.card.brand,
+        paymentMethodId: paymentMethodId,
+        expirationDate: paymentMethod.card.exp_month + "/" + paymentMethod.card.exp_year,
+        country: country,
+      })
+
+      return{
+        status: 200,
+        message: 'Card information created successfully.'
+      }
+    }else {
+      return{
+        status: 400,
+        message: 'This card no attach to customer Stripe of user'
+      }
     }
+
   } catch (error) {
     return {
       status: 500,
@@ -177,10 +199,72 @@ const deleteCardInfo = async(userId, paymentMethodId) => {
   }
 }
 
+const getPaymentHistory = async(userId, page, pageSize, startDate, endDate) => {
+  try {
+    const whereCondition = { userId };
+
+
+    console.log(startDate, endDate);
+
+
+    if (startDate && endDate) {
+      if (!endDate.includes(' ') && !startDate.includes(' ')) {
+        endDate = `${endDate} 23:59:59`;
+        startDate = `${startDate} 00:00:00`;
+      }
+      whereCondition.createdAt = {
+          [Op.between]: [startDate, endDate]
+      };
+    }
+
+    const list = await Payment.findAll({
+        where: whereCondition,
+        attributes: [
+            'repPackageId',
+            'rep',
+            [fn('DATE', col('createdAt')), 'created_date'],
+            [fn('COUNT', '*'), 'count']
+        ],
+        group: ['repPackageId', literal('DATE(createdAt)'), 'rep'],
+        offset: (page - 1) * pageSize *1,
+        limit: pageSize*1
+    });
+
+    const count = await Payment.count({
+      where: whereCondition,
+        attributes: [
+            'repPackageId',
+            'rep',
+            [fn('COUNT', '*'), 'count']
+        ],
+        group: ['repPackageId', literal('DATE(createdAt)'), 'rep'],
+    })
+
+    return {
+      status: 200,
+      data: {
+        list,
+        count: count.length,
+        totalPages: Math.ceil(list.length/pageSize)
+      },
+      message: "Card removed successfully"
+    }
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createPayment,
   getCardInfoByUserId,
   createCardInfor,
   createSetupIntent,
   deleteCardInfo,
+  getPaymentHistory
 }

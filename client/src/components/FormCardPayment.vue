@@ -4,11 +4,14 @@
   import MasterCardIcon from '@components/icons/mastercard.vue';
   import { useContryStore } from '@/stores';
   import { loadStripe } from '@stripe/stripe-js';
+  import { paymentSchema } from '@/utils/vadilation';
 
   const props = defineProps({
     isPaymentDetailsVisible: Boolean,
     title: String,
+    errors: Object,
   });
+
   const countryStore = useContryStore();
   const stripe = ref(null);
   const elements = ref(null);
@@ -17,45 +20,57 @@
   const cardCvc = ref(null);
   const cardName = ref('');
   const country = ref('');
+  const cardBrand = ref(null);
+  const isComplete = ref(false);
+  const errors = ref({
+    cardNumber: '',
+    cardExpiry: '',
+    cardCvc: '',
+    cardName: props.errors?.cardName || '',
+    country: props.errors?.country || '',
+  });
+  watch(
+    () => props.errors,
+    (newErrors) => {
+      errors.value.cardName = newErrors?.cardName || '';
+      errors.value.country = newErrors?.country || '';
+    },
+    { immediate: true },
+  );
 
+  const handleElementChange = (event, elementType) => {
+    errors.value[elementType] = event.error ? event.error.message : '';
 
-  // const handleElementChange = (event, elementType) => {
-  //   // errors[elementType] = event.error ? event.error.message : ''
-  //   console.log('lewlewlelw');
-  //   console.log(event);
-
-  //   // if (elementType === 'cardNumber' && event.brand) {
-  //   //   cardBrand.value = event.brand
-
-  //   // }
-
-  //   // Kiểm tra tất cả các trường đã hoàn thành
-  //   const elements = props.elements
-  //   isComplete.value = [
-  //     elements.getElement('cardNumber'),
-  //     elements.getElement('cardExpiry'),
-  //     elements.getElement('cardCvc')
-  //   ].every(element => element._complete) && formData.cardholderName && formData.country
-  // }
+    if (elementType === 'cardNumber' && event.brand) {
+      cardBrand.value = event.brand;
+      if (event.brand !== 'visa' && event.brand !== 'mastercard') {
+        errors.value.cardNumber = 'Your card number is incomplete.';
+      }
+    }
+    isComplete.value = event.complete;
+  };
 
   onMounted(async () => {
     stripe.value = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
     elements.value = stripe.value.elements();
-    cardNumber.value = elements.value.create('cardNumber');
-
+    cardNumber.value = elements.value.create('cardNumber', {
+      placeholder: 'Enter your card number',
+    });
     cardNumber.value.mount('#card-number-element');
+    cardNumber.value.addEventListener('change', (event) =>
+      handleElementChange(event, 'cardNumber'),
+    );
 
     cardExpiry.value = elements.value.create('cardExpiry');
     cardExpiry.value.mount('#card-expiry-element');
+    cardExpiry.value.addEventListener('change', (event) =>
+      handleElementChange(event, 'cardExpiry'),
+    );
 
     cardCvc.value = elements.value.create('cardCvc');
     cardCvc.value.mount('#card-cvc-element');
-
-    // cardNumber.value.addEventListener('change', (e) => handleElementChange(e, 'cardNumber'));
-    // cardExpiry.on('change', (e) => handleElementChange(e, 'cardExpiry'))
-    // cardCvc.on('change', (e) => handleElementChange(e, 'cardCvc'))
+    cardCvc.value.addEventListener('change', (event) => handleElementChange(event, 'cardCvc'));
   });
-
 
   // expose các element và cardName để có thể truy cập từ component cha
   defineExpose({
@@ -65,110 +80,151 @@
     cardExpiry,
     cardCvc,
     cardName,
-    country
+    country,
+    isComplete,
   });
+
+  const validateField = async (field) => {
+    try {
+      if (field === 'cardName' && !cardName.value) return;
+      if (field === 'country' && !country.value?.name) return;
+      if (field === 'cardName') {
+        await paymentSchema.validateAt('cardName', { cardName: cardName.value });
+        errors.value.cardName = '';
+      } else if (field === 'country') {
+        await paymentSchema.validateAt('country', { country: country.value.name });
+        errors.value.country = '';
+      }
+    } catch (validationError) {
+      if (field === 'cardName') {
+        errors.value.cardName = validationError.message;
+      } else if (field === 'country') {
+        errors.value.country = validationError.message;
+      }
+    }
+  };
 </script>
 
 <template>
-  <form @submit.prevent="handleUpdate">
-    <div class="flex flex-col md:flex-row gap-y-4 md:gap-x-3">
-      <div class="flex flex-col gap-y-2 w-full md:w-1/2">
-        <!-- Cardholder Name -->
+  <form @submit.prevent="handleSubmit">
+    <div class="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-3">
+      <!-- Row 1: Cardholder Name and Country -->
+      <div class="flex flex-col gap-y-2">
         <div class="flex flex-col">
-          <label for="username" class="text_para">Cardholder Name</label>
-          <div class="relative text-[14px] rounded-lg normal_password flex-1">
+          <label for="cardName" class="text_para">Cardholder Name</label>
+          <div
+            class="relative text-[14px] rounded-lg flex-1"
+            :class="errors.cardName ? 'error_password' : 'normal_password'"
+          >
             <input
               type="text"
               required
               class="password_custom h-full"
               v-model="cardName"
+              placeholder="Enter your card name"
+              @blur="validateField('cardName')"
             />
           </div>
-        </div>
-        <!-- Card Number -->
-        <div class="flex flex-col">
-          <label for="cardNumber" class="text_para">Card Number</label>
-          <div id="card-number-element" class="card-element relative text-[14px] rounded-lg flex-1">
-            <!-- <input
-              type="text"
-              required
-              class="password_custom h-full"
-              @input="(e) => capitalizeInput(e, 'cardNumber')"
-            /> -->
-          </div>
-        </div>
-        <!-- Expiration date -->
-        <div class="flex flex-col w-1/3">
-          <label for="expirationDate" class="text_para whitespace-nowrap">Expiration date</label>
-          <div id="card-expiry-element" class="card-element relative text-[14px] rounded-lg normal_password flex-1">
-            <!-- <input
-              id="expirationDate"
-              type="text"
-              maxlength="5"
-              required
-              class="password_custom h-full"
-              @input="formatExpirationDate"
-              placeholder="MM/YY"
-            /> -->
-          </div>
+          <span v-if="errors.cardName" class="error_message">{{ errors.cardName }}</span>
         </div>
       </div>
 
-      <div class="flex flex-col gap-y-2 w-full md:w-1/2">
-        <!-- Country -->
-        <div>
+      <div class="flex flex-col gap-y-2">
+        <div class="flex flex-col">
           <label for="country" class="text_para">Country</label>
-          <select v-model="country" id="country" class="select_custom">
-            <option v-if="!country" disabled value="null">Select country</option>
-            <option v-else selected>{{ country.name }}</option>
+          <select
+            :class="errors.country ? 'select_custom_error' : 'select_custom'"
+            v-model="country"
+            id="country"
+            @blur="validateField('country')"
+          >
+            <option v-if="!country" disabled value="">Select country</option>
+            <option v-else :selected="country">
+              {{ country.name }}
+            </option>
             <option v-for="country in countryStore.countries" :key="country.code" :value="country">
               {{ country.name }}
             </option>
           </select>
+          <span v-if="errors.country" class="error_message">{{ errors.country }}</span>
         </div>
-        <!-- Card Type -->
-        <div>
-          <label class="text_para">Card Type</label>
-          <div class="flex gap-x-4 pt-2">
-            <div
-              class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center opacity-50"
-            >
-              <VisaIcon />
-            </div>
-            <div class="cursor-pointer border border-[#CCCCCC] rounded-md p-2">
-              <MasterCardIcon />
-            </div>
-          </div>
-        </div>
-        <!-- CVV -->
+      </div>
 
-        <div class="flex flex-col w-1/3">
-          <label for="cardNumber" class="text_para whitespace-nowrap"
-            >CVV2/CVC2 <i class="pi pi-question-circle text-sm" />
-          </label>
-          <div id="card-cvc-element" class="card-element relative text-[14px] rounded-lg normal_password flex-1">
-            <!-- <input
-              type="text"
-              required
-              class="password_custom h-full"
-              @input="(e) => capitalizeInput(e, 'cardNumber')"
-            /> -->
+      <!-- Row 2: Card Number and Card Type -->
+      <div class="flex flex-col">
+        <div class="flex flex-col">
+          <label for="cardNumber" class="text_para">Card Number</label>
+          <div
+            id="card-number-element"
+            class="card-element relative text-[14px] rounded-lg flex-1"
+            :class="errors.cardNumber ? 'error_password' : 'normal_password'"
+          ></div>
+          <p v-if="errors.cardNumber" class="error_message">{{ errors.cardNumber }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col">
+        <label class="text_para">Card Type</label>
+        <div class="flex gap-x-4 pt-2">
+          <div
+            class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center"
+            :class="{
+              'opacity-100': cardBrand === 'visa',
+              'opacity-50': cardBrand !== 'visa' || cardBrand !== null,
+            }"
+          >
+            <VisaIcon />
+          </div>
+          <div
+            class="cursor-pointer border border-[#CCCCCC] rounded-md p-2"
+            :class="{
+              'opacity-100': cardBrand === 'mastercard',
+              'opacity-50': cardBrand !== 'mastercard' || cardBrand !== null,
+            }"
+          >
+            <MasterCardIcon />
           </div>
         </div>
+      </div>
+
+      <!-- Row 3: Expiration Date and CVV2/CVC2 -->
+      <div class="flex flex-col">
+        <div class="flex flex-col">
+          <label for="cardExpiry" class="text_para whitespace-nowrap">Expiration date</label>
+          <div
+            id="card-expiry-element"
+            class="card-element relative text-[14px] rounded-lg flex-1 w-1/3"
+            :class="errors.cardExpiry ? 'error_password' : 'normal_password'"
+          ></div>
+          <p v-if="errors.cardExpiry" class="error_message">{{ errors.cardExpiry }}</p>
+        </div>
+      </div>
+
+      <div class="flex flex-col">
+        <label for="cardCvc" class="text_para whitespace-nowrap">CVV2/CVC2</label>
+        <div
+          id="card-cvc-element"
+          class="card-element relative text-[14px] rounded-lg flex-1 w-1/3"
+          :class="errors.cardCvc ? 'error_password' : 'normal_password'"
+        ></div>
+        <p v-if="errors.cardCvc" class="error_message">{{ errors.cardCvc }}</p>
       </div>
     </div>
   </form>
 </template>
 
 <style scoped>
-.card-element {
-  border-radius: 8px;
-  padding: 12px 8px;
-  border: 1px solid #ccc;
-  transition: border-color 0.3s ease;
-}
+  .card-element {
+    border-radius: 8px;
+    padding: 12px 8px;
+    border: 1px solid #ccc;
+    transition: border-color 0.3s ease;
+  }
 
-.card-element:focus-within {
-  border-color: var(--border-primary, #3b82f6);
-}
+  .card-element:focus-within {
+    border-color: var(--border-primary, #3b82f6);
+  }
+  input::placeholder {
+    color: #626875;
+  }
 </style>

@@ -6,20 +6,31 @@
   import MasterCardIcon from '@components/icons/mastercard.vue';
   import Divider from 'primevue/divider';
   import { usePopupStore, useGetRepsStore, useUserStore } from '@/stores';
-import { useCardStore } from '@/stores/card.store';
-import { checkout } from '@/services/payment';
-import { toast } from 'vue3-toastify';
+  import { useCardStore } from '@/stores/card.store';
+  import { checkout } from '@/services/payment';
+  import { toast } from 'vue3-toastify';
+  import { computed } from 'vue';
 
   const props = defineProps({
     title: String,
+    isFirstTime: Boolean,
   });
+
+  const currentDate = computed(() => {
+    const date = new Date();
+    return date.toLocaleDateString('en-GB', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    });
+  });
+
   const popupStore = usePopupStore();
   const getRepsStore = useGetRepsStore();
   const cardStore = useCardStore();
   const userStore = useUserStore();
 
-
-  const emit = defineEmits(['toggleGetREPsMenu', 'toggleLoadPayment']);
+  const emit = defineEmits(['toggleGetREPsMenu', 'toggleLoadPayment', 'toggleOpenOrder']);
   const chooseCard = ref(false);
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');
@@ -29,30 +40,49 @@ import { toast } from 'vue3-toastify';
 
     getRepsStore.clearSelectedOption();
   };
+  const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const handleCheckout = async () => {
-    const dataCheckout = {
-      paymentMethodId: cardStore.card.paymentMethodId,
-      repPackageId: getRepsStore.selectedOption.id,
+  const handleCheckout = async (paymentMethodId) => {
+    try {
+      const dataCheckout = {
+        paymentMethodId: paymentMethodId,
+        repPackageId: getRepsStore.selectedOption.id,
+      };
+
+      popupStore.showLoadingPayment = true;
+      popupStore.showOpenBuyREPs = false;
+      await sleep(3000);
+      //cancel
+      if (popupStore.isCancelPayment) return;
+      // Thực hiện checkout
+      const res = await checkout(dataCheckout);
+
+      // Kiểm tra kết quả trả về từ API
+      if (res && res.status === 200) {
+        userStore.user.REPs += getRepsStore.selectedOption.rep;
+        // console.log('Payment successful.');
+        emit('toggleOpenOrder'); // Hiện popup "Order Success"
+        popupStore.isOrderSuccessful = true;
+      } else if (res.status === 201) {
+        // console.log('Payment has been initiated, please wait.');
+        emit('toggleOpenOrder'); // Hiện popup "Order Pending"
+      } else {
+        // console.log('Payment failed!');
+        emit('toggleOpenOrder'); // Hiện popup "Payment Failed"
+
+        popupStore.isOrderSuccessful = false;
+      }
+    } catch (error) {
+      console.error('Error during checkout:', error.message);
+      // Nếu có lỗi, hiển thị popup lỗi
+      emit('toggleOpenOrder');
+    } finally {
+      popupStore.showLoadingPayment = false;
     }
-    const res = await checkout(dataCheckout)
-    if (res && res.status === 200) {
-      userStore.user.REPs += getRepsStore.selectedOption.rep;
-      // toast.success('Payment successful.') // Payment has been initiated, please wait
-    } else if(res.status === 201) {
-      // toast.info('Payment has been initiated, please wait.')
-      console.log('Payment has been initiated, please wait.');
-    } else {
-      // toast.error("Payment failed!")
-      console.log('Payment failed!');
-    }
+  };
 
-  }
-
-  const toggleLoadPayment = async() => {
-    await handleCheckout()
-    popupStore.showLoadingPayment = !popupStore.showLoadingPayment;
-    popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
+  const toggleLoadPayment = async () => {
+    await handleCheckout(cardStore.card.paymentMethodId);
   };
 </script>
 
@@ -67,7 +97,6 @@ import { toast } from 'vue3-toastify';
       @hide="unlockScroll"
       @update:visible="toggleBuyREPs"
       :style="{ width: '40rem' }"
-     :dismissableMask="true"
     >
       <div class="space-y-4">
         <div class="text-base text-[#666666] font-bold">Order Summary</div>
@@ -76,7 +105,9 @@ import { toast } from 'vue3-toastify';
           <div class="text-base">US${{ getRepsStore.selectedOption.amount }}</div>
         </div>
       </div>
-      <div class="text-sm text-[#777777]">One-time charge on 20 Jul 2020.</div>
+      <div v-if="isFirstTime" class="text-sm text-[#777777]">
+        One-time charge on {{ currentDate }}.
+      </div>
       <Divider />
       <div class="flex gap-x-6 justify-end">
         <div>Total</div>
@@ -87,23 +118,26 @@ import { toast } from 'vue3-toastify';
         <div class="text-base text-[#666666] font-bold">Payment Details</div>
         <div class="space-y-12">
           <!-- CHOOSE CARD -->
-          <div class="flex gap-x-4 pt-2 items-center">
-            <div
-              v-if="cardStore.card.cardType === 'visa'"
-              class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center opacity-50"
-            >
-              <VisaIcon />
-            </div>
-            <div v-else class="cursor-pointer border border-[#CCCCCC] rounded-md p-2">
-              <MasterCardIcon />
-            </div>
-            <div class="flex justify-between items-center text-sm w-full">
-              <div>
-                Visa ending with <span class="font-bold">{{ cardStore.card.cardNumber }}</span>
+          <div>
+            <div class="flex gap-x-4 py-4 items-center">
+              <div
+                v-if="cardStore.card.cardType === 'visa'"
+                class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center"
+              >
+                <VisaIcon />
               </div>
-              <div class="text-primary cursor-pointer">Change</div>
+              <div v-else class="cursor-pointer border border-[#CCCCCC] rounded-md p-2">
+                <MasterCardIcon />
+              </div>
+              <div class="flex justify-between items-center text-sm w-full">
+                <div>
+                  Visa ending with <span class="font-bold">{{ cardStore.card.cardNumber }}</span>
+                </div>
+              </div>
             </div>
+            <span class="text-sm text-primary cursor-pointer">Change payment method</span>
           </div>
+
           <!-- submit -->
           <div class="space-y-4">
             <div class="text-xs">

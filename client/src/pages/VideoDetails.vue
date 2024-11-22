@@ -181,7 +181,7 @@
 </script>
 <template>
   <div class="grid grid-cols-12">
-    <div class="col-span-12 lg:col-span-8">
+    <div class="col-span-12 lg:col-span-9">
       <div ref="vimeoPlayer" :class="['video-player', 'relative', { 'bg-black': isLoading }]">
         <div v-if="isLoading" class="grid place-items-center absolute top-0 left-0 w-full h-full">
           <i class="pi pi-spin pi-spinner text-white text-[50px]"></i>
@@ -219,9 +219,9 @@
         <CommentPage :videoId="videoId" :isCommentable="isCommentable" />
       </div>
     </div>
-    <div class="col-span-12 lg:col-span-4">
+    <div class="col-span-12 lg:col-span-3 ">
       <div class="p-[10px]">
-        <h3 class="font-bold mb-2 uppercase">watch also</h3>
+        <h3 class="font-bold mb-2 uppercase px-2 py-3">watch also</h3>
         <div>
           <VideoCard v-if="videos" :videos="videos" />
         </div>

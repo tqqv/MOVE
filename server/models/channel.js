@@ -73,6 +73,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false
             },
+            rep: {
+                type: DataTypes.INTEGER,
+                defaultValue: 0
+            },
             popularCheck: {
                 type: DataTypes.BOOLEAN,
                 allowNull: true, // hoặc false nếu bạn muốn bắt buộc
