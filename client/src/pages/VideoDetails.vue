@@ -155,6 +155,9 @@
       actualWatchTime = 0;
       lastUpdateTime = 0;
       hasWatchedFiveMinutes = false;
+      playerInstance.setCurrentTime(0).then(() => {
+        playerInstance.pause();
+      });
     });
   };
 
