@@ -99,7 +99,7 @@
         <!-- Truncate channelName with tooltip -->
         <div class="flex items-center">
           <RouterLink
-            :to="`/user/${video.channel.User?.username}`"
+            :to="`/user/${video.channel?.User?.username}`"
             class="text_secondary whitespace-nowrap"
             :title="video.channel?.channelName || video.livestreamChannel?.channelName"
             >{{
