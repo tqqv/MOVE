@@ -109,9 +109,22 @@ const getVideoById = async (videoId) => {
     return { error: true, message: error.message };
   }
 };
+const getVideoYouMayLike = async (currentPage, pageSize, userId) => {
+  try {
+    const params = {
+      page: currentPage,
+      ...(pageSize !== 12 && { pageSize }),
+    };
 
+    const response = await axios.get(`/video/getVideoYouMayLike/${userId}`, { params });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   getVideobyChannel,
+  getVideoYouMayLike,
   getAllCategory,
   getAllLevelWorkout,
   getLevelWorkoutById,

@@ -294,18 +294,20 @@
               <i class="pi pi-ellipsis-v"></i>
             </button>
           </div>
-
           <div
             v-if="openReportComment"
             id="report-menu"
-            class="absolute left-0 z-10 mt-5 top-3 p-2 border border-primary origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+            class="absolute left-0 z-10 mt-5 top-3 p-2 origin-top-right rounded-md bg-white shadow-lg focus:outline-none text-black border-none"
           >
-            <span
-              @click="openPopupReport"
-              class="text-primary text-xs whitespace-nowrap cursor-pointer"
-            >
-              Report comment
-            </span>
+            <ul class="flex flex-col justify-center h-full gap-y-1 m-0 p-0">
+              <li
+                class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
+                @click="openPopupReport"
+              >
+                <i class="pi pi-flag text-sm"></i>
+                <span class="truncate"> Report comment</span>
+              </li>
+            </ul>
           </div>
         </div>
         <span

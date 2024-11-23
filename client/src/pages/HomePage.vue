@@ -14,7 +14,7 @@
 
   const categories = ref([]);
   const dataSlider = ref([]);
-  const isLoadingSlider = ref(false);
+  const isLoadingSlider = ref(true);
   const videos = ref([]);
 
   const fetchAllCategoriesHaveView = async () => {
