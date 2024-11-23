@@ -64,7 +64,7 @@
       <p class="text-sm">live</p>
     </div>
     <div v-else class="flex flex-col">
-      <p class="font-medium">
+      <p class="font-medium w-16">
         {{ elapsedTime > 0 ? formatTimeInStream(elapsedTime) : '00:00:00' }}
       </p>
       <p class="text-sm">live</p>

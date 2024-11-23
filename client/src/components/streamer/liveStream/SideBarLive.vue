@@ -115,6 +115,10 @@
       }
     },
   );
+
+  watch(() => {
+    console.log(props.elapsedTime);
+  });
 </script>
 <template>
   <section
