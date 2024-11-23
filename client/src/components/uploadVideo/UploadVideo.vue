@@ -157,7 +157,6 @@
     header="Upload a video"
     :draggable="false"
     :dismissableMask="true"
-    :blockScroll="true"
     :style="{ width: '842px', height: '400px' }"
   >
     <div>

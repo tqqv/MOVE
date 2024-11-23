@@ -25,8 +25,9 @@
     const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
     if (createdAt) {
       timer = setInterval(() => {
+        console.log('create', createdAt);
         const currentTime = new Date();
-        console.log(createdAt);
+        console.log('curre', currentTime);
         elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
         // console.log(elapsedTime.value);
       }, 1000);
