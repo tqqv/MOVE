@@ -86,18 +86,18 @@
             <dashboard class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
           </div>
-          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
-            <RouterLink
-              to="/wallet/payment-method"
-              class="flex flex-row items-center gap-x-2 group cursor-pointer"
-              @click="emit('closeAllPopups')"
-            >
+          <RouterLink
+            to="/wallet/payment-method"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
+          >
+            <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
               <wallet class="fill-black group-hover:fill-primary" />
               <h1 class="mb-1 group-hover:text-primary">
                 Wallet ({{ props.user?.REPs ?? 0 }} REPs)
-              </h1></RouterLink
-            >
-          </div>
+              </h1>
+            </div>
+          </RouterLink>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />
         <div class="flex flex-col gap-y-4 px-[2px]">
