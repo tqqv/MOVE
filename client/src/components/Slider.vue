@@ -63,7 +63,7 @@
     :perspective="5"
     :space="300"
     height="350"
-    width="961"
+    width="1000"
     :controlsVisible="true"
     :startIndex="currentSlide"
     :on-slide-change="handleSlideChanged"
@@ -106,7 +106,7 @@
           <!-- Cột thông tin với transition -->
           <div
             v-show="isInfoVisible && currentSlide === i"
-            class="flex-col p-6 'w-[30%]' h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
+            class="flex-col p-6 w-[30%] h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
           >
             <div
               v-if="slide.livestream?.livestreamChannel.isLive"
@@ -166,11 +166,14 @@
               </span>
             </div>
 
-            <div>
-              <span class="text-[14px] text-body break-words">
-                {{
-                  truncateDescripton(slide.video?.description || slide.livestream?.description, 100)
-                }}
+            <div
+              class="w-full truncate"
+              :title="slide.video?.description || slide.livestream?.description"
+            >
+              <span
+                class="text-[14px] text-body truncate w-full overflow-hidden whitespace-nowrap text-ellipsis"
+              >
+                {{ slide.video?.description || slide.livestream?.description }}
               </span>
             </div>
           </div>
