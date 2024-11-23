@@ -1,11 +1,13 @@
 <script setup>
-  import { ref, computed, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue';
   import EmojiPicker from 'vue3-emoji-picker';
   import { postComments } from '@/services/comment';
   import { useUserStore } from '@/stores';
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
   import { useTabStore } from '@/stores';
+  import Warning from '../icons/warning.vue';
+  import { debounce } from '@/utils';
 
   const isPickerVisible = ref(false);
   const commentText = ref('');
@@ -141,6 +143,19 @@
     textarea.style.height = 'auto';
     textarea.style.height = `${textarea.scrollHeight}px`;
   };
+
+  const errorInput = ref(false);
+  const checkInputLength = debounce((newValue) => {
+    if (newValue.length === 2500) {
+      errorInput.value = true;
+    } else if (newValue.length < 2500) {
+      errorInput.value = false;
+    }
+  }, 200);
+
+  watch(commentText, (newValue) => {
+    checkInputLength(newValue);
+  });
 </script>
 
 <template>
@@ -164,7 +179,12 @@
           @input="handleCommentInput"
           v-model="commentText"
           @keydown="handleKeyDown"
+          maxlength="2500"
         />
+        <div v-if="errorInput" class="flex items-center gap-x-2 my-3">
+          <Warning />
+          <p class="italic text-red text-sm font-medium">Comments cannot exceed 2500 words.</p>
+        </div>
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
           <div class="relative">
             <button

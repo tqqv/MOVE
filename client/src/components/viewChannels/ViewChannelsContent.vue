@@ -119,7 +119,7 @@
             <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel v-if="channelId" v-for="tab in tabs" :key="tab.component" :value="tab.value">
+            <TabPanel v-if="channelDetails" v-for="tab in tabs" :key="tab.component" :value="tab.value">
               <component
                 :is="tab.component"
                 :channelDetails="channelDetails"
