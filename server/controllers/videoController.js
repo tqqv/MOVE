@@ -19,7 +19,7 @@ const {
   getVideoWatchAlso,
   deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
-  renewTopVideos,
+  getVideoYouMayLikeService,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 const { createHashmapFromDBData, getFilteredSortedTopVideos } = require('../utils/redis/cache/videoCache');
@@ -249,6 +249,18 @@ const getTopVideoController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getVideoYouMayLikeController = async(req, res, next) => {
+  const userId = req.params.userId;
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'score',
+    order: req.query.order || 'desc'
+  };
+  const result = await getVideoYouMayLikeService(userId, page, pageSize, sortCondition);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -271,4 +283,5 @@ module.exports = {
   getVideoWatchAlsoController,
   getStateByCountryAndVideoIdFromIpController,
   getTopVideoController,
+  getVideoYouMayLikeController,
 };
