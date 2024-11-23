@@ -8,7 +8,7 @@
   <Navbar />
   <div class="flex pt-[72px]">
     <SideBarFollow />
-    <div class="flex-1 ">
+    <div class="flex-1">
       <router-view />
     </div>
   </div>
