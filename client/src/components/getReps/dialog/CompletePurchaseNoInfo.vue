@@ -33,7 +33,7 @@
   const isLoandingSubmit = ref(false);
 
   const cardForm = ref(null);
-
+  const isSubmitting = ref(false);
   const isCheckMark = ref(false);
   const emit = defineEmits(['toggleOpenOrder']);
 
@@ -165,6 +165,9 @@
   };
 
   const toggleLoadPayment = async () => {
+    if (isSubmitting.value) return;
+    isSubmitting.value = true;
+
     isLoandingSubmit.value = true;
 
     const isValid = await validatePaymentData();
@@ -173,7 +176,7 @@
     if (isCheckMark.value) {
       if (!isComplete || !isValid) {
         isLoandingSubmit.value = false;
-
+        isSubmitting.value = false;
         return;
       }
       await handleSaveCard();
@@ -182,7 +185,7 @@
       if (!cardStore.card?.paymentMethodId) {
         console.error('paymentMethodId not found after saving card.');
         isLoandingSubmit.value = false;
-
+        isSubmitting.value = false;
         return;
       }
       await handleCheckout(cardStore.card?.paymentMethodId);
@@ -191,7 +194,7 @@
 
       if (!isComplete || !isValid) {
         isLoandingSubmit.value = false;
-
+        isSubmitting.value = false;
         return;
       }
       await handleCheckout(paymentMethodId);
@@ -200,6 +203,7 @@
     // Đảm bảo ẩn popup loading sau khi thanh toán
     popupStore.showLoadingPayment = false;
     popupStore.showOpenBuyREPs = false;
+    isSubmitting.value = false;
   };
 
   const toggleBuyREPs = () => {
@@ -265,7 +269,7 @@
           @update:modelValue="(value) => (isCheckMark = value)"
         />
         <div class="flex justify-center mt-4">
-          <button @click="toggleLoadPayment" class="btn w-1/3">
+          <button @click="toggleLoadPayment" class="btn w-1/3" :disabled="isSubmitting.value">
             <smallLoading v-if="isLoandingSubmit" fill="white" fill_second="#13d0b4" />
             <span v-else>Submit</span>
           </button>

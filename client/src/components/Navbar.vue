@@ -456,8 +456,12 @@
                 >
                   <span class="sr-only">Open user menu</span>
                   <img
-                    class="size-[40px] rounded-full"
-                    :src="userStore.user?.avatar"
+                    class="size-[40px] rounded-full object-cover"
+                    :src="
+                      userStore.user?.Channel
+                        ? userStore.user?.Channel?.avatar
+                        : userStore.user?.avatar
+                    "
                     :alt="userStore.user?.username || 'User'"
                   />
                 </button>

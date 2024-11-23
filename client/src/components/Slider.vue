@@ -1,50 +1,82 @@
 <script setup>
-  import { ref, watch } from 'vue';
+  import { ref, onMounted, watch } from 'vue';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
-
+  import Skeleton from 'primevue/skeleton';
   import { Carousel3d, Slide } from 'vue3-carousel-3d';
   import Verified from '@/components/icons/verified.vue';
   import rate from '@/components/icons/rate.vue';
-  import { formatRating, truncateDescripton, genreDuration, formatView } from '@/utils';
+  import { formatRating, truncateDescripton, genreDuration } from '@/utils';
 
   const props = defineProps({
     dataSlider: {
       type: Array,
       default: true,
     },
+    isLoadingSlider: {
+      type: Boolean,
+      required: true,
+    },
   });
 
   const currentSlide = ref(0);
-  const isThumbnailVisible = ref(true);
   const isInfoVisible = ref(true);
 
   const handleSlideChanged = (newIndex) => {
     currentSlide.value = newIndex;
-    isThumbnailVisible.value = false;
     isInfoVisible.value = false;
+
     setTimeout(() => {
       isInfoVisible.value = true;
     }, 300);
   };
 </script>
 <template>
+  <div v-if="isLoadingSlider" class="flex bg-white shadow-lg overflow-hidden h-[350px]">
+    <Skeleton width="100%" height="100%" />
+    <div
+      class="flex-col p-6 w-[30%] h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
+    >
+      <div class="flex items-center space-x-4">
+        <div class="relative inline-block">
+          <div class="flex items-center justify-center size-14 rounded-full flex-shrink-0">
+            <Skeleton shape="circle" size="3.5rem" />
+          </div>
+        </div>
+        <div class="flex flex-col justify-center">
+          <div class="flex items-center pt-2">
+            <Skeleton width="6rem" class="mb-2" />
+          </div>
+          <Skeleton width="3rem" class="mb-2" />
+          <Skeleton width="3rem" class="mb-2" />
+        </div>
+      </div>
+      <div class="flex gap-2 items-center text-[10px] font-bold my-4">
+        <Skeleton width="4rem" height="2rem" borderRadius="9999px" />
+        <Skeleton width="4rem" height="2rem" borderRadius="9999px" />
+      </div>
+      <div>
+        <Skeleton width="14rem" height="4rem" />
+      </div>
+    </div>
+  </div>
   <carousel-3d
+    :perspective="5"
     :space="300"
     height="350"
     width="961"
-    controlsVisible="true"
+    :controlsVisible="true"
     :startIndex="currentSlide"
     :on-slide-change="handleSlideChanged"
     border="0"
+    v-else-if="dataSlider && !isLoadingSlider"
   >
-    <slide v-for="(slide, i) in dataSlider" :index="i" :key="i">
+    <Slide v-for="(slide, i) in dataSlider" :index="i" :key="i">
       <figure>
-        <div class="relative flex bg-white shadow-lg overflow-hidden h-[350px]">
+        <div class="flex bg-white shadow-lg h-[350px]">
           <!-- Cột hình ảnh -->
-
           <div
-            class="w-full rounded-md relative transition-all duration-500"
-            :class="{ 'w-[70%]': currentSlide === i }"
+            class="h-full w-full rounded-md relative transition-all duration-500"
+            :class="{ 'w-[75%]': currentSlide === i }"
           >
             <RouterLink
               :to="
@@ -52,7 +84,7 @@
                   ? slide.livestream
                     ? `/live/${slide.livestream.livestreamChannel.User.username}`
                     : `/video/${slide.videoId}`
-                  : null
+                  : ''
               "
               :key="slide.id"
             >
@@ -66,8 +98,7 @@
                 v-else
                 :src="slide.livestream?.thumbnailUrl || slide.video?.thumbnailUrl"
                 alt="Thumbnail"
-                class="w-full h-full object-cover border-none"
-                :class="{ 'opacity-95': currentSlide !== i }"
+                class="w-full h-full object-cover"
               />
             </RouterLink>
           </div>
@@ -75,7 +106,7 @@
           <!-- Cột thông tin với transition -->
           <div
             v-show="isInfoVisible && currentSlide === i"
-            class="flex-col p-6 w-[30%] h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
+            class="flex-col p-6 'w-[30%]' h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
           >
             <div
               v-if="slide.livestream?.livestreamChannel.isLive"
@@ -109,9 +140,11 @@
                     <Verified class="fill-blue" />
                   </p>
                 </div>
+
                 <div>
                   <p class="text-[14px] text-body">{{ slide.video?.category.title }}</p>
                 </div>
+
                 <div class="flex items-center mt-2">
                   <rate class="mr-1" />
                   <span class="text-sm font-bold">
@@ -127,10 +160,12 @@
                   slide.livestream?.livestreamLevelWorkout.levelWorkout
                 }}
               </span>
+
               <span class="bg-[#EEEEEE] rounded-full text-black p-2">
                 {{ genreDuration(slide.video?.duration) || slide.livestream?.category.title }}
               </span>
             </div>
+
             <div>
               <span class="text-[14px] text-body break-words">
                 {{
@@ -141,7 +176,7 @@
           </div>
         </div>
       </figure>
-    </slide>
+    </Slide>
   </carousel-3d>
 </template>
 <style>

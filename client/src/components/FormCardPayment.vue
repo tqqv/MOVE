@@ -39,6 +39,8 @@
   );
 
   const handleElementChange = (event, elementType) => {
+    console.log(event);
+
     errors.value[elementType] = event.error ? event.error.message : '';
 
     if (elementType === 'cardNumber' && event.brand) {
@@ -47,6 +49,8 @@
         errors.value.cardNumber = 'Your card number is incomplete.';
       }
     }
+    console.log(cardBrand.value);
+
     isComplete.value = event.complete;
   };
 
@@ -170,7 +174,7 @@
             class="cursor-pointer border border-[#CCCCCC] rounded-md p-2 flex items-center"
             :class="{
               'opacity-100': cardBrand === 'visa',
-              'opacity-50': cardBrand !== 'visa' || cardBrand !== null,
+              'opacity-50': cardBrand !== 'visa',
             }"
           >
             <VisaIcon />
@@ -179,7 +183,7 @@
             class="cursor-pointer border border-[#CCCCCC] rounded-md p-2"
             :class="{
               'opacity-100': cardBrand === 'mastercard',
-              'opacity-50': cardBrand !== 'mastercard' || cardBrand !== null,
+              'opacity-50': cardBrand !== 'mastercard',
             }"
           >
             <MasterCardIcon />

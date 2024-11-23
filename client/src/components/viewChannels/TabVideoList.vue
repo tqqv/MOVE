@@ -106,7 +106,6 @@
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
-    await fetchVideos();
   });
 </script>
 
