@@ -23,11 +23,14 @@
 
   const startTimer = () => {
     const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
-    timer = setInterval(() => {
-      const currentTime = new Date();
-      elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
-      // console.log(elapsedTime.value);
-    }, 1000);
+    if (createdAt) {
+      timer = setInterval(() => {
+        const currentTime = new Date();
+        console.log(createdAt);
+        elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
+        // console.log(elapsedTime.value);
+      }, 1000);
+    }
   };
 
   const stopTimer = () => {
