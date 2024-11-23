@@ -398,9 +398,9 @@
               </select>
             </div>
             <div class="flex flex-col gap-y-2 w-full md:w-1/2">
-              <label for="district" class="text_para">State</label>
+              <label for="district" class="text_para">State/ City</label>
               <select v-model="profileData.state" class="select_custom">
-                <option v-if="!profileData.state" disabled value="null">Select state</option>
+                <option v-if="!profileData.state" disabled value="null">Select state/ city</option>
                 <option v-else selected>{{ profileData.state }}</option>
                 <option v-for="state in states" :key="state.code" :value="state.name">
                   {{ state.name }}
@@ -410,7 +410,7 @@
           </div>
           <!-- CITY -->
           <div class="flex flex-col w-full md:w-1/2 gap-y-2">
-            <label for="city" class="text_para">City</label>
+            <label for="city" class="text_para">District </label>
             <Skeleton v-if="userStore.loading" height="3rem"></Skeleton>
             <div
               v-else
@@ -420,7 +420,7 @@
               <input
                 v-model="profileData.city"
                 type="text"
-                placeholder="Enter city"
+                placeholder="Enter District"
                 class="password_custom capitalize"
                 @input="(e) => capitalizeInput(e, 'city')"
               />

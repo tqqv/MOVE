@@ -190,14 +190,10 @@
     <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
         v-if="username !== props.usernameDetails"
-        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
+        class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase"
         @click="toggleFollow"
       >
-        <heart
-          :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
-          stroke="stroke-primary"
-          class="mr-1"
-        />
+        <heart :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'" stroke="stroke-primary"  />
         Follow
       </div>
       <div
