@@ -116,7 +116,13 @@
     },
   );
 
-  watch(() => {
+  watch(
+    () => props.elapsedTime,
+    (newVal, oldVal) => {
+      console.log('Elapsed Time changed:', oldVal, '=>', newVal);
+    },
+  );
+  onMounted(() => {
     console.log(props.elapsedTime);
   });
 </script>
