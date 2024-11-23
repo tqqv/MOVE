@@ -61,6 +61,7 @@
       @hide="unlockScroll"
       @update:visible="popupStore.toggleSelectPaymentMethod"
       :style="{ width: '40rem' }"
+      :dismissableMask="true"
     >
       <div class="flex gap-x-12 p-8 text-base">
         <CheckboxCustom
