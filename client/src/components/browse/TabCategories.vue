@@ -23,7 +23,7 @@
 
 <template>
   <div
-    class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
+    class="grid gap-x-8 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6"
   >
     <CategoryImage :categories="categories" :loading="loading" :qualitySkeleton="6" />
   </div>
