@@ -882,7 +882,7 @@ const getDataCountryByIp = async (videoId, days) => {
     where: whereCondition,
     attributes: [
       'country',
-      [Sequelize.fn('COUNT', Sequelize.col('country')), 'viewerCount']
+      [Sequelize.fn('COUNT', Sequelize.col('viewerId')), 'viewerCount']
     ],
     group: ['country'],
     raw: true
@@ -1506,7 +1506,8 @@ const renewTopVideos = async () => {
     };
   }
 };
-const getVideoYouMayLikeService = async (userId, page = 1, pageSize = 10, sortCondition = null) => {
+const
+getVideoYouMayLikeService = async (userId, page = 1, pageSize = 10, sortCondition = null) => {
   try {
     // 1. Embedding video
     const videoEmbeddings = await generateVideoEmbeddings();
