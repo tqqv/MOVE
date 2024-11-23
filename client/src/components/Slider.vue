@@ -63,7 +63,7 @@
     :perspective="5"
     :space="300"
     height="350"
-    width="1000"
+    width="961"
     :controlsVisible="true"
     :startIndex="currentSlide"
     :on-slide-change="handleSlideChanged"
@@ -76,7 +76,7 @@
           <!-- Cột hình ảnh -->
           <div
             class="h-full w-full rounded-md relative transition-all duration-500"
-            :class="{ 'w-[75%]': currentSlide === i }"
+            :class="{ 'w-[80%]': currentSlide === i }"
           >
             <RouterLink
               :to="
