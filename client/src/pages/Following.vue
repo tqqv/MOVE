@@ -90,7 +90,7 @@
       </div>
 
       <div
-        class="grid gap-x-12 gap-y-10 pt-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+        class="grid gap-x-6 gap-y-10 pt-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
       >
         <CategoryImage :categories="catesFollow" :loading="isLoading" :qualitySkeleton="6" />
       </div>

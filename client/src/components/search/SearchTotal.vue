@@ -111,7 +111,7 @@
               <h1 class="text_subTitle mb-2">Categories</h1>
             </div>
             <div
-              class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
+              class="grid gap-x-6 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
             >
               <CategoryImage :categories="categories" :loading="loading" :qualitySkeleton="5" />
             </div>
