@@ -36,6 +36,7 @@
   let playerInstance = null;
   const isLoading = ref(true);
   const isVideoLoading = ref(true);
+  const isWatchAlsoLoading = ref(true);
   let actualWatchTime = 0;
   let lastUpdateTime = 0;
   let hasWatchedFiveMinutes = false;
@@ -43,6 +44,7 @@
 
   const fetchWatchAlso = async () => {
     try {
+      isWatchAlsoLoading.value = true;
       const res = await axiosInstance.get(
         `video/getVideoWatchAlso?videoId=${videoId.value}&category=${categoryId.value}&levelWorkout=${levelworkoutsId.value}`,
       );
@@ -51,6 +53,8 @@
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      isWatchAlsoLoading.value = false;
     }
   };
 
@@ -309,7 +313,7 @@
     <div class="col-span-12 lg:col-span-3">
       <div class="p-[10px]">
         <h3 class="font-bold mb-2 uppercase px-2 py-3">watch also</h3>
-        <div v-if="isVideoLoading" class="grid gap-4 mt-3 px-2">
+        <div v-if="isWatchAlsoLoading" class="grid gap-4 mt-3 px-2">
           <div>
             <Skeleton height="200px" />
             <div class="flex mt-4">
@@ -355,7 +359,7 @@
             </div>
           </div>
         </div>
-        <VideoCard v-else-if="videos && !isVideoLoading" :videos="videos" />
+        <VideoCard v-else-if="videos && !isWatchAlsoLoading" :videos="videos" />
       </div>
     </div>
   </div>

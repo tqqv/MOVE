@@ -33,5 +33,6 @@
     :categoryTitle="currentCategoryTitle"
     :sortByOptions="sortByOptions"
     :isVisibleCategory="false"
+    :fetchVideosFunction="getMostViewOfVideo"
   />
 </template>
