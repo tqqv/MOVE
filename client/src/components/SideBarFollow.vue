@@ -38,7 +38,7 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden md:block sticky top-[72px] min-h-[calc(100vh-72px)] w-[241px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[241px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col pt-4 h-full">
       <div class="flex items-center my-1 justify-between px-3">
