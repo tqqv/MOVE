@@ -29,7 +29,7 @@
 <template>
   <Navbar />
   <div v-if="status === 'success'"><Congratulation2 /></div>
-  <div class="h-screen flex flex-col relative z-50 pt-[72px]">
+  <div class="h-screen flex flex-col relative z-50 pt-[64px]">
     <div class="flex flex-grow justify-center items-center">
       <div class="border border-gray-dark rounded-2xl w-[520px] h-[420px] p-10">
         <div v-if="status === 'success'" class="flex flex-col items-center gap-y-5">

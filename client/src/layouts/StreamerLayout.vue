@@ -6,7 +6,7 @@
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px] h-screen">
+  <div class="flex pt-[64px] h-screen">
     <SideBarStreamer />
     <ScrollWrapper>
       <router-view />

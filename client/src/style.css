@@ -73,7 +73,7 @@ html {
   }
 
   .btn {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px] leading-none;
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[36px] leading-none;
   }
 
   .notification_custom {

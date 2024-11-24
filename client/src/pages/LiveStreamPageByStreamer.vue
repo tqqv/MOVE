@@ -125,7 +125,7 @@
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px] bg-[#f0f2f5] h-screen">
+  <div class="flex pt-[64px] bg-[#f0f2f5] h-screen">
     <SideBarLive
       :elapsedTime="elapsedTime"
       :connectOBS="connectOBS"

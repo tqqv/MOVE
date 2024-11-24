@@ -69,7 +69,7 @@
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px] h-screen">
+  <div class="flex pt-[64px] h-screen">
     <SideBarFollow />
     <div class="flex-1 overflow-x-none mb-4 overflow-y-scroll">
       <ViewLiveStreamContent
