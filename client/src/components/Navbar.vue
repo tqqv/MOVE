@@ -19,7 +19,7 @@
   import { useUserStore } from '@/stores/user.store';
   import { RouterLink, useRouter } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
-  import { debounce } from '@/utils';
+  import { debounce, formatView } from '@/utils';
   import { searchInformation } from '@/services/search';
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
@@ -318,7 +318,11 @@
                 @focus="handleFocus"
                 @blur="handleBlur"
               />
-              <Button icon="pi pi-search text-sm" class="btn rounded-s-none" @click="performSearch" />
+              <Button
+                icon="pi pi-search text-sm"
+                class="btn rounded-s-none"
+                @click="performSearch"
+              />
             </InputGroup>
             <div
               v-if="isSearchPopupOpen"
@@ -362,7 +366,7 @@
                 class="rounded-md px-3 py-2 text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
-                {{ userStore.user?.REPs }} REP$
+                {{ formatView(userStore.user?.REPs) }} REP$
               </div>
               <div
                 id="reps-menu"
