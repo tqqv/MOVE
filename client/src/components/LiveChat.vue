@@ -170,7 +170,7 @@
   <div
     v-if="openLiveChat"
     class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
-    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[64px] h-[calc(100vh-64px)]'"
   >
     <!-- TOPBAR -->
     <div

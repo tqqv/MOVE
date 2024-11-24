@@ -129,7 +129,7 @@
 <template>
   <section
     v-if="isShow"
-    class="sticky top-[72px] max-h-[calc(100vh-72px)] w-[300px] shadow-lg bg-white transition-all duration-300 ease-in-out"
+    class="sticky top-[64px] max-h-[calc(100vh-64px)] w-[300px] shadow-lg bg-white transition-all duration-300 ease-in-out"
   >
     <div class="px-4 flex flex-col h-full">
       <!-- HEADER -->
@@ -303,7 +303,7 @@
   <!-- CLOSE -->
   <section
     v-else
-    class="sticky top-[72px] h-[calc(100vh-72px)] w-[100px] shadow-lg bg-white transition-all duration-300 ease-in-out"
+    class="sticky top-[64px] h-[calc(100vh-64px)] w-[100px] shadow-lg bg-white transition-all duration-300 ease-in-out"
   >
     <div class="flex px-2 flex-col h-full">
       <!-- HEADER -->
