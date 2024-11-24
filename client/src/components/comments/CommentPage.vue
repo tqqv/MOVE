@@ -12,7 +12,6 @@
     isCommentable: Boolean,
   });
   const userStore = useUserStore();
-  console.log(userStore.user?.id);
 
   const comments = ref([]);
   const childComments = ref({});
@@ -172,7 +171,7 @@
     This video is not open for comments.
   </p>
     <WriteComments  
-      v-if="isCommentable"
+      v-if="isCommentable && userStore.user?.id"
       :videoId="videoId"
       :fetchChildComments="fetchChildComments"
       @sendComment="handleSendComment"

@@ -199,6 +199,7 @@
     </div>
     <div class="flex items-center gap-9">
       <Rate
+        titleRatePopup="Rate the stream"
         :title="titleRate"
         @rate="toggleRate"
         :videoId="video?.id"

@@ -18,6 +18,9 @@
     dataRate: {
       type: Number,
     },
+    titleRatePopup: {
+      type: String,
+    },
   });
 
   const value = ref(props.dataRate);
@@ -80,7 +83,7 @@
     <div class="space-y-4 p-4 text-left">
       <div>
         <h1 class="text-base relative font-bold">
-          Rate the stream
+          {{ titleRatePopup }}
           <i
             class="pi pi-times text-[16px] absolute right-0 top-[15%] cursor-pointer hover:text-primary"
             @click="closePopup"
