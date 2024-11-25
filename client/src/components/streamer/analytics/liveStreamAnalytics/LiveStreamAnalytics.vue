@@ -6,14 +6,15 @@
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
-  import TabGender from '@components/streamer/analytics/liveStreamAnalytics/TabGender.vue';
+  import TabGender from '@components/streamer/analytics/TabGender.vue';
   import { useTabStore } from '@/stores/tab.store';
   import rate from '@components/icons/rate.vue';
   import { formatView, formatRating, formatAvgViewTime, truncateDescripton } from '@/utils';
-  import TabAge from '@components/streamer/analytics/liveStreamAnalytics/TabAge.vue';
+  import TabAge from '@components/streamer/analytics//TabAge.vue';
   import TabCountry from '@components/streamer/analytics/liveStreamAnalytics/TabCountry.vue';
   import Filter from '@/components/Filter.vue';
   import { getAllLivestreamSession, getLiveStreamAnalytics } from '@/services/liveStream';
+  import Skeleton from 'primevue/skeleton';
 
   const liveStreamDetails = ref([{}]);
   const page = ref(1);
@@ -21,7 +22,7 @@
   const ageStats = ref(null);
   const genderStats = ref(null);
   const dataByIp = ref(null);
-
+  const isLoadingLive = ref(false);
   const liveStreamId = ref(null);
   const overviewStats = [
     { title: 'Total REPs earned' },
@@ -61,6 +62,7 @@
   };
 
   const fetchLiveStreamAnalytics = async () => {
+    isLoadingLive.value = true;
     try {
       const response = await getLiveStreamAnalytics(selectedLiveStreamSession.value.id);
 
@@ -76,6 +78,8 @@
       liveStreamId.value = response.data.data.livestream.id;
     } catch (error) {
       log.error(error.message);
+    } finally {
+      isLoadingLive.value = false;
     }
   };
   watch(selectedLiveStreamSession, (newValue) => {
@@ -108,8 +112,9 @@
 
     <div class="grid grid-cols-1 lg:grid-cols-[5fr_5fr] gap-8 p-2">
       <!-- Col 1 -->
+      <Skeleton v-if="isLoadingLive" width="100%" height="315px"></Skeleton>
 
-      <div class="bg-white shadow-lg p-6 rounded-md space-y-6">
+      <div v-else class="bg-white shadow-lg p-6 rounded-md space-y-6">
         <div class="space-y-2">
           <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
           <div class="text-base font-bold" :title="liveStreamDetails.title">
@@ -150,6 +155,7 @@
             :title="stat.title"
             :value="stat.value"
             :percent="stat.percent"
+            :isLoading="isLoadingLive"
           />
         </div>
       </div>
@@ -171,6 +177,7 @@
               :ageStats="ageStats"
               :dataByIp="dataByIp"
               :liveStreamId="liveStreamId"
+              :isLoading="isLoadingLive"
             />
           </TabPanel>
         </TabPanels>

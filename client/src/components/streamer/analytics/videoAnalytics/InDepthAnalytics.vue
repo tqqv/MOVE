@@ -6,11 +6,16 @@
   import Tab from 'primevue/tab';
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
-  import TabGender from '@components/streamer/analytics/videoAnalytics/TabGender.vue';
+  import TabGender from '@components/streamer/analytics/TabGender.vue';
   import { useTabStore } from '@/stores/tab.store';
   import { getVideoAnalyticsById } from '@services/video';
   import rate from '@components/icons/rate.vue';
   import { useRoute } from 'vue-router';
+  import Skeleton from 'primevue/skeleton';
+  import TabAge from '@components/streamer/analytics/TabAge.vue';
+  import TabCountry from './TabCountry.vue';
+  import Filter from '@/components/Filter.vue';
+  import TabNationality from './TabNationality.vue';
   import {
     formatView,
     formatRating,
@@ -19,10 +24,6 @@
     formatNumber,
     truncateDescripton,
   } from '@/utils';
-  import TabAge from './TabAge.vue';
-  import TabCountry from './TabCountry.vue';
-  import Filter from '@/components/Filter.vue';
-  import TabNationality from './TabNationality.vue';
 
   const route = useRoute();
   const videoId = route.params.videoId;
@@ -49,7 +50,7 @@
     { title: 'Country', value: '3', component: TabCountry },
   ];
   const selectedSortByTime = ref(sortByTime[0].days);
-
+  const isLoadingIndepth = ref(false);
   const tabStore = useTabStore();
   const onTabChange = (event) => {
     tabStore.setActiveTab(event.value);
@@ -59,6 +60,7 @@
     selectedSortByTime.value = newValue.days || '';
   };
   const fetchVideosAnalytics = async (videoId) => {
+    isLoadingIndepth.value = true;
     try {
       const response = await getVideoAnalyticsById(videoId, selectedSortByTime.value);
       videosDetails.value = response.data.videoData;
@@ -72,9 +74,9 @@
       console.log(ageStats.value);
 
       countryStats.value = response.data.viewersData.countryData.sort((a, b) => {
-        if (a.country === null) return 1;
-        if (b.country === null) return -1;
-        return a.country.localeCompare(b.country);
+        if (a.nationality === null) return 1;
+        if (b.nationality === null) return -1;
+        return a.nationality.localeCompare(b.nationality);
       });
       dataByIp.value = response.data.viewersData.dataByIp.sort((a, b) => {
         if (a.country === null) return 1;
@@ -83,6 +85,8 @@
       });
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      isLoadingIndepth.value = false;
     }
   };
   watch([selectedSortByTime], () => {
@@ -109,12 +113,42 @@
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-[3fr_7fr] gap-8 p-2">
       <!-- Col 1 -->
-
-      <div class="space-y-4">
+      <!-- SKELETON -->
+      <div v-if="isLoadingIndepth" lass="space-y-4">
         <div class="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
-          <img :src="videosDetails.thumbnailUrl" class="object-cover w-full h-full" />
+          <Skeleton width="100%" height="210px"></Skeleton>
         </div>
 
+        <div class="space-y-2">
+          <Skeleton width="10rem" class="mb-2"></Skeleton>
+          <Skeleton width="5rem" class="mb-2"></Skeleton>
+        </div>
+        <div class="pt-2 space-y-4">
+          <div class="flex justify-between">
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+          </div>
+          <div class="flex justify-between">
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+          </div>
+          <div class="flex justify-between">
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+          </div>
+          <div class="flex justify-between">
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+          </div>
+        </div>
+      </div>
+
+      <div v-else class="space-y-4">
+        <RouterLink :to="`/video/${videosDetails.id}`" :key="videosDetails.id">
+          <div class="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
+            <img :src="videosDetails.thumbnailUrl" class="object-cover w-full h-full" />
+          </div>
+        </RouterLink>
         <div class="space-y-2">
           <div class="text-base font-bold truncate" :title="videosDetails.title">
             {{ truncateDescripton(videosDetails.title, 55) }}
@@ -155,6 +189,7 @@
             :title="stat.title"
             :value="stat.value"
             :percent="stat.percent"
+            :isLoading="isLoadingIndepth"
           />
         </div>
         <div>
@@ -175,6 +210,7 @@
                   :ageStats="ageStats"
                   :countryStats="countryStats"
                   :dataByIp="dataByIp"
+                  :isLoading="isLoadingIndepth"
                 />
               </TabPanel>
             </TabPanels>
