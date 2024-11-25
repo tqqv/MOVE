@@ -1,17 +1,25 @@
 <script setup>
   import ProgressBar from 'primevue/progressbar';
   import WithdrawPopup from './WithdrawPopup.vue';
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import ProcessingPaymentPopup from './ProcessingPaymentPopup.vue';
   import SelectBank from './SelectBank.vue';
   import BankDetails from './BankDetails.vue';
   import VerificationPopup from '@/components/popup/VerificationPopup.vue';
+import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
+import { getLinkStripeVerify } from '@/services/cashout';
 
   const props = defineProps({
     reps: Number,
     estimatedValue: Number,
     nameCard: String,
   });
+  const withdrawInforStore = useWithdrawInfor();
+
+  onMounted(async() => {
+    await withdrawInforStore.fetchWithdrawInfor()
+  })
+
   const hasInfo = ref(false);
   const isUpdateSuccessful = ref(false);
   const isWithdrawVisible = ref(false);
@@ -30,6 +38,13 @@
   const toogleProcessingPaymentVisible = () => {
     isProcessingPaymentVisible.value = !isProcessingPaymentVisible.value;
   };
+
+  const handleStripeVerify = async() => {
+    const res = await getLinkStripeVerify();
+    if(res && res.status === 200) {
+      window.open(res.data.data, '_self');
+    }
+  }
 </script>
 <template>
   <div class="container">
@@ -56,14 +71,16 @@
       </div>
       <div class="pt-8 space-y-4">
         <!-- HAVE INFO -->
-        <div v-if="hasInfo">
-          <div class="text-sm text-primary cursor-pointer">Edit bank information</div>
+        <div v-if="withdrawInforStore.withdrawInfor">
+          <div v-if="withdrawInforStore.withdrawInfor.status !== 'verified'" class="text-sm text-[#C96868]">Your account has not been verified</div>
           <div class="flex items-center justify-between">
             <div class="space-y-2">
-              <div class="text-[17px] font-bold">Bank transfer to **** 1234</div>
-              <div class="text-base">{{ nameCard || 'Phillip Giggs' }}</div>
+              <div class="text-[17px] font-bold">Bank transfer to **** {{ withdrawInforStore.withdrawInfor.bankNumber }}</div>
+              <div class="text-base">{{ withdrawInforStore.withdrawInfor.bankHolderName }}</div>
             </div>
-            <button @click="toogleWithdrawVisible" class="btn">Withdraw</button>
+            <button v-if="withdrawInforStore.withdrawInfor.status === 'verified'" @click="toogleWithdrawVisible" class="btn">Withdraw</button>
+            <button v-else @click="handleStripeVerify" class="btn bg-[#C96868] text-[#ffffff]">Verify</button>
+
           </div>
         </div>
 

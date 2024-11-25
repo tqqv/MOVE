@@ -1,11 +1,18 @@
 const express = require("express");
-const { verifyAdmin } = require("../middlewares/verifyToken");
-const { test1, test2 } = require("../controllers/cashoutController");
+const { verifyStreamer } = require("../middlewares/verifyToken");
+const { createMethodWithdrawController, createLinkStripeVerifyController, updateVerifyAccountStripeController, cashoutController, deleleStripeAccountId, getWithdrawInforController, getListCashoutHistoryController } = require("../controllers/cashoutController");
 const cashoutRoute = express.Router();
 
 
-cashoutRoute.post('/createAccountId', test1);
-cashoutRoute.post('/createPayout', test2);
+cashoutRoute.get('/getWithdrawInfor', verifyStreamer, getWithdrawInforController);
+cashoutRoute.get('/getListCashoutHistory', verifyStreamer, getListCashoutHistoryController);
+cashoutRoute.post('/createWithdrawInfor', verifyStreamer, createMethodWithdrawController)
+cashoutRoute.get('/createLinkStripeVerify', verifyStreamer, createLinkStripeVerifyController)
+cashoutRoute.post('/updateStripeVerify', verifyStreamer, updateVerifyAccountStripeController)
+cashoutRoute.post('/createPayout', verifyStreamer, cashoutController);
+
+// cashoutRoute.post('/createBankToken', test4);
+cashoutRoute.delete('/delete/:accountId', deleleStripeAccountId);
 
 
 module.exports = cashoutRoute;

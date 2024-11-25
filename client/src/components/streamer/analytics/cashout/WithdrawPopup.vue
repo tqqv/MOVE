@@ -1,6 +1,8 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue';
   import Dialog from 'primevue/dialog';
+import { createPayout } from '@/services/cashout';
+import { toast } from 'vue3-toastify';
 
   const props = defineProps({
     isWithdrawVisible: Boolean,
@@ -10,9 +12,18 @@
   const toogleWithdrawVisible = () => {
     emit('toogleWithdrawVisible');
   };
-  const toogleProcessingPaymentVisible = () => {
-    emit('toogleProcessingPaymentVisible');
-    emit('toogleWithdrawVisible');
+
+  const repInput = ref();
+
+  const toogleProcessingPaymentVisible = async() => {
+    const res = await createPayout(repInput.value);
+
+    if(res && res.status === 200) {
+      emit('toogleProcessingPaymentVisible');
+      emit('toogleWithdrawVisible');
+    }else {
+      toast.error(res.message)
+    }
   };
 </script>
 
@@ -43,7 +54,7 @@
                 required
                 class="password_custom h-full"
                 placeholder="2500"
-                @input="(e) => capitalizeInput(e, 'fullName')"
+                v-model="repInput"
               />
             </div>
             <div class="text-primary cursor-pointer">Withdraw all</div>

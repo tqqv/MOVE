@@ -9,6 +9,8 @@
   import { useCardStore } from '@/stores/card.store';
   import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
   import { paymentSchema } from '@/utils/vadilation';
+import { createWithdrawInfor } from '@/services/cashout';
+import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
 
   const props = defineProps({
     title: String,
@@ -19,6 +21,16 @@
   const getRepsStore = useGetRepsStore();
   const cardStore = useCardStore();
   const userStore = useUserStore();
+  const withdrawInforStore = useWithdrawInfor();
+
+
+  const isValidRoutingNumber = ref(true);
+  const bankData = ref({
+    routingNumber: '',
+    bankHolderName: '',
+    bankNumber: '',
+  })
+
   const errors = ref({
     bankName: '',
     bankAccountNumber: '',
@@ -64,6 +76,40 @@
       return false;
     }
   };
+
+  const formatRoutingNumber = () => {
+    let cleaned = bankData.value.routingNumber.replace(/\D/g, "");
+
+    if (cleaned.length > 4) {
+      cleaned = cleaned.slice(0, 4) + "-" + cleaned.slice(4, 7);
+    }
+
+    bankData.value.routingNumber = cleaned;
+
+    const regex = /^\d{4}-\d{3}$/;
+    isValidRoutingNumber.value = regex.test(bankData.value.routingNumber);
+  };
+
+  const handleSubmit = async() => {
+    console.log(bankData.value.bankHolderName);
+
+    if(!bankData.value.bankHolderName || !bankData.value.bankNumber || !bankData.value.routingNumber){
+      console.log("abccc");
+
+      return
+    }
+
+    const res = await createWithdrawInfor(bankData.value);
+    if(res && res.status === 200) {
+      // xử lý thành công ở đây
+      await withdrawInforStore.fetchWithdrawInfor()
+      console.log("success");
+
+    }else {
+      // log cái messages của cái ra
+      console.log(res.message);
+    }
+  }
 </script>
 
 <template>
@@ -79,102 +125,56 @@
       :style="{ width: '40rem' }"
     >
       <form @submit.prevent="handleSubmit" class="space-y-4">
-        <div class="grid grid-cols-1 gap-y-4 md:grid-cols-2 md:gap-x-3">
           <!-- Row 1: Bank Name and Bank Account Name -->
-          <div class="flex flex-col gap-y-2">
-            <div class="flex flex-col">
-              <label for="cardName" class="text_para">Bank Name</label>
-              <div
-                class="relative text-[14px] rounded-lg flex-1"
-                :class="errors.bankName ? 'error_password' : 'normal_password'"
-              >
-                <input type="text" required class="password_custom h-full" v-model="cardName"
-                placeholder="Enter your card name"
-              </div>
-              <span v-if="errors.cardName" class="error_message">{{ errors.cardName }}</span>
-            </div>
-          </div>
-
-          <div class="flex flex-col gap-y-2">
-            <div class="flex flex-col">
-              <label for="cardName" class="text_para">Bank account number</label>
-              <div
-                class="relative text-[14px] rounded-lg flex-1"
-                :class="errors.bankAccountNumber ? 'error_password' : 'normal_password'"
-              >
-                <input
-                  type="text"
-                  required
-                  class="password_custom h-full"
-                  v-model="cardName"
-                  placeholder="Enter your card name"
-                />
-              </div>
-              <span v-if="errors.bankAccountNumber" class="error_message">{{
-                errors.bankAccountNumber
-              }}</span>
-            </div>
-          </div>
-        </div>
-        <!-- Row 2: Card Number and Card Type -->
-
         <div class="flex flex-col gap-y-2">
           <div class="flex flex-col">
-            <label for="cardName" class="text_para">Bank Address</label>
+            <label for="cardName" class="text_para">Bank Holder Name</label>
             <div
               class="relative text-[14px] rounded-lg flex-1"
-              :class="errors.bankAddress ? 'error_password' : 'normal_password'"
+              :class="errors.bankHolderName ? 'error_password' : 'normal_password'"
             >
-              <input type="text" required class="password_custom h-full" v-model="bankAddress"
-              placeholder="Enter your card name"
+              <input type="text" required class="password_custom h-full" v-model="bankData.bankHolderName"
+                placeholder="Enter your bank holder name"
+              />
             </div>
-            <span v-if="errors.bankAddress" class="error_message">{{ errors.bankAddress }}</span>
+            <span v-if="errors.bankHolderName" class="error_message">{{ errors.bankHolderName }}</span>
           </div>
         </div>
+        <div class="flex flex-col gap-y-2">
+          <div class="flex flex-col">
+            <label for="cardName" class="text_para">Bank account number</label>
+            <div
+              class="relative text-[14px] rounded-lg flex-1"
+              :class="errors.bankAccountNumber ? 'error_password' : 'normal_password'"
+            >
+              <input type="text" required class="password_custom h-full" v-model="bankData.bankNumber"
+                placeholder="Enter your bank account number"
+              />
+            </div>
+            <span v-if="errors.bankAccountNumber" class="error_message">{{ errors.bankAccountNumber }}</span>
+          </div>
+        </div>
+
+
         <!-- Row 2: Card Number and Card Type -->
 
         <div class="flex flex-col gap-y-2">
           <div class="flex flex-col w-1/2">
-            <label for="cardName" class="text_para">SWIFT Code</label>
+            <label for="cardName" class="text_para">Bank code - Branch code</label>
             <div
               class="relative text-[14px] rounded-lg flex-1"
               :class="errors.swiftCode ? 'error_password' : 'normal_password'"
             >
-              <input type="text" required class="password_custom h-full" v-model="swiftCode"
-              placeholder="Enter your card name"
+              <input type="text" required class="password_custom h-full" v-model="bankData.routingNumber"
+                placeholder="BankCode-BranchCode"
+                :class="{'invalid': !isValidRoutingNumber}"
+                @input="formatRoutingNumber"
+              />
             </div>
             <span v-if="errors.swiftCode" class="error_message">{{ errors.swiftCode }}</span>
           </div>
         </div>
         <Divider class="w-full text-[#CCCCCC]" />
-        <!-- Row 3: FullName -->
-        <div class="flex flex-col">
-          <div class="flex flex-col">
-            <label for="cardName" class="text_para">Full name</label>
-            <div
-              class="relative text-[14px] rounded-lg flex-1"
-              :class="errors.fullName ? 'error_password' : 'normal_password'"
-            >
-              <input type="text" required class="password_custom h-full" v-model="fullName"
-              placeholder="Enter your card name"
-            </div>
-            <span v-if="errors.fullName" class="error_message">{{ errors.fullName }}</span>
-          </div>
-        </div>
-        <!-- Row 3: Mobile number -->
-        <div class="flex flex-col">
-          <div class="flex flex-col">
-            <label for="cardName" class="text_para">Mobile number</label>
-            <div
-              class="relative text-[14px] rounded-lg flex-1"
-              :class="errors.mobileNumber ? 'error_password' : 'normal_password'"
-            >
-              <input type="text" required class="password_custom h-full" v-model="mobileNumber"
-              placeholder="Enter your card name"
-            </div>
-            <span v-if="errors.mobileNumber" class="error_message">{{ errors.mobileNumber }}</span>
-          </div>
-        </div>
       </form>
       <div class="space-y-4 pt-8">
         <div class="text-xs">
@@ -186,16 +186,16 @@
           <span class="text-[#777777]"> and</span>
           <span class="text-primary"> Refund Policy</span>.
         </div>
-        <CheckMarkCustom
+        <!-- <CheckMarkCustom
           label="Save my payment details for faster checkout in the future."
           :checked="isCheckMark"
           groupName="checkMark"
           @update:modelValue="(value) => (isCheckMark = value)"
-        />
+        /> -->
         <div class="flex justify-end py-4">
           <button @click="handleBack" class="text-primary w-1/3">Back</button>
 
-          <button @click="handleNext" class="btn w-1/3">Next</button>
+          <button @click="handleSubmit" class="btn w-1/3">Submit</button>
         </div>
       </div>
     </Dialog>
