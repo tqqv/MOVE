@@ -69,9 +69,9 @@
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px]">
+  <div class="flex pt-[64px] h-screen">
     <SideBarFollow />
-    <div class="flex-1 overflow-y-auto overflow-x-none mb-4">
+    <div class="flex-1 overflow-x-none mb-4 overflow-y-scroll">
       <ViewLiveStreamContent
         :connectOBS="connectOBS"
         :liveStatus="liveStatus"
@@ -83,3 +83,14 @@
     <LiveChat :liveStreamData="liveStreamData.channel?.id" />
   </div>
 </template>
+
+<style scoped>
+  .overflow-y-scroll {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .overflow-y-scroll::-webkit-scrollbar {
+    display: none;
+  }
+</style>

@@ -3,7 +3,7 @@
 </script>
 
 <template>
-  <div class="flex w-full pt-[72px]">
+  <div class="flex w-full pt-[64px]">
     <WalletContent />
   </div>
 </template>

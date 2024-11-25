@@ -19,7 +19,7 @@
   import { useUserStore } from '@/stores/user.store';
   import { RouterLink, useRouter } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
-  import { debounce } from '@/utils';
+  import { debounce, formatView } from '@/utils';
   import { searchInformation } from '@/services/search';
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
@@ -238,7 +238,7 @@
 <template>
   <nav class="bg-[#18181b] text-white fixed w-full z-[100]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
-      <div class="relative flex h-16 items-center justify-between">
+      <div class="relative flex h-14 items-center justify-between">
         <!-- Mobile menu button-->
         <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
           <button
@@ -280,7 +280,7 @@
           </button>
         </div>
         <!-- Nav items -->
-        <div class="flex items-center w-1/3 justify-center md:items-stretch md:justify-start">
+        <div class="flex items-center w-2/5 justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
               <RouterLink
@@ -298,13 +298,13 @@
             </div>
           </div>
         </div>
-        <div class="w-1/3 h-8 flex justify-center items-center">
+        <div class="w-1/5 h-8 flex justify-center items-center">
           <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
-        <div class="w-1/3 items-center justify-end gap-x-6 hidden md:flex">
+        <div class="w-2/5 items-center justify-end gap-x-6 hidden md:flex">
           <!-- User -->
-          <div class="relative w-[292px] min-w-[120px]">
-            <InputGroup class="h-[40px] hidden md:flex">
+          <div class="relative w-[262px] min-w-[120px]">
+            <InputGroup class="h-[36px] hidden md:flex">
               <InputText
                 class="text-sm"
                 id="search-menu-button"
@@ -316,7 +316,11 @@
                 @focus="handleFocus"
                 @blur="handleBlur"
               />
-              <Button icon="pi pi-search" class="btn rounded-s-none" @click="performSearch" />
+              <Button
+                icon="pi pi-search text-sm"
+                class="btn rounded-s-none"
+                @click="performSearch"
+              />
             </InputGroup>
             <div
               v-if="isSearchPopupOpen"
@@ -345,11 +349,11 @@
 
           <!-- User -->
           <template v-else>
-            <div v-if="userStore.user?.role == 'user' || 'streamer'" class="relative">
+            <div v-if="userStore.user?.role == 'user' || 'streamer'" class="relative text-sm">
               <div
                 v-if="userStore.user?.REPs === 0"
                 @click="toggleGetREPsMenu"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
+                class="rounded-md px-3 py-2 text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
                 Get REP$
@@ -357,10 +361,10 @@
               <div
                 v-else
                 @click="toggleGetREPsMenu"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
+                class="rounded-md px-3 py-2 text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
-                {{ userStore.user?.REPs }} REP$
+                {{ formatView(userStore.user?.REPs) }} REP$
               </div>
               <div
                 id="reps-menu"
