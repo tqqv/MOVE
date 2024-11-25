@@ -18,10 +18,14 @@ export const usePopupStore = defineStore('popup', () => {
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
   const isSelectPaymentMethod = ref(false);
+  const isCompletePurchaseVisible = ref(false);
 
   const isHaveCard = ref(false);
   const isOrderSuccessful = ref(true);
   const isCancelPayment = ref(false);
+  const toggleCompletePurchaseVisible = () => {
+    isCompletePurchaseVisible.value = !isCompletePurchaseVisible.value;
+  };
   const toggleGetREPsMenuOpen = () => {
     showGetREPsMenuOpen.value = !showGetREPsMenuOpen.value;
   };
@@ -151,5 +155,7 @@ export const usePopupStore = defineStore('popup', () => {
     isCancelPayment,
     isSelectPaymentMethod,
     toggleSelectPaymentMethod,
+    toggleCompletePurchaseVisible,
+    isCompletePurchaseVisible,
   };
 });

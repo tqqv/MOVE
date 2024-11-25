@@ -16,6 +16,10 @@
       type: [Date, String],
       default: null,
     },
+    startDate: {
+      type: [Date, String],
+      default: null,
+    },
   });
 
   const selectedDate = ref(props.defaultDate);
@@ -39,6 +43,7 @@
 
     selectedDate.value = props.defaultDate;
   });
+  const today = ref(new Date());
 </script>
 
 <template>
@@ -51,6 +56,8 @@
       :class="['w-[150px]  text-xs']"
       dateFormat="dd/mm/yy"
       showIcon
+      :maxDate="today"
+      :minDate="startDate"
     ></Calendar>
   </div>
 </template>
