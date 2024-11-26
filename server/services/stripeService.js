@@ -84,6 +84,33 @@ const createStripeAccountId = async(email) => {
   }
 }
 
+const createNewBankAccount = async(accountId, bankData) => {
+  try {
+    const newBankAccount = await stripe.accounts.createExternalAccount(accountId, {
+      external_account: {
+        object: "bank_account",
+        country: "SG",
+        currency: "sgd",
+        account_holder_name: bankData.bankHolderName,
+        routing_number: bankData.routingNumber,
+        account_number: bankData.bankNumber,
+      },
+    });
+
+    const updatedBankAccount = await stripe.accounts.updateExternalAccount(
+        accountId,
+        newBankAccount.id,
+        {
+            default_for_currency: true,
+        }
+      );
+
+    return updatedBankAccount
+  } catch (error) {
+    throw new Error(error.message)
+  }
+}
+
 const updateStripeAccount = async(accountId, channelData, bankData) => {
   try {
     let firstName
@@ -298,7 +325,7 @@ const retrievePayout = async(payoutId, stripeAccountId) => {
 
 const deleteWithdrawMethod = async(accountId, bankId) => {
   try {
-    return await await stripe.accounts.deleteExternalAccount(accountId, bankId)
+    return await stripe.accounts.deleteExternalAccount(accountId, bankId)
   } catch (error) {
     throw new Error(error.message)
   }
@@ -320,5 +347,6 @@ module.exports = {
   createStripeLinkVerify,
   retrieveAccountStripe,
   retrievePayout,
-  deleteWithdrawMethod
+  deleteWithdrawMethod,
+  createNewBankAccount
 }

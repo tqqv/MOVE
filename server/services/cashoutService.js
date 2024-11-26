@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout, deleteWithdrawMethod } = require("./stripeService.js");
+const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout, deleteWithdrawMethod, createNewBankAccount } = require("./stripeService.js");
 const { Channel, User, WithdrawInfor, Withdraw, sequelize } = db;
 
 
@@ -48,25 +48,47 @@ const createMethodWithdraw = async(channelId, bankData) => {
       const account = await createStripeAccountId(channel.User.email)
       channel.stripeAccountId = account
       await channel.save()
+
+      const res = await updateStripeAccount(channel.stripeAccountId, channel.User, bankData)
+
+      const createWithdrawInfor = await WithdrawInfor.create({
+        channelId: channelId,
+        bankName: res.external_accounts.data[0].bank_name,
+        bankHolderName: bankData.bankHolderName,
+        bankNumber: res.external_accounts.data[0].last4,
+        routingNumber: bankData.routingNumber,
+        stripeBankId: res.external_accounts.data[0].id,
+        status: res.requirements.currently_due[0] || "verified"
+      })
+
+      return {
+        status: 200,
+        data: createWithdrawInfor,
+        message: "Successful"
+      }
+    } else {
+      const res = await createNewBankAccount(channel.stripeAccountId, bankData)
+      console.log(res);
+
+      const createWithdrawInfor = await WithdrawInfor.create({
+        channelId: channelId,
+        bankName: res.bank_name,
+        bankHolderName: bankData.bankHolderName,
+        bankNumber: res.last4,
+        routingNumber: bankData.routingNumber,
+        stripeBankId: res.id,
+        status: "verified"
+      })
+
+      // await detachBankAccount(channelId, channel.stripeAccountId)
+      return {
+        status: 200,
+        data: createWithdrawInfor,
+        message: "Successful"
+      }
     }
 
-    const res = await updateStripeAccount(channel.stripeAccountId, channel.User, bankData)
 
-    const createWithdrawInfor = await WithdrawInfor.create({
-      channelId: channelId,
-      bankName: res.external_accounts.data[0].bank_name,
-      bankHolderName: bankData.bankHolderName,
-      bankNumber: res.external_accounts.data[0].last4,
-      routingNumber: bankData.routingNumber,
-      stripeBankId: res.external_accounts.data[0].id,
-      status: res.requirements.currently_due[0] || "verified"
-    })
-
-    return {
-      status: 200,
-      data: createWithdrawInfor,
-      message: "Successful"
-    }
   } catch (error) {
     return {
       status: 500,
@@ -151,9 +173,20 @@ const cashout = async(channelId, repInput) => {
       },
       include: [{
         model: WithdrawInfor,
-        attributes: ['stripeBankId']
+        attributes: ['stripeBankId'],
+        where: {
+          status: 'verified'
+        }
       }]
     })
+
+    if (!channel.WithdrawInfors.stripeBankId) {
+      return {
+        status: 400,
+        data: null,
+        message: 'Insert your bank account',
+      };
+    }
 
     if (repInput < 2500) {
       return {
@@ -244,14 +277,27 @@ const checkStatusStripePayout = async (channelId) => {
 };
 
 
-const getListCashoutHistory = async(channelId) => {
+const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDate, sortCondition) => {
   try {
     await checkStatusStripePayout(channelId);
 
-    const listCashout = await Withdraw.findAll({
-      where: {
-        channelId: channelId,
+    const whereCondition = { channelId };
+
+    if (startDate && endDate) {
+      if (!endDate.includes(' ') && !startDate.includes(' ')) {
+        endDate = `${endDate} 23:59:59`;
+        startDate = `${startDate} 00:00:00`;
       }
+      whereCondition.createdAt = {
+          [Op.between]: [startDate, endDate]
+      };
+    }
+
+    const listCashout = await Withdraw.findAll({
+      where: whereCondition,
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize *1,
+      limit: pageSize*1
     })
 
     return {
@@ -270,7 +316,7 @@ const getListCashoutHistory = async(channelId) => {
 
 const getWithdrawInfor = async(channelId) => {
   try {
-    const withdrawInfor = await WithdrawInfor.findOne({where: { channelId: channelId }})
+    const withdrawInfor = await WithdrawInfor.findOne({where: { channelId: channelId, status: 'verified' }})
 
     return {
       status: 200,
@@ -286,23 +332,67 @@ const getWithdrawInfor = async(channelId) => {
   }
 }
 
+const detachBankAccount = async (channelId, accountId) => {
+  try {
+    const listDelete = await WithdrawInfor.findAll({
+      where: { channelId: channelId, status: 'deleted' },
+    });
+
+    if (!listDelete.length) {
+      console.log('No records with status "deleted" found.');
+      return;
+    }
+
+    for (const withdrawInfor of listDelete) {
+      try {
+
+        await deleteWithdrawMethod(accountId, withdrawInfor.stripeBankId);
+        console.log(`Successfully deleted withdraw method: ${withdrawInfor.stripeBankId}`);
+
+        await WithdrawInfor.destroy({
+          where: {
+            channelId: channelId,
+            status: 'deleted',
+            stripeBankId: withdrawInfor.stripeBankId,
+          },
+        });
+
+      } catch (err) {
+        console.error(`Error processing stripeBankId ${withdrawInfor.stripeBankId}: ${err.message}`);
+      }
+    }
+
+    console.log('All deletions processed successfully.');
+  } catch (error) {
+    console.error('Error in detachBankAccount:', error.message);
+  }
+};
+
+
 const deleteWithdrawInfor = async(channelId, stripeBankId) => {
   try {
-    const channel = await Channel.findOne({where: { id: channelId }})
-
-    await deleteWithdrawMethod(channel.stripeAccountId, stripeBankId)
-
-    await WithdrawInfor.destroy({
-      where: {
-        channelId: channelId,
-        stripeBankId: stripeBankId
+    const [updatedRows] = await WithdrawInfor.update(
+      { status: 'deleted' },
+      {
+        where: {
+          channelId: channelId,
+          stripeBankId: stripeBankId,
+        },
       }
-    })
+    );
 
-    return {
-      status: 200,
-      message: "Bank removed successfully"
+    if (updatedRows === 0) {
+      return {
+        status: 404,
+        message: "No records were removed."
+      }
+    } else {
+      return {
+        status: 200,
+        message: "Bank removed successfully"
+      }
     }
+
 
   } catch (error) {
     return {
