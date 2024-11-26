@@ -208,14 +208,15 @@
   <tr class="bg-white border-b-[1px] border-gray-dark">
     <!-- COMMENT -->
     <td class="w-[50%] px-6 py-4 font-normal align-top text-gray-900">
-      <div class="flex gap-x-4">
+      <div class="flex gap-x-4">    <div class="flex-shrink-0">
+
         <RouterLink :to="`/user/${comment.userComments?.username}`">
 
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
           alt="avatar"
-          class="size-14 object-cover rounded-full flex-shrink-0"
-        /></RouterLink>
+          class="size-12 object-cover rounded-full "
+        /></RouterLink></div>
         <!-- RIGHT COMMENT -->
         <div class="flex flex-col flex-grow gap-y-1">
           <!-- REPS SENDER -->
