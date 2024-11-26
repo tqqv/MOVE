@@ -166,7 +166,7 @@ const cashout = async(channelId, repInput) => {
       }
     )
 
-    await channel.decrement('rep', { by: rep });
+    await channel.decrement('rep', { by: repInput });
 
     // chưa xử lý trừ rep nè check nghe
 
@@ -197,14 +197,15 @@ const checkStatusStripePayout = async (channelId) => {
       return;
     }
 
+    const channel = await Channel.findOne({where: {id: channelId}})
+
     for (const payout of listPending) {
       try {
-        const check = await retrievePayout(payout.stripePayoutId);
+        const check = await retrievePayout(payout.stripePayoutId, channel.stripeAccountId);
 
         if (check.status !== "pending") {
-          payout.status = check.status;
           await Withdraw.update(
-            { status: payout.status },
+            { status: check.status === "paid" ? "completed" : check.status },
             { where: { stripePayoutId: payout.stripePayoutId } }
           );
           if (check.status === "failed") {
@@ -212,11 +213,10 @@ const checkStatusStripePayout = async (channelId) => {
               { rep: payout.rep },
               { where: { id: channelId } }
             );
-            // Thêm logic bắn thông báo nếu cần
           }
         }
       } catch (err) {
-        console.error(`Failed to process payout with ID ${payout.stripePayoutId}: ${err.message}`);
+        console.error(`Loi pay out Id ${payout.stripePayoutId}: ${err.message}`);
       }
     }
   } catch (error) {

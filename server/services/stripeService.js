@@ -263,7 +263,7 @@ const deleteStripeAccountId = async(accountId) => {
     //   accountId,
     //   stripeBankId
     // );
-    const account = await stripe.accounts.retrieve(accountId);
+    // const account = await stripe.accounts.retrieve(accountId);
 
     // return {
     //   status: 200,
@@ -272,10 +272,10 @@ const deleteStripeAccountId = async(accountId) => {
     // }
 
     // return await stripe.account.del(accountId)
-    // const account = await stripe.payouts.list({
-    //   limit: 3,
-    //   destination: 'acct_1QP5gA4P7oYbiP6k'
-    // });
+    const account = await stripe.payouts.retrieve(
+      accountId,
+      { stripeAccount: "acct_1QP5gA4P7oYbiP6k" }
+    );
     return {
       status: 200,
       data: account,
@@ -290,8 +290,10 @@ const deleteStripeAccountId = async(accountId) => {
   }
 }
 
-const retrievePayout = async(payoutId) => {
-  return await stripe.payouts.retrieve(payoutId);
+const retrievePayout = async(payoutId, stripeAccountId) => {
+  // console.log(stripeAccountId);
+
+  return await stripe.payouts.retrieve(payoutId, { stripeAccount: stripeAccountId });
 }
 
 
