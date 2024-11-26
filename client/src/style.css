@@ -1,5 +1,6 @@
 html {
   overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 /* scrollbar */
@@ -20,7 +21,6 @@ html {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
-
 
 @layer tailwind-base, primevue, tailwind-utilities;
 

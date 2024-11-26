@@ -12,6 +12,7 @@
   import ReportChat from './chatOnLiveStream/ReportChat.vue';
   import Reply from './icons/reply.vue';
   import Chat from './icons/chat.vue';
+  import NewDonation from './chatOnLiveStream/NewDonation.vue';
 
   const props = defineProps({
     isStreamer: Boolean,
@@ -168,7 +169,7 @@
 
 <template>
   <div
-    v-if="openLiveChat"
+    v-show="openLiveChat"
     class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
     :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[64px] h-[calc(100vh-64px)]'"
   >
@@ -200,6 +201,7 @@
         class="max-h-full h-[30px] flex-grow pb-1 relative"
         :class="{ 'max-h-[440px]  h-[70px]': isStreamer }"
       >
+        <NewDonation />
         <div
           class="flex flex-col-reverse px-2 py-3 h-full relative overflow-y-auto overflow-x-hidden scrollbar-custom"
           ref="chatContainerRef"
@@ -311,10 +313,7 @@
         :class="{ 'rounded-b-md': isStreamer }"
       >
         <!-- HIDDEN AFTER FOLLOW -->
-        <div v-if="!isStreamer" class="flex justify-start items-center gap-x-3 ml-3">
-          <p class="font-bold text-[13px]">Follow to chat</p>
-          <i class="pi pi-question-circle text-[0.8rem] mt-0.5"></i>
-        </div>
+
         <form class="flex flex-col mt-3 relative group" @submit.prevent="handleSendMessage">
           <!-- NON FOLLOW CHANNEL -->
           <FollowToChat
@@ -407,7 +406,7 @@
     </div>
   </div>
   <div
-    v-else
+    v-show="!openLiveChat"
     class="fixed top-20 right-0 m-3 p-3 bg-transparent rounded-md flex justify-center items-center cursor-pointer hover:bg-[#FFFFFF21]"
     v-tooltip="'Expand'"
     @click="handleOpenLiveChat"
