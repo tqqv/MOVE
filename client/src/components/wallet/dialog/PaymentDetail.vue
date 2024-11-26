@@ -16,7 +16,7 @@
     title: String,
   });
   const countries = ref([]);
-
+  const isSubmitting = ref(false);
   const cardStore = useCardStore();
   const errors = ref();
   const emit = defineEmits(['closePayment']);
@@ -83,6 +83,9 @@
     }
   };
   const handleSubmit = async () => {
+    if (isSubmitting.value) return;
+
+    isSubmitting.value = true;
     isLoandingSubmit.value = true;
     const isValid = await validatePaymentData();
 
@@ -131,6 +134,7 @@
       console.error('Error:', error.message);
     } finally {
       isLoandingSubmit.value = false;
+      isSubmitting.value = false;
     }
   };
 </script>
@@ -160,7 +164,7 @@
           <span class="text-primary"> Refund Policy</span>.
         </div>
         <div class="flex justify-center mt-4">
-          <button @click="handleSubmit" class="btn w-1/3">
+          <button @click="handleSubmit" class="btn w-1/3" :disabled="isSubmitting.value">
             <smallLoading v-if="isLoandingSubmit" fill="white" fill_second="#13d0b4" />
             <span v-else>Submit</span>
           </button>

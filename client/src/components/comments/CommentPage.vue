@@ -12,7 +12,6 @@
     isCommentable: Boolean,
   });
   const userStore = useUserStore();
-  console.log(userStore.user?.id);
 
   const comments = ref([]);
   const childComments = ref({});
@@ -172,16 +171,17 @@
     This video is not open for comments.
   </p>
     <WriteComments  
-      v-if="isCommentable"
+      v-if="isCommentable && userStore.user?.id"
       :videoId="videoId"
       :fetchChildComments="fetchChildComments"
       @sendComment="handleSendComment"
       :isCommentable="isCommentable"
     />
 
-    <CommentItem
+    <CommentItem 
       v-for="(comment, index) in comments"
-      v-if="comments.length > 0"
+      v-if="isCommentable"
+
       :key="comment.id"
       :comment="comment"
       :fetchChildComments="fetchChildComments"
@@ -193,15 +193,16 @@
       @fetchComments="fetchComments"
       :isCommentable="isCommentable"
 
-    /><p v-else class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
+    /><p    v-if="!comments.length > 0 " class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
     No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
-  </p>
+  </p >
     <div
-      v-if="hasMoreComments && comments.length > 0"
+      v-if="hasMoreComments && comments.length > 0 "
       class="font-bold text-[13px] text-primary cursor-pointer pt-2"
       @click="loadMoreComments"
     >
-      <span>Show more comments</span>
+      <span       v-if="isCommentable"
+      >Show more comments</span>
     </div>
   </div>
   

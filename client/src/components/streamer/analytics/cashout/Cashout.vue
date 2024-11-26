@@ -6,8 +6,9 @@
   import SelectBank from './SelectBank.vue';
   import BankDetails from './BankDetails.vue';
   import VerificationPopup from '@/components/popup/VerificationPopup.vue';
-import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
-import { getLinkStripeVerify } from '@/services/cashout';
+  import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
+  import { getLinkStripeVerify } from '@/services/cashout';
+  import { useUserStore } from '@/stores';
 
   const props = defineProps({
     reps: Number,
@@ -15,12 +16,11 @@ import { getLinkStripeVerify } from '@/services/cashout';
     nameCard: String,
   });
   const withdrawInforStore = useWithdrawInfor();
+  onMounted(async () => {
+    await withdrawInforStore.fetchWithdrawInfor();
+  });
+  const userStore = useUserStore();
 
-  onMounted(async() => {
-    await withdrawInforStore.fetchWithdrawInfor()
-  })
-
-  const hasInfo = ref(false);
   const isUpdateSuccessful = ref(false);
   const isWithdrawVisible = ref(false);
   const isProcessingPaymentVisible = ref(false);
@@ -39,12 +39,13 @@ import { getLinkStripeVerify } from '@/services/cashout';
     isProcessingPaymentVisible.value = !isProcessingPaymentVisible.value;
   };
 
-  const handleStripeVerify = async() => {
+  const handleStripeVerify = async () => {
     const res = await getLinkStripeVerify();
-    if(res && res.status === 200) {
+    if (res && res.status === 200) {
       window.open(res.data.data, '_self');
     }
-  }
+  };
+  console.log(userStore);
 </script>
 <template>
   <div class="container">
@@ -59,7 +60,7 @@ import { getLinkStripeVerify } from '@/services/cashout';
       <span class="text-lg font-bold whitespace-nowrap">Total REPs earned</span>
       <div class="space-y-2">
         <div class="flex gap-x-8 items-center">
-          <div class="text-[32px] font-bold">{{ reps || 1000 }} REPs</div>
+          <div class="text-[32px] font-bold">{{ userStore.user?.Channel.rep }} REPs</div>
           <div class="text-base">(Estimated value ${{ estimatedValue || 64.0 }})</div>
         </div>
         <div class="card">
@@ -72,15 +73,29 @@ import { getLinkStripeVerify } from '@/services/cashout';
       <div class="pt-8 space-y-4">
         <!-- HAVE INFO -->
         <div v-if="withdrawInforStore.withdrawInfor">
-          <div v-if="withdrawInforStore.withdrawInfor.status !== 'verified'" class="text-sm text-[#C96868]">Your account has not been verified</div>
+          <div
+            v-if="withdrawInforStore.withdrawInfor.status !== 'verified'"
+            class="text-sm text-[#C96868]"
+          >
+            Your account has not been verified
+          </div>
           <div class="flex items-center justify-between">
             <div class="space-y-2">
-              <div class="text-[17px] font-bold">Bank transfer to **** {{ withdrawInforStore.withdrawInfor.bankNumber }}</div>
+              <div class="text-[17px] font-bold">
+                Bank transfer to **** {{ withdrawInforStore.withdrawInfor.bankNumber }}
+              </div>
               <div class="text-base">{{ withdrawInforStore.withdrawInfor.bankHolderName }}</div>
             </div>
-            <button v-if="withdrawInforStore.withdrawInfor.status === 'verified'" @click="toogleWithdrawVisible" class="btn">Withdraw</button>
-            <button v-else @click="handleStripeVerify" class="btn bg-[#C96868] text-[#ffffff]">Verify</button>
-
+            <button
+              v-if="withdrawInforStore.withdrawInfor.status === 'verified'"
+              @click="toogleWithdrawVisible"
+              class="btn"
+            >
+              Withdraw
+            </button>
+            <button v-else @click="handleStripeVerify" class="btn bg-[#C96868] text-[#ffffff]">
+              Verify
+            </button>
           </div>
         </div>
 

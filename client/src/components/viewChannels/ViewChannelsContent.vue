@@ -79,15 +79,18 @@
   watch(
     () => route.params.username,
     async (newUsername) => {
-      username.value = newUsername;
-      activeTab.value = '0';
-      await fetchChannelData();
-      if (channelDetails.value !== null) {
-        channelId.value = channelDetails.value.id;
-        await fetchListFollowOfChannel(channelId.value);
+      if (newUsername !== username.value) {
+        username.value = newUsername;
+        activeTab.value = '0';
+        await fetchChannelData();
+        if (channelDetails.value !== null) {
+          channelId.value = channelDetails.value.id;
+          await fetchListFollowOfChannel(channelId.value);
+        }
       }
     },
   );
+
   const onTabChange = (event) => {
     activeTab.value = event;
   };
@@ -116,7 +119,7 @@
             <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
+            <TabPanel v-if="channelDetails" v-for="tab in tabs" :key="tab.component" :value="tab.value">
               <component
                 :is="tab.component"
                 :channelDetails="channelDetails"

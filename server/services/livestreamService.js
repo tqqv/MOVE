@@ -542,7 +542,7 @@ const getStateByCountryAndStreamIdFromIp = async(livestreamId, country) => {
 
       attributes: [
         'city',
-        [Sequelize.fn('COUNT', Sequelize.col('city')), 'viewerCount']
+        [Sequelize.fn('COUNT', Sequelize.col('viewerId')), 'viewerCount']
       ],
       group: ['city'],
       raw: true

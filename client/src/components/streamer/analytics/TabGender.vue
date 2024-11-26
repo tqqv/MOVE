@@ -11,6 +11,9 @@
       type: Number,
       required: true,
     },
+    isLoading: {
+      type: Boolean,
+    },
   });
 
   const defaultStats = [
@@ -21,7 +24,7 @@
 
   const mergedStats = computed(() => {
     return defaultStats.map((defaultStat) => {
-      const foundStat = props.genderStats.find((stat) => {
+      const foundStat = props.genderStats?.find((stat) => {
         return stat.genderGroup === defaultStat.genderGroup;
       });
 
@@ -44,6 +47,7 @@
       :title="stat.genderGroup"
       :value="stat.viewerCount"
       :percent="stat.percent"
+      :isLoading="isLoading"
     />
   </div>
 </template>

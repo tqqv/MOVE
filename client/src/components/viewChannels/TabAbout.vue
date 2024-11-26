@@ -80,8 +80,10 @@
           :key="index"
           class="flex flex-col items-center space-y-4"
         >
-          <RouterLink :to="`/user/${item.User.username}`">
-            <div class="relative inline-block">
+          <RouterLink
+            :to="item.isLive ? `/live/${item.User.username}` : `/user/${item.User.username}`"
+          >
+            <div class="flex relative justify-center">
               <div
                 :class="[
                   'flex items-center justify-center w-16 h-16 rounded-full',
@@ -97,15 +99,18 @@
                   v-if="item.isLive"
                   class="absolute bottom-0 left-1/2 transform -translate-x-1/2 translate-y-1/2"
                 />
-              </div></div
-          ></RouterLink>
-          <div class="flex flex-col items-center text-center">
-            <p class="text-[20px] flex items-center justify-center">
-              {{ item.channelName }}
-              <Verified v-if="item.popularCheck" class="ml-2 mb-1 mr-2 fill-blue" />
-            </p>
-            <p class="text-[14px] text-body">{{ item.followCount ?? 0 }} followers</p>
-          </div>
+              </div>
+            </div>
+          </RouterLink>
+          <RouterLink :to="`/user/${item.User.username}`">
+            <div class="flex flex-col items-center text-center">
+              <p class="text-[20px] flex items-center justify-center pl-10 whitespace-nowrap">
+                {{ item.channelName }}
+                <Verified v-if="item.popularCheck" class="mx-2 fill-blue" />
+              </p>
+              <p class="text-[14px] text-body">{{ item.followCount ?? 0 }} followers</p>
+            </div></RouterLink
+          >
         </div>
       </div>
     </div>

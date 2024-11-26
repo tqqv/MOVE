@@ -49,13 +49,21 @@
       >
         <div class="flex items-center justify-center size-12 rounded-full flex-shrink-0">
           <img
-            :src="props.user.avatar"
+            :src="
+              userStore.user?.Channel ? userStore.user?.Channel?.avatar : userStore.user?.avatar
+            "
             :alt="props.user.username"
             alt="Avatar"
             class="w-full h-full rounded-full object-cover"
           />
         </div>
-        <h1 class="text_subTitle whitespace-nowrap">{{ props.user.username }}</h1>
+        <h1 class="text_subTitle whitespace-nowrap">
+          {{
+            userStore.user?.Channel
+              ? userStore.user?.Channel?.channelName
+              : userStore.user?.username
+          }}
+        </h1>
         <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
       </RouterLink>
       <hr class="h-px bg-gray-dark border-0 mb-4" />
@@ -78,18 +86,18 @@
             <dashboard class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
           </div>
-          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
-            <RouterLink
-              to="/wallet/payment-method"
-              class="flex flex-row items-center gap-x-2 group cursor-pointer"
-              @click="emit('closeAllPopups')"
-            >
+          <RouterLink
+            to="/wallet/payment-method"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
+          >
+            <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
               <wallet class="fill-black group-hover:fill-primary" />
               <h1 class="mb-1 group-hover:text-primary">
                 Wallet ({{ props.user?.REPs ?? 0 }} REPs)
-              </h1></RouterLink
-            >
-          </div>
+              </h1>
+            </div>
+          </RouterLink>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />
         <div class="flex flex-col gap-y-4 px-[2px]">

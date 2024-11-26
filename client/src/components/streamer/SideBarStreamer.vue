@@ -37,7 +37,7 @@
 
 <template>
   <div
-    class="sticky top-[72px] h-[calc(100vh-72px)] w-[261px] border-r-2 border-gray-dark bg-white"
+    class="sticky top-[64px] h-[calc(100vh-64px)] w-[261px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-ou"
   >
     <div class="flex flex-col py-3">
       <ul>

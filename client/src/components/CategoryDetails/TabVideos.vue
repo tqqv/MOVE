@@ -1,7 +1,7 @@
 <script setup>
   import { ref, watch } from 'vue';
   import { getMostViewOfVideo } from '@/services/browse';
-  import VideoListFilter from './VideoListFilter.vue';
+  import VideoListFilter from '@components/browse/VideoListFilter.vue';
 
   const props = defineProps({
     categoryTitle: {
@@ -31,7 +31,8 @@
 <template>
   <VideoListFilter
     :categoryTitle="currentCategoryTitle"
-    :fetchVideosFunction="getMostViewOfVideo"
     :sortByOptions="sortByOptions"
+    :isVisibleCategory="false"
+    :fetchVideosFunction="getMostViewOfVideo"
   />
 </template>
