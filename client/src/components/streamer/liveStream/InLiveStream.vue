@@ -21,7 +21,7 @@
 </script>
 <template>
   <div class="px-10 flex items-center flex-col gap-y-7">
-    <div class="w-full flex gap-x-8 justify-center">
+    <div class="w-full flex gap-x-8 justify-center overflow-x-hidden">
       <div
         class="flex flex-col max-w-[1284px] min-w-[700px] rounded-md basis-full justify-center shadow-md bg-white overflow-hidden"
       >
