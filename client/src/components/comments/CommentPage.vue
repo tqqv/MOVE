@@ -62,7 +62,6 @@
         });
 
         hasMoreComments.value = currentPage.value < response.data.data.totalPages;
-        console.log('fetch neeeeeeeeee', comments.value);
       }
     } catch (error) {
       console.error('Error fetching comments:', error);
@@ -122,12 +121,14 @@
     currentPage.value = 1;
     hasMoreComments.value = true;
     fetchComments();
+    
   };
 
   watch(() => props.videoId, resetComments);
 
   const handleSendComment = (newComment) => {
     if (newComment) {
+     
       comments.value.unshift(newComment);
       newComment.likeCount = newComment.likeCount || 0;
       // Cập nhật tổng số bình luận con cho bình luận cha
@@ -141,7 +142,6 @@
           parentComment.totalRepliesCount = (parentComment.totalRepliesCount || 0) + 1; // Cập nhật tổng số bình luận con
         }
       }  
-     console.log(newComment);
      
     } else {
       console.error('New comment is undefined or null');
@@ -160,6 +160,7 @@
 
   onMounted(() => {
     fetchComments();
+    
   });
 </script>
 

@@ -39,7 +39,7 @@
       type: Boolean,
       default: false,
     },
-    isGiftVisivle: Boolean,
+    isGiftVisible: Boolean,
     loading: {
       type: Boolean,
       required: true,
@@ -193,7 +193,7 @@
         class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase"
         @click="toggleFollow"
       >
-        <heart :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'" stroke="stroke-primary"  />
+        <heart :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'" stroke="stroke-primary" />
         Follow
       </div>
       <div
@@ -205,7 +205,7 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="username !== props.usernameDetails && !isGiftVisivle"
+          v-if="isGiftVisible && username !== props.usernameDetails"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
