@@ -1,5 +1,6 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createMethodWithdraw, updateVerifyAccountStripe, getLinkStripeVerify, cashout, getWithdrawInfor, getListCashoutHistory } = require("../services/cashoutService");
+const { sendMailConfirmWithdrawMethod, verifyOtp } = require("../services/authService");
+const { createMethodWithdraw, updateVerifyAccountStripe, getLinkStripeVerify, cashout, getWithdrawInfor, getListCashoutHistory, deleteWithdrawInfor } = require("../services/cashoutService");
 const { createStripeAccountId, createPayout, attachBankAccountToConnectedAccount, createBankToken, deleteStripeAccountId } = require("../services/stripeService");
 
 const createMethodWithdrawController = async (req, res, next) => {
@@ -50,6 +51,29 @@ const getListCashoutHistoryController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const sendMailConfirmWithdrawMethodController = async (req, res, next) => {
+  const userId = req.user.id
+  const result = await sendMailConfirmWithdrawMethod(userId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const checkOtpCodeController = async (req, res, next) => {
+  const userId = req.user.id
+  const otp = req.params.otp
+  const result = verifyOtp(userId, otp);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const deleteWithdrawInforController = async (req, res, next) => {
+  const channelId = req.user.channelId
+  const stripeBankId = req.params.stripeBankId
+  const result = deleteWithdrawInfor(channelId, stripeBankId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 
 module.exports = {
   createMethodWithdrawController,
@@ -59,4 +83,7 @@ module.exports = {
   deleleStripeAccountId,
   getWithdrawInforController,
   getListCashoutHistoryController,
+  sendMailConfirmWithdrawMethodController,
+  checkOtpCodeController,
+  deleteWithdrawInforController,
 }
