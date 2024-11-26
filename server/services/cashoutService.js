@@ -1,15 +1,34 @@
 const db = require("../models/index.js");
-const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout } = require("./stripeService.js");
+const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout, deleteWithdrawMethod } = require("./stripeService.js");
 const { Channel, User, WithdrawInfor, Withdraw, sequelize } = db;
 
 
 const createMethodWithdraw = async(channelId, bankData) => {
+  const bankNumberRegex = /^\d{9,16}$/;
+  const routingNumberRegex = /^\d{4}-\d{3}$/;
   try {
     if(!bankData.bankHolderName || !bankData.bankNumber || !bankData.routingNumber){
       return {
         status: 400,
         data: null,
         message: "Bank data not null."
+      }
+    }
+
+    // Validate Bank Singapore
+    if (!bankNumberRegex.test(bankData.bankNumber)) {
+      return {
+        status: 400,
+        data: null,
+        message: "Bank number must be 9-16 digits."
+      }
+    }
+
+    if (!routingNumberRegex.test(bankData.routingNumber)) {
+      return {
+        status: 400,
+        data: null,
+        message: "Routing number must be in the format XXXX-XXX."
       }
     }
 
@@ -267,11 +286,38 @@ const getWithdrawInfor = async(channelId) => {
   }
 }
 
+const deleteWithdrawInfor = async(channelId, stripeBankId) => {
+  try {
+    const channel = await Channel.findOne({where: { id: channelId }})
+
+    await deleteWithdrawMethod(channel.stripeAccountId, stripeBankId)
+
+    await WithdrawInfor.destroy({
+      where: {
+        channelId: channelId,
+        stripeBankId: stripeBankId
+      }
+    })
+
+    return {
+      status: 200,
+      message: "Bank removed successfully"
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createMethodWithdraw,
   updateVerifyAccountStripe,
   getLinkStripeVerify,
   cashout,
   getListCashoutHistory,
-  getWithdrawInfor
+  getWithdrawInfor,
+  deleteWithdrawInfor
 }

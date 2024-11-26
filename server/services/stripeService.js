@@ -271,11 +271,11 @@ const deleteStripeAccountId = async(accountId) => {
     //   message: "success"
     // }
 
-    // return await stripe.account.del(accountId)
-    const account = await stripe.payouts.retrieve(
-      accountId,
-      { stripeAccount: "acct_1QP5gA4P7oYbiP6k" }
-    );
+    const account = await stripe.account.del(accountId)
+    // const account = await stripe.payouts.retrieve(
+    //   accountId,
+    //   { stripeAccount: "acct_1QP5gA4P7oYbiP6k" }
+    // );
     return {
       status: 200,
       data: account,
@@ -296,6 +296,14 @@ const retrievePayout = async(payoutId, stripeAccountId) => {
   return await stripe.payouts.retrieve(payoutId, { stripeAccount: stripeAccountId });
 }
 
+const deleteWithdrawMethod = async(accountId, bankId) => {
+  try {
+    return await await stripe.accounts.deleteExternalAccount(accountId, bankId)
+  } catch (error) {
+    throw new Error(error.message)
+  }
+}
+
 
 module.exports = {
   createStripeCustomerId,
@@ -311,5 +319,6 @@ module.exports = {
   updateStripeAccount,
   createStripeLinkVerify,
   retrieveAccountStripe,
-  retrievePayout
+  retrievePayout,
+  deleteWithdrawMethod
 }
