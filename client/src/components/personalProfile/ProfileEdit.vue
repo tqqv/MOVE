@@ -5,7 +5,7 @@
   import ChangePasswordPopup from '../changePassword/ChangePasswordPopup.vue';
   import { usePopupStore } from '@/stores/popup.store';
   import ChangePasswordSuccessPopup from '../changePassword/ChangePasswordSuccessPopup.vue';
-  import { fetchCountries, fetchStates } from '@/services/address';
+  import { fetchCountries, fetchStates, fetchNational } from '@/services/address';
   import { useUserStore } from '@/stores/user.store';
   import { updateProfile } from '@/services/user';
   import { toast } from 'vue3-toastify';
@@ -40,6 +40,7 @@
     city: '',
     avatar: '',
     dob: '',
+    nationality: '',
   });
 
   const emailVerified = computed(() => userStore?.user?.isVerified);
@@ -47,6 +48,8 @@
   const initialProfileData = ref({ ...profileData.value });
   const countries = ref([]);
   const states = ref([]);
+  const nationality = ref(null);
+
   const isLoadingAvatar = ref(false);
   const errors = ref({});
   const isLoading = ref(false);
@@ -115,7 +118,17 @@
       console.error(error);
     }
   };
-
+  const loadNational = async () => {
+    try {
+      nationality.value = await fetchNational(profileData.value.country);
+      console.log(nationality.value[0].demonyms.eng.f);
+      if (nationality.value && nationality.value[0]) {
+        profileData.value.nationality = nationality.value[0].demonyms.eng.f;
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
   const handleCountryChange = () => {
     if (profileData.value.country) {
       loadStates(profileData.value.country.iso2);
@@ -164,11 +177,13 @@
       toast.error('Please check the information again');
       return;
     }
+    await loadNational();
 
     const changedFields = getChangedFields(profileData.value, initialProfileData.value);
     if (Object.keys(changedFields).length > 0) {
       try {
         isLoading.value = true;
+
         const response = await updateProfile(changedFields);
         if (!response.error) {
           initialProfileData.value = { ...profileData.value };

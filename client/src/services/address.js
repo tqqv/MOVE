@@ -1,5 +1,6 @@
 import axios from 'axios';
 const apiBaseUrl = 'https://api.countrystatecity.in/v1/countries';
+const apiNationalUrl = 'https://restcountries.com/v3.1/';
 
 const axiosCountryInstance = axios.create({
   baseURL: apiBaseUrl,
@@ -7,7 +8,9 @@ const axiosCountryInstance = axios.create({
     'X-CSCAPI-KEY': import.meta.env.VITE_KEYAPICOUNTRY,
   },
 });
-
+const axiosNationalInstance = axios.create({
+  baseURL: apiNationalUrl,
+});
 const fetchData = async (url) => {
   try {
     const response = await axiosCountryInstance.get(url);
@@ -26,4 +29,17 @@ const fetchStates = async (iso2) => {
   return await fetchData(`/${iso2}/states`);
 };
 
-export { fetchCountries, fetchStates, fetchData };
+const fetchDataNational = async (url) => {
+  try {
+    const response = await axiosNationalInstance.get(url);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching data:', error);
+    throw error;
+  }
+};
+
+const fetchNational = async (country) => {
+  return await fetchDataNational(`/name/${country}`);
+};
+export { fetchCountries, fetchStates, fetchData, fetchNational };
