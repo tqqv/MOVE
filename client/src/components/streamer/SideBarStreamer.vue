@@ -9,12 +9,15 @@
   import SettingIcon from '@icons/setting.vue';
 
   const route = useRoute();
-  const isDropdownOpen = ref(false);
 
-  const toggleDropdown = () => {
-    isDropdownOpen.value = !isDropdownOpen.value;
+  const dropdownState = ref({});
+
+  // Hàm để toggle  thái dropdown
+  const toggleDropdown = (name) => {
+    dropdownState.value[name] = !dropdownState.value[name];
   };
 
+  // Dữ liệu menu
   const menuItems = [
     { name: 'Home', icon: HomeIcon, link: '/dashboard-streamer' },
     { name: 'Video', icon: VideoIcon, link: '/dashboard-streamer/videos' },
@@ -30,7 +33,16 @@
         { name: 'Live analytics', link: '/dashboard-streamer/live-stream-analytics' },
       ],
     },
-    { name: 'Cashout', icon: CashoutIcon, link: '/dashboard-streamer/cashout' },
+    {
+      name: 'Cashout',
+      icon: CashoutIcon,
+      link: '/dashboard-streamer/cashout',
+      hasDropdown: true,
+      submenu: [
+        { name: 'Cashout', link: '/dashboard-streamer/cashout' },
+        { name: 'Cashout History', link: '/dashboard-streamer/cashout-history' },
+      ],
+    },
     { name: 'Channel settings', icon: SettingIcon, link: '/dashboard-streamer/channel-setting' },
   ];
 </script>
@@ -46,26 +58,26 @@
             <div
               class="p-4 cursor-pointer group hover:bg-primary/20 flex gap-x-4 font-semibold items-center rounded-md"
               :class="{ 'bg-primary/85 font-bold hover:bg-primary/85': route.path === item.link }"
-              @click="item.hasDropdown && toggleDropdown()"
+              @click="item.hasDropdown && toggleDropdown(item.name)"
             >
               <component :is="item.icon" />
               <p class="text-sm">{{ item.name }}</p>
               <span
                 v-if="item.hasDropdown"
                 class="ml-auto"
-                :class="isDropdownOpen ? 'pi pi-angle-up' : 'pi pi-angle-down'"
+                :class="dropdownState[item.name] ? 'pi pi-angle-up' : 'pi pi-angle-down'"
               ></span>
             </div>
           </router-link>
 
           <!-- Submenu -->
-          <ul v-if="isDropdownOpen && item.hasDropdown" class="ml-4 mt-1">
+          <ul v-if="dropdownState[item.name] && item.hasDropdown" class="ml-4 mt-1">
             <li v-for="subitem in item.submenu" :key="subitem.name" class="block mx-2 mb-1">
               <router-link :to="subitem.link" class="block">
                 <div
                   class="p-2 cursor-pointer group hover:bg-primary/20 flex items-center rounded-md"
                   :class="{
-                    ' font-bold hover:bg-primary/20': route.path.startsWith(subitem.link),
+                    'font-bold hover:bg-primary/20': route.path === subitem.link,
                   }"
                 >
                   <p class="text-sm">{{ subitem.name }}</p>

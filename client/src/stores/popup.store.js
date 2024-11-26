@@ -27,6 +27,7 @@ export const usePopupStore = defineStore('popup', () => {
   const isCancelPayment = ref(false);
   const toggleVerificationPopup = () => {
     showVerificationPopup.value = !showVerificationPopup.value;
+  };
   const toggleCompletePurchaseVisible = () => {
     isCompletePurchaseVisible.value = !isCompletePurchaseVisible.value;
   };

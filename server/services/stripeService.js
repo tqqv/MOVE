@@ -298,7 +298,7 @@ const retrievePayout = async(payoutId, stripeAccountId) => {
 
 const deleteWithdrawMethod = async(accountId, bankId) => {
   try {
-    return await await stripe.accounts.deleteExternalAccount(accountId, bankId)
+    return await stripe.accounts.deleteExternalAccount(accountId, bankId)
   } catch (error) {
     throw new Error(error.message)
   }

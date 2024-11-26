@@ -4,14 +4,22 @@ import { ref } from 'vue';
 
 export const useWithdrawInfor = defineStore('getWithdrawInfor', () => {
   const withdrawInfor = ref({});
-
+  const isLoadingWithdrawInfor = ref(false);
   const fetchWithdrawInfor = async () => {
-    const res = await getWithdrawInfor();
+    isLoadingWithdrawInfor.value = true;
 
-    if (res && res.status === 200) {
-      withdrawInfor.value = res.data.data;
-    } else {
-      console.error('get withdraw infor failed');
+    try {
+      const res = await getWithdrawInfor();
+
+      if (res && res.status === 200) {
+        withdrawInfor.value = res.data.data;
+      } else {
+        console.error('Get withdraw info failed');
+      }
+    } catch (error) {
+      console.error('Error fetching withdraw info', error);
+    } finally {
+      isLoadingWithdrawInfor.value = false;
     }
   };
 
@@ -23,5 +31,6 @@ export const useWithdrawInfor = defineStore('getWithdrawInfor', () => {
     withdrawInfor,
     fetchWithdrawInfor,
     clearWithdrawInfor,
+    isLoadingWithdrawInfor,
   };
 });
