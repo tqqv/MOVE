@@ -97,7 +97,7 @@ export const paymentSchema = yup.object({
     .string()
     .matches(
       /^[A-Z]+(?:\s[A-Z]+)*$/,
-      'Cardholder name must be uppercase, contain only letters without accents, and single spaces between words',
+      'Cardholder name must be contain only letters without accents, and single spaces between words',
     )
     .trim('Cardholder name must not have leading or trailing spaces')
     .min(3, 'Cardholder name must be at least 3 characters')

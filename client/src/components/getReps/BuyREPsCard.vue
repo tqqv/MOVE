@@ -1,9 +1,8 @@
 <script setup>
   import { ref, onMounted, watch } from 'vue';
   import Divider from 'primevue/divider';
-  import { usePopupStore, useGetRepsStore, useContryStore } from '@/stores';
+  import { usePopupStore, useGetRepsStore, useContryStore, useCardStore } from '@/stores';
   import { getCardInfo, getPaymentHistory } from '@/services/payment';
-  import { useCardStore } from '@/stores/card.store';
 
   const emit = defineEmits(['toggleBuyREPs']);
   const props = defineProps({
@@ -15,6 +14,9 @@
   const getRepsStore = useGetRepsStore();
   const popupStore = usePopupStore();
   const cardStore = useCardStore();
+  const countryStore = useContryStore();
+
+  let hasFetchedCountries = false;
 
   // console.log(getRepsStore.selectedOption);
 
@@ -33,10 +35,15 @@
   // };
 
   const toggleBuyREPs = async () => {
-    popupStore.toggleSelectPaymentMethod();
-
-    // await cardStore.fetchCard();
-
+    popupStore.toggleCompletePurchaseVisible();
+    if (!hasFetchedCountries) {
+      countryStore.fetchCountries();
+      hasFetchedCountries = true;
+    }
+    getRepsStore.setSelectedOption(getRepsStore.selectedOption);
+    // close buy reps
+    popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
+    emit('toggleGetREPsMenu');
     // if (cardStore.card?.cardOwnerName) {
     //   popupStore.isHaveCard = true;
     // } else {

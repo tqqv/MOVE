@@ -29,12 +29,10 @@
   import { getPaymentHistory } from '@/services/payment';
 
   import GetREPS from './getReps/GetREPS.vue';
-  import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
-  import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
   import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
   import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
-  import SelectPaymentMethod from './getReps/dialog/SelectPaymentMethod.vue';
   import Stream from './icons/Stream.vue';
+  import CompletePurchase from '@/components/getReps/dialog/CompletePurchase.vue';
 
   const popupStore = usePopupStore();
   const userStore = useUserStore();
@@ -557,21 +555,13 @@
   <UploadVideo />
   <VideoDetail />
   <!-- POPUP GET REPS -->
-  <SelectPaymentMethod title="Select payment method" />
-  <CompletePurchaseNoInfo
-    v-if="!popupStore.isHaveCard"
+  <CompletePurchase
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
     @toggleOpenOrder="toggleOpenOrder"
     :isFirstTime="isFirstTime"
   />
-  <CompletePurchaseHaveInfo
-    v-else
-    title="Complete Purchase"
-    :isOpenBuyREPs="popupStore.showOpenBuyREPs"
-    @toggleOpenOrder="toggleOpenOrder"
-    :isFirstTime="isFirstTime"
-  />
+
   <ProcessingPayment />
   <OrderStatusPopup :isOpenOrder="isOpenOrder" @toggleOpenOrder="toggleOpenOrder" />
 </template>
