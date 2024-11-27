@@ -1,7 +1,8 @@
 <script setup>
-  import { ref, watch } from 'vue';
+  import { ref, computed } from 'vue';
   import Button from 'primevue/button';
   import { useGetRepsStore } from '@/stores/getReps.store';
+  import { useRoute } from 'vue-router';
 
   import { useUserStore } from '@/stores';
   import Skeleton from 'primevue/skeleton';
@@ -9,8 +10,11 @@
   import SmallLoading from './icons/smallLoading.vue';
   import Firework from './animation/firework.vue';
   import { sendMessage } from '@/services/socketService';
+  import { postComments, getAllComments } from '@/services/comment';
+
   const userStore = useUserStore();
   const getRepsStore = useGetRepsStore();
+  const route = useRoute();
 
   const props = defineProps({
     donationItems: {
@@ -35,6 +39,7 @@
 
   const messageDonate = ref();
   const loading = ref(false);
+  const videoId = computed(() => route.params.videoId);
 
   const toggleClose = () => {
     emit('toggleButtonGiftVisible');
@@ -62,6 +67,29 @@
   const handleSelectPresentMessage = (message) => {
     selectPresentMessage.value = selectPresentMessage.value === message ? null : message;
   };
+  // =========== DONATE COMMENT===============
+  const donateInComment = async (donationItemId, content) => {
+    if (!userStore.user) {
+      openLoginPopup();
+
+      return;
+    }
+    const data = { donationItemId, content };
+    console.log(videoId.value);
+
+    try {
+      const response = await postComments(videoId.value, data);
+
+      if (response.status === 200) {
+      } else {
+        console.error('Failed to create comment');
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+    }
+  };
+
+  // ==========================
 
   // ======= DONATE STREAM ===========
   const donateInLive = async (donationItemId, content) => {
@@ -107,9 +135,11 @@
 
   const handleDonation = () => {
     if (inputMessage.value) {
-      donateInLive(selectedValue.value?.id, messageDonate.value);
+      // donateInLive(selectedValue.value?.id, messageDonate.value);
+      donateInComment(selectedValue.value?.id, messageDonate.value);
     } else {
-      donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
+      // donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
+      donateInComment(selectedValue.value?.id, selectPresentMessage.value?.message);
     }
     handleSendMessage();
     messageDonate.value = '';
