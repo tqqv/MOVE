@@ -124,7 +124,7 @@
         dataKey="id"
         tableStyle="min-width: 50rem, text-align: center"
       >
-        <Column field="created_date" header="Date" sortable>
+        <Column field="createdAt" header="Date" sortable>
           <template #body="{ data }">
             <div class="space-y-4">
               <div>{{ formatDatePosted(data.createdAt) }}</div>
