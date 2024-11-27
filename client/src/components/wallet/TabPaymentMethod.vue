@@ -21,7 +21,9 @@
   };
 
   onMounted(async () => {
-    cardStore.fetchCard();
+    if (!cardStore.card || cardStore.card.length === 0) {
+      await cardStore.fetchCard();
+    }
   });
 </script>
 <template>
