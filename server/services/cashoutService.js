@@ -182,12 +182,7 @@ console.log(repInput);
     const amount = Math.round(repInput * 0.005)
 
 
-<<<<<<< HEAD
-    const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors.stripeBankId, amount)
-console.log(repInput);
-=======
     const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors[0].stripeBankId, amount)
->>>>>>> 7db99b9d41b833a40768da008244f7b82fc9e069
 
     const createWithdraw = await Withdraw.create({
       channelId: channelId,

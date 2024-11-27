@@ -24,6 +24,8 @@
     { id: 3, name: 30, value: 30 },
   ];
   const sortByStatus = [
+    { id: 0, name: 'All' },
+
     { id: 1, name: 'Completed', value: 'completed' },
     { id: 2, name: 'Pending', value: 'pending' },
     { id: 3, name: 'Cancel', value: 'cancel' },
