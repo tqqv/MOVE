@@ -12,7 +12,7 @@
 
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
-  import { getPaymentHistory } from '@services/payment';
+  import { getCashoutHistory } from '@services/cashout';
   import { toast } from 'vue3-toastify';
   import FilterDate from '@/components/FilterDate.vue';
   import Filter from '@/components/Filter.vue';
@@ -25,49 +25,49 @@
   ];
   const currentPage = ref(1);
   const totalPage = ref();
-  const paymentHistoryData = ref([]);
+  const cashoutHistoryData = ref([]);
   const startDate = ref('');
   const endDate = ref('');
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
-  const isLoadingPaymentHistory = ref(false);
+  const isLoadingCashoutHistory = ref(false);
 
-  const fetchPaymentHistory = async () => {
-    isLoadingPaymentHistory.value = true;
+  const fetchCashoutHistory = async () => {
+    isLoadingCashoutHistory.value = true;
     try {
-      const response = await getPaymentHistory(
+      const response = await getCashoutHistory(
         currentPage.value,
         selectedPageSize.value,
         formatDateData(startDate.value),
         formatDateData(endDate.value),
       );
-      paymentHistoryData.value = response.data.data.list;
+      cashoutHistoryData.value = response.data.data;
       totalData.value = response.data.data.count;
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       toast.error(error.message);
     } finally {
-      isLoadingPaymentHistory.value = false;
+      isLoadingCashoutHistory.value = false;
     }
   };
 
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
-      fetchPaymentHistory();
+      fetchCashoutHistory();
     }
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
-      fetchPaymentHistory();
+      fetchCashoutHistory();
     }
   };
 
   watch([selectedPageSize, startDate, endDate], () => {
     currentPage.value = 1;
     if (startDate.value || endDate.value || selectedPageSize.value) {
-      fetchPaymentHistory();
+      fetchCashoutHistory();
     }
   });
 
@@ -101,12 +101,12 @@
       </div>
     </div>
 
-    <Skeleton v-if="isLoadingPaymentHistory" width="100%" height="500px"></Skeleton>
+    <Skeleton v-if="isLoadingCashoutHistory" width="100%" height="500px"></Skeleton>
 
     <div v-else class="card">
       <DataTable
-        v-if="paymentHistoryData.length > 0"
-        :value="paymentHistoryData"
+        v-if="cashoutHistoryData.length > 0"
+        :value="cashoutHistoryData"
         rowGroupMode="subheader"
         dataKey="id"
         tableStyle="min-width: 50rem, text-align: center"
@@ -114,46 +114,47 @@
         <Column field="created_date" header="Date" sortable>
           <template #body="{ data }">
             <div class="space-y-4">
-              <div>{{ formatDatePosted(data.created_date) }}</div>
+              <div>{{ formatDatePosted(data.createdAt) }}</div>
             </div>
           </template>
         </Column>
         <Column field="rep" header="Bank Holder Name">
           <template #body="{ data }">
-            <span class="font-bold">{{ formatNumber(data.rep) }} REPs</span>
+            <span class="font-bold"></span>
           </template>
         </Column>
         <Column field="count" header="Bank Number">
           <template #body="{ data }">
-            <span>
-              {{ data.count }}
-            </span>
+            <span> </span>
           </template> </Column
-        ><Column field="count" header="REPs" sortable>
+        ><Column field="rep" header="REPs" sortable>
           <template #body="{ data }">
-            <span>
-              {{ data.count }}
+            <span class="font-bold"> {{ formatNumber(data.rep) }} REPs </span>
+          </template>
+        </Column>
+        <Column field="amount" header="Amount" sortable>
+          <template #body="{ data }">
+            <span class="font-bold"> US$ {{ data.amount }} </span>
+          </template>
+        </Column>
+        <Column field="status" header="Status" sortable>
+          <template #body="{ data }">
+            <span
+              :class="{
+                'bg-[#d4edda] text-[#28a745] px-2 py-1 rounded-full font-bold':
+                  data.status === 'completed',
+                'bg-[#fff3cd] text-[#ffc107] px-2 py-1 rounded': data.status === 'pending',
+                'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded': data.status === 'cancel',
+              }"
+            >
+              {{ data.status.charAt(0).toUpperCase() + data.status.slice(1) }}
             </span>
           </template>
         </Column>
-        <Column field="count" header="Amount" sortable>
+        <Column field="arrivalDate" header="Estimated Arrival Date" sortable>
           <template #body="{ data }">
             <span>
-              {{ data.count }}
-            </span>
-          </template>
-        </Column>
-        <Column field="count" header="Status" sortable>
-          <template #body="{ data }">
-            <span>
-              {{ data.count }}
-            </span>
-          </template>
-        </Column>
-        <Column field="count" header="Estimated Arrival Date" sortable>
-          <template #body="{ data }">
-            <span>
-              {{ data.count }}
+              {{ formatDatePosted(data.arrivalDate) }}
             </span>
           </template>
         </Column>
@@ -161,7 +162,7 @@
       </DataTable>
       <div v-else class="h-full flex justify-center items-center pb-20">
         <EmptyPage
-          title="No payment history found"
+          title="No cashout history found"
           subTitle="No transactions have been made yet. Please try again later."
         />
       </div>
