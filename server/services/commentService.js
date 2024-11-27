@@ -65,19 +65,30 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
       },
     });
 
-    const donationItem = await DonationItem.findOne({
-      where: {
-        id: commentInfor.donationItemId,
-      },
-    });
+    let donationItem = null;
+    let updateOperations = [];
 
-    commentInfor.rep = donationItem.REPs;
+    if(commentInfor.donationItemId) {
+      donationItem = await DonationItem.findOne({
+        where: {
+          id: commentInfor.donationItemId,
+        },
+      });
 
-    if(sender.REPs === 0 || sender.REPs < donationItem.REPs) {
-      return {
-        status: 400,
-        message: "You don't have enough REP to donate",
+      commentInfor.rep = donationItem.REPs || 0;
+
+      if(sender.REPs === 0 || sender.REPs < donationItem.REPs) {
+        return {
+          status: 400,
+          message: "You don't have enough REP to donate",
+        }
       }
+
+      // Add update operations for sender and receiver
+      updateOperations = [
+        sender.update({ REPs: sender.REPs - donationItem.REPs }),
+        reciever.update({ rep: reciever.rep + donationItem.REPs })
+      ];
     }
 
     const parentCommentChecker = await Comment.findOne({ where: { id: commentInfor.parentId || null }});
@@ -101,8 +112,7 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
     commentInfor.parentId = !commentInfor.parentId  ? null : await checkLevelAndGetParentId(commentInfor.parentId)
     const [comment] = await Promise.all([
       Comment.create({videoId, userId, channelId, ...commentInfor}),
-      sender.update({ REPs: sender.REPs - donationItem.REPs }),
-      reciever.update({ rep: reciever.rep + donationItem.REPs })
+      ...updateOperations
     ]);
 
     if(!comment) {
