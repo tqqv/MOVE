@@ -41,7 +41,7 @@ const updateStreamStats = async (channelId, action, field, amount) => {
                     return await decrement(key, amount);
                 }
                 }
-                else if ( field === 'totalLikes') {
+                else if ( field === 'totalLikes' || field === 'newFollowers') {
                         return await decrement(key, amount);
                 }
                 else {

@@ -309,33 +309,52 @@ const followChannel = async (userId, channelId) => {
       where: {
         id: channelId
       }
-    })
+    });
 
-
-    if(!checkChannelExist) {
+    if (!checkChannelExist) {
       return {
         status: 400,
         data: null,
         message: "Channel not found"
+      };
+    }
+
+    // Lấy thông tin theo dõi hiện tại (nếu có)
+    const currentSubscribe = await Subscribe.findOne({
+      where: { userId, channelId }
+    });
+
+    // Kiểm tra `isNewFollow` nếu đã từng follow
+    let isNewFollow = false;
+    if (currentSubscribe) {
+      const livestream = await Livestream.findOne({
+        where: { streamerId: channelId }
+      });
+
+      if (livestream) {
+        isNewFollow = currentSubscribe.createdAt > livestream.createdAt;
       }
     }
 
-    // Nếu mà có giá trị thì sẽ là unFollow
-    const checkSubscribe = await Subscribe.destroy({
-      where: {
-        userId: userId,
-        channelId: channelId
-      }})
-      if(checkSubscribe) {
-        if(checkChannelExist.isLive) {
-          await updateStreamStats(channelId, 'decrement', 'newFollowers', 1)
+    // Nếu đã theo dõi, tiến hành hủy theo dõi
+    if (currentSubscribe) {
+      await Subscribe.destroy({
+        where: {
+          userId: userId,
+          channelId: channelId
         }
-        return {
-          status: 200,
-          data: null,
-          message: "Unsubscribe successful."
-        }
+      });
+
+      if (checkChannelExist.isLive && isNewFollow) {
+        await updateStreamStats(channelId, 'decrement', 'newFollowers', 1);
       }
+
+      return {
+        status: 200,
+        data: null,
+        message: "Unsubscribe successful."
+      };
+    }
 
     // Không được follow chính channel của mình
     const channel = await Channel.findOne({
@@ -343,39 +362,44 @@ const followChannel = async (userId, channelId) => {
         userId: userId,
         id: channelId
       }
-    })
+    });
 
-    if(channel){
+    if (channel) {
       return {
         status: 400,
         data: null,
-        message: "You can not subscribe your channel."
-      }
+        message: "You cannot subscribe to your own channel."
+      };
     }
 
-    const subscribe = await Subscribe.create({userId: userId, channelId: channelId})
+    const subscribe = await Subscribe.create({ userId: userId, channelId: channelId });
 
-    if(!subscribe) {
+    if (!subscribe) {
       return {
-          status: 400,
-          data: subscribe,
-          message: "You subscribe failed."
-      }
+        status: 400,
+        data: subscribe,
+        message: "Subscription failed."
+      };
     }
-    await updateStreamStats(channelId, 'increment', 'newFollowers', 1)
+
+    await updateStreamStats(channelId, 'increment', 'newFollowers', 1);
+
     return {
       status: 200,
       data: null,
       message: "Subscribe successful."
-    }
+    };
   } catch (error) {
+    console.log(error);
+
     return {
       status: 400,
       data: null,
       message: error.message
-    }
+    };
   }
-}
+};
+
 
 const followCategory = async (userId, cateId) => {
   try {
@@ -508,13 +532,13 @@ const getAllInforFollow = async(userId) => {
       },
       {
         model: LevelWorkout,
-        as: 'levelWorkout', 
-        attributes: ['levelWorkout'] 
+        as: 'levelWorkout',
+        attributes: ['levelWorkout']
       },
       {
         model: Category,
-        as: 'category', 
-        attributes: ['title'] 
+        as: 'category',
+        attributes: ['title']
       }],
       limit: 8,
       order: [['createdAt', 'DESC']]
@@ -529,12 +553,12 @@ const getAllInforFollow = async(userId) => {
           model: Category,
           as: 'category',
           attributes: [
-            'id', 
-            'title', 
+            'id',
+            'title',
             'imgUrl',
             [sequelize.literal(`(
-              SELECT SUM(viewCount) 
-              FROM videos 
+              SELECT SUM(viewCount)
+              FROM videos
               WHERE videos.categoryId = category.id
             )`), 'totalViews']
           ]
