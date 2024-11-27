@@ -7,7 +7,7 @@
   import BankDetails from './BankDetails.vue';
   import VerificationPopup from '@/components/popup/VerificationPopup.vue';
   import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
-  import { getLinkStripeVerify, removeWithdrawInfor } from '@/services/cashout';
+  import { getLinkStripeVerify, removeWithdrawInfor, updateStripeVerify } from '@/services/cashout';
   import { useUserStore } from '@/stores';
   import { formatNumber, formatPercentage, formatView } from '@/utils';
   import Skeleton from 'primevue/skeleton';
@@ -67,7 +67,23 @@
     }
   };
   onMounted(async () => {
-    await withdrawInforStore.fetchWithdrawInfor();
+    const urlParams = new URLSearchParams(window.location.search);
+    const verifyStatus = urlParams.get('verify');
+    console.log(verifyStatus);
+
+    if (verifyStatus === 'success') {
+      try {
+        await updateStripeVerify();
+        // const baseUrl = window.location.origin;
+        // console.log(baseUrl);
+
+        // const redirectUrl = `${baseUrl}/dashboard-streamer/cashout`;
+        // window.location.href = redirectUrl;
+      } catch (error) {
+        console.error('Error updating stripe verify:', error);
+      }
+      await withdrawInforStore.fetchWithdrawInfor();
+    }
   });
 </script>
 <template>
@@ -139,6 +155,8 @@
               v-if="withdrawInforStore.withdrawInfor.status === 'verified'"
               @click="toogleWithdrawVisible"
               class="btn"
+              :class="userStore.user?.Channel.rep === 0 ? 'btn bg-[#ccc] ' : ''"
+              :disabled="userStore.user?.Channel.rep === 0"
             >
               Withdraw
             </button>
@@ -197,5 +215,5 @@
     :isRemoveVisible="isRemoveVisible"
     @closeRemove="toggleCloseRemove"
   />
-  <VerificationPopup :tokenBank="tokenBank" />
+  <VerificationPopup title="Save your bank information" :tokenBank="tokenBank" />
 </template>
