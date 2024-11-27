@@ -10,6 +10,7 @@
   } from '@/utils';
   import rate from '@/components/icons/rate.vue';
   import rep from '@/components/icons/rep.vue';
+  import Skeleton from 'primevue/skeleton';
 
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
@@ -44,7 +45,7 @@
   const totalVideo = ref(0);
   const selectedProduct = ref();
   const videos = ref([]);
-
+  const isLoadingVideoAnalytics = ref(false);
   const selectedSortByTime = ref(sortByTime[0].days);
   const selectedSortBy = ref(sortByOptions[0].sortBy);
   const selectedOrder = ref(sortByOptions[0].order);
@@ -59,6 +60,7 @@
   const selectedPageSize = ref(pageSizeOptions[0].name);
 
   const fetchVideos = async () => {
+    isLoadingVideoAnalytics.value = true;
     try {
       const response = await getVideoSetting(
         currentPage.value,
@@ -72,17 +74,21 @@
       totalPage.value = response.data.totalPages;
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      isLoadingVideoAnalytics.value = false;
     }
   };
 
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
+      fetchVideos();
     }
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
+      fetchVideos();
     }
   };
 
@@ -90,15 +96,11 @@
     currentPage.value = 1;
     fetchVideos();
   });
-
-  onMounted(() => {
-    fetchVideos();
-  });
 </script>
 <template>
-  <div class="container">
-    <div class="flex justify-between">
-      <h1 class="py-8 px-4 font-bold text-[24px]">Video analytics</h1>
+  <section class="container">
+    <div class="flex justify-between pb-4">
+      <h1 class="font-bold text-[24px]">Video analytics</h1>
       <div class="flex gap-8">
         <Filter
           title="SORT BY"
@@ -109,8 +111,23 @@
         <Filter title="SHOW" :options="sortByTime" @change="handleSortTimeChange" class="flex-1" />
       </div>
     </div>
-
-    <div class="card">
+    <div class="card mt-4" v-for="n in 10" :key="n" v-if="isLoadingVideoAnalytics">
+      <div class="px-4 flex align-center items-center gap-x-6">
+        <Skeleton width="200px" height="100px"></Skeleton>
+        <div class="pl-[65px] space-y-4">
+          <div>
+            <Skeleton width="15rem"></Skeleton> <Skeleton width="5rem" class="mt-2"></Skeleton>
+          </div>
+          <Skeleton width="5rem"></Skeleton>
+        </div>
+        <Skeleton width="5rem" class="ml-[270px]"></Skeleton>
+        <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+        <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+        <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+        <Skeleton width="5rem" class="ml-[40px]"></Skeleton>
+      </div>
+    </div>
+    <div v-else class="card">
       <DataTable
         v-model:selection="selectedProduct"
         :value="videos"
@@ -210,5 +227,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>

@@ -2,6 +2,9 @@
   import BuyREPsCard from './BuyREPsCard.vue';
   import { ref } from 'vue';
   import { useUserStore, useGetRepsStore, useContryStore, usePopupStore } from '@/stores';
+  import Skeleton from 'primevue/skeleton';
+  import Divider from 'primevue/divider';
+  import { formatNumber } from '@/utils';
 
   const props = defineProps({
     reps: {
@@ -62,22 +65,40 @@
       </div>
       <div class="space-y-2">
         <div class="text-base">
-          You have <span class="font-bold">{{ userStore.user.REPs || 0 }} REP$</span>
+          You have <span class="font-bold">{{ formatNumber(userStore.user.REPs) || 0 }} REP$</span>
         </div>
         <div class="text-sm text-[#777777]">Prices are shown in USD</div>
       </div>
     </div>
+
     <div
-      v-for="(option, index) in getRepsStore.purchaseOptions"
-      :key="index"
+      v-if="getRepsStore.isLoadingRepPackages"
+      v-for="n in getRepsStore.purchaseOptions.length"
+      :key="n"
       class="mt-4"
-      @click="selectOption(option)"
     >
+      <div
+        class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border border-gray-light hover:shadow-lg transition-all duration-300"
+      >
+        <div class="flex gap-16 items-center">
+          <!-- Skeleton cho hình ảnh -->
+          <!-- Skeleton cho thông tin -->
+          <div class="flex-1">
+            <Skeleton width="10rem" class="mb-2"></Skeleton>
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+          </div>
+          <Skeleton width="7rem" height="2.5rem"></Skeleton>
+        </div>
+      </div>
+    </div>
+    <div v-else v-for="(option, index) in getRepsStore.purchaseOptions" :key="index" class="mt-4">
       <BuyREPsCard
         :purchaseOptions="option"
         @toggleBuyREPs="toggleBuyREPs"
         @toggleGetREPsMenu="toggleGetREPsMenu"
         :isFirstTime="isFirstTime"
+        :index="index"
+        @selectOption="selectOption(option)"
       />
     </div>
   </div>

@@ -6,7 +6,7 @@
 
 <template>
   <Navbar />
-  <div class="flex w-full pt-[72px] overflow-x-hidden">
+  <div class="flex w-full pt-[64px] overflow-x-hidden">
     <ProfileContent />
   </div>
 </template>

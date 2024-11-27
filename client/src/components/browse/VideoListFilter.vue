@@ -138,7 +138,7 @@
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
-    await fetchVideos();
+    // await fetchVideos();
     window.addEventListener('scroll', loadMoreScroll(loadMoreData, 200));
   });
 

@@ -815,10 +815,10 @@ const getCountryDataWithStates = async (videoId, days) => {
       attributes: []
     }],
     attributes: [
-      [Sequelize.col('viewVideoUser.country'), 'country'],
+      [Sequelize.col('viewVideoUser.nationality'), 'nationality'],
       [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
     ],
-    group: ['viewVideoUser.country'],
+    group: ['viewVideoUser.nationality'],
     raw: true
   });
 

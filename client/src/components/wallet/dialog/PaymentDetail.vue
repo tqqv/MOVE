@@ -164,7 +164,7 @@
           <span class="text-primary"> Refund Policy</span>.
         </div>
         <div class="flex justify-center mt-4">
-          <button @click="handleSubmit" class="btn w-1/3" :disabled="isSubmitting.value">
+          <button @click="handleSubmit" class="btn w-1/3" :disabled="isSubmitting">
             <smallLoading v-if="isLoandingSubmit" fill="white" fill_second="#13d0b4" />
             <span v-else>Submit</span>
           </button>

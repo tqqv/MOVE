@@ -8,37 +8,23 @@
 
   const props = defineProps({
     title: String,
+    isSelectBankVisible: Boolean,
   });
-  const emit = defineEmits(['toggleLoadPayment', 'toggleOpenOrder', 'toggleGetREPsMenu']);
+  const emit = defineEmits(['toogleSelectBankVisible']);
   const popupStore = usePopupStore();
   const getRepsStore = useGetRepsStore();
   const cardStore = useCardStore();
   const countryStore = useContryStore();
-
+  const toogleSelectBankVisible = () => {
+    emit('toogleSelectBankVisible', 'toogleBankDetailsVisible');
+  };
   const lockScroll = () => (document.body.style.overflow = 'hidden');
   const unlockScroll = () => (document.body.style.overflow = 'auto');
-  let hasFetchedCountries = false;
 
   const toggleSelectPayment = async () => {
     if (selectedPayment.value === 'Credit card') {
-      await cardStore.fetchCard();
-
-      if (cardStore.card?.cardOwnerName) {
-        popupStore.isHaveCard = true;
-      } else {
-        popupStore.isHaveCard = false;
-      }
-      //fetch country
-      if (!hasFetchedCountries) {
-        countryStore.fetchCountries();
-        hasFetchedCountries = true;
-      }
-      // set select
-      getRepsStore.setSelectedOption(getRepsStore.selectedOption);
-      // close buy reps
-      popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
-      emit('toggleGetREPsMenu');
-      popupStore.toggleSelectPaymentMethod();
+      emit('toogleSelectBankVisible');
+      emit('toogleBankDetailsVisible');
     } else {
       toast.info('We are developing this payment method');
     }
@@ -54,14 +40,13 @@
   <div class="card flex justify-center">
     <Dialog
       :header="props.title"
-      :visible="popupStore.isSelectPaymentMethod"
+      :visible="isSelectBankVisible"
       :modal="true"
       :draggable="false"
       @show="lockScroll"
       @hide="unlockScroll"
-      @update:visible="popupStore.toggleSelectPaymentMethod"
+      @update:visible="toogleSelectBankVisible()"
       :style="{ width: '40rem' }"
-      :dismissableMask="true"
     >
       <div class="flex gap-x-12 p-8 text-base">
         <CheckboxCustom
