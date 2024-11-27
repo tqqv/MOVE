@@ -29,7 +29,7 @@
   const isLoadingBankDetail = ref(false);
   const isSubmitting = ref(false);
   const isValidRoutingNumber = ref(true);
-  const bankToken = ref();
+  // const bankToken = ref();
   const bankData = ref({
     routingNumber: '',
     bankHolderName: '',
@@ -41,7 +41,7 @@
     bankHolderName: '',
     bankNumber: '',
   });
-  const C = () => {
+  const resetForm = () => {
     bankData.value = {
       routingNumber: '',
       bankHolderName: '',
@@ -64,20 +64,13 @@
     'toogleBankDetailsVisible',
     'toogleSelectBankVisible',
     'toogleCloseBankDetailsVisible',
+    'handleDataTokenFromBankDetail',
   ]);
   const toogleBankDetailsVisible = () => {
     emit('toogleBankDetailsVisible');
     resetForm();
   };
-  const handleBack = () => {
-    emit('toogleBankDetailsVisible');
-    emit('toogleSelectBankVisible');
-  };
-  const handleNext = () => {
-    emit('toogleBankDetailsVisible');
 
-    popupStore.toggleVerificationPopup();
-  };
   const validatePaymentData = async () => {
     try {
       await cashoutSchema.validate(
@@ -144,8 +137,10 @@
 
         emit('toogleCloseBankDetailsVisible');
         resetForm();
-        bankToken.value = result.token.id;
+        emit('handleDataTokenFromBankDetail', result.token.id);
+
         const res = await sendMail();
+        console.log(res);
       }
 
       // const res = await createWithdrawInfor(bankData.value);

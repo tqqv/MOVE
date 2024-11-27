@@ -19,9 +19,7 @@
     nameCard: String,
   });
   const withdrawInforStore = useWithdrawInfor();
-  onMounted(async () => {
-    await withdrawInforStore.fetchWithdrawInfor();
-  });
+
   const userStore = useUserStore();
   const exchangeRate = ref(0.005);
   const minWithdraw = ref(2500);
@@ -32,9 +30,13 @@
   // const isSelectBankVisible = ref(false);
   const isBankDetailsVisible = ref(false);
   const withdrawValue = ref();
+  const tokenBank = ref();
 
   const handleDataFromWithdraw = (data) => {
     withdrawValue.value = data;
+  };
+  const handleDataTokenFromBankDetail = (data) => {
+    tokenBank.value = data;
   };
   const toggleOpenRemove = async () => {
     isRemoveVisible.value = !isRemoveVisible.value;
@@ -64,6 +66,9 @@
       window.open(res.data.data, '_self');
     }
   };
+  onMounted(async () => {
+    await withdrawInforStore.fetchWithdrawInfor();
+  });
 </script>
 <template>
   <section class="container">
@@ -185,11 +190,12 @@
     @toogleBankDetailsVisible="toogleBankDetailsVisible"
     @toogleSelectBankVisible="toogleSelectBankVisible"
     @toogleCloseBankDetailsVisible="toogleCloseBankDetailsVisible"
+    @handleDataTokenFromBankDetail="handleDataTokenFromBankDetail"
   />
   <CashoutRemovePopup
     title="Remove bank"
     :isRemoveVisible="isRemoveVisible"
     @closeRemove="toggleCloseRemove"
   />
-  <VerificationPopup />
+  <VerificationPopup :tokenBank="tokenBank" />
 </template>

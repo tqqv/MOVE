@@ -60,6 +60,14 @@ const sendMail = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const verifyOtp = async (otp) => {
+  try {
+    const response = await axios.get(`/cashout/verifyOtp/${otp}`);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createWithdrawInfor,
   getWithdrawInfor,
@@ -68,4 +76,5 @@ export {
   createPayout,
   removeWithdrawInfor,
   sendMail,
+  verifyOtp,
 };
