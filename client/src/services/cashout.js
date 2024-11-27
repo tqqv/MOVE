@@ -44,11 +44,37 @@ const createPayout = async (rep) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-
+const removeWithdrawInfor = async (stripeBankId) => {
+  try {
+    const response = await axios.delete(`/cashout/deleteWithdrawInfor/${stripeBankId}`);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const sendMail = async () => {
+  try {
+    const response = await axios.get('/cashout/sendMailOtp');
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const verifyOtp = async (otp) => {
+  try {
+    const response = await axios.get(`/cashout/verifyOtp/${otp}`);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createWithdrawInfor,
   getWithdrawInfor,
   getLinkStripeVerify,
   updateStripeVerify,
   createPayout,
+  removeWithdrawInfor,
+  sendMail,
+  verifyOtp,
 };

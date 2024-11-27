@@ -47,7 +47,15 @@ const getWithdrawInforController = async (req, res, next) => {
 
 const getListCashoutHistoryController = async (req, res, next) => {
   const channelId = req.user.channelId
-  const result = await getListCashoutHistory(channelId);
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const startDate = req.query.startDate || null;
+  const endDate = req.query.endDate || null;
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'createdAt',
+    order: req.query.order || 'DESC'
+  };
+  const result = await getListCashoutHistory(channelId, page, pageSize, startDate, endDate, sortCondition);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
@@ -69,7 +77,8 @@ const checkOtpCodeController = async (req, res, next) => {
 const deleteWithdrawInforController = async (req, res, next) => {
   const channelId = req.user.channelId
   const stripeBankId = req.params.stripeBankId
-  const result = deleteWithdrawInfor(channelId, stripeBankId);
+
+  const result = await deleteWithdrawInfor(channelId, stripeBankId);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
