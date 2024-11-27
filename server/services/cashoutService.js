@@ -147,20 +147,21 @@ const cashout = async(channelId, repInput) => {
       },
       include: [{
         model: WithdrawInfor,
-        attributes: ['stripeBankId'],
+        attributes: ['stripeBankId', 'bankName', 'bankHolderName', 'bankNumber'],
         where: {
           status: 'verified'
         }
       }]
     })
 
-    if (!channel.WithdrawInfors.stripeBankId) {
+    if (!channel.WithdrawInfors[0]) {
       return {
         status: 400,
         data: null,
         message: 'Insert your bank account',
       };
     }
+console.log(repInput);
 
     if (repInput < 2500) {
       return {
@@ -178,9 +179,10 @@ const cashout = async(channelId, repInput) => {
       };
     }
 
-    const amount = repInput * 0.005
+    const amount = Math.round(repInput * 0.005)
 
-    const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors.stripeBankId, amount)
+
+    const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors[0].stripeBankId, amount)
 
     const createWithdraw = await Withdraw.create({
       channelId: channelId,
@@ -188,7 +190,10 @@ const cashout = async(channelId, repInput) => {
       amount: amount,
       status: payout.status === "paid" ? "completed" : payout.status,
       arrivalDate: new Date(payout.arrival_date * 1000),
-      stripePayoutId: payout.id
+      stripePayoutId: payout.id,
+      bankName: channel.WithdrawInfors[0].bankName,
+      bankHolderName: channel.WithdrawInfors[0].bankHolderName,
+      bankNumber: channel.WithdrawInfors[0].bankNumber
       }
     )
 
@@ -198,8 +203,6 @@ const cashout = async(channelId, repInput) => {
         id: channelId
       }
     });
-
-    // chưa xử lý trừ rep nè check nghe
 
     return {
       status: 200,
@@ -256,11 +259,15 @@ const checkStatusStripePayout = async (channelId) => {
 };
 
 
-const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDate, sortCondition) => {
+const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDate, sortCondition, status) => {
   try {
     await checkStatusStripePayout(channelId);
 
     const whereCondition = { channelId };
+
+    if(status){
+      whereCondition.status = status
+    }
 
     if (startDate && endDate) {
       if (!endDate.includes(' ') && !startDate.includes(' ')) {
@@ -272,7 +279,7 @@ const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDat
       };
     }
 
-    const listCashout = await Withdraw.findAll({
+    const listCashout = await Withdraw.findAndCountAll({
       where: whereCondition,
       order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize *1,
@@ -281,7 +288,10 @@ const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDat
 
     return {
       status: 200,
-      data: listCashout,
+      data: {
+        listCashout,
+        totalPages: Math.ceil(listCashout.count/pageSize)
+      },
       message: "Get list cashout history successful."
     }
   } catch (error) {

@@ -9,6 +9,7 @@
 
   const props = defineProps({
     tokenBank: String,
+    title: String,
   });
   const popupStore = usePopupStore();
   const userStore = useUserStore();
@@ -73,7 +74,7 @@
   <div>
     <Dialog
       :visible="popupStore.showVerificationPopup"
-      header="Verify your email to keep account secure"
+      :header="title"
       :style="{ width: '40rem' }"
       :modal="true"
       :draggable="false"
@@ -82,8 +83,7 @@
       <div class="space-y-4">
         <span class="text_para">
           We sent a 6-digit code to <span class="font-bold">{{ userStore.user?.email }}</span
-          >. Enter the code below to confirm your account. You may also tap on the link in the email
-          we sent you.
+          >. Enter the code below to confirm your account
         </span>
 
         <form @submit.prevent="handleSubmit" class="w-full space-y-4">

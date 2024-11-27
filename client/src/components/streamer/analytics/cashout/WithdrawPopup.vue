@@ -38,6 +38,7 @@
 
       const res = await createPayout(repInput.value);
       console.log(res);
+      console.log(repInput.value);
 
       if (res && res.status === 200) {
         emit('toogleProcessingPaymentVisible');
