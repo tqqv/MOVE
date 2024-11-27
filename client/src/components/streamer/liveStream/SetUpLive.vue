@@ -362,7 +362,7 @@
         </div>
       </div>
     </div>
-    <PopupInstructionLive />
-    <PopupInstructionDonate />
+    <PopupInstructionLive :streamId="streamId" />
+    <PopupInstructionDonate :streamId="streamId" />
   </section>
 </template>

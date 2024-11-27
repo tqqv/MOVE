@@ -4,11 +4,24 @@
   import { usePopupStore } from '@/stores/popup.store';
   import TickRight from '@/components/icons/tickRight.vue';
   import { copyToClipboard } from '@/utils/copyToClipboard';
-  const popupStore = usePopupStore();
+  import { useUserStore } from '@/stores';
+  import { computed } from 'vue';
 
-  const chatUrl = ' https://www.nimo.tv/vidwalla/overlay?_roomId=27724811&_lang=1033&_type=chatbox';
+  const popupStore = usePopupStore();
+  const userStore = useUserStore();
+
+  const streamId = computed(() => userStore.user?.Channel?.id || 'defaultId');
+
+  const moveHost = import.meta.env.VITE_MOVE_HOST;
+  const chatUrl = computed(() => `${moveHost}overlay/${streamId.value}&type=chatbox`);
+
+  // Xử lý sao chép URL
   const handleChatURL = () => {
-    copyToClipboard(chatUrl, 'Successfully copied to clipboard', 'Failed copied to clipboard');
+    copyToClipboard(
+      chatUrl.value,
+      'Successfully copied to clipboard',
+      'Failed to copy to clipboard',
+    );
   };
 </script>
 <template>

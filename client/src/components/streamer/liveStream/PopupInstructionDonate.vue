@@ -4,11 +4,17 @@
   import { usePopupStore } from '@/stores/popup.store';
   import TickRight from '@/components/icons/tickRight.vue';
   import { copyToClipboard } from '@/utils/copyToClipboard';
+  import { useUserStore } from '@/stores';
+  import { computed } from 'vue';
   const popupStore = usePopupStore();
+  const userStore = useUserStore();
+  const streamId = computed(() => userStore.user?.Channel?.id || 'defaultId');
 
-  const chatUrl = ' https://www.nimo.tv/vidwalla/overlay?_roomId=27724811&_lang=1033&_type=chatbox';
+  const moveHost = import.meta.env.VITE_MOVE_HOST;
+  const donateUrl = computed(() => `${moveHost}overlay/${streamId.value}&type=donation`);
+
   const handleChatURL = () => {
-    copyToClipboard(chatUrl, 'Successfully copied to clipboard', 'Failed copied to clipboard');
+    copyToClipboard(donateUrl.value, 'Successfully copied to clipboard', 'Failed copied to clipboard');
   };
 </script>
 <template>
@@ -28,7 +34,7 @@
           URL
         </div>
         <div class="flex gap-x-2">
-          <div class="input_custom bg-gray-light truncate">{{ chatUrl }}</div>
+          <div class="input_custom bg-gray-light truncate">{{ donateUrl }}</div>
           <div
             v-tooltip.top="'copy stream url'"
             class="flex justify-center items-center text-white size-12 rounded-full bg-primary-light cursor-pointer hover:bg-primary flex-shrink-0"

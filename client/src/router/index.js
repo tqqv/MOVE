@@ -33,6 +33,9 @@ import SearchTotal from '@/components/search/SearchTotal.vue';
 import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
 import VerifyEmail from '@/components/VerifyEmail.vue';
+import ScreenChat from '@/components/screenObs/ScreenChat.vue';
+import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
+import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
 
 const routes = [
   // User router
@@ -83,7 +86,14 @@ const routes = [
   { path: '/live/:username', component: ViewLiveStreamPage },
   { path: '/reset-password/:token', component: ResetPassword },
   { path: '/verify-email/:token', component: VerifyEmail },
-
+  {
+    path: '/overlay',
+    component: ScreenSupportLive,
+    children: [
+      { path: ':channelId&type=chatbox', component: ScreenChat },
+      { path: ':channelId&type=donation', component: ScreenDonation },
+    ],
+  },
   // Streamer router
   {
     path: '/dashboard-streamer',
