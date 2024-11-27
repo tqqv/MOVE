@@ -147,7 +147,7 @@ const cashout = async(channelId, repInput) => {
       },
       include: [{
         model: WithdrawInfor,
-        attributes: ['stripeBankId', 'bankName', 'bankHolderName'],
+        attributes: ['stripeBankId', 'bankName', 'bankHolderName', 'bankNumber'],
         where: {
           status: 'verified'
         }
@@ -191,7 +191,10 @@ console.log(repInput);
       amount: amount,
       status: payout.status === "paid" ? "completed" : payout.status,
       arrivalDate: new Date(payout.arrival_date * 1000),
-      stripePayoutId: payout.id
+      stripePayoutId: payout.id,
+      bankName: channel.WithdrawInfors.bankName,
+      bankHolderName: channel.WithdrawInfors.bankHolderName,
+      bankNumber: channel.WithdrawInfors.bankNumber
       }
     )
 
