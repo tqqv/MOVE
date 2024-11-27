@@ -49,6 +49,7 @@
       :channelId="props.liveStreamData?.channel?.id"
       :liveStreamData="props.liveStreamData"
       :listDonation="props.listDonation"
+      :isGiftVisible="true"
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">

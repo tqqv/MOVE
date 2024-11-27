@@ -36,11 +36,15 @@
   );
 
   const handleAnimationEnd = (donation) => {
-    donation.isSlideOut = true;
+    // handle wait 3s to hidden in chat
+  setTimeout(() => {
+    donation.isSlideOut = true; 
+    // handle delete value
     setTimeout(() => {
       donation.isHidden = true;
-    }, 1000);
-  };
+    }, 1000); 
+  }, 3000);
+};
 </script>
 
 <template>
@@ -151,7 +155,7 @@
     }
   }
   .animate-slideIn {
-    animation: slideIn 1.5s ease-out forwards;
+    animation: slideIn 0.7s ease-out forwards;
   }
 
   @keyframes slideOut {
