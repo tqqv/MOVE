@@ -4,7 +4,7 @@
   import Filter from '@components/Filter.vue';
   import Camera from '@/components/icons/camera.vue';
   import Key from '@/components/icons/key.vue';
-  import { useCategoriesStore, useLiveStreamStore, useUserStore } from '@/stores';
+  import { useCategoriesStore, useLiveStreamStore, usePopupStore, useUserStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
   import LiveStreamScreen from '@/components/LiveStreamScreen.vue';
   import EmptyImage from '@/components/icons/emptyImage.vue';
@@ -12,6 +12,10 @@
   import { toast } from 'vue3-toastify';
   import { changeStreamKey } from '@/services/streamer';
   import { uploadAvatar } from '@/services/cloudinary';
+  import Chat from '@/components/icons/chat.vue';
+  import Donate from '@/components/icons/donate.vue';
+  import PopupInstructionLive from './PopupInstructionLive.vue';
+  import PopupInstructionDonate from './PopupInstructionDonate.vue';
 
   const props = defineProps({
     connectOBS: String,
@@ -19,6 +23,8 @@
   });
 
   const userStore = useUserStore();
+  const popupStore = usePopupStore();
+
   const categoriesStore = useCategoriesStore();
   const liveStreamStore = useLiveStreamStore();
   const levelWorkoutStore = useLevelWorkoutStore();
@@ -35,7 +41,7 @@
   const thumbnail = ref();
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
-
+  const streamURL = import.meta.env.VITE_STREAM_URL_OBS;
   // HANDLE DATA LIVE
   const checkCompleteStatus = () => {
     const isComplete =
@@ -66,6 +72,9 @@
       'Successfully copied to clipboard',
       'Failed copied to clipboard',
     );
+  };
+  const handleCopyStreamURL = () => {
+    copyToClipboard(streamURL, 'Successfully copied to clipboard', 'Failed copied to clipboard');
   };
 
   // UPLOAD IMAGE
@@ -129,6 +138,15 @@
     }
   });
 
+  // OPEN INSTRUCTION POPUP
+  const openInstructionLiveChat = () => {
+    popupStore.openInstructionLive();
+  };
+
+  const openInstructionDonate = () => {
+    popupStore.openInstructionDonate();
+  };
+
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
@@ -178,55 +196,6 @@
         <div class="w-full flex justify-center gap-x-7">
           <!-- LEFT -->
           <div class="flex max-w-[500px] flex-col gap-y-3 basis-1/2">
-            <!-- SELECT A VIDEO SOURCE -->
-            <div class="bg-white rounded-lg shadow-md p-4 overflow-hidden">
-              <h1 class="font-semibold">Select a video source</h1>
-              <div class="flex justify-center gap-x-3 my-5">
-                <!-- CAMERA -->
-                <div class="w-1/2" @click="handleLiveWebCam">
-                  <div
-                    class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
-                    :class="{ 'border-primary': isCameraSelected }"
-                    @click="selectCamera"
-                  >
-                    <div class="px-3 py-6 md:py-10">
-                      <div
-                        class="p-2 flex justify-center items-center rounded-full bg-gray-dark"
-                        :class="{ 'bg-primary': isCameraSelected }"
-                      >
-                        <Camera :fill="isCameraSelected ? '#fff' : '#000'" />
-                      </div>
-                    </div>
-                  </div>
-                  <h1 class="text-xs mt-2 text-center">Webcam</h1>
-                </div>
-                <!-- OBS -->
-                <div class="w-1/2">
-                  <div
-                    class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
-                    :class="{ 'border-primary': isLiveStreamSelected }"
-                    @click="selectStreaming"
-                  >
-                    <div class="px-3 py-6 md:py-10">
-                      <div
-                        class="p-2 flex justify-center items-center rounded-full bg-gray-dark"
-                        :class="{ 'bg-primary': isLiveStreamSelected }"
-                      >
-                        <Key :fill="isLiveStreamSelected ? '#fff' : '#000'" />
-                      </div>
-                    </div>
-                  </div>
-                  <h1 class="text-xs mt-2 text-center">Streaming software</h1>
-                </div>
-              </div>
-              <p class="text-xs text-body">
-                Preview streams via streaming software are subject to
-                <span class="text-primary font-medium">MOVE</span>'s Community Standards and
-                policies. Live stream content may be retained for review and enforcement purposes.
-              </p>
-            </div>
-            <!-- CAMERA SOFTWARE SETUP -->
-
             <!-- STREAMING SOFTWARE SETUP -->
             <div
               v-if="isLiveStreamSelected"
@@ -234,17 +203,25 @@
             >
               <h1 class="font-semibold mb-2">Streaming software setup</h1>
               <p class="text-xs text-body">
-                Copy and paste the stream key into your streaming software.
+                Copy and paste stream url or stream key into your streaming software.
               </p>
               <div class="my-4">
-                <h1 class="font-semibold mb-4">Stream key</h1>
+                <h1 class="font-semibold mb-4">Server URL</h1>
                 <div class="flex items-center gap-x-3 mb-2">
-                  <input
-                    type="text"
-                    v-model="streamKey"
-                    class="input_custom bg-gray-light"
-                    disabled
-                  />
+                  <div class="input_custom bg-gray-light truncate">
+                    {{ streamURL }}
+                  </div>
+                  <div
+                    v-tooltip.top="'copy stream url'"
+                    class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
+                    @click="handleCopyStreamURL"
+                  >
+                    <i class="pi pi-link text-xl"></i>
+                  </div>
+                </div>
+                <h1 class="font-semibold mb-4 mt-5">Stream key</h1>
+                <div class="flex items-center gap-x-3 mb-2">
+                  <div class="input_custom bg-gray-light truncate">{{ streamKey }}</div>
                   <div
                     v-tooltip.top="'copy stream key'"
                     class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
@@ -257,6 +234,52 @@
                   This stream key is valid until you log out of MOVE. Once you start to preview the
                   broadcast you have up to 4 hours to go live.
                 </p>
+              </div>
+            </div>
+
+            <!-- SET UP OTHER SCREEN -->
+
+            <div class="bg-white rounded-lg shadow-md p-4 overflow-hidden">
+              <h1 class="font-semibold mb-2">Set up another live stream screen</h1>
+              <p class="text-xs text-body">
+                Instructions for setting up a chat screen or a donate screen on the stream support
+                section
+              </p>
+              <div class="flex gap-x-2 mt-4">
+                <!-- SET UP CHAT -->
+                <div class="w-1/2">
+                  <div
+                    class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
+                    @click="openInstructionLiveChat"
+                  >
+                    <div class="px-3 py-6 md:py-10">
+                      <div
+                        class="p-2 flex justify-center items-center rounded-full bg-gray-dark"
+                        :class="{ 'bg-primary': isLiveStreamSelected }"
+                      >
+                        <Chat fill="#000" width="20px" height="20px" />
+                      </div>
+                    </div>
+                  </div>
+                  <h1 class="text-xs mt-2 text-center">Chat livestream</h1>
+                </div>
+                <!-- SET UP DONATE -->
+                <div class="w-1/2">
+                  <div
+                    class="flex justify-center border-2 border-gray-dark relative rounded-lg cursor-pointer hover:bg-gray-light/40"
+                    @click="openInstructionDonate"
+                  >
+                    <div class="px-3 py-6 md:py-10">
+                      <div
+                        class="p-2 flex justify-center items-center rounded-full bg-gray-dark"
+                        :class="{ 'bg-primary': isLiveStreamSelected }"
+                      >
+                        <Donate />
+                      </div>
+                    </div>
+                  </div>
+                  <h1 class="text-xs mt-2 text-center">Donation</h1>
+                </div>
               </div>
             </div>
           </div>
@@ -339,5 +362,7 @@
         </div>
       </div>
     </div>
+    <PopupInstructionLive />
+    <PopupInstructionDonate />
   </section>
 </template>

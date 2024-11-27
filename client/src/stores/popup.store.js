@@ -19,6 +19,8 @@ export const usePopupStore = defineStore('popup', () => {
   const showLoadingPayment = ref(false);
   const isSelectPaymentMethod = ref(false);
   const isCompletePurchaseVisible = ref(false);
+  const showInstructionLive = ref(false);
+  const showInstructionDonate = ref(false);
 
   const isHaveCard = ref(false);
   const isOrderSuccessful = ref(true);
@@ -114,6 +116,22 @@ export const usePopupStore = defineStore('popup', () => {
     showReportSuccess.value = false;
   };
 
+  const openInstructionLive = () => {
+    showInstructionLive.value = true;
+  };
+
+  const closeInstructionLive = () => {
+    showInstructionLive.value = false;
+  };
+
+  const openInstructionDonate = () => {
+    showInstructionDonate.value = true;
+  };
+
+  const closeInstructionDonate = () => {
+    showInstructionDonate.value = false;
+  };
+
   return {
     showOpenBuyREPs,
     showLoginPopup,
@@ -157,5 +175,11 @@ export const usePopupStore = defineStore('popup', () => {
     toggleSelectPaymentMethod,
     toggleCompletePurchaseVisible,
     isCompletePurchaseVisible,
+    showInstructionLive,
+    openInstructionLive,
+    closeInstructionLive,
+    showInstructionDonate,
+    openInstructionDonate,
+    closeInstructionDonate,
   };
 });
