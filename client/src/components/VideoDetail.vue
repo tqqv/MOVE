@@ -39,7 +39,7 @@
       type: Boolean,
       default: false,
     },
-    isGiftVisivle: Boolean,
+    isGiftVisible: Boolean,
     loading: {
       type: Boolean,
       required: true,
@@ -210,7 +210,7 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="username !== props.usernameDetails && !isGiftVisivle"
+          v-if="isGiftVisible && username !== props.usernameDetails"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
