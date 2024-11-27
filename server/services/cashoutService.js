@@ -146,14 +146,14 @@ const cashout = async(channelId, repInput) => {
       },
       include: [{
         model: WithdrawInfor,
-        attributes: ['stripeBankId'],
+        attributes: ['stripeBankId', 'bankName', 'bankHolderName'],
         where: {
           status: 'verified'
         }
       }]
     })
 
-    if (!channel.WithdrawInfors.stripeBankId) {
+    if (!channel.WithdrawInfors) {
       return {
         status: 400,
         data: null,
@@ -192,8 +192,6 @@ const cashout = async(channelId, repInput) => {
     )
 
     await channel.decrement('rep', { by: repInput });
-
-    // chưa xử lý trừ rep nè check nghe
 
     return {
       status: 200,
@@ -266,7 +264,7 @@ const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDat
       };
     }
 
-    const listCashout = await Withdraw.findAll({
+    const listCashout = await Withdraw.findAndCountAll({
       where: whereCondition,
       order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize *1,
@@ -275,7 +273,10 @@ const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDat
 
     return {
       status: 200,
-      data: listCashout,
+      data: {
+        listCashout,
+        totalPages: Math.ceil(listCashout.count/pageSize)
+      },
       message: "Get list cashout history successful."
     }
   } catch (error) {
