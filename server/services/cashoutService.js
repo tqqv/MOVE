@@ -153,7 +153,7 @@ const cashout = async(channelId, repInput) => {
       }]
     })
 
-    if (!channel.WithdrawInfors) {
+    if (!channel.WithdrawInfors[0]) {
       return {
         status: 400,
         data: null,
@@ -179,7 +179,7 @@ const cashout = async(channelId, repInput) => {
 
     const amount = repInput * 0.005
 
-    const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors.stripeBankId, amount)
+    const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors[0].stripeBankId, amount)
 
     const createWithdraw = await Withdraw.create({
       channelId: channelId,
@@ -188,9 +188,9 @@ const cashout = async(channelId, repInput) => {
       status: payout.status === "paid" ? "completed" : payout.status,
       arrivalDate: new Date(payout.arrival_date * 1000),
       stripePayoutId: payout.id,
-      bankName: channel.WithdrawInfors.bankName,
-      bankHolderName: channel.WithdrawInfors.bankHolderName,
-      bankNumber: channel.WithdrawInfors.bankNumber
+      bankName: channel.WithdrawInfors[0].bankName,
+      bankHolderName: channel.WithdrawInfors[0].bankHolderName,
+      bankNumber: channel.WithdrawInfors[0].bankNumber
       }
     )
 
@@ -251,11 +251,15 @@ const checkStatusStripePayout = async (channelId) => {
 };
 
 
-const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDate, sortCondition) => {
+const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDate, sortCondition, status) => {
   try {
     await checkStatusStripePayout(channelId);
 
     const whereCondition = { channelId };
+
+    if(status){
+      whereCondition.status = status
+    }
 
     if (startDate && endDate) {
       if (!endDate.includes(' ') && !startDate.includes(' ')) {
