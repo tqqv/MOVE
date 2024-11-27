@@ -91,19 +91,14 @@
         </div>
       </div>
     </div>
-    <div
-      v-else
-      v-for="(option, index) in getRepsStore.purchaseOptions"
-      :key="index"
-      class="mt-4"
-      @click="selectOption(option)"
-    >
+    <div v-else v-for="(option, index) in getRepsStore.purchaseOptions" :key="index" class="mt-4">
       <BuyREPsCard
         :purchaseOptions="option"
         @toggleBuyREPs="toggleBuyREPs"
         @toggleGetREPsMenu="toggleGetREPsMenu"
         :isFirstTime="isFirstTime"
         :index="index"
+        @selectOption="selectOption(option)"
       />
     </div>
   </div>

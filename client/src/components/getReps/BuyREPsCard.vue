@@ -5,7 +5,7 @@
   import { getCardInfo, getPaymentHistory } from '@/services/payment';
   import { formatPercentage } from '@/utils';
 
-  const emit = defineEmits(['toggleBuyREPs']);
+  const emit = defineEmits(['toggleBuyREPs', 'selectOption']);
   const props = defineProps({
     purchaseOptions: {
       type: Object,
@@ -36,6 +36,10 @@
   // };
 
   const toggleBuyREPs = async () => {
+    console.log(props.purchaseOptions);
+
+    emit('selectOption', props.purchaseOptions);
+
     popupStore.toggleCompletePurchaseVisible();
     if (!hasFetchedCountries) {
       countryStore.fetchCountries();
@@ -73,7 +77,9 @@
           {{ formatPercentage(purchaseOptions.discount * 100) }}% OFF
         </p>
       </div>
-      <p class="text-gray-500 line-through text-sm mt-1">US$ {{ purchaseOptions.amount }}</p>
+      <p class="text-gray-500 line-through text-sm mt-1" v-if="purchaseOptions.discount !== 0">
+        US$ {{ purchaseOptions.amount }}
+      </p>
     </div>
     <button
       @click="toggleBuyREPs(purchaseOptions)"

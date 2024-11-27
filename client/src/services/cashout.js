@@ -68,6 +68,21 @@ const verifyOtp = async (otp) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const getCashoutHistory = async (page, pageSize, startDate, endDate) => {
+  try {
+    const response = await axios.get('cashout/getListCashoutHistory', {
+      params: {
+        page,
+        pageSize,
+        startDate,
+        endDate,
+      },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createWithdrawInfor,
   getWithdrawInfor,
@@ -77,4 +92,5 @@ export {
   removeWithdrawInfor,
   sendMail,
   verifyOtp,
+  getCashoutHistory,
 };

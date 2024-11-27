@@ -21,6 +21,8 @@
     'dataFromWithdraw',
   ]);
   const toogleWithdrawVisible = () => {
+    repInput.value = '';
+
     emit('toogleWithdrawVisible');
   };
 
@@ -32,6 +34,8 @@
   const toogleProcessingPaymentVisible = async () => {
     isLoadingWithdraw.value = true;
     try {
+      console.log(repInput.value);
+
       const res = await createPayout(repInput.value);
       console.log(res);
 
@@ -41,6 +45,7 @@
         emit('dataFromWithdraw', estimatedValue);
         await userStore.fetchUserProfile();
       } else {
+        console.error(res.message);
         toast.error(`You need to enter a REPs value greater than ${props.minWithdraw}.`);
       }
     } catch (error) {
