@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, watch, computed } from 'vue';
+  import { ref, watch, computed, onMounted } from 'vue';
   import Dialog from 'primevue/dialog';
 
   import Divider from 'primevue/divider';
@@ -9,10 +9,12 @@
   import { useCardStore } from '@/stores/card.store';
   import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
   import { cashoutSchema, paymentSchema } from '@/utils/vadilation';
-  import { createWithdrawInfor } from '@/services/cashout';
+  import { createWithdrawInfor, sendMail } from '@/services/cashout';
+
   import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
   import smallLoading from '@/components/icons/smallLoading.vue';
   import { toast } from 'vue3-toastify';
+  import { loadStripe } from '@stripe/stripe-js';
 
   const props = defineProps({
     title: String,
@@ -27,6 +29,7 @@
   const isLoadingBankDetail = ref(false);
   const isSubmitting = ref(false);
   const isValidRoutingNumber = ref(true);
+  const bankToken = ref();
   const bankData = ref({
     routingNumber: '',
     bankHolderName: '',
@@ -38,7 +41,7 @@
     bankHolderName: '',
     bankNumber: '',
   });
-  const resetForm = () => {
+  const C = () => {
     bankData.value = {
       routingNumber: '',
       bankHolderName: '',
@@ -50,7 +53,18 @@
       bankNumber: '',
     };
   };
-  const emit = defineEmits(['toogleBankDetailsVisible', 'toogleSelectBankVisible']);
+
+  const stripe = ref();
+
+  onMounted(async () => {
+    stripe.value = await loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
+  });
+
+  const emit = defineEmits([
+    'toogleBankDetailsVisible',
+    'toogleSelectBankVisible',
+    'toogleCloseBankDetailsVisible',
+  ]);
   const toogleBankDetailsVisible = () => {
     emit('toogleBankDetailsVisible');
     resetForm();
@@ -113,13 +127,36 @@
         return;
       }
 
-      const res = await createWithdrawInfor(bankData.value);
+      // Create bank account token
+      const result = await stripe.value.createToken('bank_account', {
+        country: 'SG',
+        currency: 'sgd',
+        account_holder_name: bankData.value.bankHolderName,
+        routing_number: bankData.value.routingNumber, // Routing number giả cho test
+        account_number: bankData.value.bankNumber,
+      });
 
-      if (res && res.status === 200) {
-        await withdrawInforStore.fetchWithdrawInfor();
+      if (result.error) {
+        console.log(result.error.message);
+        toast.error('Bank info does not exist. Please check your information again.');
       } else {
-        toast.error('Card does not exist. Please check your information again.');
+        popupStore.showVerificationPopup = true;
+
+        emit('toogleCloseBankDetailsVisible');
+        resetForm();
+        bankToken.value = result.token.id;
+        const res = await sendMail();
       }
+
+      // const res = await createWithdrawInfor(bankData.value);
+
+      // if (res && res.status === 200) {
+      //   await withdrawInforStore.fetchWithdrawInfor();
+      //   emit('toogleCloseBankDetailsVisible');
+      //   resetForm();
+      // } else {
+      //   toast.error('Bank info does not exist. Please check your information again.');
+      // }
     } catch (error) {
       console.error('Error during submission:', error);
     } finally {
@@ -167,8 +204,6 @@
       :modal="true"
       :draggable="false"
       :header="props.title"
-      @show="lockScroll"
-      @hide="unlockScroll"
       @update:visible="toogleBankDetailsVisible()"
       :style="{ width: '40rem' }"
     >

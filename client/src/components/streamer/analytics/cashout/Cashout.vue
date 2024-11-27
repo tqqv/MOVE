@@ -7,10 +7,11 @@
   import BankDetails from './BankDetails.vue';
   import VerificationPopup from '@/components/popup/VerificationPopup.vue';
   import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
-  import { getLinkStripeVerify } from '@/services/cashout';
+  import { getLinkStripeVerify, removeWithdrawInfor } from '@/services/cashout';
   import { useUserStore } from '@/stores';
   import { formatNumber, formatPercentage, formatView } from '@/utils';
   import Skeleton from 'primevue/skeleton';
+  import CashoutRemovePopup from './CashoutRemovePopup.vue';
 
   const props = defineProps({
     reps: Number,
@@ -24,7 +25,7 @@
   const userStore = useUserStore();
   const exchangeRate = ref(0.005);
   const minWithdraw = ref(2500);
-
+  const isRemoveVisible = ref(false);
   const isUpdateSuccessful = ref(false);
   const isWithdrawVisible = ref(false);
   const isProcessingPaymentVisible = ref(false);
@@ -34,6 +35,16 @@
 
   const handleDataFromWithdraw = (data) => {
     withdrawValue.value = data;
+  };
+  const toggleOpenRemove = async () => {
+    isRemoveVisible.value = !isRemoveVisible.value;
+  };
+
+  const toggleCloseRemove = () => {
+    isRemoveVisible.value = false;
+  };
+  const toogleCloseBankDetailsVisible = () => {
+    isBankDetailsVisible.value = false;
   };
 
   const toogleBankDetailsVisible = () => {
@@ -173,6 +184,12 @@
     :isBankDetailsVisible="isBankDetailsVisible"
     @toogleBankDetailsVisible="toogleBankDetailsVisible"
     @toogleSelectBankVisible="toogleSelectBankVisible"
+    @toogleCloseBankDetailsVisible="toogleCloseBankDetailsVisible"
+  />
+  <CashoutRemovePopup
+    title="Remove bank"
+    :isRemoveVisible="isRemoveVisible"
+    @closeRemove="toggleCloseRemove"
   />
   <VerificationPopup />
 </template>

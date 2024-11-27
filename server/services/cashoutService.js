@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout, deleteWithdrawMethod, createNewBankAccount } = require("./stripeService.js");
 const { Channel, User, WithdrawInfor, Withdraw, sequelize } = db;
@@ -218,7 +219,12 @@ const cashout = async(channelId, repInput) => {
       }
     )
 
-    await channel.decrement('rep', { by: repInput });
+    await Channel.decrement('rep', { 
+      by: repInput,
+      where: {
+        id: channelId
+      }
+    });
 
     // chưa xử lý trừ rep nè check nghe
 
@@ -316,7 +322,7 @@ const getListCashoutHistory = async(channelId, page, pageSize, startDate, endDat
 
 const getWithdrawInfor = async(channelId) => {
   try {
-    const withdrawInfor = await WithdrawInfor.findOne({where: { channelId: channelId, status: 'verified' }})
+    const withdrawInfor = await WithdrawInfor.findOne({where: { channelId: channelId, status: { [Op.ne]: 'deleted'} }})
 
     return {
       status: 200,
