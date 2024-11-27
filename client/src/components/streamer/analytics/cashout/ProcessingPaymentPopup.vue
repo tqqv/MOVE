@@ -5,6 +5,7 @@
   const props = defineProps({
     isProcessingPaymentVisible: Boolean,
     title: String,
+    withdrawValue: Number,
   });
   const emit = defineEmits(['toogleProcessingPaymentVisible']);
   const toogleProcessingPaymentVisible = () => {
@@ -25,13 +26,15 @@
     >
       <div class="text-black space-y-8">
         <div class="text-base">
-          Your payment of <span class="font-bold">${{ money || 1223 }}</span> is being processed.
+          Your payment of <span class="font-bold">${{ withdrawValue }}</span> is being processed.
           Please allow 7 working days to receive your payment.
         </div>
         <div class="text-[#777777] text-xs">
           Note: The amount receive may vary due to the exchange rate & bank charges.
         </div>
-        <div class="flex justify-center"><button class="btn w-[170px]">Close</button></div>
+        <div @click="toogleProcessingPaymentVisible" class="flex justify-center">
+          <button class="btn w-[170px]">Close</button>
+        </div>
       </div>
     </Dialog>
   </div>

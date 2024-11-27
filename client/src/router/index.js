@@ -33,6 +33,7 @@ import SearchTotal from '@/components/search/SearchTotal.vue';
 import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
 import VerifyEmail from '@/components/VerifyEmail.vue';
+import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
 
 const routes = [
   // User router
@@ -96,8 +97,16 @@ const routes = [
       { path: 'analytics', component: Overview },
       { path: 'video-analytics', component: VideoAnalytics },
       { path: 'video-analytics/:videoId', component: InDepthAnalytics },
-      { path: 'cashout', component: Cashout },
+
       { path: 'live-stream-analytics', component: LiveStreamAnalytics },
+      {
+        path: 'cashout',
+        component: Cashout,
+      },
+      {
+        path: 'cashout-history',
+        component: CashoutHistory,
+      },
     ],
   },
   // Live stream by streamer
