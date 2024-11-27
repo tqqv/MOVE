@@ -3,34 +3,8 @@ const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, creat
 const { Channel, User, WithdrawInfor, Withdraw, sequelize } = db;
 
 
-const createMethodWithdraw = async(channelId, bankData) => {
-  const bankNumberRegex = /^\d{9,16}$/;
-  const routingNumberRegex = /^\d{4}-\d{3}$/;
+const createMethodWithdraw = async(channelId, bankToken) => {
   try {
-    if(!bankData.bankHolderName || !bankData.bankNumber || !bankData.routingNumber){
-      return {
-        status: 400,
-        data: null,
-        message: "Bank data not null."
-      }
-    }
-
-    // Validate Bank Singapore
-    if (!bankNumberRegex.test(bankData.bankNumber)) {
-      return {
-        status: 400,
-        data: null,
-        message: "Bank number must be 9-16 digits."
-      }
-    }
-
-    if (!routingNumberRegex.test(bankData.routingNumber)) {
-      return {
-        status: 400,
-        data: null,
-        message: "Routing number must be in the format XXXX-XXX."
-      }
-    }
 
     const channel = await Channel.findOne({
       where: {
@@ -49,14 +23,14 @@ const createMethodWithdraw = async(channelId, bankData) => {
       channel.stripeAccountId = account
       await channel.save()
 
-      const res = await updateStripeAccount(channel.stripeAccountId, channel.User, bankData)
+      const res = await updateStripeAccount(channel.stripeAccountId, channel.User, bankToken)
 
       const createWithdrawInfor = await WithdrawInfor.create({
         channelId: channelId,
         bankName: res.external_accounts.data[0].bank_name,
-        bankHolderName: bankData.bankHolderName,
+        bankHolderName: res.external_accounts.data[0].account_holder_name,
         bankNumber: res.external_accounts.data[0].last4,
-        routingNumber: bankData.routingNumber,
+        routingNumber: res.external_accounts.data[0].routing_number,
         stripeBankId: res.external_accounts.data[0].id,
         status: res.requirements.currently_due[0] || "verified"
       })
@@ -67,15 +41,14 @@ const createMethodWithdraw = async(channelId, bankData) => {
         message: "Successful"
       }
     } else {
-      const res = await createNewBankAccount(channel.stripeAccountId, bankData)
-      console.log(res);
+      const res = await createNewBankAccount(channel.stripeAccountId, bankToken)
 
       const createWithdrawInfor = await WithdrawInfor.create({
         channelId: channelId,
         bankName: res.bank_name,
-        bankHolderName: bankData.bankHolderName,
+        bankHolderName: res.account_holder_name,
         bankNumber: res.last4,
-        routingNumber: bankData.routingNumber,
+        routingNumber: res.routing_number,
         stripeBankId: res.id,
         status: "verified"
       })

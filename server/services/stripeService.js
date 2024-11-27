@@ -84,17 +84,10 @@ const createStripeAccountId = async(email) => {
   }
 }
 
-const createNewBankAccount = async(accountId, bankData) => {
+const createNewBankAccount = async(accountId, bankToken) => {
   try {
     const newBankAccount = await stripe.accounts.createExternalAccount(accountId, {
-      external_account: {
-        object: "bank_account",
-        country: "SG",
-        currency: "sgd",
-        account_holder_name: bankData.bankHolderName,
-        routing_number: bankData.routingNumber,
-        account_number: bankData.bankNumber,
-      },
+      external_account: bankToken,
     });
 
     const updatedBankAccount = await stripe.accounts.updateExternalAccount(
@@ -111,8 +104,12 @@ const createNewBankAccount = async(accountId, bankData) => {
   }
 }
 
-const updateStripeAccount = async(accountId, channelData, bankData) => {
+const updateStripeAccount = async(accountId, channelData, bankToken) => {
   try {
+    await stripe.accounts.createExternalAccount(accountId, {
+      external_account: bankToken,
+    });
+
     let firstName
     let lastName
     let day
@@ -132,6 +129,7 @@ const updateStripeAccount = async(accountId, channelData, bankData) => {
     year = dateParts[0];
     month = dateParts[1];
     day = dateParts[2];
+
 
     const file1 = await stripe.files.create({
       purpose: 'identity_document',
@@ -157,14 +155,14 @@ const updateStripeAccount = async(accountId, channelData, bankData) => {
         url: 'https://training-move-capstone.madlab.tech/', // URL của doanh nghiệp
       },
       business_type: 'individual', // Hoặc "company"
-      external_account: {
-        object: "bank_account",
-        country: "SG",
-        currency: "sgd",
-        account_holder_name: bankData.bankHolderName,
-        routing_number: bankData.routingNumber, // Routing number giả cho test
-        account_number: bankData.bankNumber, // Account number giả cho test
-      },
+      // external_account: {
+      //   object: "bank_account",
+      //   country: "SG",
+      //   currency: "sgd",
+      //   account_holder_name: bankData.bankHolderName,
+      //   routing_number: bankData.routingNumber, // Routing number giả cho test
+      //   account_number: bankData.bankNumber, // Account number giả cho test
+      // },
       individual: {
         address: {
           line1: '123 Main Street',
