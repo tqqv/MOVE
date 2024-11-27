@@ -18,6 +18,8 @@ export const usePopupStore = defineStore('popup', () => {
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
   const isSelectPaymentMethod = ref(false);
+  const showVerificationPopup = ref(false);
+
   const isCompletePurchaseVisible = ref(false);
   const showInstructionLive = ref(false);
   const showInstructionDonate = ref(false);
@@ -25,6 +27,9 @@ export const usePopupStore = defineStore('popup', () => {
   const isHaveCard = ref(false);
   const isOrderSuccessful = ref(true);
   const isCancelPayment = ref(false);
+  const toggleVerificationPopup = () => {
+    showVerificationPopup.value = !showVerificationPopup.value;
+  };
   const toggleCompletePurchaseVisible = () => {
     isCompletePurchaseVisible.value = !isCompletePurchaseVisible.value;
   };
@@ -173,6 +178,8 @@ export const usePopupStore = defineStore('popup', () => {
     isCancelPayment,
     isSelectPaymentMethod,
     toggleSelectPaymentMethod,
+    showVerificationPopup,
+    toggleVerificationPopup,
     toggleCompletePurchaseVisible,
     isCompletePurchaseVisible,
     showInstructionLive,

@@ -2,12 +2,12 @@
 const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
-  class Withdraw extends Model {
+  class WithdrawInfor extends Model {
   static associate(models) {
     this.belongsTo(models.Channel, { foreignKey: "channelId" });
   }
   }
-  Withdraw.init(
+  WithdrawInfor.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -17,7 +17,7 @@ module.exports = (sequelize, DataTypes) => {
         },
         channelId: {
             type: DataTypes.UUID,
-            allowNull: true,
+            allowNull: false,
             references: {
                 model: 'Channels',
                 key: 'id'
@@ -25,33 +25,36 @@ module.exports = (sequelize, DataTypes) => {
             onUpdate: 'CASCADE',
             onDelete: 'CASCADE',
         },
-        amount: {
-            type: DataTypes.FLOAT,
-            allowNull: false,
+        stripeBankId: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        bankName: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        bankHolderName: {
+          type: DataTypes.STRING,
+          allowNull: true,
+        },
+        bankNumber: {
+          type: DataTypes.INTEGER,
+          allowNull: true,
+        },
+        routingNumber: {
+          type: DataTypes.STRING,
+          allowNull: true,
         },
         status: {
-            type: DataTypes.ENUM('pending', 'completed', 'failed'),
-            allowNull: false,
-            defaultValue: 'pending'
-        },
-        arrivalDate: {
-            type: DataTypes.DATE,
-            // defaultValue: DataTypes.literal('CURRENT_TIMESTAMP'),
-        },
-        stripePayoutId: {
-            type: DataTypes.STRING(255),
-            allowNull: false,
-        },
-        rep: {
-            type: DataTypes.INTEGER,
-            allowNull: false,
-        },
+          type: DataTypes.STRING,
+          allowNull: true,
+        }
     },
     {
       sequelize,
-      modelName: "Withdraw",
-      tableName: "withdraws",
+      modelName: "WithdrawInfor",
+      tableName: "withdrawInfors",
       timestamps: true,
   });
-  return Withdraw;
+  return WithdrawInfor;
 };

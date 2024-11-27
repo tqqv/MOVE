@@ -36,6 +36,8 @@ import VerifyEmail from '@/components/VerifyEmail.vue';
 import ScreenChat from '@/components/screenObs/ScreenChat.vue';
 import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
+import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
+
 
 const routes = [
   // User router
@@ -106,8 +108,16 @@ const routes = [
       { path: 'analytics', component: Overview },
       { path: 'video-analytics', component: VideoAnalytics },
       { path: 'video-analytics/:videoId', component: InDepthAnalytics },
-      { path: 'cashout', component: Cashout },
+
       { path: 'live-stream-analytics', component: LiveStreamAnalytics },
+      {
+        path: 'cashout',
+        component: Cashout,
+      },
+      {
+        path: 'cashout-history',
+        component: CashoutHistory,
+      },
     ],
   },
   // Live stream by streamer

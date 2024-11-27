@@ -95,9 +95,9 @@
   });
 </script>
 <template>
-  <div class="container">
-    <div class="flex justify-between items-center">
-      <h1 class="py-8 px-4 font-bold text-[24px]">Live analytics</h1>
+  <section class="container">
+    <div class="flex justify-between items-center pb-4">
+      <h1 class="font-bold text-[24px]">Live analytics</h1>
       <div class="p-4 w-[30%]">
         <Filter
           title="Select live stream"
@@ -183,6 +183,6 @@
         </TabPanels>
       </Tabs>
     </div>
-  </div>
+  </section>
 </template>
 <style></style>

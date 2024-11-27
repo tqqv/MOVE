@@ -98,9 +98,9 @@
   });
 </script>
 <template>
-  <div class="container">
-    <div class="flex justify-between">
-      <h1 class="py-8 px-4 font-bold text-[24px]">Video analytics</h1>
+  <section class="container">
+    <div class="flex justify-between pb-4">
+      <h1 class="font-bold text-[24px]">Video analytics</h1>
       <div class="flex gap-8">
         <Filter
           title="SORT BY"
@@ -227,5 +227,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
