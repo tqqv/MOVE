@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, ReactionComment, Report } = db;
+const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, ReactionComment, DonationItem, Report } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -47,6 +47,39 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
       }
     }
 
+    const sender = await User.findOne({
+      where: {
+        id: userId,
+      },
+    })
+
+    const video = await Video.findOne({
+      where: {
+        id: videoId,
+      },
+    })
+
+    const reciever = await Channel.findOne({
+      where: {
+        id: video.channelId,
+      },
+    });
+
+    const donationItem = await DonationItem.findOne({
+      where: {
+        id: commentInfor.donationItemId,
+      },
+    });
+
+    commentInfor.rep = donationItem.REPs;
+
+    if(sender.REPs === 0 || sender.REPs < donationItem.REPs) {
+      return {
+        status: 400,
+        message: "You don't have enough REP to donate",
+      }
+    }
+
     const parentCommentChecker = await Comment.findOne({ where: { id: commentInfor.parentId || null }});
     // check parent comment is not null but also not a comment id. + check cả trường hợp fake parentId cmt
     if(commentInfor.parentId && !parentCommentChecker) {
@@ -66,7 +99,12 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
 
     // Nếu parentId != null, thì phải kiểm tra để xem parent của nó là comment nào.
     commentInfor.parentId = !commentInfor.parentId  ? null : await checkLevelAndGetParentId(commentInfor.parentId)
-    const comment = await Comment.create({videoId, userId, channelId, ...commentInfor})
+    const [comment] = await Promise.all([
+      Comment.create({videoId, userId, channelId, ...commentInfor}),
+      sender.update({ REPs: sender.REPs - donationItem.REPs }),
+      reciever.update({ rep: reciever.rep + donationItem.REPs })
+    ]);
+
     if(!comment) {
         return {
             status: 400,
@@ -81,6 +119,8 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
         message: "Create comment successfully."
     }
   } catch (error) {
+    console.log(error);
+
     return {
         status: 400,
         data: null,
@@ -149,7 +189,11 @@ const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
         as: 'commentReport',
         attributes: ['status']
       },
-
+      {
+        model: DonationItem,
+        as: 'commentDonationItem',
+        attributes: ['name', 'image']
+      },
     ],
 
     order: [
@@ -251,6 +295,11 @@ const getCommentsByChannelId = async (userId, channelId, page, pageSize, respons
         attributes: ['avatar','channelName', 'popularCheck']
       },
       {
+        model: DonationItem,
+        as: 'commentDonationItem',
+        attributes: ['name', 'image']
+      },
+      {
         model: Video,
         attributes: ['thumbnailUrl', 'title', 'duration', 'updatedAt', 'id'],
         where: {
@@ -338,6 +387,11 @@ const getChildCommentsByParentId = async (parentId, page, pageSize, userId) => {
         model: Channel,
         as: 'channelComments',
         attributes: ['avatar','channelName', 'popularCheck']
+      },
+      {
+        model: DonationItem,
+        as: 'commentDonationItem',
+        attributes: ['name', 'image']
       },
     ],
     order: [
