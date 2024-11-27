@@ -51,11 +51,13 @@ const getListCashoutHistoryController = async (req, res, next) => {
   const pageSize = req.query.pageSize || 10;
   const startDate = req.query.startDate || null;
   const endDate = req.query.endDate || null;
+  const status = req.query.status || null;
+
   const sortCondition = {
     sortBy: req.query.sortBy || 'createdAt',
     order: req.query.order || 'DESC'
   };
-  const result = await getListCashoutHistory(channelId, page, pageSize, startDate, endDate, sortCondition);
+  const result = await getListCashoutHistory(channelId, page, pageSize, startDate, endDate, sortCondition, status);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 

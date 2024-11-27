@@ -131,7 +131,12 @@
         </Column>
         <Column field="rep" header="Bank Holder Name">
           <template #body="{ data }">
-            <span class="font-bold">{{ data.bankName }}</span>
+            <span>{{ data.bankHolderName }}</span>
+          </template>
+        </Column>
+        <Column field="rep" header="Bank Name">
+          <template #body="{ data }">
+            <span>{{ data.bankName }}</span>
           </template>
         </Column>
         <Column field="count" header="Bank Number">
@@ -154,9 +159,12 @@
               :class="{
                 'bg-[#d4edda] text-[#28a745] px-2 py-1 rounded-full font-bold':
                   data.status === 'completed',
-                'bg-[#fff3cd] text-[#ffc107] px-2 py-1 rounded': data.status === 'pending',
-                'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded': data.status === 'cancel',
-                'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded': data.status === 'failed',
+                'bg-[#fff3cd] text-[#ffc107] px-2 py-1 rounded-full font-bold':
+                  data.status === 'pending',
+                'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded-full font-bold':
+                  data.status === 'cancel',
+                'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded-full font-bold':
+                  data.status === 'failed',
               }"
             >
               {{ data.status.charAt(0).toUpperCase() + data.status.slice(1) }}
