@@ -244,7 +244,17 @@
         <div class="text-base text-[#666666] font-bold">Order Summary</div>
         <div class="flex justify-between">
           <div class="font-bold text-base">{{ getRepsStore.selectedOption?.rep }} REP$</div>
-          <div class="text-base">US${{ getRepsStore.selectedOption?.amount }}</div>
+          <div class="text-base">
+            US$
+            {{
+              (
+                getRepsStore.selectedOption?.amount -
+                getRepsStore.selectedOption?.amount * getRepsStore.selectedOption?.discount
+              )
+                .toFixed(2)
+                .replace(/\.00$/, '')
+            }}
+          </div>
         </div>
       </div>
       <div v-if="isFirstTime" class="text-sm text-[#777777]">
@@ -253,7 +263,17 @@
       <Divider />
       <div class="flex gap-x-6 justify-end">
         <div>Total</div>
-        <div class="text-base font-bold">US${{ getRepsStore.selectedOption?.amount }}</div>
+        <div class="text-base font-bold">
+          US$
+          {{
+            (
+              getRepsStore.selectedOption?.amount -
+              getRepsStore.selectedOption?.amount * getRepsStore.selectedOption?.discount
+            )
+              .toFixed(2)
+              .replace(/\.00$/, '')
+          }}
+        </div>
       </div>
 
       <div class="space-y-4">
@@ -312,7 +332,17 @@
         <div class="flex gap-x-6 justify-center items-center">
           <div class="flex gap-x-2 justify-end">
             <div>Total</div>
-            <div class="text-base font-bold">US${{ getRepsStore.selectedOption?.amount }}</div>
+            <div class="text-base font-bold">
+              US$
+              {{
+                (
+                  getRepsStore.selectedOption?.amount -
+                  getRepsStore.selectedOption?.amount * getRepsStore.selectedOption?.discount
+                )
+                  .toFixed(2)
+                  .replace(/\.00$/, '')
+              }}
+            </div>
           </div>
           <div>
             <button @click="toggleLoadPayment" class="btn" :disabled="isSubmitting">

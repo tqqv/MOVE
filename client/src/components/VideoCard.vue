@@ -28,9 +28,7 @@
             : `/video/${video.id}`
         "
       >
-        <img
-          :src="video.thumbnailUrl"
-          class="aspect-[9/16] rounded-md object-cover w-full h-[180px] sm:h-[210px] md:h-[230px] lg:h-[200px]"
+        <img :src="video.thumbnailUrl" class="aspect-[16/9] rounded-md object-cover w-full h-full"
       /></router-link>
       <span
         v-if="video.livestreamChannel?.isLive"

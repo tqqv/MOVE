@@ -1,54 +1,118 @@
 <script setup>
   import { ref, computed } from 'vue';
   import Dialog from 'primevue/dialog';
-  import Button from 'primevue/button';
+  import { usePopupStore, useUserStore } from '@/stores';
+  import { createWithdrawInfor, verifyOtp, sendMail } from '@/services/cashout';
+  import { toast } from 'vue3-toastify';
+  import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
+  import smallLoading from '@/components/icons/smallLoading.vue';
 
-  const data = {
-    email: 'abc@gmail.com',
-  };
+  const props = defineProps({
+    tokenBank: String,
+  });
+  const popupStore = usePopupStore();
+  const userStore = useUserStore();
+  const withdrawInforStore = useWithdrawInfor();
 
-  const code = ref('');
-  const showVerificationPopup = ref(false);
-
+  const otp = ref('');
+  const isLoading = ref(false);
+  const countdown = ref(0);
   const buttonColor = computed(() => {
-    return code.value.trim() ? 'btn' : 'btnDisable';
+    return otp.value.trim() ? 'btn' : 'btnDisable';
   });
 
   const isButtonDisabled = computed(() => {
-    return !code.value.trim();
+    return !otp.value.trim();
   });
+  const resendMail = async () => {
+    if (countdown.value > 0) return;
+    try {
+      const res = await sendMail();
+      if (res.status === 200) {
+        toast.success('Code resent successfully.');
+        countdown.value = 60;
+        const interval = setInterval(() => {
+          countdown.value -= 1;
+          if (countdown.value <= 0) {
+            clearInterval(interval);
+          }
+        }, 1000);
+      } else {
+        toast.error(res.message || 'Failed to resend code.');
+      }
+    } catch (error) {
+      toast.error('Error sending code. Please try again later.');
+      console.error(error);
+    }
+  };
+  const handleSubmit = async () => {
+    if (isLoading.value) return;
+    try {
+      const response = await verifyOtp(otp.value);
+      if (response.status === 200) {
+        isLoading.value = true;
+
+        const res = await createWithdrawInfor(props.tokenBank);
+        if (res.status === 200) {
+          toast.success('Create successful withdraw information');
+          await withdrawInforStore.fetchWithdrawInfor();
+          popupStore.toggleVerificationPopup();
+        }
+      } else {
+        toast.error(response.message);
+      }
+    } catch (error) {
+      console.error('Error during submission:', error);
+    } finally {
+      isLoading.value = false;
+    }
+  };
 </script>
 
 <template>
   <div>
-    <Button label="Show Verification Popup" @click="showVerificationPopup = true" />
-
     <Dialog
-      v-model:visible="showVerificationPopup"
+      :visible="popupStore.showVerificationPopup"
       header="Verify your email to keep account secure"
-      class="w-[568px]"
+      :style="{ width: '40rem' }"
+      :modal="true"
       :draggable="false"
-      :dismissableMask="true"
+      @update:visible="popupStore.toggleVerificationPopup()"
     >
       <div class="space-y-4">
         <span class="text_para">
-          We sent a 6-digit code to <span class="font-bold">{{ data.email }}</span
+          We sent a 6-digit code to <span class="font-bold">{{ userStore.user?.email }}</span
           >. Enter the code below to confirm your account. You may also tap on the link in the email
           we sent you.
         </span>
 
-        <form @submit.prevent="submitVerificationForm" class="w-full space-y-4">
+        <form @submit.prevent="handleSubmit" class="w-full space-y-4">
           <div class="space-y-2">
             <div class="relative">
-              <label for="code" class="text_para">
-                Verification Code (<span class="text-primary cursor-pointer">Resend code</span>)
+              <label for="otp" class="text_para">
+                Verification Code (<span
+                  @click="resendMail"
+                  class="text-primary"
+                  :class="{
+                    'cursor-pointer': countdown === 0,
+                    '': countdown > 0,
+                  }"
+                  :disabled="countdown > 0"
+                >
+                  Resend code {{ countdown > 0 ? `(${countdown}s)` : '' }} </span
+                >)
               </label>
-              <input v-model="code" type="text" class="input_custom" required />
+              <input v-model="otp" type="text" class="input_custom" required />
             </div>
           </div>
           <div class="flex justify-center">
-            <button type="submit" :class="['w-1/2 p-2', buttonColor]" :disabled="isButtonDisabled">
-              Submit
+            <button
+              type="submit"
+              :class="['w-1/2 p-2', buttonColor]"
+              :disabled="isButtonDisabled || isLoading"
+            >
+              <smallLoading v-if="isLoading" fill="white" fill_second="#13d0b4" />
+              <span v-else>Submit</span>
             </button>
           </div>
         </form>
@@ -56,5 +120,3 @@
     </Dialog>
   </div>
 </template>
-
-<style scoped></style>

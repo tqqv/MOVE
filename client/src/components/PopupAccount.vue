@@ -8,6 +8,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+  import { formatNumber } from '@/utils';
   const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
@@ -94,7 +95,7 @@
             <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
               <wallet class="fill-black group-hover:fill-primary" />
               <h1 class="mb-1 group-hover:text-primary">
-                Wallet ({{ props.user?.REPs ?? 0 }} REPs)
+                Wallet ({{ formatNumber(props.user?.REPs) ?? 0 }} REPs)
               </h1>
             </div>
           </RouterLink>
