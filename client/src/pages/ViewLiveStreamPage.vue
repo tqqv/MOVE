@@ -21,6 +21,8 @@
   const username = route.params.username;
   const liveStreamData = ref([]);
   const metricsData = ref([]);
+  const listDonation = ref([]);
+
   const fetchUserViewLive = async (username) => {
     try {
       const response = await fetchViewLiveStreamByUsername(username);
@@ -71,16 +73,17 @@
   <Navbar />
   <div class="flex pt-[64px] h-screen">
     <SideBarFollow />
-    <div class="flex-1 overflow-x-none mb-4 overflow-y-scroll">
+    <div class="flex-1 overflow-x-none pb-4 overflow-y-scroll">
       <ViewLiveStreamContent
         :connectOBS="connectOBS"
         :liveStatus="liveStatus"
         :username="username"
         :liveStreamData="liveStreamData"
         :metricsData="metricsData"
+        :listDonation="listDonation"
       />
     </div>
-    <LiveChat :liveStreamData="liveStreamData.channel?.id" />
+    <LiveChat :liveStreamData="liveStreamData.channel?.id" :listDonation="listDonation" />
   </div>
 </template>
 

@@ -2,11 +2,11 @@
   const props = defineProps({
     width: {
       type: String,
-      default: '19px',
+      default: '24',
     },
     height: {
       type: String,
-      default: '19px',
+      default: '24',
     },
     fill: {
       type: String,
@@ -26,8 +26,8 @@
   <svg
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
-    width="84"
-    height="84"
+    :width="width"
+    :height="height"
     viewBox="0 0 80 80"
   >
     <defs>
