@@ -68,7 +68,7 @@ const verifyOtp = async (otp) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-const getCashoutHistory = async (page, pageSize, startDate, endDate) => {
+const getCashoutHistory = async (page, pageSize, startDate, endDate, sortCondition) => {
   try {
     const response = await axios.get('cashout/getListCashoutHistory', {
       params: {
@@ -76,6 +76,7 @@ const getCashoutHistory = async (page, pageSize, startDate, endDate) => {
         pageSize,
         startDate,
         endDate,
+        sortCondition,
       },
     });
     return response;

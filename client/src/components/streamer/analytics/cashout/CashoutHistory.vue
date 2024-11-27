@@ -23,6 +23,12 @@
     { id: 2, name: 20, value: 20 },
     { id: 3, name: 30, value: 30 },
   ];
+  const sortByStatus = [
+    { id: 1, name: 'Completed', value: 'completed' },
+    { id: 2, name: 'Pending', value: 'pending' },
+    { id: 3, name: 'Cancel', value: 'cancel' },
+    { id: 4, name: 'Failed', value: 'failed' },
+  ];
   const currentPage = ref(1);
   const totalPage = ref();
   const cashoutHistoryData = ref([]);
@@ -31,6 +37,7 @@
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
   const isLoadingCashoutHistory = ref(false);
+  const selectedSortBy = ref(sortByStatus[0].value);
 
   const fetchCashoutHistory = async () => {
     isLoadingCashoutHistory.value = true;
@@ -40,9 +47,10 @@
         selectedPageSize.value,
         formatDateData(startDate.value),
         formatDateData(endDate.value),
+        selectedSortBy.value,
       );
-      cashoutHistoryData.value = response.data.data;
-      totalData.value = response.data.data.count;
+      cashoutHistoryData.value = response.data.data.listCashout.rows;
+      totalData.value = response.data.data.listCashout.count;
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       toast.error(error.message);
@@ -64,13 +72,15 @@
     }
   };
 
-  watch([selectedPageSize, startDate, endDate], () => {
+  watch([selectedPageSize, startDate, endDate, selectedSortBy], () => {
     currentPage.value = 1;
-    if (startDate.value || endDate.value || selectedPageSize.value) {
+    if (startDate.value || endDate.value || selectedPageSize.value || selectedSortBy.value) {
       fetchCashoutHistory();
     }
   });
-
+  const handleSortChange = (newValue) => {
+    selectedSortBy.value = newValue.value || '';
+  };
   onMounted(() => {
     const today = new Date();
     const sevenDaysAgo = new Date(today);
@@ -85,6 +95,7 @@
     <div class="flex justify-between items-center pb-4">
       <h1 class="text_title">Cashout History</h1>
       <div class="flex gap-8">
+        <Filter title="Status" :options="sortByStatus" @change="handleSortChange" />
         <FilterDate
           title="Start date"
           :defaultDate="startDate"
@@ -120,12 +131,12 @@
         </Column>
         <Column field="rep" header="Bank Holder Name">
           <template #body="{ data }">
-            <span class="font-bold"></span>
+            <span class="font-bold">{{ data.bankName }}</span>
           </template>
         </Column>
         <Column field="count" header="Bank Number">
           <template #body="{ data }">
-            <span> </span>
+            <span> {{ data.bankNumber }}</span>
           </template> </Column
         ><Column field="rep" header="REPs" sortable>
           <template #body="{ data }">
@@ -145,6 +156,7 @@
                   data.status === 'completed',
                 'bg-[#fff3cd] text-[#ffc107] px-2 py-1 rounded': data.status === 'pending',
                 'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded': data.status === 'cancel',
+                'bg-[#f8d7da] text-[#dc3545] px-2 py-1 rounded': data.status === 'failed',
               }"
             >
               {{ data.status.charAt(0).toUpperCase() + data.status.slice(1) }}

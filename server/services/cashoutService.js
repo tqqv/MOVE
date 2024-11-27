@@ -161,6 +161,7 @@ const cashout = async(channelId, repInput) => {
         message: 'Insert your bank account',
       };
     }
+console.log(repInput);
 
     if (repInput < 2500) {
       return {
@@ -178,9 +179,11 @@ const cashout = async(channelId, repInput) => {
       };
     }
 
-    const amount = repInput * 0.005
+    const amount = Math.round(repInput * 0.005)
+
 
     const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors.stripeBankId, amount)
+console.log(repInput);
 
     const createWithdraw = await Withdraw.create({
       channelId: channelId,
