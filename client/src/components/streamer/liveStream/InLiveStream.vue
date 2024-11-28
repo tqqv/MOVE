@@ -16,7 +16,7 @@
 
   const userStore = useUserStore();
   const streamerStore = useStreamerStore();
-
+  const listDonation = ref([]);
   const liveStreamData = computed(() => streamerStore?.streamerChannel?.id);
 </script>
 <template>
@@ -52,7 +52,7 @@
         </div>
       </div>
       <!-- CHAT -->
-      <LiveChat :liveStreamData="liveStreamData" :isStreamer="true" />
+      <LiveChat :liveStreamData="liveStreamData" :isStreamer="true" :listDonation="listDonation" />
     </div>
     <div class="w-full flex gap-x-8 justify-center">
       <!-- Information -->
