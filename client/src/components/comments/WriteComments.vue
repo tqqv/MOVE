@@ -183,7 +183,7 @@
         />
         <div v-if="errorInput" class="flex items-center gap-x-2 my-3">
           <Warning />
-          <p class="italic text-red text-sm font-medium">Comments cannot exceed 2500 words.</p>
+          <p class="italic text-red text-sm font-medium">Comments cannot exceed 2500 characters.</p>
         </div>
         <div v-if="showActions" class="mt-2 flex gap-2 items-center justify-between">
           <div class="relative">

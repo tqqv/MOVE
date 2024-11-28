@@ -24,6 +24,7 @@ module.exports = (sequelize, DataTypes) => {
 
             this.hasMany(models.Withdraw, { foreignKey: 'channelId', as: 'channelWithdraw' });
 
+            this.hasMany(models.WithdrawInfor, { foreignKey: 'channelId' });
 
             this.belongsToMany(models.User, {
                 through: models.Subscribe,
@@ -105,6 +106,10 @@ module.exports = (sequelize, DataTypes) => {
             isLivestreamAble: {
                 type: DataTypes.BOOLEAN,
                 defaultValue: false,
+            },
+            stripeAccountId: {
+                type: DataTypes.STRING(255),
+                allowNull: true,
             },
   },
   {

@@ -4,11 +4,10 @@
   import PaymentDetail from '@components/wallet/dialog/PaymentDetail.vue';
   import { useContryStore } from '@/stores';
   import { getCardInfo } from '@/services/payment';
-import { useCardStore } from '@/stores/card.store';
+  import { useCardStore } from '@/stores/card.store';
 
   const countryStore = useContryStore();
   const cardStore = useCardStore();
-
   const isDisplay = ref(false);
   let hasFetchedCountries = false;
 
@@ -21,10 +20,11 @@ import { useCardStore } from '@/stores/card.store';
     }
   };
 
-  onMounted(async() => {
-    cardStore.fetchCard();
-  })
-
+  onMounted(async () => {
+    if (!cardStore.card || cardStore.card.length === 0) {
+      await cardStore.fetchCard();
+    }
+  });
 </script>
 <template>
   <div class="space-y-2">

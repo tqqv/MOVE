@@ -88,7 +88,7 @@
 
 <template>
   <section class="container">
-    <div class="flex justify-between px-4">
+    <div class="flex justify-between px-2">
       <h1 class="text_title">Comments</h1>
       <div class="flex gap-x-20">
         <Filter

@@ -1,9 +1,10 @@
 <script setup>
   import Clock from '@/components/icons/clock.vue';
   import Eye from '@/components/icons/eye.vue';
-  import Like from '@/components/icons/like.vue';
+  import Like from '@/components/icons/rate.vue';
   import LogoIcon from '@/components/icons/logoIcon.vue';
   import { formatTimeInStream } from '@/utils';
+  import User from '@/components/icons/user.vue';
 
   const props = defineProps({
     liveInfo: Array,
@@ -37,11 +38,11 @@
     </div>
     <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
       <p class="font-medium">{{ liveStreamData?.avgRates ?? '0' }}</p>
-      <p class="text-sm">Ave rating</p>
+      <p class="text-sm">rating</p>
     </div>
     <div v-else class="flex flex-col">
       <p class="font-medium">{{ metricsData?.avgRates ?? '0' }}</p>
-      <p class="text-sm">Ave rating</p>
+      <p class="text-sm">rating</p>
     </div>
   </div>
   <div class="flex justify-start items-center gap-x-3">
@@ -64,10 +65,28 @@
       <p class="text-sm">live</p>
     </div>
     <div v-else class="flex flex-col">
-      <p class="font-medium">
+      <p class="font-medium w-16">
         {{ elapsedTime > 0 ? formatTimeInStream(elapsedTime) : '00:00:00' }}
       </p>
       <p class="text-sm">live</p>
+    </div>
+  </div>
+  <!-- New followers -->
+  <div class="flex justify-start items-center gap-x-3">
+    <div class="flex size-8 justify-center items-center bg-primary rounded-full">
+      <User full="true" fill="white" />
+    </div>
+    <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
+      <p class="font-medium">
+        {{ liveStreamData?.newFollowers }}
+      </p>
+      <p class="text-sm">new follower</p>
+    </div>
+    <div v-else class="flex flex-col">
+      <p class="font-medium w-16">
+        {{ metricsData?.newFollowers }}
+      </p>
+      <p class="text-sm">new follower</p>
     </div>
   </div>
 </template>

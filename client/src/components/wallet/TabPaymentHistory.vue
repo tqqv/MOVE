@@ -16,6 +16,7 @@
   import { toast } from 'vue3-toastify';
   import FilterDate from '@/components/FilterDate.vue';
   import Filter from '@/components/Filter.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const pageSizeOptions = [
     { id: 1, name: 10, value: 10 },
@@ -29,8 +30,10 @@
   const endDate = ref('');
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
+  const isLoadingPaymentHistory = ref(false);
 
   const fetchPaymentHistory = async () => {
+    isLoadingPaymentHistory.value = true;
     try {
       const response = await getPaymentHistory(
         currentPage.value,
@@ -38,23 +41,26 @@
         formatDateData(startDate.value),
         formatDateData(endDate.value),
       );
-      console.log(response);
       paymentHistoryData.value = response.data.data.list;
       totalData.value = response.data.data.count;
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      isLoadingPaymentHistory.value = false;
     }
   };
 
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
+      fetchPaymentHistory();
     }
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
+      fetchPaymentHistory();
     }
   };
 
@@ -87,13 +93,15 @@
         <FilterDate
           title="End date"
           :defaultDate="endDate"
+          :startDate="startDate"
           class="flex-1"
           @change="(date) => (endDate = date)"
         />
       </div>
     </div>
+    <Skeleton v-if="isLoadingPaymentHistory" width="100%" height="500px"></Skeleton>
 
-    <div class="card">
+    <div v-else class="card">
       <DataTable
         v-if="paymentHistoryData.length > 0"
         :value="paymentHistoryData"
@@ -101,19 +109,19 @@
         dataKey="id"
         tableStyle="min-width: 50rem, text-align: center"
       >
-        <Column header="Date">
+        <Column field="created_date" header="Date" sortable>
           <template #body="{ data }">
             <div class="space-y-4">
               <div>{{ formatDatePosted(data.created_date) }}</div>
             </div>
           </template>
         </Column>
-        <Column header="Product name">
+        <Column field="rep" header="Product name" sortable>
           <template #body="{ data }">
             <span class="font-bold">{{ formatNumber(data.rep) }} REPs</span>
           </template>
         </Column>
-        <Column header="Amount Purchased">
+        <Column field="count" header="Amount Purchased" sortable>
           <template #body="{ data }">
             <span>
               {{ data.count }}

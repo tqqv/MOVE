@@ -1,6 +1,7 @@
 <script setup>
   import { ref, onMounted, watch, computed } from 'vue';
   import Chart from 'primevue/chart';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     ageStats: {
@@ -10,6 +11,9 @@
     totalViewer: {
       type: Number,
       required: true,
+    },
+    isLoading: {
+      type: Boolean,
     },
   });
 
@@ -31,7 +35,7 @@
 
   const setChartData = () => {
     const mergedStats = defaultAgeGroups.map((defaultGroup) => {
-      const foundStat = props.ageStats.find((stat) => stat.ageGroup === defaultGroup.ageGroup);
+      const foundStat = props.ageStats?.find((stat) => stat.ageGroup === defaultGroup.ageGroup);
       return {
         ...defaultGroup,
         viewerCount: foundStat ? foundStat.viewerCount || 0 : 0,
@@ -111,7 +115,8 @@
 </script>
 
 <template>
-  <div v-if="chartData && chartOptions" class="card shadow-lg rounded-lg p-3 w-full">
+  <Skeleton v-if="isLoading" width="100%" height="200px" />
+  <div v-else v-if="chartData && chartOptions" class="card shadow-lg rounded-lg p-3 w-full">
     <Chart type="bar" :data="chartData" :options="chartOptions" class="h-[13rem]" />
   </div>
 </template>

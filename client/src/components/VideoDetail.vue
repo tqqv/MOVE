@@ -5,7 +5,7 @@
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
-  import { getAllDonationItems } from '@/services/donationItem';
+  import { donateInLivestream, getAllDonationItems } from '@/services/donate';
 
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
@@ -39,11 +39,13 @@
       type: Boolean,
       default: false,
     },
-    isGiftVisivle: Boolean,
+    isGiftVisible: Boolean,
     loading: {
       type: Boolean,
       required: true,
     },
+    liveStreamData: Object,
+    listDonation: Array,
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -55,6 +57,8 @@
   const isButtonGiftVisible = ref(false);
   const donationItems = ref({});
   const isGetREPsMenuOpen = ref(false);
+  const loadingItem = ref(true);
+
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
   };
@@ -69,8 +73,10 @@
   const closeMenu = () => {
     isMenuVisible.value = false;
   };
+
   const fetchAllDonationItems = async () => {
     try {
+      loadingItem.value = true;
       const response = await getAllDonationItems();
 
       if (response.status === 200) {
@@ -80,6 +86,8 @@
       }
     } catch (error) {
       console.error('Error fetching donation items:', error);
+    } finally {
+      loadingItem.value = false;
     }
   };
 
@@ -117,10 +125,7 @@
       channel.channelId === props.channelId ? props.channelId.toString() : null,
     );
   });
-  watch(
-    () => props.usernameDetails,
-    (newVal) => {},
-  );
+
   onMounted(() => {
     if (userStore.user) {
       userStore.loadFollowers();
@@ -190,14 +195,10 @@
     <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
         v-if="username !== props.usernameDetails"
-        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
+        class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase"
         @click="toggleFollow"
       >
-        <heart
-          :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
-          stroke="stroke-primary"
-          class="mr-1"
-        />
+        <heart :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'" stroke="stroke-primary" />
         Follow
       </div>
       <div
@@ -209,7 +210,7 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="username !== props.usernameDetails && !isGiftVisivle"
+          v-if="isGiftVisible && username !== props.usernameDetails"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
@@ -220,6 +221,10 @@
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           @toggleGetREPsMenu="toggleGetREPsMenu"
           :donationItems="donationItems"
+          :loadingItem="loadingItem"
+          :liveStreamData="props.liveStreamData"
+          :channelId="props.channelId"
+          :listDonation="props.listDonation"
         />
         <GetREPS
           class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"

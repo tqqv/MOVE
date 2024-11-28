@@ -10,6 +10,7 @@
     listenStreamReady,
   } from '@/services/socketService';
   import { useRoute } from 'vue-router';
+  import ScrollWrapper from '@/layouts/ScrollWrapper.vue';
 
   const route = useRoute();
   const streamerStore = useStreamerStore();
@@ -23,11 +24,15 @@
 
   const startTimer = () => {
     const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
-    timer = setInterval(() => {
-      const currentTime = new Date();
-      elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
-      // console.log(elapsedTime.value);
-    }, 1000);
+    if (createdAt) {
+      timer = setInterval(() => {
+        console.log('create', createdAt);
+        const currentTime = new Date();
+        console.log('curre', currentTime);
+        elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
+        // console.log(elapsedTime.value);
+      }, 1000);
+    }
   };
 
   const stopTimer = () => {
@@ -120,7 +125,7 @@
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px] bg-[#f0f2f5]">
+  <div class="flex pt-[64px] bg-[#f0f2f5] h-screen">
     <SideBarLive
       :elapsedTime="elapsedTime"
       :connectOBS="connectOBS"
@@ -128,13 +133,13 @@
       @startTimer="startTimer"
       @stopTimer="stopTimer"
     />
-    <div class="flex-1 overflow-y-auto">
+    <ScrollWrapper>
       <router-view
         :elapsedTime="elapsedTime"
         :connectOBS="connectOBS"
         :liveStatus="liveStatus"
         :metricsData="metricsData"
       />
-    </div>
+    </ScrollWrapper>
   </div>
 </template>

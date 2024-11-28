@@ -38,9 +38,9 @@
   <!-- SHOW -->
   <div
     v-if="isShow"
-    class="hidden md:block sticky top-[72px] min-h-[calc(100vh-72px)] w-[241px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[64px] h-[calc(100vh-64px)] w-[241px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
   >
-    <div class="flex flex-col pt-4 h-full">
+    <div class="flex flex-col pt-2 h-full">
       <div class="flex items-center my-1 justify-between px-3">
         <h2 class="uppercase text_subTitle text-[16px]">for you</h2>
         <i
@@ -79,7 +79,7 @@
           >Browse</RouterLink
         >
       </div>
-      <div class="flex flex-col gap-y-2 my-3 h-full overflow-y-auto scrollbar-custom px-3 mr-0.5">
+      <div class="flex flex-col gap-y-2 h-full overflow-y-auto scrollbar-custom px-3 mr-0.5">
         <!-- HAVE FOLLOWING CHANNEL -->
         <div v-if="userStore.followers.length && userStore.user" class="flex flex-col mt-2 gap-y-2">
           <p class="mb-3 text-body font-semibold">Follow channel</p>
@@ -92,10 +92,10 @@
           >
             <div
               :class="[
-                'flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0',
+                'flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0',
                 userFollower.followChannel.isLive
                   ? 'border-[3px] border-red'
-                  : 'border-[3px] border-transparent',
+                  : '',
               ]"
             >
               <img
@@ -146,7 +146,7 @@
             :to="`/browse/categories/${userFollowCategory.category?.title}`"
           >
             <div
-              class="flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0"
+              class="flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0"
             >
               <img
                 :src="userFollowCategory.category?.imgUrl || 'default-avatar.png'"
@@ -173,7 +173,7 @@
   <!-- HIDDEN -->
   <div
     v-else
-    class="hidden md:block sticky top-[72px] h-[calc(100vh-72px)] w-[70px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
+    class="hidden md:block sticky top-[64px] h-[calc(100vh-64px)] w-[70px] border-2 border-gray-dark transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col h-full">
       <div
@@ -226,7 +226,7 @@
         >
           <div
             :class="[
-              'flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0',
+              'flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0',
               userFollower.followChannel.isLive
                 ? 'border-[3px] border-red'
                 : 'border-[3px] border-transparent',
@@ -254,7 +254,7 @@
           :to="`/browse/categories/${userFollowCategory.category?.title}`"
           v-tooltip="userFollowCategory.category?.title"
         >
-          <div class="flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0">
+          <div class="flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0">
             <img
               :src="userFollowCategory.category?.imgUrl || 'default-avatar.png'"
               alt="Avatar"

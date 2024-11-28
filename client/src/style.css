@@ -1,5 +1,25 @@
 html {
-  overflow-y: scroll;
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c2c2c3;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }
 
 @layer tailwind-base, primevue, tailwind-utilities;
@@ -53,7 +73,7 @@ html {
   }
 
   .btn {
-    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[40px] leading-none;
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[36px] leading-none;
   }
 
   .notification_custom {
@@ -75,17 +95,22 @@ html {
   .input_custom {
     @apply px-2 py-3 pr-12 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full;
   }
-
+  .select_customPayment {
+    @apply flex-1 px-2 py-3 text-[14px]  ring-1 ring-[#ccc] rounded-lg outline-none;
+  }
   .select_custom {
-    @apply flex-1 px-2 py-3 text-[14px]  ring-1 ring-gray-dark rounded-lg outline-none focus-within:ring-primary;
+    @apply flex-1 px-2 py-3 text-[14px] ring-1 ring-gray-dark rounded-lg outline-none focus-within:ring-primary;
   }
 
   .select_custom_error {
-    @apply bg-red/20 flex-1  text-[14px] text-[#626875]  px-2  py-3   ring-1  rounded-lg outline-none ring-red   focus:caret-red text-xs;
+    @apply bg-red/20 flex-1  text-[14px]  px-2  py-3   ring-1  rounded-lg outline-none ring-[#ccc]  focus:caret-[#ccc] text-sm;
+
   }
+
   .select_custom_error option {
     @apply bg-white;
   }
+
   .btn_eyes {
     @apply flex justify-center items-center absolute top-1/2 right-2 transform -translate-y-1/2 z-20 px-3 cursor-pointer text-[#666666];
   }
@@ -101,11 +126,15 @@ html {
   .error_password {
     @apply bg-red/20 border-[1.7px] border-red text-red focus-within:border-red;
   }
-
+  .error_payment {
+    @apply bg-red/20 border-[1.7px] border-[#ccc] text-red focus-within:border-[#ccc];
+  }
   .normal_password {
     @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary;
   }
-
+  .normal_payment {
+    @apply border-[1.7px] border-[#ccc];
+  }
   .password_custom {
     @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg;
   }

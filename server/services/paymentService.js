@@ -150,18 +150,9 @@ const createPayment = async(userId, paymentMethodId, repPackageId) => {
         message: 'Payment successfully.'
       }
     } else {
-      await Payment.create({
-        userId: userId,
-        repPackageId: repPackageId,
-        paymentMethodId: paymentMethodId,
-        paymentIntentId: paymentIntent.id,
-        amount: repPackage.amount,
-        rep: repPackage.rep,
-      })
-
       return {
-        status: 200,
-        message: `Your bill status is: ${paymentIntent.status}`
+        status: 400,
+        message: `Please use this PaymentMethod with the Customer that it belongs to instead`
       }
     }
 

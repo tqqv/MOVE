@@ -12,10 +12,18 @@
   import ReportChat from './chatOnLiveStream/ReportChat.vue';
   import Reply from './icons/reply.vue';
   import Chat from './icons/chat.vue';
+  import NewDonation from './chatOnLiveStream/NewDonation.vue';
+  import Donate from './icons/donate.vue';
+  import REPs1 from './icons/REPsItems/REPs1.vue';
+  import REPs2 from './icons/REPsItems/REPs2.vue';
+  import REPs3 from './icons/REPsItems/REPs3.vue';
+  import REPs4 from './icons/REPsItems/REPs4.vue';
+  import REPs5 from './icons/REPsItems/REPs5.vue';
 
   const props = defineProps({
     isStreamer: Boolean,
     liveStreamData: String,
+    listDonation: Array,
   });
 
   const userStore = useUserStore();
@@ -44,9 +52,9 @@
 
   const fetchChat = () => {
     listenChatHistory((chatHistory) => {
-      console.log('Received chat history:', chatHistory);
+      // console.log('Received chat history:', chatHistory);
       chatMessages.value = chatHistory;
-      console.log(chatMessages.value);
+      // console.log(chatMessages.value);
     });
   };
 
@@ -54,6 +62,9 @@
     listenNewMessage((newMessage) => {
       if (showScrollButton.value) {
         qualityNewMessage.value++;
+      }
+      if (newMessage.donation) {
+        props.listDonation.push(newMessage);
       }
       chatMessages.value.push(newMessage);
     });
@@ -66,7 +77,6 @@
         return;
       }
       if (!inputMessage.value.trim()) return;
-      console.log('123');
 
       const messageData = {
         userId: userStore.user.id,
@@ -105,7 +115,10 @@
   const scrollToBottom = () => {
     const container = chatContainerRef.value;
     if (container) {
-      container.scrollTop = container.scrollHeight;
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: 'smooth',
+      });
       showScrollButton.value = false;
     }
   };
@@ -168,9 +181,9 @@
 
 <template>
   <div
-    v-if="openLiveChat"
-    class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-[#777777] md:flex"
-    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[72px] h-[calc(100vh-72px)]'"
+    v-show="openLiveChat"
+    class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-black md:flex"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[64px] h-[calc(100vh-64px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -200,6 +213,7 @@
         class="max-h-full h-[30px] flex-grow pb-1 relative"
         :class="{ 'max-h-[440px]  h-[70px]': isStreamer }"
       >
+        <NewDonation :listDonation="props.listDonation" />
         <div
           class="flex flex-col-reverse px-2 py-3 h-full relative overflow-y-auto overflow-x-hidden scrollbar-custom"
           ref="chatContainerRef"
@@ -209,12 +223,14 @@
             <div
               v-for="(userChat, index) in chatMessages"
               :key="index"
-              class="text-[13px] p-1 rounded hover:bg-gray-light relative"
+              class="text-[13px] rounded hover:bg-gray-light relative p-1"
               :class="{
                 'bg-primary/20 hover:bg-primary/20':
                   userStore.user?.username &&
                   userChat.replyTo?.username &&
-                  userStore.user?.username === userChat.replyTo?.username,
+                  userStore.user?.username === userChat.replyTo?.username &&
+                  !userChat.donation,
+                '!p-0': userChat.donation,
               }"
               @mouseenter="hoveredIndex = index"
               @mouseleave="hoveredIndex = null"
@@ -227,7 +243,10 @@
                 @handleOpenOptionChat="handleOpenOptionChat"
                 @handleReplyChat="replyChat"
               />
-              <div v-if="userChat.replyTo" class="flex gap-x-1 items-center mb-1.5 text-xs px-0.5">
+              <div
+                v-if="userChat.replyTo"
+                class="flex gap-x-1 items-center mb-1.5 text-xs px-0.5 text-body"
+              >
                 <div class="flex-shrink-0">
                   <Chat />
                 </div>
@@ -252,7 +271,8 @@
               >
                 <Reply />
               </div>
-              <div class="inline-block mr-1">
+              <!-- NORMAL CHAT -->
+              <div v-if="!userChat.donation" class="inline-block mr-1">
                 <div class="flex gap-x-1.5 truncate">
                   <h1 class="text-body">{{ formatTimeChatInLive(userChat.timestamp) }}</h1>
                   <img
@@ -271,7 +291,70 @@
                   </div>
                 </div>
               </div>
-              <span class="text-black break-words leading-relaxed">{{ userChat.message }}</span>
+              <span v-if="!userChat.donation" class="text-black break-words leading-relaxed">{{
+                userChat.message
+              }}</span>
+              <!-- DONATE CHAT -->
+              <div v-if="userChat.donation" class="w-full text-black">
+                <div
+                  class="flex justify-between gap-x-3 px-1 py-1.5 rounded-t"
+                  :class="{
+                    'bg-body/20': userChat.donation === 100,
+                    'bg-primary/20': userChat.donation === 1000,
+                    'bg-purple/20': userChat.donation === 5000,
+                    'bg-blue/15': userChat.donation === 10000,
+                    'bg-yellow-dark/20': userChat.donation === 25000,
+                  }"
+                >
+                  <div class="flex gap-x-2">
+                    <span class="text-body">{{ formatTimeChatInLive(userChat.timestamp) }}</span>
+                    <div class="flex items-center gap-x-2">
+                      <img
+                        class="size-7 object-cover rounded-full flex-shrink-0"
+                        :src="userChat.avatar"
+                        alt=""
+                      />
+                      <div class="flex flex-col">
+                        <h2
+                          class="font-bold truncate cursor-pointer"
+                          @click="handleOpenOptionChat(index)"
+                        >
+                          {{ userChat.channelName || userChat.username }}
+                        </h2>
+                        <div class="flex items-center">
+                          <template v-if="userChat.donation === 100"><REPs1 /></template>
+                          <template v-else-if="userChat.donation === 1000"><REPs2 /></template>
+                          <template v-else-if="userChat.donation === 5000"><REPs3 /></template>
+                          <template v-else-if="userChat.donation === 10000"><REPs4 /></template>
+                          <template v-else-if="userChat.donation === 25000"><REPs5 /></template>
+                          <span class="text-xs mb-1 font-medium">{{ userChat.donation }}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="mx-1">
+                    <div class="flex items-center gap-x-1 text-xs">
+                      <img
+                        src="https://res.cloudinary.com/dg9imqwrd/image/upload/v1732633992/rk4ptrlvqvg6wfesaf32.gif"
+                        alt=""
+                        class="size-8"
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div
+                  class="font-medium bg-opacity-30 px-3 py-1.5 rounded-b"
+                  :class="{
+                    'bg-body/30': userChat.donation === 100,
+                    'bg-primary/30': userChat.donation === 1000,
+                    'bg-purple/30': userChat.donation === 5000,
+                    'bg-blue/25': userChat.donation === 10000,
+                    'bg-yellow-dark/30': userChat.donation === 25000,
+                  }"
+                >
+                  {{ userChat.message }}
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -311,10 +394,7 @@
         :class="{ 'rounded-b-md': isStreamer }"
       >
         <!-- HIDDEN AFTER FOLLOW -->
-        <div v-if="!isStreamer" class="flex justify-start items-center gap-x-3 ml-3">
-          <p class="font-bold text-[13px]">Follow to chat</p>
-          <i class="pi pi-question-circle text-[0.8rem] mt-0.5"></i>
-        </div>
+
         <form class="flex flex-col mt-3 relative group" @submit.prevent="handleSendMessage">
           <!-- NON FOLLOW CHANNEL -->
           <FollowToChat
@@ -375,7 +455,7 @@
               @keydown.shift.enter.stop
               placeholder="Send a message"
               rows="1"
-              class="w-full resize-none text-black bg-gray-light py-[14px] pr-4 px-4 rounded-md text-[13px] placeholder:text-[13px] placeholder:text-footer focus-visible:outline-none max-h-[calc(1.5em*5)]"
+              class="w-full resize-none text-black bg-gray-light py-[14px] pr-4 px-4 rounded-md text-[13px] placeholder:text-[13px] placeholder:text-footer focus-visible:outline-none max-h-[calc(1.5em*5)] min-h-[48px]"
               @input="autoResize"
               maxlength="250"
             />
@@ -407,7 +487,7 @@
     </div>
   </div>
   <div
-    v-else
+    v-show="!openLiveChat"
     class="fixed top-20 right-0 m-3 p-3 bg-transparent rounded-md flex justify-center items-center cursor-pointer hover:bg-[#FFFFFF21]"
     v-tooltip="'Expand'"
     @click="handleOpenLiveChat"

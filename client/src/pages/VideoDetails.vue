@@ -251,6 +251,7 @@
           :usernameDetails="usernameDetails"
           @updateFollowers="fetchVideoById"
           :hiddenReport="false"
+          :isGiftVisible="true"
         />
         <Tabs value="about" class="p-0">
           <TabList class="!p-0">
