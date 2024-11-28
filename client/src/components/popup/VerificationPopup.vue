@@ -14,6 +14,7 @@
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const withdrawInforStore = useWithdrawInfor();
+  const isResending = ref(false);
 
   const otp = ref('');
   const isLoading = ref(false);
@@ -35,7 +36,8 @@
     }, 1000);
   };
   const resendMail = async () => {
-    if (countdown.value > 0) return;
+    if (countdown.value > 0 || isResending.value) return;
+    isResending.value = true;
     try {
       const res = await sendMail();
       if (res.status === 200) {
@@ -47,8 +49,11 @@
     } catch (error) {
       toast.error('Error sending code. Please try again later.');
       console.error(error);
+    } finally {
+      isResending.value = false;
     }
   };
+
   const handleSubmit = async () => {
     if (isLoading.value) return;
     try {
@@ -61,6 +66,7 @@
           toast.success('Create successful withdraw information');
           await withdrawInforStore.fetchWithdrawInfor();
           popupStore.toggleVerificationPopup();
+          otp.value = '';
         }
       } else {
         toast.error(response.message);
@@ -89,7 +95,12 @@
       :style="{ width: '40rem' }"
       :modal="true"
       :draggable="false"
-      @update:visible="popupStore.toggleVerificationPopup()"
+      @update:visible="
+        (visible) => {
+          popupStore.toggleVerificationPopup();
+          if (!visible) otp = '';
+        }
+      "
     >
       <div class="space-y-4">
         <span class="text_para">
@@ -100,19 +111,23 @@
         <form @submit.prevent="handleSubmit" class="w-full space-y-4">
           <div class="space-y-2">
             <div class="relative">
-              <label for="otp" class="text_para">
-                Verification Code (<span
+              <label for="otp" class="text_para flex gap-x-2">
+                <div>Verification Code</div>
+
+                <div
                   @click="resendMail"
-                  class="text-primary"
+                  class="text-primary flex items-center gap-2 text-xs"
                   :class="{
-                    'cursor-pointer': countdown === 0,
-                    '': countdown > 0,
+                    'cursor-pointer': countdown === 0 && !isResending,
+                    '': countdown > 0 || isResending,
                   }"
-                  :disabled="countdown > 0"
+                  :disabled="countdown > 0 || isResending"
                 >
-                  Resend code {{ countdown > 0 ? `(${countdown}s)` : '' }} </span
-                >)
+                  <smallLoading v-if="isResending" fill="#13d0b4" fill_second="#ccc" />
+                  <span v-else> ( Resend code {{ countdown > 0 ? `${countdown}s` : '' }})</span>
+                </div>
               </label>
+
               <input v-model="otp" type="text" class="input_custom" required />
             </div>
           </div>

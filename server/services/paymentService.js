@@ -233,7 +233,7 @@ const getPaymentHistory = async(userId, page, pageSize, startDate, endDate) => {
       data: {
         list,
         count: count.length,
-        totalPages: Math.ceil(list.length/pageSize)
+        totalPages: Math.ceil(count.length/pageSize)
       },
       message: "Get list payment history successfully"
     }

@@ -30,10 +30,9 @@
   const endDate = ref('');
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
-  const isLoadingPaymentHistory = ref(false);
+  const isLoadingPaymentHistory = ref(true);
 
   const fetchPaymentHistory = async () => {
-    isLoadingPaymentHistory.value = true;
     try {
       const response = await getPaymentHistory(
         currentPage.value,
@@ -59,6 +58,8 @@
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
+      console.log(1);
+
       currentPage.value++;
       fetchPaymentHistory();
     }
