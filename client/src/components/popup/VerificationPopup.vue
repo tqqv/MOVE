@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import Dialog from 'primevue/dialog';
   import { usePopupStore, useUserStore } from '@/stores';
   import { createWithdrawInfor, verifyOtp, sendMail } from '@/services/cashout';
@@ -9,6 +9,7 @@
 
   const props = defineProps({
     tokenBank: String,
+    title: String,
   });
   const popupStore = usePopupStore();
   const userStore = useUserStore();
@@ -24,19 +25,22 @@
   const isButtonDisabled = computed(() => {
     return !otp.value.trim();
   });
+  const startCountdown = () => {
+    countdown.value = 60;
+    const interval = setInterval(() => {
+      countdown.value -= 1;
+      if (countdown.value <= 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  };
   const resendMail = async () => {
     if (countdown.value > 0) return;
     try {
       const res = await sendMail();
       if (res.status === 200) {
         toast.success('Code resent successfully.');
-        countdown.value = 60;
-        const interval = setInterval(() => {
-          countdown.value -= 1;
-          if (countdown.value <= 0) {
-            clearInterval(interval);
-          }
-        }, 1000);
+        startCountdown();
       } else {
         toast.error(res.message || 'Failed to resend code.');
       }
@@ -67,13 +71,21 @@
       isLoading.value = false;
     }
   };
+  watch(
+    () => popupStore.showVerificationPopup,
+    (newVal) => {
+      if (newVal) {
+        startCountdown();
+      }
+    },
+  );
 </script>
 
 <template>
   <div>
     <Dialog
       :visible="popupStore.showVerificationPopup"
-      header="Verify your email to keep account secure"
+      :header="title"
       :style="{ width: '40rem' }"
       :modal="true"
       :draggable="false"
@@ -82,8 +94,7 @@
       <div class="space-y-4">
         <span class="text_para">
           We sent a 6-digit code to <span class="font-bold">{{ userStore.user?.email }}</span
-          >. Enter the code below to confirm your account. You may also tap on the link in the email
-          we sent you.
+          >. Enter the code below to confirm your account
         </span>
 
         <form @submit.prevent="handleSubmit" class="w-full space-y-4">

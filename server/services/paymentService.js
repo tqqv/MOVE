@@ -194,10 +194,6 @@ const getPaymentHistory = async(userId, page, pageSize, startDate, endDate) => {
   try {
     const whereCondition = { userId };
 
-
-    console.log(startDate, endDate);
-
-
     if (startDate && endDate) {
       if (!endDate.includes(' ') && !startDate.includes(' ')) {
         endDate = `${endDate} 23:59:59`;
@@ -217,6 +213,7 @@ const getPaymentHistory = async(userId, page, pageSize, startDate, endDate) => {
             [fn('COUNT', '*'), 'count']
         ],
         group: ['repPackageId', literal('DATE(createdAt)'), 'rep'],
+        order: [['created_date', 'DESC']],
         offset: (page - 1) * pageSize *1,
         limit: pageSize*1
     });
@@ -238,7 +235,7 @@ const getPaymentHistory = async(userId, page, pageSize, startDate, endDate) => {
         count: count.length,
         totalPages: Math.ceil(list.length/pageSize)
       },
-      message: "Card removed successfully"
+      message: "Get list payment history successfully"
     }
   } catch (error) {
     console.log(error);
