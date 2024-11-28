@@ -38,9 +38,10 @@ jobs:
           sudo apt update
           sudo apt install -y nginx
           fi
-      - name: Start and enable Nginx
+      - name: Ensure Nginx is running
         run: |
+          if ! sudo service nginx status &> /dev/null; then
           sudo service nginx start
-          sudo service nginx enable
+          fi
       - name: Reload Nginx
         run: sudo service nginx reload
