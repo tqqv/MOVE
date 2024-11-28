@@ -1,7 +1,7 @@
 <script setup></script>
 
 <template>
-  <section class="bg-[#FAFAFB]">
+  <section class="bg-[#FAFAFB] h-full">
     <div class="container">
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="bg-white flex items-center shadow p-5 rounded-lg gap-x-5">

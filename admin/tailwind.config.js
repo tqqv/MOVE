@@ -21,7 +21,8 @@ export default {
       'gray-light': '#EEEEEE',
       'yellow-light': "#FFF6E6",
       'yellow-dark': "#FFB564",
-      'purple': "#e05fcd"
+      'purple': "#e05fcd",
+      'dark': "#1c2434"
     },
   },
   plugins: [],

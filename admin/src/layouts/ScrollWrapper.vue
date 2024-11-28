@@ -18,7 +18,10 @@
 </script>
 
 <template>
-  <div ref="scrollContainerRef" class="flex-1 overflow-y-scroll mr-0.5">
+  <div
+    ref="scrollContainerRef"
+    class="flex-1 mr-0.5 mt-[72px] min-h-screen overflow-y-scroll bg-[#fafafb]"
+  >
     <slot></slot>
   </div>
 </template>

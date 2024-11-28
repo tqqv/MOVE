@@ -1,11 +1,17 @@
 <script setup>
   import { ref } from 'vue';
   import { useRoute } from 'vue-router';
+  import logo from '@assets/logo.svg';
   import HomeIcon from '@icons/home.vue';
   import VideoIcon from '@icons/videos.vue';
   import CommentIcon from '@icons/comment.vue';
   import CashoutIcon from '@icons/cashout.vue';
   import SettingIcon from '@icons/setting.vue';
+  import User from '../icons/user.vue';
+  import Category from '../icons/category.vue';
+  import Level from '../icons/level.vue';
+  import Flag from '../icons/flag.vue';
+  import Request from '../icons/request.vue';
 
   const route = useRoute();
   const isDropdownOpen = ref(false);
@@ -15,8 +21,8 @@
   };
 
   const menuItems = [
-    { name: 'Dashboard', icon: HomeIcon, link: '/' },
-    { name: 'User Management', icon: VideoIcon, link: '/users' },
+    { name: 'Dashboard', icon: HomeIcon, link: '/dashboard' },
+    { name: 'User Management', icon: User, link: '/users' },
     {
       name: 'REP$ System',
       icon: CashoutIcon,
@@ -28,24 +34,25 @@
         { name: 'Discount Item', link: '/reps/discount' },
       ],
     },
-    { name: 'Category Management', icon: CommentIcon, link: '/category' },
-    { name: 'Level Management', icon: CommentIcon, link: '/levelworkout' },
-    { name: 'Report Management', icon: CommentIcon, link: '/report' },
-    { name: 'Request Channel', icon: CommentIcon, link: '/request' },
+    { name: 'Category Management', icon: Category, link: '/category' },
+    { name: 'Level Management', icon: Level, link: '/levelworkout' },
+    { name: 'Report Management', icon: Flag, link: '/report' },
+    { name: 'Request Channel', icon: Request, link: '/request' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
   ];
 </script>
 
 <template>
-  <div
-    class="sticky top-[72px] h-[calc(100vh-72px)] w-[261px] border-r-2 border-gray-dark bg-white"
-  >
-    <div class="flex flex-col py-3">
+  <div class="sticky h-[100vh] w-[281px] bg-dark shadow-xl flex-shrink-0">
+    <div class="flex justify-center items-center py-8 mr-2">
+      <RouterLink to="/dashboard"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
+    </div>
+    <div class="flex flex-col">
       <ul>
         <li v-for="item in menuItems" :key="item.name" class="block mx-2 mb-1">
           <router-link :to="item.link" class="block">
             <div
-              class="p-4 cursor-pointer group hover:bg-primary/20 flex gap-x-4 font-semibold items-center rounded-md"
+              class="p-4 cursor-pointer group hover:bg-[#333a48] flex gap-x-4 font-semibold items-center rounded-md text-white"
               :class="{
                 'bg-primary/85 font-bold hover:bg-primary/85':
                   route.path === item.link ||
@@ -53,7 +60,7 @@
               }"
               @click="item.hasDropdown && toggleDropdown()"
             >
-              <component :is="item.icon" />
+              <component :is="item.icon" fill="#fff" />
               <p class="text-sm">{{ item.name }}</p>
               <span
                 v-if="item.hasDropdown"
@@ -68,9 +75,9 @@
             <li v-for="subitem in item.submenu" :key="subitem.name" class="block mx-2 mb-1">
               <router-link :to="subitem.link" class="block">
                 <div
-                  class="p-2 cursor-pointer group hover:bg-primary/20 flex items-center rounded-md"
+                  class="p-2 cursor-pointer group hover:text-white flex items-center rounded-md text-gray-dark"
                   :class="{
-                    ' font-bold hover:bg-primary/20': route.path.startsWith(subitem.link),
+                    ' font-bold  text-white': route.path.startsWith(subitem.link),
                   }"
                 >
                   <p class="text-sm">{{ subitem.name }}</p>
@@ -80,6 +87,7 @@
           </ul>
         </li>
       </ul>
+      <div></div>
     </div>
   </div>
 </template>

@@ -1,14 +1,23 @@
 <script setup>
   import AdminNavbar from '@/components/admin/AdminNavbar.vue';
   import AdminSideBar from '@/components/admin/AdminSideBar.vue';
+  import ScrollWrapper from './ScrollWrapper.vue';
+  import { ref } from 'vue';
+
+  const openSidebar = ref(true);
+  const handleOpenSidebar = () => {
+    openSidebar.value = !openSidebar.value;
+  };
 </script>
 
 <template>
-  <AdminNavbar />
-  <div class="flex pt-[72px]">
+  <div class="flex h-screen">
     <AdminSideBar />
-    <div class="flex-1 overflow-y-auto">
-      <router-view />
+    <div class="flex-grow flex flex-col h-screen">
+      <AdminNavbar />
+      <ScrollWrapper>
+        <router-view />
+      </ScrollWrapper>
     </div>
   </div>
 </template>
