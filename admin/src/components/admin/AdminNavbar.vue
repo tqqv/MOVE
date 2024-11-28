@@ -2,7 +2,7 @@
   import { ref, onMounted, onBeforeUnmount } from 'vue';
   import logo from '@assets/logo.svg';
   import verified from '@icons/verified.vue';
-  import notification from '@icons/notification.vue';
+  import notificationBell from '@icons/notification.vue';
   import upload from '@icons/upload.vue';
   import rep from '@icons/rep.vue';
   import Button from 'primevue/button';
@@ -65,8 +65,8 @@
   });
 </script>
 <template>
-  <nav class="bg-[#18181b] text-white fixed w-full z-[100]">
-    <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
+  <nav class="bg-white text-white fixed w-[calc(100%-281px)] z-[100] shadow-lg">
+    <div class="mx-auto py-1 sm:px-6 lg:px-8">
       <div class="relative flex h-16 items-center justify-between">
         <!-- Mobile menu button-->
         <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
@@ -109,22 +109,15 @@
           </button>
         </div>
         <!-- Nav items -->
-        <div class="flex items-center w-1/3 justify-center md:items-stretch md:justify-start ml-5">
-          <div class="hidden md:block">
-            <RouterLink to="/admin"
-              ><img class="h-8 w-auto" :src="logo" alt="Madison"
-            /></RouterLink>
-          </div>
-        </div>
-        <div class="w-1/3 h-8 flex justify-center items-center"></div>
-        <div class="w-1/3 items-center justify-end gap-x-6 hidden md:flex">
+
+        <div class="w-full items-center justify-end gap-x-6 hidden md:flex">
           <div class="relative" id="noti-menu-button">
             <div class="relative cursor-pointer" @click="toggleNotiMenu">
               <div class="mt-0.5">
-                <notification fill="fill-white" class="scale-100" />
+                <notificationBell fill="#1c2434" class="scale-100" />
               </div>
               <div
-                class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
+                class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px]"
               >
                 1
               </div>
@@ -154,7 +147,10 @@
                 <span class="sr-only">Open user menu</span>
                 <img
                   class="size-[40px] rounded-full"
-                  :src="userStore.user?.avatar"
+                  :src="
+                    userStore.user?.avatar ||
+                    'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80'
+                  "
                   :alt="userStore.user?.username || 'User'"
                 />
               </button>
