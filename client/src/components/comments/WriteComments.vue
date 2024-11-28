@@ -8,6 +8,7 @@
   import { useTabStore } from '@/stores';
   import Warning from '../icons/warning.vue';
   import { debounce } from '@/utils';
+  import { avatarDefault } from '../animation/gif';
 
   const isPickerVisible = ref(false);
   const commentText = ref('');
@@ -16,11 +17,7 @@
   const popupStore = usePopupStore();
   const tabStore = useTabStore();
 
-  const avatar = computed(
-    () =>
-      userStore.user?.avatar ||
-      'https://res.cloudinary.com/dg9imqwrd/image/upload/v1731636620/pgxv1tkwjvz7rkwy2ked.png',
-  );
+  const avatar = computed(() => userStore.user?.avatar || avatarDefault);
 
   const props = defineProps({
     fetchComments: {

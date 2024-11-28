@@ -19,6 +19,7 @@
   import REPs3 from './icons/REPsItems/REPs3.vue';
   import REPs4 from './icons/REPsItems/REPs4.vue';
   import REPs5 from './icons/REPsItems/REPs5.vue';
+  import { giftBox } from './animation/gif';
 
   const props = defineProps({
     isStreamer: Boolean,
@@ -334,11 +335,7 @@
                   </div>
                   <div class="mx-1">
                     <div class="flex items-center gap-x-1 text-xs">
-                      <img
-                        src="https://res.cloudinary.com/dg9imqwrd/image/upload/v1732633992/rk4ptrlvqvg6wfesaf32.gif"
-                        alt=""
-                        class="size-8"
-                      />
+                      <img :src="giftBox" alt="" class="size-8" />
                     </div>
                   </div>
                 </div>
