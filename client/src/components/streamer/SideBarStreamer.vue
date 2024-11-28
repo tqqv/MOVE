@@ -9,15 +9,12 @@
   import SettingIcon from '@icons/setting.vue';
 
   const route = useRoute();
-
   const dropdownState = ref({});
 
-  // Hàm để toggle  thái dropdown
   const toggleDropdown = (name) => {
     dropdownState.value[name] = !dropdownState.value[name];
   };
 
-  // Dữ liệu menu
   const menuItems = [
     { name: 'Home', icon: HomeIcon, link: '/dashboard-streamer' },
     { name: 'Video', icon: VideoIcon, link: '/dashboard-streamer/videos' },
@@ -45,11 +42,19 @@
     },
     { name: 'Channel settings', icon: SettingIcon, link: '/dashboard-streamer/channel-setting' },
   ];
+
+  const isActive = (item) => {
+    if (route.path === item.link) return true;
+    if (item.hasDropdown) {
+      return item.submenu.some((subitem) => route.path === subitem.link);
+    }
+    return false;
+  };
 </script>
 
 <template>
   <div
-    class="sticky top-[64px] h-[calc(100vh-64px)] w-[261px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-ou"
+    class="sticky top-[64px] h-[calc(100vh-64px)] w-[261px] border-r-2 border-gray-dark bg-white transition-all duration-300 ease-in-out"
   >
     <div class="flex flex-col py-3">
       <ul>
@@ -57,7 +62,9 @@
           <router-link :to="item.link" class="block">
             <div
               class="p-4 cursor-pointer group hover:bg-primary/20 flex gap-x-4 font-semibold items-center rounded-md"
-              :class="{ 'bg-primary/85 font-bold hover:bg-primary/85': route.path === item.link }"
+              :class="{
+                'bg-primary/85 font-bold hover:bg-primary/85': isActive(item),
+              }"
               @click="item.hasDropdown && toggleDropdown(item.name)"
             >
               <component :is="item.icon" />

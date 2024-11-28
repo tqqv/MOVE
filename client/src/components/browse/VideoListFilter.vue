@@ -122,6 +122,7 @@
   watch(levelWorkoutOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
       selectLevelWorkoutOptions.value = newOptions[0].value || '';
+      fetchVideos();
     }
   });
 
