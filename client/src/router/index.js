@@ -44,6 +44,11 @@ import ReportManagement from '@/components/admin/report/ReportManagement.vue';
 import ReportDetail from '@/components/admin/report/ReportDetail.vue';
 import AdminSetting from '@/components/admin/setting/AdminSetting.vue';
 import RepSystem from '@/components/admin/rep/RepSystem.vue';
+import ScreenChat from '@/components/screenObs/ScreenChat.vue';
+import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
+import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
+import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
+
 
 const routes = [
   // User router
@@ -94,7 +99,14 @@ const routes = [
   { path: '/live/:username', component: ViewLiveStreamPage },
   { path: '/reset-password/:token', component: ResetPassword },
   { path: '/verify-email/:token', component: VerifyEmail },
-
+  {
+    path: '/overlay',
+    component: ScreenSupportLive,
+    children: [
+      { path: ':channelId&type=chatbox', component: ScreenChat },
+      { path: ':channelId&type=donation', component: ScreenDonation },
+    ],
+  },
   // Streamer router
   {
     path: '/dashboard-streamer',
@@ -107,8 +119,16 @@ const routes = [
       { path: 'analytics', component: Overview },
       { path: 'video-analytics', component: VideoAnalytics },
       { path: 'video-analytics/:videoId', component: InDepthAnalytics },
-      { path: 'cashout', component: Cashout },
+
       { path: 'live-stream-analytics', component: LiveStreamAnalytics },
+      {
+        path: 'cashout',
+        component: Cashout,
+      },
+      {
+        path: 'cashout-history',
+        component: CashoutHistory,
+      },
     ],
   },
   // Live stream by streamer

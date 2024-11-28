@@ -29,6 +29,7 @@
       } else {
         userStore.fetchUserProfile();
         userStore.loadFollowers();
+        userStore.loadFollowCategories();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
       }

@@ -6,6 +6,7 @@ var nodemailer = require("nodemailer");
 const { createChannel, generatedStreamKey } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
+const { totp } = require('otplib');
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -234,7 +235,7 @@ const sendMailVerify = async (email, id) => {
         <h2 style="color: #04ddb2;">Reset Your Password</h2>
         <p>Dear ${email},</p>
         <p>Please click the link below to verify your email address:</p>
-      <a href="${verificationUrl}" 
+      <a href="${verificationUrl}"
           style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">
          Verify email
         </a>
@@ -566,6 +567,84 @@ const verifyAccountFacebook = async (accountInfor, token) => {
 };
 //// Send mail and verify account - END
 
+
+// Send mail OTP and verify OTP create Withdraw infor
+totp.options = { digits: 6, step: 500 };
+
+const generateOtp = (userId) => {
+  return totp.generate(process.env.OTP_SECRET_KEY + userId);
+}
+
+const verifyOtp = (userId, inputOtp) => {
+  try {
+
+    const check = totp.check(inputOtp, process.env.OTP_SECRET_KEY + userId);
+    if(check) {
+      return{
+        status: 200,
+        data: check,
+        message: "Verified."
+      }
+    } else {
+
+      return{
+        status: 400,
+        data: null,
+        message: "OTP is incorrect."
+      }
+    }
+
+  } catch (error) {
+    return{
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const sendMailConfirmWithdrawMethod = async (userId) => {
+  try {
+    const user = await User.findOne({ where: { id: userId } });
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found",
+      }
+    }
+
+    const otp = generateOtp(userId)
+    var mailOptions = {
+      from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "OTP code - Move",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #04ddb2;">OTP confirm add withdraw method</h2>
+            <p>Dear ${user.fullName},</p>
+            <p>Your OTP code:</p>
+            <span style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2;
+            text-decoration: none; border-radius: 5px;">${otp}</span>
+            <p>If you didn't request add withdraw method, please ignore this email.</p>
+            <p>Thank you,<br> Move Team</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return {
+      status: 200,
+      message: "Mail sent successfully",
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message,
+    };
+  }
+};
+
 module.exports = {
   login,
   register,
@@ -579,4 +658,7 @@ module.exports = {
   sendMailVerifyFacebook,
   verifyAccountFacebook,
   generateUniqueReferralCode,
+  sendMailConfirmWithdrawMethod,
+  verifyOtp
+
 };

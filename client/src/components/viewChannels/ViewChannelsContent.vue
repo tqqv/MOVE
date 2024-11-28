@@ -29,28 +29,34 @@
   const usernameDetails = ref({});
   const avatarDetails = ref({});
   const followChannelDetails = ref({});
-
+  const loading = ref(true);
   const errorData = ref(null);
 
   const fetchChannelData = async () => {
-    const result = await getProfilebyUsername(username.value);
-
-    if (result.error) {
-      errorData.value = result.message;
-      router.push('/404');
-    } else {
-      channelDetails.value = result.data.Channel;
-      usernameDetails.value = result.data.username;
-      avatarDetails.value = result.data.avatar;
-      if (channelDetails.value !== null) {
-        channelId.value = result.data.Channel.id;
+    loading.value = true;
+    try {
+      const result = await getProfilebyUsername(username.value);
+      if (result.error) {
+        errorData.value = result.message;
+        router.push('/404');
+      } else {
+        channelDetails.value = result.data.Channel;
+        usernameDetails.value = result.data.username;
+        avatarDetails.value = result.data.avatar;
+        if (channelDetails.value !== null) {
+          channelId.value = result.data.Channel.id;
+        }
       }
+    } catch (error) {
+      console.error('Error fetching channel data:', error);
+      errorData.value = 'An unexpected error occurred.';
+    } finally {
+      loading.value = false;
     }
   };
 
   const fetchListFollowOfChannel = async (channelId) => {
     const result = await getListFollowOfChannel(channelId);
-
     if (result.error) {
       errorData.value = result.message || 'Error occurred';
     } else if (result.data && result.data.length > 0) {
@@ -73,15 +79,18 @@
   watch(
     () => route.params.username,
     async (newUsername) => {
-      username.value = newUsername;
-      activeTab.value = '0';
-      await fetchChannelData();
-      if (channelDetails.value !== null) {
-        channelId.value = channelDetails.value.id;
-        await fetchListFollowOfChannel(channelId.value);
+      if (newUsername !== username.value) {
+        username.value = newUsername;
+        activeTab.value = '0';
+        await fetchChannelData();
+        if (channelDetails.value !== null) {
+          channelId.value = channelDetails.value.id;
+          await fetchListFollowOfChannel(channelId.value);
+        }
       }
     },
   );
+
   const onTabChange = (event) => {
     activeTab.value = event;
   };
@@ -100,6 +109,8 @@
       @updateFollowers="fetchChannelData"
       :hiddenReport="true"
       class="pl-3"
+      :isGiftVisible="false"
+      :loading="loading"
     />
     <div>
       <div class="mt-2">
@@ -108,9 +119,13 @@
             <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
+            <TabPanel
+              v-if="channelDetails"
+              v-for="tab in tabs"
+              :key="tab.component"
+              :value="tab.value"
+            >
               <component
-                v-if="channelId"
                 :is="tab.component"
                 :channelDetails="channelDetails"
                 :channelId="channelId"

@@ -8,6 +8,7 @@
   import { acpVerifyMail } from '@/services/auth';
   import Expired from './icons/expired.vue';
   import Fail from './icons/fail.vue';
+  import Congratulation2 from '@components/animation/congratulation.vue';
 
   const token = ref(useRoute().params.token || '');
   const status = ref();
@@ -27,7 +28,8 @@
 </script>
 <template>
   <Navbar />
-  <div class="h-screen flex flex-col">
+  <div v-if="status === 'success'"><Congratulation2 /></div>
+  <div class="h-screen flex flex-col relative z-50 pt-[64px]">
     <div class="flex flex-grow justify-center items-center">
       <div class="border border-gray-dark rounded-2xl w-[520px] h-[420px] p-10">
         <div v-if="status === 'success'" class="flex flex-col items-center gap-y-5">
@@ -41,7 +43,7 @@
           </div>
           <RouterLink
             to="/"
-            class="bg-primary rounded-full py-2 px-12 text-white font-semibold mt-2"
+            class="bg-primary rounded-full py-2 px-12 text-white font-semibold mt-2 cursor-pointer"
             >Continue</RouterLink
           >
         </div>
@@ -49,7 +51,7 @@
           <h1 class="text-3xl font-bold text-[#ff5449]">Verification fail!</h1>
           <div class="flex justify-center my-3"><Expired /></div>
           <div
-            class="flex justify-center items-center gap-x-2 px-12 py-5 rounded-md bg-red/40 text-sm"
+            class="flex justify-center items-center gap-x-2 px-12 py-5 rounded-md bg-red/40 text-sm cursor-pointer"
           >
             <Fail />
             <p>Fail! Verification time has passed</p>

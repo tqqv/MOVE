@@ -10,6 +10,7 @@
   import { toast } from 'vue3-toastify';
   import { createLiveStream, endLiveStream, updateLiveStream } from '@/services/liveStream';
   import { formatTimeInStream } from '@/utils';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     connectOBS: String,
@@ -85,7 +86,7 @@
 
   const handleGoHome = () => {
     emit('updateStatusLive', 'beforeLive');
-    // router.push('/');
+    router.push('/');
   };
 
   watch(
@@ -114,11 +115,21 @@
       }
     },
   );
+
+  watch(
+    () => props.elapsedTime,
+    (newVal, oldVal) => {
+      console.log('Elapsed Time changed:', oldVal, '=>', newVal);
+    },
+  );
+  onMounted(() => {
+    console.log(props.elapsedTime);
+  });
 </script>
 <template>
   <section
     v-if="isShow"
-    class="sticky top-[72px] h-[calc(100vh-72px)] w-[300px] shadow-lg bg-white transition-all duration-300 ease-in-out"
+    class="sticky top-[64px] max-h-[calc(100vh-64px)] w-[300px] shadow-lg bg-white transition-all duration-300 ease-in-out"
   >
     <div class="px-4 flex flex-col h-full">
       <!-- HEADER -->
@@ -186,7 +197,11 @@
         <!-- SET UP USER -->
         <hr class="h-px my-8 bg-gray-dark border-0" />
         <div class="flex flex-col gap-y-7">
-          <div class="flex items-center gap-x-4">
+          <div v-if="streamerStore.loading" class="flex items-center gap-x-4">
+            <Skeleton shape="circle" size="3rem"></Skeleton>
+            <Skeleton height="2.3rem" width="10rem"></Skeleton>
+          </div>
+          <div v-else class="flex items-center gap-x-4">
             <RouterLink
               class="hover:text-primary"
               :to="`/user/${streamerStore.streamerChannel?.User?.username}`"
@@ -210,10 +225,9 @@
             </div>
           </div>
           <div class="flex flex-col gap-y-2">
-            <RouterLink
+            <div
               v-for="item in menuItems"
               :key="item.name"
-              :to="item.link"
               replace
               class="flex items-center gap-x-3 py-2 px-2 rounded-lg cursor-pointer hover:bg-gray-light"
               :class="{ 'bg-primary/20 hover:bg-primary/20': route.path === item.link }"
@@ -225,7 +239,7 @@
                 <component :is="item.icon" :fill="route.path === item.link ? '#fff' : '#000'" />
               </div>
               <p class="font-medium">{{ item.name }}</p>
-            </RouterLink>
+            </div>
           </div>
         </div>
       </div>
@@ -289,7 +303,7 @@
   <!-- CLOSE -->
   <section
     v-else
-    class="sticky top-[72px] h-[calc(100vh-72px)] w-[100px] shadow-lg bg-white transition-all duration-300 ease-in-out"
+    class="sticky top-[64px] h-[calc(100vh-64px)] w-[100px] shadow-lg bg-white transition-all duration-300 ease-in-out"
   >
     <div class="flex px-2 flex-col h-full">
       <!-- HEADER -->
@@ -305,10 +319,9 @@
       <hr class="h-px my-3 bg-gray-dark border-0" />
       <!-- MAIN -->
       <div class="flex flex-col gap-y-2">
-        <router-link
+        <div
           v-for="item in menuItems"
           :key="item.name"
-          :to="item.link"
           class="flex justify-center items-center gap-x-3 py-3 px-3 rounded-lg cursor-pointer hover:bg-gray-light"
           :class="{ 'bg-primary/20 hover:bg-primary/20': route.path === item.link }"
           v-tooltip="item.name"
@@ -319,7 +332,7 @@
           >
             <component :is="item.icon" :fill="route.path === item.link ? '#fff' : '#000'" />
           </div>
-        </router-link>
+        </div>
       </div>
       <!-- GO LIVE -->
       <hr class="h-px my-4 bg-gray-dark border-0" />

@@ -9,6 +9,7 @@
     genreDuration,
     truncateDescripton,
   } from '@/utils';
+  import { RouterLink } from 'vue-router';
 
   const props = defineProps({
     videos: {
@@ -23,13 +24,11 @@
       <router-link
         :to="
           video.livestreamChannel
-            ? `/live/${video.livestreamChannel.channelName}`
+            ? `/live/${video.livestreamChannel.User.username}`
             : `/video/${video.id}`
         "
       >
-        <img
-          :src="video.thumbnailUrl"
-          class="aspect-[9/16] rounded-md object-cover w-full h-[180px] sm:h-[210px] md:h-[230px] lg:h-[200px]"
+        <img :src="video.thumbnailUrl" class="aspect-[16/9] rounded-md object-cover w-full h-full"
       /></router-link>
       <span
         v-if="video.livestreamChannel?.isLive"
@@ -52,31 +51,44 @@
     </div>
 
     <div class="flex py-3">
-      <div
+      <RouterLink
         :class="[
-          'flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0',
+          'flex items-center justify-center size-12 rounded-full p-[2px] flex-shrink-0 cursor-pointer',
           video.livestreamChannel?.isLive || video.channel?.isLive
             ? 'border-[3px] border-red'
             : 'border-[3px] border-transparent',
         ]"
+        :to="
+          video.livestreamChannel
+            ? `/live/${video.livestreamChannel.User.username}`
+            : `/user/${video.channel.User?.username}`
+        "
       >
         <img
           :src="video.channel?.avatar || video.livestreamChannel?.avatar"
           alt="Avatar"
           class="w-full h-full rounded-full object-cover"
         />
-      </div>
+      </RouterLink>
 
-      <div class="pl-4 flex-1">
+      <div class="pl-3 flex-1 w-full truncate">
         <div class="flex items-center w-full justify-between">
           <!-- Tiêu đề chiếm 2/3 không gian -->
-          <h3 class="text-sm md:text-base lg:text-lg font-bold text-black" :title="video.title">
+          <RouterLink
+            :to="
+              video.livestreamChannel
+                ? `/live/${video.livestreamChannel.User.username}`
+                : `/video/${video.id}`
+            "
+            class="text-sm md:text-base lg:text-lg font-bold text-black truncate"
+            :title="video.title"
+          >
             {{ truncateDescripton(video.title, 28) }}
-          </h3>
+          </RouterLink>
 
-          <div class="flex items-center">
-            <rate class="mr-1 mb-[0.5px]" />
-            <span class="text-sm font-bold">{{
+          <div class="flex items-center flex-shrink-0">
+            <rate class="mr-1 mb-[0.5px] flex-shrink-0" />
+            <span class="text-sm font-bold flex-shrink-0">{{
               formatRating(video.ratings || video.avgRates || 0)
             }}</span>
           </div>
@@ -84,7 +96,8 @@
 
         <!-- Truncate channelName with tooltip -->
         <div class="flex items-center">
-          <span
+          <RouterLink
+            :to="`/user/${video.channel?.User?.username}`"
             class="text_secondary whitespace-nowrap"
             :title="video.channel?.channelName || video.livestreamChannel?.channelName"
             >{{
@@ -92,7 +105,7 @@
                 video.channel?.channelName || video.livestreamChannel?.channelName,
                 12,
               )
-            }}</span
+            }}</RouterLink
           >
           <span
             v-if="video.channel?.popularCheck || video.livestreamChannel?.popularCheck"

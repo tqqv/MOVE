@@ -1,5 +1,5 @@
 <script setup>
-  import { onMounted, ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import Slider from '@/components/Slider.vue';
 
   import Divider from '@/components/Divider.vue';
@@ -14,33 +14,22 @@
 
   const categories = ref([]);
   const dataSlider = ref([]);
-  const isLoading = ref(true);
+  const isLoadingSlider = ref(true);
   const videos = ref([]);
 
   const fetchAllCategoriesHaveView = async () => {
     try {
       const res = await getAllCategoriesHaveView();
       if (res.success) {
-        categories.value = res.data;
+        categories.value = res.data.slice(0, 6);
       }
     } catch (error) {
       console.error(error.message);
     }
   };
-  const fetchTopVideos = async () => {
-    try {
-      const res = await getTopVideo();
-      console.log(res);
 
-      if (res.status === 200) {
-        videos.value = res.data.data.listVideo.rows.slice(0, 5);
-      }
-    } catch (error) {
-      console.error(error.message);
-    } finally {
-    }
-  };
   const fetchDataSlider = async () => {
+    isLoadingSlider.value = true;
     try {
       const res = await getDataSlider();
 
@@ -50,29 +39,43 @@
     } catch (error) {
       console.error(error.message);
     } finally {
-      isLoading.value = false;
+      isLoadingSlider.value = false;
     }
   };
+  const fetchVideoYouMayLike = async () => {
+    try {
+      const res = await getTopVideo();
 
+      if (res.data.success) {
+        videos.value = res.data.data.listVideo.rows;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
   onMounted(async () => {
     fetchAllCategoriesHaveView();
     fetchDataSlider();
-    // fetchAllVideos();
+    fetchVideoYouMayLike();
   });
+  // watch(isLoadingSlider, (newVal, oldVal) => {
+  //   console.log(`isLoadingSlider changed from ${oldVal} to ${newVal}`);
+  //   if (!newVal) {
+  //     console.log('Slider has finished loading.');
+  //   }
+  // });
 </script>
 
 <template>
   <section>
-    <div class="container">
+    <div class="container items-center">
       <div class="flex items-center">
         <span class="font-bold text-[24px] pr-8">Featured</span>
         <Divider class="flex-grow mt-1" />
       </div>
-      <div class="flex justify-center items-center h-[300px]" v-if="isLoading">
-        <SmallLoading />
-      </div>
-      <div v-else>
-        <Slider :dataSlider="dataSlider" />
+
+      <div class="mt-14">
+        <Slider :dataSlider="dataSlider" :isLoadingSlider="isLoadingSlider" />
       </div>
     </div>
   </section>
@@ -88,9 +91,9 @@
         </div>
       </div>
       <div
-        class="grid gap-x-12 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
+        class="grid gap-x-6 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6"
       >
-        <CategoryImage :categories="categories" />
+        <CategoryImage :categories="categories" :loading="isLoadingSlider" :qualitySkeleton="6" />
       </div>
     </div>
   </section>
@@ -100,7 +103,7 @@
         <Divider class="flex-grow mt-1" />
         <div><span class="font-bold text-[24px] whitespace-nowrap">Video you may like</span></div>
       </div>
-      <GirdVideo :videos="videos.slice(0, 8)" />
+      <GirdVideo :videos="videos.slice(0, 8)" :loading="isLoadingSlider" />
     </div>
   </section>
 </template>

@@ -153,7 +153,7 @@ const createRatingOnStream = async(userId, livestreamId, rating) => {
       });
 
       const avgRating = parseFloat(avgRatingResult.dataValues.avgRating || 0).toFixed(2);
-      await set(StreamKeys.avgRates(foundStream.channelId), avgRating);
+      await set(StreamKeys.avgRates(foundStream.dataValues.streamerId), avgRating);
       return {
         status: 200,
         data: newRating,

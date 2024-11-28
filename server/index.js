@@ -22,6 +22,7 @@ const searchRouter = require("./routes/searchRoute.js");
 const donationItemRouter = require("./routes/donationItemRoute.js");
 const donationRouter = require("./routes/donationRoute.js");
 const cashoutRoute = require("./routes/cashoutRoute.js");
+const categoryFollowRoute = require("./routes/categoryFollowRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -63,6 +64,8 @@ app.use("/api/payment", paymentRouter);
 app.use("/api/report", reportRouter);
 app.use("/api/repPackage", repPackageRouter);
 app.use("/api/cashout", cashoutRoute);
+app.use("/api/categoryFollow", categoryFollowRoute);
+
 
 app.use("/api/featuredContent", featuredContentRouter);
 app.use('/api/search', searchRouter)

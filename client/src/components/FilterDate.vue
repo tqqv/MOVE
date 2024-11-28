@@ -12,9 +12,25 @@
     class: {
       type: [Array, String],
     },
+    defaultDate: {
+      type: [Date, String],
+      default: null,
+    },
+    startDate: {
+      type: [Date, String],
+      default: null,
+    },
   });
 
-  const selectedDate = ref(null);
+  const selectedDate = ref(props.defaultDate);
+
+  watch(
+    () => props.defaultDate,
+    (newValue) => {
+      selectedDate.value = newValue;
+    },
+    { immediate: true },
+  );
 
   watch(selectedDate, (newValue) => {
     if (newValue) {
@@ -23,8 +39,11 @@
   });
 
   onMounted(() => {
-    selectedDate.value = new Date();
+    console.log(selectedDate.value);
+
+    selectedDate.value = props.defaultDate;
   });
+  const today = ref(new Date());
 </script>
 
 <template>
@@ -37,12 +56,15 @@
       :class="['w-[150px]  text-xs']"
       dateFormat="dd/mm/yy"
       showIcon
+      :maxDate="today"
+      :minDate="startDate"
     ></Calendar>
   </div>
 </template>
 <style>
   .p-inputtext {
     border-color: #13d0b4;
+    color: #13d0b4;
   }
   .p-datepicker-dropdown {
     border-color: #13d0b4;
