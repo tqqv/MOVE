@@ -1,4 +1,7 @@
+const { Sequelize } = require("sequelize");
 const db = require("../models/index.js");
+const { avgRates } = require("../utils/redis/key/streamKey.js");
+const { updateStreamStats, reRankingTopDonators } = require("../utils/redis/stream/redisStreamService.js");
 const { Donation, Livestream, DonationItem, Channel, User } = db;
 
 const donateLivestream = async (userId, livestreamId, donationItemId, content) => {
@@ -64,9 +67,31 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
         content,
         REPs: donationItem.REPs,
       }),
-      user.update({ REPs: user.REPs - donationItem.REPs }),
-      channel.update({ rep: channel.rep + donationItem.REPs }),
+      User.decrement('REPs', {
+        by: donationItem.REPs,
+        where: { id: userId } // Điều kiện giảm REPs cho đúng user
+      }),
+      Channel.increment('rep', {
+        by: donationItem.REPs,
+        where: { id: channel.id } // Điều kiện tăng rep cho đúng channel
+      }),
     ]);
+
+    const totalDonate = await Donation.findAll({
+      where: {
+          userId: userId,
+          livestreamId: livestreamId
+      },
+      attributes: [
+          [Sequelize.fn('SUM', Sequelize.col('REPs')), 'totalDonation']
+      ],
+      raw: true
+    });
+
+    const totalDonateValue = totalDonate[0]?.totalDonation || 0;
+
+    updateStreamStats(livestream.streamerId, "increment", "avgRates", donationItem.REPs),
+    reRankingTopDonators(livestream.streamerId, {username: user.username, userId: user.id, avatar: user.avatar}, totalDonateValue)
 
     return {
       status: 200,

@@ -3,6 +3,7 @@ const  streamKeys = require("../../redis/key/streamKey.js");
 const _redis = require("../config.js");
 const db = require("../../../models/index.js");
 const { isValidUUID } = require('../../formatChecker.js');
+const { getTopDonatorsWithDetails } = require("../../../services/livestreamService.js");
 const { Livestream } = db;
 
 const updateStreamStats = async (channelId, action, field, amount) => {
@@ -65,6 +66,7 @@ const getStreamStats = async (channelId) => {
         });
 
         const results = await pipeline.exec();
+        const topDonators = await getTopDonatorsWithDetails(channelId);
         // update chỗ ni bằng cách loop qua file enum rồi sẽ dynamic
         const statistics = {
             currentViews: parseInt(results[0][1] || '0'),
@@ -75,7 +77,8 @@ const getStreamStats = async (channelId) => {
             totalReps: parseInt(results[5][1] || '0'),
             avgRates: parseFloat(results[6][1] || '0'),
             totalLikes: parseInt(results[7][1] || '0'),
-            newFollowers: parseInt(results[8][1] || '0')
+            newFollowers: parseInt(results[8][1] || '0'),
+            topDonators
         };
         let liveStatus = await get(`channel_${channelId}_live_status`);
         console.log(statistics);
@@ -98,6 +101,55 @@ const clearStreamStats = async (channelId) => {
         await pipeline.exec();
     } catch (error) {
         console.log(`Error clearing stream stats for ${channelId}:`, error);
+        throw error;
+    }
+};
+
+const reRankingTopDonators = async (channelId, donator, totalDonate) => {
+    const key = streamKeys["topDonators"](channelId);
+    try {
+        const userId = donator.userId;
+
+        // Lấy toàn bộ danh sách userId theo thứ tự giảm dần
+        const currentTopDonators = await _redis.zrevrange(key, 0, -1, 'WITHSCORES');
+
+        // Tìm userId trùng khớp
+        const existingDonatorIndex = currentTopDonators.findIndex((item, index) => {
+            return index % 2 === 0 && item === userId;
+        });
+
+        // Nếu đã tồn tại, update score (totalReps)
+        if (existingDonatorIndex !== -1) {
+            await _redis.zadd(key, totalDonate, userId);
+            return;
+        }
+
+        const currentCount = currentTopDonators.length / 2;
+
+        // Nếu chưa đủ top
+        if (currentCount < 7) {
+            await _redis.zadd(key, totalDonate, userId);
+            return;
+        }
+
+        // Lấy userId có điểm thấp nhất trong top
+        const lowestScore = parseFloat(currentTopDonators[currentTopDonators.length - 1]);
+
+        if (totalDonate > lowestScore) {
+            const lowestUserId = currentTopDonators[currentTopDonators.length - 2];
+
+            // Xóa userId có điểm thấp nhất
+            await _redis.zrem(key, lowestUserId);
+
+            // Thêm userId mới
+            await _redis.zadd(key, totalDonate, userId);
+        }
+
+        // Giới hạn top 7
+        await _redis.zremrangebyrank(key, 7, -1);
+
+    } catch (error) {
+        console.log(`Error updating stream stats for ${channelId}:`, error);
         throw error;
     }
 };
@@ -205,5 +257,6 @@ module.exports = {
     clearStreamStats,
     // setupPeriodicSnapshot
     takeFinalSnapshot,
-    filterRoomsForDeletion
+    filterRoomsForDeletion,
+    reRankingTopDonators
 };

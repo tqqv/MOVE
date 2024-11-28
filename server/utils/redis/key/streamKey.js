@@ -7,7 +7,8 @@ const StreamKeys = {
     totalReps: (channelId) => `channelStreamId:${channelId}:totalReps`,
     avgRates: (channelId) => `channelStreamId:${channelId}:avgRates`,
     totalLikes: (channelId) => `channelStreamId:${channelId}:totalLikes`,
-    newFollowers: (channelId) => `channelStreamId:${channelId}:newFollowers`
+    newFollowers: (channelId) => `channelStreamId:${channelId}:newFollowers`,
+    topDonators: (channelId) => `channelStreamId:${channelId}:topDonators`
 };
 
 module.exports = StreamKeys;
