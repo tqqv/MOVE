@@ -4,12 +4,9 @@ on:
     branches: ["test"]
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v2
-      - name: Pull latest changes from the remote repository
-        run: |
-          git pull origin test
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
         with:
@@ -25,7 +22,6 @@ jobs:
           cd server
           npm install
           npx sequelize-cli db:migrate
-          npm install -g pm2
           pm2 start index.js --name move-api || pm2 restart move-api
       - name: Create .env for Client
         run: |
@@ -35,16 +31,6 @@ jobs:
           cd client
           npm install
           npm run build
-      - name: Install Nginx
-        run: |
-          if ! command -v nginx &> /dev/null; then
-          sudo apt update
-          sudo apt install -y nginx
-          fi
-      - name: Ensure Nginx is running
-        run: |
-          if ! sudo service nginx status &> /dev/null; then
-          sudo service nginx start
-          fi
       - name: Reload Nginx
-        run: sudo service nginx reload
+        run: |
+          sudo service nginx reload
