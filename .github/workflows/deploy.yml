@@ -22,6 +22,7 @@ jobs:
           cd server
           npm install
           npx sequelize-cli db:migrate
+          npm install -g pm2
           pm2 start index.js --name move-api || pm2 restart move-api
       - name: Create .env for Client
         run: |
