@@ -22,6 +22,7 @@
   const country = ref('');
   const cardBrand = ref(null);
   const isComplete = ref(false);
+
   const errors = ref({
     cardNumber: '',
     cardExpiry: '',
@@ -223,7 +224,7 @@
       <!-- Row 3: Expiration Date and CVV2/CVC2 -->
       <div class="flex flex-col">
         <div class="flex flex-col">
-          <label for="cardExpiry" class="text_para pb-2 whitespace-nowrap">Expiration date</label>
+          <label for="cardExpiry" class="text_para pb-2 whitespace-nowrap">Expiration Date</label>
           <div
             id="card-expiry-element"
             class="card-element relative text-[14px] rounded-lg flex-1 w-1/3"

@@ -106,3 +106,28 @@ export const paymentSchema = yup.object({
 
   country: yup.string().required('Country is required'),
 });
+export const cashoutSchema = yup.object({
+  bankHolderName: yup
+    .string()
+    .matches(
+      /^[A-Z]+(?:\s[A-Z]+)*$/,
+      'Bank Holder Name must contain only letters without accents and single spaces between words',
+    )
+    .trim('Bank Holder Name must not have leading or trailing spaces')
+    .min(3, 'Bank Holder Name must be at least 3 characters')
+    .max(50, 'Bank Holder Name must be less than 50 characters')
+    .required('Bank Holder Name is required'),
+
+  bankNumber: yup
+    .string()
+    .matches(/^[0-9]{9,16}$/, 'Bank Account Number must be between 9 and 16 digits')
+    .required('Bank Account Number is required'),
+
+  routingNumber: yup
+    .string()
+    .matches(
+      /^[A-Za-z0-9]+-[A-Za-z0-9]+$/,
+      'Bank Code - Branch Code must be in the format BankCode-BranchCode',
+    )
+    .required('Bank Code - Branch Code is required'),
+});

@@ -18,11 +18,18 @@ export const usePopupStore = defineStore('popup', () => {
   const showOpenBuyREPs = ref(false);
   const showLoadingPayment = ref(false);
   const isSelectPaymentMethod = ref(false);
+  const showVerificationPopup = ref(false);
+
   const isCompletePurchaseVisible = ref(false);
+  const showInstructionLive = ref(false);
+  const showInstructionDonate = ref(false);
 
   const isHaveCard = ref(false);
   const isOrderSuccessful = ref(true);
   const isCancelPayment = ref(false);
+  const toggleVerificationPopup = () => {
+    showVerificationPopup.value = !showVerificationPopup.value;
+  };
   const toggleCompletePurchaseVisible = () => {
     isCompletePurchaseVisible.value = !isCompletePurchaseVisible.value;
   };
@@ -114,6 +121,22 @@ export const usePopupStore = defineStore('popup', () => {
     showReportSuccess.value = false;
   };
 
+  const openInstructionLive = () => {
+    showInstructionLive.value = true;
+  };
+
+  const closeInstructionLive = () => {
+    showInstructionLive.value = false;
+  };
+
+  const openInstructionDonate = () => {
+    showInstructionDonate.value = true;
+  };
+
+  const closeInstructionDonate = () => {
+    showInstructionDonate.value = false;
+  };
+
   return {
     showOpenBuyREPs,
     showLoginPopup,
@@ -155,7 +178,15 @@ export const usePopupStore = defineStore('popup', () => {
     isCancelPayment,
     isSelectPaymentMethod,
     toggleSelectPaymentMethod,
+    showVerificationPopup,
+    toggleVerificationPopup,
     toggleCompletePurchaseVisible,
     isCompletePurchaseVisible,
+    showInstructionLive,
+    openInstructionLive,
+    closeInstructionLive,
+    showInstructionDonate,
+    openInstructionDonate,
+    closeInstructionDonate,
   };
 });

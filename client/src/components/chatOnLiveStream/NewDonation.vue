@@ -1,36 +1,65 @@
-<script setup lang="ts">
-  import { ref } from 'vue';
+<script setup>
+  import { ref, watch } from 'vue';
   import REPs1 from '../icons/REPsItems/REPs1.vue';
   import REPs2 from '../icons/REPsItems/REPs2.vue';
   import REPs3 from '../icons/REPsItems/REPs3.vue';
   import REPs4 from '../icons/REPsItems/REPs4.vue';
   import REPs5 from '../icons/REPsItems/REPs5.vue';
-  const isHidden = ref(false);
-  const isSlideOut = ref(false);
-  const isGrowShrink = ref(false);
 
-  const handleAnimationEnd = () => {
-    if (!isSlideOut.value) {
-      setTimeout(() => {
-        isSlideOut.value = true;
-      }, 3000);
-    } else {
-      isHidden.value = true;
-    }
-  };
+  const props = defineProps({
+    listDonation: Array,
+  });
+
+  const donationWithEffect = ref([]);
+
+  watch(
+    () => props.listDonation,
+    (newVal) => {
+      if (newVal && newVal.length) {
+        const newDonation = newVal[newVal.length - 1]; // add new value
+        donationWithEffect.value.push({
+          ...newDonation,
+          isSlideOut: false,
+          isHidden: false,
+        });
+        console.log(newVal);
+
+        //detel value
+        setTimeout(() => {
+          donationWithEffect.value = donationWithEffect.value.filter(
+            (item) => item !== newDonation,
+          );
+        }, 5000);
+      }
+    },
+    { deep: true },
+  );
+
+  const handleAnimationEnd = (donation) => {
+    // handle wait 3s to hidden in chat
+  setTimeout(() => {
+    donation.isSlideOut = true; 
+    // handle delete value
+    setTimeout(() => {
+      donation.isHidden = true;
+    }, 1000); 
+  }, 3000);
+};
 </script>
 
 <template>
   <div class="absolute top-8 left-0 z-10 text-black overflow-hidden">
     <div class="flex flex-col gap-y-3 mx-3">
       <div
+        v-for="(donation, index) in donationWithEffect"
+        :key="index"
         class="flex justify-start items-center gap-x-3 rounded-s-full px-1 py-1 custom-gradient w-64 transform"
         :class="{
-          'animate-slideIn': !isSlideOut,
-          'animate-slideOut': isSlideOut,
+          'animate-slideIn': !donation.isSlideOut,
+          'animate-slideOut': donation.isSlideOut,
         }"
-        v-show="!isHidden"
-        @animationend="handleAnimationEnd"
+        v-show="!donation.isHidden"
+        @animationend="() => handleAnimationEnd(donation)"
       >
         <div class="absolute flex h-[48px] rotate-box z-10 animate-slide">
           <div class="w-8 gradient-second transform"></div>
@@ -38,19 +67,33 @@
         <div class="flex items-center gap-x-2 z-20">
           <img
             class="size-10 object-cover flex-shrink-0 rounded-full"
-            src="https://images.pexels.com/photos/1040881/pexels-photo-1040881.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            :src="donation.avatar"
             alt=""
           />
           <div class="flex flex-col text-sm text-white">
-            <span class="font-semibold text-primary">npmh310</span>
+            <span class="font-semibold text-primary">{{ donation.username }}</span>
             <span class="font-medium text-[11px] leading-4 italic"
-              >Send <span>1000</span> Reps</span
+              >Send
+              <span class="font-semibold">{{ donation.donation }}</span>
+              Reps</span
             >
           </div>
         </div>
 
         <div class="absolute flex items-center right-1 mt-3 z-20">
-          <REPs1 />
+          <template v-if="donation.donation === 100"><REPs1 width="80" height="80" /></template>
+          <template v-else-if="donation.donation === 1000"
+            ><REPs2 width="80" height="80"
+          /></template>
+          <template v-else-if="donation.donation === 5000"
+            ><REPs3 width="80" height="80"
+          /></template>
+          <template v-else-if="donation.donation === 10000"
+            ><REPs4 width="80" height="80"
+          /></template>
+          <template v-else-if="donation.donation === 25000"
+            ><REPs5 width="80" height="80"
+          /></template>
           <div
             class="flex justify-center items-center gap-x-2 mb-3 font-extrabold italic text-[#ff5c22] drop-shadow-xl"
           >
@@ -112,7 +155,7 @@
     }
   }
   .animate-slideIn {
-    animation: slideIn 1.5s ease-out forwards;
+    animation: slideIn 0.7s ease-out forwards;
   }
 
   @keyframes slideOut {

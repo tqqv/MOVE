@@ -48,12 +48,12 @@
 </script>
 
 <template>
-  <div class="container">
+  <section class="container">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 pt-6">
       <div class="space-y-12">
         <!-- Overview Section -->
         <div class="space-y-2">
-          <span class="text-[22px] font-bold">Overview</span>
+          <span class="font-bold text-[24px]">Overview</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
               v-for="(stat, index) in overviewStats"
@@ -67,7 +67,7 @@
 
         <!-- Live Summary Section -->
         <div class="space-y-2">
-          <span class="text-[22px] font-bold">Live summary</span>
+          <span class="font-bold text-[24px]">Live summary</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
               v-for="(stat, index) in liveSummaryStats"
@@ -81,7 +81,7 @@
 
         <!-- Video Summary Section -->
         <div class="space-y-2">
-          <span class="text-[22px] font-bold">Video summary</span>
+          <span class="font-bold text-[24px]">Video summary</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
               v-for="(stat, index) in videoSummaryStats"
@@ -96,7 +96,7 @@
 
       <!-- SKELETON -->
       <div v-if="isLoadingOverview" class="space-y-2">
-        <div class="text-[22px] font-bold">Latest analytics</div>
+        <div class="font-bold text-[24px]">Latest analytics</div>
         <!-- Latest Live Stream Card -->
         <div class="pb-6">
           <Skeleton width="100%" height="283px" class="rounded-md"></Skeleton>
@@ -107,7 +107,7 @@
 
       <!-- Latest analytics -->
       <div v-else class="space-y-2">
-        <div class="text-[22px] font-bold">Latest analytics</div>
+        <div class="font-bold text-[24px]">Latest analytics</div>
 
         <!-- Latest Live Stream Card -->
         <div class="space-y-6 pb-6">
@@ -177,5 +177,5 @@
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>
