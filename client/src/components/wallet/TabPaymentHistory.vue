@@ -109,19 +109,19 @@
         dataKey="id"
         tableStyle="min-width: 50rem, text-align: center"
       >
-        <Column field="created_date" header="Date" sortable>
+        <Column field="created_date" header="Date">
           <template #body="{ data }">
             <div class="space-y-4">
               <div>{{ formatDatePosted(data.created_date) }}</div>
             </div>
           </template>
         </Column>
-        <Column field="rep" header="Product name" sortable>
+        <Column field="rep" header="Product name">
           <template #body="{ data }">
             <span class="font-bold">{{ formatNumber(data.rep) }} REPs</span>
           </template>
         </Column>
-        <Column field="count" header="Amount Purchased" sortable>
+        <Column field="count" header="Amount Purchased">
           <template #body="{ data }">
             <span>
               {{ data.count }}

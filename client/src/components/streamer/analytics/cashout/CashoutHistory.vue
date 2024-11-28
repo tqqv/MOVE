@@ -124,7 +124,7 @@
         dataKey="id"
         tableStyle="min-width: 50rem, text-align: center"
       >
-        <Column field="createdAt" header="Date" sortable>
+        <Column field="createdAt" header="Date">
           <template #body="{ data }">
             <div class="space-y-4">
               <div>{{ formatDatePosted(data.createdAt) }}</div>
@@ -145,17 +145,17 @@
           <template #body="{ data }">
             <span> {{ data.bankNumber }}</span>
           </template> </Column
-        ><Column field="rep" header="REPs" sortable>
+        ><Column field="rep" header="REPs">
           <template #body="{ data }">
             <span class="font-bold"> {{ formatNumber(data.rep) }} REPs </span>
           </template>
         </Column>
-        <Column field="amount" header="Amount" sortable>
+        <Column field="amount" header="Amount">
           <template #body="{ data }">
             <span class="font-bold"> US$ {{ data.amount }} </span>
           </template>
         </Column>
-        <Column field="status" header="Status" sortable>
+        <Column field="status" header="Status">
           <template #body="{ data }">
             <span
               :class="{
@@ -173,7 +173,7 @@
             </span>
           </template>
         </Column>
-        <Column field="arrivalDate" header="Estimated Arrival Date" sortable>
+        <Column header="Estimated Arrival Date">
           <template #body="{ data }">
             <span>
               {{ formatDatePosted(data.arrivalDate) }}

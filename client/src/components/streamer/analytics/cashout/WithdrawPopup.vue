@@ -7,6 +7,7 @@
   import { formatNumber, formatPercentage, formatView } from '@/utils';
   import smallLoading from '@/components/icons/smallLoading.vue';
 
+  const repInput = ref();
   const userStore = useUserStore();
   const isLoadingWithdraw = ref(false);
   const props = defineProps({
@@ -14,19 +15,18 @@
     title: String,
     minWithdraw: String,
     exchangeRate: Number,
+    clearInput: Boolean,
   });
+
   const emit = defineEmits([
     'toogleWithdrawVisible',
     'toogleProcessingPaymentVisible',
     'dataFromWithdraw',
   ]);
   const toogleWithdrawVisible = () => {
-    repInput.value = '';
-
     emit('toogleWithdrawVisible');
   };
 
-  const repInput = ref();
   const handleWithdrawAll = () => {
     repInput.value = userStore.user?.Channel.rep || 0;
   };
@@ -42,8 +42,9 @@
 
       if (res && res.status === 200) {
         emit('toogleProcessingPaymentVisible');
-        emit('toogleWithdrawVisible');
         emit('dataFromWithdraw', estimatedValue);
+        toogleWithdrawVisible();
+
         await userStore.fetchUserProfile();
       } else {
         console.error(res.message);
@@ -65,6 +66,14 @@
       repInput.value = maxRep;
     }
   });
+  watch(
+    () => props.clearInput,
+    (newValue) => {
+      if (newValue) {
+        repInput.value = '';
+      }
+    },
+  );
 </script>
 
 <template>

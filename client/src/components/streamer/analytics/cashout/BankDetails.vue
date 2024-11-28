@@ -219,6 +219,7 @@
                 @input="bankData.bankHolderName = bankData.bankHolderName.toUpperCase()"
                 placeholder="Enter your bank holder name"
                 @blur="validateField('bankHolderName')"
+                maxlength="50"
               />
             </div>
             <span v-if="errors.bankHolderName" class="error_message">{{
@@ -240,6 +241,7 @@
                 v-model="bankData.bankNumber"
                 placeholder="Enter your bank account number"
                 @blur="validateField('bankNumber')"
+                maxlength="16"
               />
             </div>
             <span v-if="errors.bankNumber" class="error_message">{{ errors.bankNumber }}</span>
