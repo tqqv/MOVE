@@ -33,6 +33,17 @@ import SearchTotal from '@/components/search/SearchTotal.vue';
 import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
 import VerifyEmail from '@/components/VerifyEmail.vue';
+import AdminDashboard from '@/components/admin/dashboard/AdminDashboard.vue';
+import AdminLayout from '@/layouts/AdminLayout.vue';
+import UserManagement from '@/components/admin/users/UserManagement.vue';
+import RequestManagement from '@/components/admin/request/RequestManagement.vue';
+import CategoryManagement from '@/components/admin/category/CategoryManagement.vue';
+import LevelworkoutManagement from '@/components/admin/levelworkout/LevelworkoutManagement.vue';
+import UserDetail from '@/components/admin/users/UserDetail.vue';
+import ReportManagement from '@/components/admin/report/ReportManagement.vue';
+import ReportDetail from '@/components/admin/report/ReportDetail.vue';
+import AdminSetting from '@/components/admin/setting/AdminSetting.vue';
+import RepSystem from '@/components/admin/rep/RepSystem.vue';
 import ScreenChat from '@/components/screenObs/ScreenChat.vue';
 import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
@@ -127,6 +138,23 @@ const routes = [
     children: [
       { path: 'stream-setup', component: SetUpLive },
       { path: 'dashboard-live', component: DashboardLive },
+    ],
+  },
+  // Admin
+  {
+    path: '/admin',
+    component: AdminLayout,
+    children: [
+      { path: '', component: AdminDashboard },
+      { path: 'users', component: UserManagement },
+      { path: 'request', component: RequestManagement },
+      { path: 'category', component: CategoryManagement },
+      { path: 'levelworkout', component: LevelworkoutManagement },
+      { path: 'report', component: ReportManagement },
+      { path: 'setting', component: AdminSetting },
+      { path: 'reps', component: RepSystem },
+      { path: 'users/:username', component: UserDetail },
+      { path: 'report/:reportId', component: ReportDetail },
     ],
   },
   {
