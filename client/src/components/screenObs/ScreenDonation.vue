@@ -2,6 +2,8 @@
   import { ref, watch } from 'vue';
   import { useRoute } from 'vue-router';
   import LogoIcon from '../icons/logoIcon.vue';
+  import Congratulation from '../animation/congratulation.vue';
+  import { animationRunInDonation } from '../animation/gif';
 
   const props = defineProps({
     listDonation: Array,
@@ -37,15 +39,16 @@
     class="w-screen h-screen justify-center items-center flex flex-col bg-transparent animate-scale"
     v-if="currentDonation"
   >
-    <LogoIcon width="230px" height="230px" />
+    <Congratulation />
+    <img :src="animationRunInDonation" alt="" class="size-52" />
     <div class="flex flex-col gap-y-3 py-6 text-white border-stroke font-extrabold">
-      <div class="flex gap-x-1.5 text-[32px]">
+      <div class="flex gap-x-1.5 text-[42px]">
         <h1 class="text-primary">{{ currentDonation.username }}</h1>
         <span>donated</span>
         <span class="text-primary">{{ currentDonation.donation }}</span>
         <span>REPs</span>
       </div>
-      <div class="text-center text-white text-2xl">
+      <div class="text-center text-white text-4xl">
         {{ currentDonation.message }}
       </div>
     </div>
@@ -54,7 +57,7 @@
 
 <style scoped>
   .border-stroke {
-    -webkit-text-stroke: 1.2px #000;
+    -webkit-text-stroke: 2px #000;
   }
 
   @keyframes scaleEffect {

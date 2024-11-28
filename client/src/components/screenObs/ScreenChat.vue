@@ -6,6 +6,7 @@
   import REPs3 from '../icons/REPsItems/REPs3.vue';
   import REPs4 from '../icons/REPsItems/REPs4.vue';
   import REPs5 from '../icons/REPsItems/REPs5.vue';
+import { giftBox } from '../animation/gif';
 
   const userStore = useUserStore();
   const props = defineProps({
@@ -15,17 +16,17 @@
 
 <template>
   <div class="w-screen h-screen flex flex-col bg-transparent">
-    <div class="max-h-full h-[30px] flex-grow pb-1 relative">
+    <div class="max-h-full w-4/5 relative">
       <div
-        class="flex flex-col-reverse px-2 py-3 h-full relative overflow-y-hidden overflow-x-hidden"
+        class="flex flex-col-reverse py-3 h-full relative overflow-y-hidden overflow-x-hidden"
         ref="chatContainerRef"
         @scroll="handleScroll"
       >
-        <div class="flex flex-col gap-y-3">
+        <div class="flex flex-col gap-y-1">
           <div
             v-for="(userChat, index) in props.chatMessages"
             :key="index"
-            class="text-[32px] rounded hover:bg-gray-light relative p-1"
+            class="text-[32px] rounded hover:bg-gray-light relative px-1"
             @mouseenter="hoveredIndex = index"
             @mouseleave="hoveredIndex = null"
             :class="{
@@ -67,7 +68,7 @@
                   alt=""
                 />
                 <div class="flex gap-x-0.5">
-                  <h2 class="font-bold truncate text-blue cursor-pointer border-stroke">
+                  <h2 class="font-extrabold truncate text-primary cursor-pointer border-stroke">
                     {{ userChat.channelName || userChat.username }}
                   </h2>
                   <p class="text-black">:</p>
@@ -76,19 +77,19 @@
             </div>
             <span
               v-if="!userChat.donation"
-              class="text-white font-bold break-words border-stroke align-top mb-1"
+              class="text-body font-extrabold break-words border-stroke align-top mb-1"
               >{{ userChat.message }}</span
             >
             <!-- DONATE CHAT -->
-            <div v-if="userChat.donation" class="w-full text-black">
+            <div v-if="userChat.donation" class="w-full text-white text-[27px]">
               <div
-                class="flex justify-between gap-x-3 px-1 py-1.5 rounded-t bg-opacity-70"
+                class="flex justify-between gap-x-3 px-1 "
                 :class="{
-                  'bg-body': userChat.donation === 100,
-                  'bg-primary': userChat.donation === 1000,
-                  'bg-purple': userChat.donation === 5000,
-                  'bg-blue': userChat.donation === 10000,
-                  'bg-yellow-dark': userChat.donation === 25000,
+                  'bg-[#545455]': userChat.donation === 100,
+                  'bg-[#15a791]': userChat.donation === 1000,
+                  'bg-[#b44ea5]': userChat.donation === 5000,
+                  'bg-[#1092ba]': userChat.donation === 10000,
+                  'bg-[#cd9253]': userChat.donation === 25000,
                 }"
               >
                 <div class="flex gap-x-5">
@@ -99,11 +100,8 @@
                       :src="userChat.avatar"
                       alt=""
                     />
-                    <div class="flex flex-col">
-                      <h2
-                        class="font-bold truncate cursor-pointer"
-                        @click="handleOpenOptionChat(index)"
-                      >
+                    <div class="flex flex-col font-extrabold border-stroke">
+                      <h2 class="truncate cursor-pointer" @click="handleOpenOptionChat(index)">
                         {{ userChat.channelName || userChat.username }}
                       </h2>
                       <div class="flex items-center">
@@ -122,7 +120,7 @@
                         <template v-else-if="userChat.donation === 25000"
                           ><REPs5 width="50px" height="50px"
                         /></template>
-                        <span class="pb-3 font-medium">{{ userChat.donation }}</span>
+                        <span class="pb-3">{{ userChat.donation }}</span>
                       </div>
                     </div>
                   </div>
@@ -130,7 +128,7 @@
                 <div class="mx-1">
                   <div class="flex items-center gap-x-1">
                     <img
-                      src="https://res.cloudinary.com/dg9imqwrd/image/upload/v1732633992/rk4ptrlvqvg6wfesaf32.gif"
+                      :src="giftBox"
                       alt=""
                       class="size-20"
                     />
@@ -138,10 +136,10 @@
                 </div>
               </div>
               <div
-                class="font-medium px-3 py-1.5 rounded-b"
+                class="font-extrabold px-3 py-2 border-stroke"
                 :class="{
                   'bg-body': userChat.donation === 100,
-                  'bg-primary': userChat.donation === 1000,
+                  'bg-[#14bca3]': userChat.donation === 1000,
                   'bg-purple': userChat.donation === 5000,
                   'bg-blue': userChat.donation === 10000,
                   'bg-yellow-dark': userChat.donation === 25000,
@@ -157,8 +155,4 @@
   </div>
 </template>
 
-<style scoped>
-  .border-stroke {
-    -webkit-text-stroke: 1.4px #000;
-  }
-</style>
+<style scoped></style>

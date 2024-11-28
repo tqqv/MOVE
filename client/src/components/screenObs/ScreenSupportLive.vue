@@ -52,12 +52,6 @@
 
 <template>
   <div class="w-screen h-screen flex flex-col bg-transparent">
-    <div class="py-2">
-      <div class="flex items-center px-2 gap-x-7 text-[32px] font-semibold">
-        <LogoIcon />
-        <span class="text-[#c1cfd6]">{{ userStore?.user?.Channel?.channelName }}</span>
-      </div>
-    </div>
     <router-view :listDonation="listDonation" :chatMessages="chatMessages" />
   </div>
 </template>
