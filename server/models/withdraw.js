@@ -46,6 +46,18 @@ module.exports = (sequelize, DataTypes) => {
             type: DataTypes.INTEGER,
             allowNull: false,
         },
+        bankName: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        bankHolderName: {
+            type: DataTypes.STRING,
+            allowNull: true,
+        },
+        bankNumber: {
+            type: DataTypes.INTEGER,
+            allowNull: true,
+        },
     },
     {
       sequelize,
