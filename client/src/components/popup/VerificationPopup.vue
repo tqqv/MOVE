@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref, computed, watch } from 'vue';
   import Dialog from 'primevue/dialog';
   import { usePopupStore, useUserStore } from '@/stores';
   import { createWithdrawInfor, verifyOtp, sendMail } from '@/services/cashout';
@@ -25,19 +25,22 @@
   const isButtonDisabled = computed(() => {
     return !otp.value.trim();
   });
+  const startCountdown = () => {
+    countdown.value = 60;
+    const interval = setInterval(() => {
+      countdown.value -= 1;
+      if (countdown.value <= 0) {
+        clearInterval(interval);
+      }
+    }, 1000);
+  };
   const resendMail = async () => {
     if (countdown.value > 0) return;
     try {
       const res = await sendMail();
       if (res.status === 200) {
         toast.success('Code resent successfully.');
-        countdown.value = 60;
-        const interval = setInterval(() => {
-          countdown.value -= 1;
-          if (countdown.value <= 0) {
-            clearInterval(interval);
-          }
-        }, 1000);
+        startCountdown();
       } else {
         toast.error(res.message || 'Failed to resend code.');
       }
@@ -68,6 +71,14 @@
       isLoading.value = false;
     }
   };
+  watch(
+    () => popupStore.showVerificationPopup,
+    (newVal) => {
+      if (newVal) {
+        startCountdown();
+      }
+    },
+  );
 </script>
 
 <template>

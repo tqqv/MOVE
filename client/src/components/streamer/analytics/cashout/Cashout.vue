@@ -68,9 +68,6 @@
     }
   };
   onMounted(async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const verifyStatus = urlParams.get('verify');
-    console.log(verifyStatus);
     await withdrawInforStore.fetchWithdrawInfor();
 
     if (verifyStatus === 'success') {
@@ -78,14 +75,13 @@
         await updateStripeVerify();
         const baseUrl = window.location.origin;
         console.log(baseUrl);
-
-        const redirectUrl = `${baseUrl}/dashboard-streamer/cashout`;
-        window.location.href = redirectUrl;
       } catch (error) {
         console.error('Error updating stripe verify:', error);
       }
-      await withdrawInforStore.fetchWithdrawInfor();
+      // await withdrawInforStore.fetchWithdrawInfor();
     }
+    const redirectUrl = `${baseUrl}/dashboard-streamer/cashout`;
+    window.location.href = redirectUrl;
   });
 </script>
 <template>
@@ -191,6 +187,7 @@
     @dataFromWithdraw="handleDataFromWithdraw"
     :minWithdraw="minWithdraw"
     :exchangeRate="exchangeRate"
+    :clearInput="isWithdrawVisible"
   />
   <ProcessingPaymentPopup
     :isProcessingPaymentVisible="isProcessingPaymentVisible"
