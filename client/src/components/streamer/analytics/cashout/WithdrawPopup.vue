@@ -56,6 +56,7 @@
       isLoadingWithdraw.value = false;
     }
   };
+
   const estimatedValue = computed(() => {
     const repValue = parseFloat(repInput.value) || 0;
     return (repValue * props.exchangeRate).toFixed(2);

@@ -38,11 +38,10 @@
   const endDate = ref('');
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
-  const isLoadingCashoutHistory = ref(false);
+  const isLoadingCashoutHistory = ref(true);
   const selectedSortBy = ref(sortByStatus[0].value);
 
   const fetchCashoutHistory = async () => {
-    isLoadingCashoutHistory.value = true;
     try {
       const response = await getCashoutHistory(
         currentPage.value,
@@ -83,6 +82,10 @@
   const handleSortChange = (newValue) => {
     selectedSortBy.value = newValue.value || '';
   };
+  watch([selectedPageSize], () => {
+    currentPage.value = 1;
+    fetchCashoutHistory();
+  });
   onMounted(() => {
     const today = new Date();
     const sevenDaysAgo = new Date(today);
