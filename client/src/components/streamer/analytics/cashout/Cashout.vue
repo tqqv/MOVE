@@ -85,6 +85,7 @@
 
     if (verifyStatus === 'success') {
       try {
+        const res = await updateStripeVerify();
         if (res && res.status === 200) {
           const baseUrl = window.location.origin;
           const redirectUrl = `${baseUrl}/dashboard-streamer/cashout`;
