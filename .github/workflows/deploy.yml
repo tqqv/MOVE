@@ -32,6 +32,15 @@ jobs:
           cd client
           npm install
           npm run build
-      - name: Reload Nginx
+      - name: Install Nginx
         run: |
-          sudo service nginx reload
+          if ! command -v nginx &> /dev/null; then
+          sudo apt update
+          sudo apt install -y nginx
+          fi
+      - name: Start and enable Nginx
+        run: |
+          sudo service nginx start
+          sudo service nginx enable
+      - name: Reload Nginx
+        run: sudo service nginx reload
