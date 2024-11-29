@@ -115,6 +115,19 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
       ...updateOperations
     ]);
 
+
+        // Fetch comment with the associated DonationItem
+    const commentWithDonationItem = await Comment.findOne({
+      where: { id: comment.id },
+      include: [
+        {
+          model: DonationItem,
+          as: 'commentDonationItem',
+        },
+      ],
+    });
+
+
     if(!comment) {
         return {
             status: 400,
@@ -125,7 +138,7 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
 
     return {
         status: 200,
-        data: comment,
+        data: commentWithDonationItem,
         message: "Create comment successfully."
     }
   } catch (error) {

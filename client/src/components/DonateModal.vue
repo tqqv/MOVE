@@ -11,6 +11,12 @@
   import Firework from './animation/firework.vue';
   import { sendMessage } from '@/services/socketService';
   import { postComments, getAllComments } from '@/services/comment';
+  import { useCommentStore } from '@/stores/useCommentStore';
+  import { toast } from 'vue3-toastify';
+
+  const commentStore = useCommentStore();
+
+  const { comments } = commentStore;
 
   const userStore = useUserStore();
   const getRepsStore = useGetRepsStore();
@@ -28,7 +34,12 @@
     channelId: String,
     listDonation: Array,
   });
-  const emit = defineEmits(['toggleButtonGiftVisible', 'toggleGetREPsMenu', 'donateInLive']);
+  const emit = defineEmits([
+    'toggleButtonGiftVisible',
+    'toggleGetREPsMenu',
+    'donateInLive',
+    'closeDonateModal',
+  ]);
 
   const presentMessages = [
     { id: 1, message: 'Best workout yet!' },
@@ -45,8 +56,8 @@
     emit('toggleButtonGiftVisible');
   };
   const toggleGetREPsMenu = () => {
-    emit('toggleButtonGiftVisible');
-
+    // emit('toggleButtonGiftVisible');
+    emit('closeDonateModal');
     emit('toggleGetREPsMenu');
     if (!getRepsStore.purchaseOptions.length > 0) {
       getRepsStore.getRepPackages();
@@ -78,14 +89,27 @@
     console.log(videoId.value);
 
     try {
+      loading.value = true;
+
       const response = await postComments(videoId.value, data);
 
       if (response.status === 200) {
-      } else {
-        console.error('Failed to create comment');
+        const newComment = {
+          ...response.data.data,
+          userComments: {
+            avatar: userStore.user.avatar,
+            username: userStore.user.username,
+            isVerified: userStore.user.isVerified,
+          },
+        };
+        commentStore.handleSendComment(newComment);
       }
     } catch (error) {
       console.error('Error posting comment:', error);
+    } finally {
+      userStore.fetchUserProfile();
+      toggleClose();
+      loading.value = false;
     }
   };
 
@@ -135,11 +159,21 @@
 
   const handleDonation = () => {
     if (inputMessage.value) {
-      // donateInLive(selectedValue.value?.id, messageDonate.value);
-      donateInComment(selectedValue.value?.id, messageDonate.value);
+      if (!messageDonate.value || messageDonate.value.trim() === '') {
+        toast.error('Please enter a message before donating!');
+        return;
+      }
+      if (videoId.value) {
+        donateInComment(selectedValue.value?.id, messageDonate.value);
+      } else if (props.liveStreamData?.livestream?.id) {
+        donateInLive(selectedValue.value?.id, messageDonate.value);
+      }
     } else {
-      // donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
-      donateInComment(selectedValue.value?.id, selectPresentMessage.value?.message);
+      if (props.liveStreamData?.livestream?.id) {
+        donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
+      } else if (videoId.value) {
+        donateInComment(selectedValue.value?.id, selectPresentMessage.value?.message);
+      }
     }
     handleSendMessage();
     messageDonate.value = '';

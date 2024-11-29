@@ -46,6 +46,7 @@
     },
     liveStreamData: Object,
     listDonation: Array,
+    isCommentable: Boolean,
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -64,7 +65,21 @@
   };
 
   const toggleButtonGiftVisible = () => {
-    isButtonGiftVisible.value = !isButtonGiftVisible.value;
+    console.log('isButtonGiftVisible', isButtonGiftVisible.value);
+    console.log('isGetREPsMenuOpen', isGetREPsMenuOpen.value);
+    console.log('isGiftVisible', props.isGiftVisible);
+
+    if (!userStore.user) {
+      popupStore.openLoginPopup();
+      return;
+    }
+    if (isGetREPsMenuOpen.value === true && isButtonGiftVisible.value === false) {
+      isGetREPsMenuOpen.value = false;
+      return;
+    } else {
+      isButtonGiftVisible.value = !isButtonGiftVisible.value;
+    }
+
     fetchAllDonationItems();
   };
   const toggleMenu = () => {
@@ -225,12 +240,13 @@
           :liveStreamData="props.liveStreamData"
           :channelId="props.channelId"
           :listDonation="props.listDonation"
+          @closeDonateModal="isButtonGiftVisible = false"
         />
         <GetREPS
           class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isGetREPsMenuOpen"
           @toggleGetREPsMenu="toggleGetREPsMenu"
-          @toggleBuyREPs="popupStore.toggleBuyREPs"
+          @toggleBuyREPs="popupStore.toggleBuyREPs()"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           :isBackVisible="true"
         />

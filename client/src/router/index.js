@@ -49,7 +49,6 @@ import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
 import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
 
-
 const routes = [
   // User router
   {
