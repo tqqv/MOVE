@@ -81,9 +81,9 @@ export const useVideoStore = defineStore('video', () => {
           uploadThumbnail.value = response.data.thumbnailUrl;
           thumbnailPreview.value = response.data.thumbnailUrl;
           duration.value = response.data.duration;
-          commentSetting.value = response.data.isCommentable;
-          selectCategoryOptions.value = response.data.categoryId;
-          selectLevelWorkoutOptions.value = response.data.levelWorkoutsId;
+          commentSetting.value = response.data.isCommentable || true;
+          selectCategoryOptions.value = response.data.categoryId || '0';
+          selectLevelWorkoutOptions.value = response.data.levelWorkoutsId || '1';
         }
       }
     } catch (err) {
