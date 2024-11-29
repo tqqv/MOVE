@@ -1,7 +1,8 @@
 <script setup>
-  import { ref, watch } from 'vue';
+  import { ref, computed } from 'vue';
   import Button from 'primevue/button';
   import { useGetRepsStore } from '@/stores/getReps.store';
+  import { useRoute } from 'vue-router';
 
   import { useUserStore } from '@/stores';
   import Skeleton from 'primevue/skeleton';
@@ -9,8 +10,17 @@
   import SmallLoading from './icons/smallLoading.vue';
   import Firework from './animation/firework.vue';
   import { sendMessage } from '@/services/socketService';
+  import { postComments, getAllComments } from '@/services/comment';
+  import { useCommentStore } from '@/stores/useCommentStore';
+  import { toast } from 'vue3-toastify';
+
+  const commentStore = useCommentStore();
+
+  const { comments } = commentStore;
+
   const userStore = useUserStore();
   const getRepsStore = useGetRepsStore();
+  const route = useRoute();
 
   const props = defineProps({
     donationItems: {
@@ -24,7 +34,12 @@
     channelId: String,
     listDonation: Array,
   });
-  const emit = defineEmits(['toggleButtonGiftVisible', 'toggleGetREPsMenu', 'donateInLive']);
+  const emit = defineEmits([
+    'toggleButtonGiftVisible',
+    'toggleGetREPsMenu',
+    'donateInLive',
+    'closeDonateModal',
+  ]);
 
   const presentMessages = [
     { id: 1, message: 'Best workout yet!' },
@@ -35,13 +50,14 @@
 
   const messageDonate = ref();
   const loading = ref(false);
+  const videoId = computed(() => route.params.videoId);
 
   const toggleClose = () => {
     emit('toggleButtonGiftVisible');
   };
   const toggleGetREPsMenu = () => {
-    emit('toggleButtonGiftVisible');
-
+    // emit('toggleButtonGiftVisible');
+    emit('closeDonateModal');
     emit('toggleGetREPsMenu');
     if (!getRepsStore.purchaseOptions.length > 0) {
       getRepsStore.getRepPackages();
@@ -62,6 +78,42 @@
   const handleSelectPresentMessage = (message) => {
     selectPresentMessage.value = selectPresentMessage.value === message ? null : message;
   };
+  // =========== DONATE COMMENT===============
+  const donateInComment = async (donationItemId, content) => {
+    if (!userStore.user) {
+      openLoginPopup();
+
+      return;
+    }
+    const data = { donationItemId, content };
+    console.log(videoId.value);
+
+    try {
+      loading.value = true;
+
+      const response = await postComments(videoId.value, data);
+
+      if (response.status === 200) {
+        const newComment = {
+          ...response.data.data,
+          userComments: {
+            avatar: userStore.user.avatar,
+            username: userStore.user.username,
+            isVerified: userStore.user.isVerified,
+          },
+        };
+        commentStore.handleSendComment(newComment);
+      }
+    } catch (error) {
+      console.error('Error posting comment:', error);
+    } finally {
+      userStore.fetchUserProfile();
+      toggleClose();
+      loading.value = false;
+    }
+  };
+
+  // ==========================
 
   // ======= DONATE STREAM ===========
   const donateInLive = async (donationItemId, content) => {
@@ -107,9 +159,21 @@
 
   const handleDonation = () => {
     if (inputMessage.value) {
-      donateInLive(selectedValue.value?.id, messageDonate.value);
+      if (!messageDonate.value || messageDonate.value.trim() === '') {
+        toast.error('Please enter a message before donating!');
+        return;
+      }
+      if (videoId.value) {
+        donateInComment(selectedValue.value?.id, messageDonate.value);
+      } else if (props.liveStreamData?.livestream?.id) {
+        donateInLive(selectedValue.value?.id, messageDonate.value);
+      }
     } else {
-      donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
+      if (props.liveStreamData?.livestream?.id) {
+        donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
+      } else if (videoId.value) {
+        donateInComment(selectedValue.value?.id, selectPresentMessage.value?.message);
+      }
     }
     handleSendMessage();
     messageDonate.value = '';
