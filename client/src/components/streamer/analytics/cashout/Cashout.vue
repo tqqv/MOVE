@@ -13,6 +13,7 @@
   import Skeleton from 'primevue/skeleton';
   import CashoutRemovePopup from './CashoutRemovePopup.vue';
   import { RouterLink } from 'vue-router';
+  import smallLoading from '@/components/icons/smallLoading.vue';
 
   const props = defineProps({
     reps: Number,
@@ -28,6 +29,7 @@
   const isUpdateSuccessful = ref(false);
   const isWithdrawVisible = ref(false);
   const isProcessingPaymentVisible = ref(false);
+  const isLoadingVerify = ref(false);
   // const isSelectBankVisible = ref(false);
   const isBankDetailsVisible = ref(false);
   const withdrawValue = ref();
@@ -62,26 +64,39 @@
   };
 
   const handleStripeVerify = async () => {
-    const res = await getLinkStripeVerify();
-    if (res && res.status === 200) {
-      window.open(res.data.data, '_self');
+    isLoadingVerify.value = false;
+    try {
+      const res = await getLinkStripeVerify();
+      if (res && res.status === 200) {
+        window.open(res.data.data, '_self');
+      }
+    } catch (error) {
+      console.error('Error during Stripe verification:', error);
+    } finally {
+      isLoadingVerify.value = true;
     }
   };
+
   onMounted(async () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
     await withdrawInforStore.fetchWithdrawInfor();
+    const verifyStatus = urlParams.get('verify');
 
     if (verifyStatus === 'success') {
       try {
-        await updateStripeVerify();
-        const baseUrl = window.location.origin;
-        console.log(baseUrl);
+        const res = await updateStripeVerify();
+        if (res && res.status === 200) {
+          const baseUrl = window.location.origin;
+          const redirectUrl = `${baseUrl}/dashboard-streamer/cashout`;
+
+          window.location.href = redirectUrl;
+        }
       } catch (error) {
         console.error('Error updating stripe verify:', error);
       }
       // await withdrawInforStore.fetchWithdrawInfor();
     }
-    const redirectUrl = `${baseUrl}/dashboard-streamer/cashout`;
-    window.location.href = redirectUrl;
   });
 </script>
 <template>
@@ -158,12 +173,13 @@
             >
               Withdraw
             </button>
+
             <button v-else @click="handleStripeVerify" class="btn bg-[#C96868] text-[#ffffff]">
-              Verify
+              <smallLoading v-if="isLoadingVerify" fill="white" fill_second="#C96868" />
+              <span v-else>Verify</span>
             </button>
           </div>
         </div>
-
         <!-- NO INFO -->
         <div v-else>
           <div @click="toogleBankDetailsVisible" class="text-sm text-primary cursor-pointer">
@@ -180,6 +196,7 @@
     </div>
   </section>
   <WithdrawPopup
+    v-if="isWithdrawVisible"
     :isWithdrawVisible="isWithdrawVisible"
     title="Withdraw"
     @toogleWithdrawVisible="toogleWithdrawVisible"
@@ -202,6 +219,7 @@
     title="I want to receive payment via"
   /> -->
   <BankDetails
+    v-if="isBankDetailsVisible"
     title="Enter bank details"
     :isBankDetailsVisible="isBankDetailsVisible"
     @toogleBankDetailsVisible="toogleBankDetailsVisible"
