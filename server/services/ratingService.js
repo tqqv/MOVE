@@ -29,7 +29,7 @@ const createRatingOnVideo = async(userId, videoId, rating) => {
       }
     }
 
-    if(rating > 5 && rating < 0){
+    if(rating > 5 || rating < 0){
       return {
         status: 400,
         data: null,

@@ -119,11 +119,11 @@ const editProfileChannel = async(userId, data, username) => {
     if(username) {
       const user = await User.findByPk(userId)
 
-      if (username.length < 3 || username.length > 32) {
+      if (username.length < 3 || username.length > 32 || /[A-Z]/.test(data.username)) {
         return {
           status: 400,
           data: null,
-          message: "Must be between 3 and 32 in length."
+          message: "Must be between 3 and 32 in length and cannot contain uppercase letters."
         }
       } else if (!validateUsername(username)) {
         return {
@@ -549,7 +549,7 @@ const endStream = async(data) => {
     channel.save();
     return {
       status: 200,
-      data: {channel, 
+      data: {channel,
         livestream: { ...livestream.toJSON(), avgRates },
       },
       message: "Stream ended suceess"
