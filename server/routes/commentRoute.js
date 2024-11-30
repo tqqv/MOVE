@@ -9,6 +9,5 @@ commentRouter.post("/:videoId", verifyUser, commentOnVideoController);
 // commentRouter.post("/:videoId", commentOnVideoController);
 commentRouter.get("/:userId", getChildCommentsByParentIdController);
 commentRouter.get("/:videoId/:userId", getVideoCommentController);
-
+//  test
 module.exports = commentRouter;
-  
