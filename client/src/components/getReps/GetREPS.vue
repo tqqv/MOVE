@@ -30,8 +30,10 @@
     }
   };
   const toggleBack = () => {
+    emit('toggleGetREPsMenu'); // close buy reps
     emit('toggleButtonGiftVisible');
-    emit('toggleGetREPsMenu');
+
+    // emit('toggleBuyREPs');
   };
   const toggleGetREPsMenu = () => {
     emit('toggleGetREPsMenu');
@@ -91,15 +93,17 @@
         </div>
       </div>
     </div>
-    <div v-else v-for="(option, index) in getRepsStore.purchaseOptions" :key="index" class="mt-4">
-      <BuyREPsCard
-        :purchaseOptions="option"
-        @toggleBuyREPs="toggleBuyREPs"
-        @toggleGetREPsMenu="toggleGetREPsMenu"
-        :isFirstTime="isFirstTime"
-        :index="index"
-        @selectOption="selectOption(option)"
-      />
+    <div v-else class="space-y-2 overflow-y-auto" style="max-height: 300px">
+      <div class="mt-4 pr-2" v-for="(option, index) in getRepsStore.purchaseOptions" :key="index">
+        <BuyREPsCard
+          :purchaseOptions="option"
+          @toggleBuyREPs="toggleBuyREPs"
+          @toggleGetREPsMenu="toggleGetREPsMenu"
+          :isFirstTime="isFirstTime"
+          :index="index"
+          @selectOption="selectOption(option)"
+        />
+      </div>
     </div>
   </div>
 </template>

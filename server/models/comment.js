@@ -19,6 +19,12 @@ module.exports = (sequelize, DataTypes) => {
         foreignKey: 'parentId',
         as: 'parent',
       });
+
+      this.belongsTo(models.DonationItem, {
+        foreignKey: 'donationItemId',
+        as: 'commentDonationItem'
+      });
+
       this.hasMany(models.Comment, {
         foreignKey: 'parentId',
         as: 'replies',
@@ -76,6 +82,20 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.INTEGER,
         defaultValue: 0,
         allowNull: false
+      },
+      donationItemId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'donationItems', // Tên bảng users
+          key: 'id',      // Khóa chính từ bảng users
+        },
+        onDelete: 'CASCADE', // Xóa follow khi user bị xóa
+        onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
+      },
+      quantity: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
       },
       parentId: {
         type: DataTypes.UUID,

@@ -38,11 +38,10 @@
   const endDate = ref('');
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
-  const isLoadingCashoutHistory = ref(false);
+  const isLoadingCashoutHistory = ref(true);
   const selectedSortBy = ref(sortByStatus[0].value);
 
   const fetchCashoutHistory = async () => {
-    isLoadingCashoutHistory.value = true;
     try {
       const response = await getCashoutHistory(
         currentPage.value,
@@ -83,6 +82,10 @@
   const handleSortChange = (newValue) => {
     selectedSortBy.value = newValue.value || '';
   };
+  watch([selectedPageSize], () => {
+    currentPage.value = 1;
+    fetchCashoutHistory();
+  });
   onMounted(() => {
     const today = new Date();
     const sevenDaysAgo = new Date(today);
@@ -124,7 +127,7 @@
         dataKey="id"
         tableStyle="min-width: 50rem, text-align: center"
       >
-        <Column field="createdAt" header="Date" sortable>
+        <Column field="createdAt" header="Date">
           <template #body="{ data }">
             <div class="space-y-4">
               <div>{{ formatDatePosted(data.createdAt) }}</div>
@@ -145,17 +148,17 @@
           <template #body="{ data }">
             <span> {{ data.bankNumber }}</span>
           </template> </Column
-        ><Column field="rep" header="REPs" sortable>
+        ><Column field="rep" header="REPs">
           <template #body="{ data }">
             <span class="font-bold"> {{ formatNumber(data.rep) }} REPs </span>
           </template>
         </Column>
-        <Column field="amount" header="Amount" sortable>
+        <Column field="amount" header="Amount">
           <template #body="{ data }">
             <span class="font-bold"> US$ {{ data.amount }} </span>
           </template>
         </Column>
-        <Column field="status" header="Status" sortable>
+        <Column field="status" header="Status">
           <template #body="{ data }">
             <span
               :class="{
@@ -173,7 +176,7 @@
             </span>
           </template>
         </Column>
-        <Column field="arrivalDate" header="Estimated Arrival Date" sortable>
+        <Column header="Estimated Arrival Date">
           <template #body="{ data }">
             <span>
               {{ formatDatePosted(data.arrivalDate) }}

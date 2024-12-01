@@ -64,12 +64,9 @@
     // popupStore.showOpenBuyREPs = !popupStore.showOpenBuyREPs;
     // emit('toggleGetREPsMenu');
   };
-  console.log(props.isFirstTime);
 </script>
 <template>
-  <div
-    class="bg-white shadow-md rounded-lg p-4 flex items-center space-x-4 border border-gray-light hover:shadow-lg transition-all duration-300"
-  >
+  <div class="bg-white rounded-lg p-4 flex items-center space-x-4 border border-gray-dark">
     <div class="flex-grow">
       <div class="flex items-baseline space-x-2">
         <p class="font-bold text-xl text-black">{{ purchaseOptions.rep }} REP$</p>

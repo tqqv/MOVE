@@ -17,6 +17,7 @@
       required: true,
     },
   });
+  console.log(props.videos);
 </script>
 <template>
   <div v-for="video in videos" :key="video.id" class="overflow-hidden w-full px-2">
@@ -24,7 +25,7 @@
       <router-link
         :to="
           video.livestreamChannel
-            ? `/live/${video.livestreamChannel.User.username}`
+            ? `/live/${video?.livestreamChannel?.User.username}`
             : `/video/${video.id}`
         "
       >

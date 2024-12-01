@@ -569,7 +569,7 @@ const verifyAccountFacebook = async (accountInfor, token) => {
 
 
 // Send mail OTP and verify OTP create Withdraw infor
-totp.options = { digits: 6, step: 500 };
+totp.options = { digits: 6, step: 120 };
 
 const generateOtp = (userId) => {
   return totp.generate(process.env.OTP_SECRET_KEY + userId);
