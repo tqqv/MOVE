@@ -69,7 +69,7 @@
         <div class="text-base">
           You have <span class="font-bold">{{ formatNumber(userStore.user.REPs) || 0 }} REP$</span>
         </div>
-        <div class="text-sm text-[#777777]">Prices are shown in USD</div>
+        <div class="text-sm text-[#777777]">Prices are shown in SGD</div>
       </div>
     </div>
 
@@ -94,7 +94,7 @@
       </div>
     </div>
     <div v-else class="space-y-2 overflow-y-auto" style="max-height: 300px">
-      <div class="mt-4" v-for="(option, index) in getRepsStore.purchaseOptions" :key="index">
+      <div class="mt-4 pr-2" v-for="(option, index) in getRepsStore.purchaseOptions" :key="index">
         <BuyREPsCard
           :purchaseOptions="option"
           @toggleBuyREPs="toggleBuyREPs"

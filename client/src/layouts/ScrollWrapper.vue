@@ -15,10 +15,23 @@
     },
     { deep: true },
   );
+
+
+  // check scroll near bottom
+  function emitScrollEvent() {
+    const container = scrollContainerRef.value;
+    if (!container) return;
+
+    const { scrollTop, scrollHeight, clientHeight } = container;
+    if (scrollHeight - scrollTop - clientHeight < 200) {
+      // when near bottom (cach 200px) call near-bottom
+      container.dispatchEvent(new CustomEvent('near-bottom'));
+    }
+  }
 </script>
 
 <template>
-  <div ref="scrollContainerRef" class="flex-1 overflow-y-scroll mr-0.5">
+  <div ref="scrollContainerRef" @scroll="emitScrollEvent" class="flex-1 overflow-y-scroll mr-0.5">
     <slot></slot>
   </div>
 </template>

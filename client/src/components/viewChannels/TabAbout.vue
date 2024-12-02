@@ -5,6 +5,7 @@
   import InstagramIcon from '@/components/icons/instagramIcon.vue';
   import Verified from '@/components/icons/verified.vue';
   import Live from '@/components/icons/live.vue';
+  import { truncateDescripton } from '@/utils';
 
   const props = defineProps({
     channelDetails: {
@@ -104,8 +105,11 @@
           </RouterLink>
           <RouterLink :to="`/user/${item.User.username}`">
             <div class="flex flex-col items-center text-center">
-              <p class="text-[20px] flex items-center justify-center pl-10 whitespace-nowrap">
-                {{ item.channelName }}
+              <p
+                class="text-[20px] flex items-center justify-center pl-10 whitespace-nowrap"
+                :title="item.channelName"
+              >
+                {{ truncateDescripton(item.channelName, 20) }}
                 <Verified v-if="item.popularCheck" class="mx-2 fill-blue" />
               </p>
               <p class="text-[14px] text-body">{{ item.followCount ?? 0 }} followers</p>
