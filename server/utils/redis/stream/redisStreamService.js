@@ -3,8 +3,7 @@ const  streamKeys = require("../../redis/key/streamKey.js");
 const _redis = require("../config.js");
 const db = require("../../../models/index.js");
 const { isValidUUID } = require('../../formatChecker.js');
-const { getTopDonatorsWithDetails } = require("../../../services/livestreamService.js");
-const { Livestream } = db;
+const { Livestream, User } = db;
 
 const updateStreamStats = async (channelId, action, field, amount) => {
     const key = streamKeys[field](channelId);
@@ -101,6 +100,46 @@ const clearStreamStats = async (channelId) => {
         await pipeline.exec();
     } catch (error) {
         console.log(`Error clearing stream stats for ${channelId}:`, error);
+        throw error;
+    }
+};
+
+
+const getTopDonatorsWithDetails = async (channelId) => {
+    const redisKey = streamKeys["topDonators"](channelId);
+    try {
+        // 1. Lấy danh sách userId và scores từ Redis
+        const result = await _redis.zrevrange(redisKey, 0, -1, 'WITHSCORES');
+        const userIdsWithScores = [];
+        for (let i = 0; i < result.length; i += 2) {
+            userIdsWithScores.push({
+                userId: result[i],
+                totalReps: parseFloat(result[i + 1]),
+            });
+        }
+
+        // 2. Lấy thông tin user từ bảng User
+        const userIds = userIdsWithScores.map((item) => item.userId);
+        const users = await User.findAll({
+            where: {
+                id: userIds,
+            },
+            attributes: ['id', 'username', 'avatar'], // Chỉ lấy các trường cần thiết
+        });
+
+        // 3. Kết hợp thông tin từ Redis và User
+        const topDonators = userIdsWithScores.map((entry) => {
+            const user = users.find((u) => u.id === entry.userId);
+            return {
+                userId: entry.userId,
+                username: user?.username || 'Unknown',
+                avatar: user?.avatar || '',
+                totalReps: entry.totalReps,
+            };
+        });
+        return topDonators
+    } catch (error) {
+        console.error(`Error getting top donators with details for ${channelId}:`, error);
         throw error;
     }
 };
