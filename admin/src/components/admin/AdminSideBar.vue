@@ -12,6 +12,7 @@
   import Level from '../icons/level.vue';
   import Flag from '../icons/flag.vue';
   import Request from '../icons/request.vue';
+  import Causerol from '../icons/causerol.vue';
 
   const route = useRoute();
   const isDropdownOpen = ref(false);
@@ -38,6 +39,8 @@
     { name: 'Level Management', icon: Level, link: '/levelworkout' },
     { name: 'Report Management', icon: Flag, link: '/report' },
     { name: 'Request Channel', icon: Request, link: '/request' },
+    { name: 'Featured Content', icon: Causerol, link: '/featuredcontent' },
+
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
   ];
 </script>

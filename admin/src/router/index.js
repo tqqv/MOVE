@@ -13,6 +13,7 @@ import AdminSetting from '@/components/admin/setting/AdminSetting.vue';
 import Cashout from '@/components/admin/rep/Cashout.vue';
 import DonateItem from '@/components/admin/rep/DonateItem.vue';
 import DiscountItem from '@/components/admin/rep/DiscountItem.vue';
+import FeaturedContent from '@/components/admin/featuredContent/FeaturedContent.vue';
 
 const routes = [
   {
@@ -32,6 +33,7 @@ const routes = [
       { path: 'reps/discount', component: DiscountItem },
       { path: 'users/:username', component: UserDetail },
       { path: 'report/:reportId', component: ReportDetail },
+      { path: 'featuredcontent', component: FeaturedContent },
     ],
   },
   {
