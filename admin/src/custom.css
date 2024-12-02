@@ -2,6 +2,10 @@ html {
   scroll-behavior: smooth;
 }
 
+section {
+  min-height: 100vh;
+}
+
 .shadow {
   box-shadow: rgba(0, 0, 0, 0.075) 0px 5px 15px;
 }
@@ -192,6 +196,7 @@ html {
 .p-checkbox .p-checkbox-icon {
   color: white;
 }
+
 /* 
 input::placeholder {
   all: unset !important;
@@ -257,14 +262,34 @@ input::placeholder {
   0% {
     opacity: 0;
   }
+
   100% {
     opacity: 1;
   }
 }
+
 .p-dialog-mask {
   overflow: auto !important;
 }
 
 body.p-overflow-hidden {
   overflow: auto !important;
+}
+
+/* CUSTOM TABLE PRIEMEVUE */
+.p-datatable ::-webkit-scrollbar {
+  height: 8px;
+}
+
+.p-datatable ::-webkit-scrollbar-track {
+  background: rgba(19, 208, 180, 0.2);
+  border-radius: 4px;
+}
+
+.p-datatable ::-webkit-scrollbar-thumb {
+  background: rgba(19, 208, 180, 0.8);
+  border-radius: 4px;
+}
+.p-datatable ::-webkit-scrollbar-thumb:hover {
+  background: rgba(19, 208, 180, 0.8);
 }
