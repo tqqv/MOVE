@@ -285,16 +285,21 @@
             <div class="flex space-x-4">
               <RouterLink
                 to="/following"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                class="rounded-md px-3 py-2 text_nav hover:bg-primary font-bold"
                 aria-current="page"
                 v-if="userStore.user"
                 >Following</RouterLink
               >
               <RouterLink
                 to="/browse/categories"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                class="rounded-md px-3 py-2 text_nav hover:bg-primary font-bold"
                 >Browse</RouterLink
               >
+              <!-- <RouterLink
+                to="/browse/categories"
+                class="rounded-md px-3 py-2 text_nav font-bold items-center"
+                ><i class="pi pi-ellipsis-h"
+              /></RouterLink> -->
             </div>
           </div>
         </div>
