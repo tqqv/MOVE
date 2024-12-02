@@ -3,6 +3,8 @@ const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set, get } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
+const StreamKeys = require("../utils/redis/key/streamKey.js");
+const _redis = require("../utils/redis/config.js");
 const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize, ViewVideo } = db;
 
 const createLivestream = async(data) => {
@@ -657,7 +659,6 @@ const countNewFollowersDuringStream = async (channelId, createdAt, duration) => 
     throw error;
   }
 };
-
 
 
 module.exports = {

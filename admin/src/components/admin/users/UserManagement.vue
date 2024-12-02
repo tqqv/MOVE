@@ -70,7 +70,7 @@
 </script>
 
 <template>
-  <section class="bg-[#FAFAFB]">
+  <section class="">
     <div class="container">
       <div class="card bg-white p-4 shadow rounded-lg">
         <DataTable :value="products" stripedRows showGridlines @row-click="handleRowClick">
