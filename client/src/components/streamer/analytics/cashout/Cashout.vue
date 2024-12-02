@@ -118,7 +118,7 @@
     ></Skeleton>
 
     <div v-else class="bg-white shadow-lg p-6 rounded-md text-black w-[762px]">
-      <span class="text-lg font-bold whitespace-nowrap">Total REPs earned</span>
+      <span class="text-lg font-bold whitespace-nowrap">Total REPs </span>
       <div class="space-y-2">
         <div class="flex gap-x-8 items-center">
           <div class="text-[30px] font-bold">

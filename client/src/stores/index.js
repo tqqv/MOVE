@@ -11,3 +11,4 @@ export { useContryStore } from './country.store';
 export { useLiveStreamStore } from './liveStream.store';
 export { useLoadingStore } from './globalLoading.store';
 export { useCardStore } from './card.store';
+export { useAnalyticsStreamerStore } from './analyticsStreamer.store';

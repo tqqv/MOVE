@@ -6,44 +6,13 @@
   import { formatNumber, formatRating, formatView, truncateDescripton } from '@/utils';
   import Skeleton from 'primevue/skeleton';
 
-  const overviewStats = [{ title: 'Total followers' }, { title: 'Total REPs earned' }];
+  import LatestAnalyticsCard from '@components/streamer/analytics/LatestAnalyticsCard.vue';
+  import { useAnalyticsStreamerStore } from '@/stores';
 
-  const liveSummaryStats = [{ title: 'Total live views' }, { title: 'Average view time' }];
+  const analyticsStreamerStore = useAnalyticsStreamerStore();
 
-  const videoSummaryStats = [{ title: 'Total video views' }, { title: 'Average view time' }];
-
-  const latestStream = ref(null);
-  const latestVideo = ref(null);
-  const isLoadingOverview = ref(false);
-  const fetchOverviewAnalytic = async () => {
-    isLoadingOverview.value = true;
-    try {
-      const response = await getOverviewAnalytic();
-      if (response.status === 200) {
-        overviewStats[0].value = response.data.data.overview.followerCount;
-        overviewStats[1].value = response.data.data.overview.totalRepEarn;
-
-        liveSummaryStats[0].value = response.data.data.streamSummary.totalStreamView;
-        liveSummaryStats[1].value = response.data.data.streamSummary.avgView;
-
-        videoSummaryStats[0].value = response.data.data.videoSummary.totalVideoView;
-
-        videoSummaryStats[1].value = response.data.data.videoSummary.avgView;
-
-        latestVideo.value = response.data.data.latestVideos[0];
-
-        latestStream.value = response.data.data.latestStream[0];
-      } else {
-        console.error('Unexpected status code:', response.status);
-      }
-    } catch (error) {
-      console.error(error.message);
-    } finally {
-      isLoadingOverview.value = false;
-    }
-  };
   onMounted(() => {
-    fetchOverviewAnalytic();
+    analyticsStreamerStore.fetchOverviewAnalytic();
   });
 </script>
 
@@ -56,11 +25,11 @@
           <span class="font-bold text-[24px]">Overview</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
-              v-for="(stat, index) in overviewStats"
+              v-for="(stat, index) in analyticsStreamerStore.overviewStats"
               :key="index"
               :title="stat.title"
               :value="stat.value"
-              :isLoading="isLoadingOverview"
+              :isLoading="analyticsStreamerStore.isLoadingOverview"
             />
           </div>
         </div>
@@ -70,11 +39,11 @@
           <span class="font-bold text-[24px]">Live summary</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
-              v-for="(stat, index) in liveSummaryStats"
+              v-for="(stat, index) in analyticsStreamerStore.liveSummaryStats"
               :key="index"
               :title="stat.title"
               :value="stat.value"
-              :isLoading="isLoadingOverview"
+              :isLoading="analyticsStreamerStore.isLoadingOverview"
             />
           </div>
         </div>
@@ -84,18 +53,18 @@
           <span class="font-bold text-[24px]">Video summary</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
-              v-for="(stat, index) in videoSummaryStats"
+              v-for="(stat, index) in analyticsStreamerStore.videoSummaryStats"
               :key="index"
               :title="stat.title"
               :value="stat.value"
-              :isLoading="isLoadingOverview"
+              :isLoading="analyticsStreamerStore.isLoadingOverview"
             />
           </div>
         </div>
       </div>
 
       <!-- SKELETON -->
-      <div v-if="isLoadingOverview" class="space-y-2">
+      <div v-if="analyticsStreamerStore.isLoadingOverview" class="space-y-2">
         <div class="font-bold text-[24px]">Latest analytics</div>
         <!-- Latest Live Stream Card -->
         <div class="pb-6">
@@ -111,80 +80,28 @@
 
         <!-- Latest Live Stream Card -->
         <div class="space-y-6 pb-6">
-          <div v-if="latestStream" class="bg-white shadow-lg p-8 rounded-md space-y-4">
-            <div class="text-[18px] font-bold">Latest live stream</div>
-            <div>
-              <div>
-                <div class="text-xs text-[#666666] uppercase pb-2">Title of live stream</div>
-                <span class="text-[16px] font-bold">{{
-                  truncateDescripton(latestStream?.title, 55)
-                }}</span>
-              </div>
-              <div class="space-y-2">
-                <div class="flex justify-between">
-                  <span class="text-base">Total views</span>
-                  <span class="text-base font-bold">{{ formatView(latestStream?.totalView) }}</span>
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-base">Total REPs received</span>
-                  <span class="text-base font-bold"
-                    >{{ formatNumber(latestStream?.totalReps || 0) }} REPs</span
-                  >
-                </div>
-                <div class="flex justify-between">
-                  <span class="text-base">Ratings</span>
-                  <div class="flex items-center">
-                    <span class="text-base font-bold">{{
-                      formatRating(latestStream?.ratings)
-                    }}</span>
-                    <rate class="ml-1 mb-1" />
-                  </div>
-                </div>
-              </div>
-              <RouterLink :to="'/dashboard-streamer/live-stream-analytics'">
-                <div class="text-base text-primary pt-2">Go to live analytics</div></RouterLink
-              >
-            </div>
-          </div>
+          <LatestAnalyticsCard
+            v-if="analyticsStreamerStore.latestStream"
+            title="Latest live stream"
+            :latestStream="analyticsStreamerStore.latestStream"
+          />
+
           <div v-else class="bg-white shadow-lg p-8 rounded-md space-y-4">
             <div class="text-[18px] font-bold">Latest live stream</div>
             <div>No live stream data available.</div>
           </div>
+
           <!-- Latest Video Card -->
-          <div v-if="latestVideo" class="bg-white shadow-lg p-8 rounded-md space-y-4 mb-8">
-            <span class="text-[18px] font-bold">Latest video</span>
-            <RouterLink :to="`/video/${latestVideo?.id}`">
-              <div class="relative overflow-hidden rounded-lg">
-                <img :src="latestVideo?.thumbnailUrl" class="object-cover w-full h-[300px]" /></div
-            ></RouterLink>
-            <div class="text-base font-bold">{{ truncateDescripton(latestVideo?.title, 28) }}</div>
-            <div class="space-y-2">
-              <div class="flex justify-between">
-                <span class="text-base">Total views</span>
-                <span class="text-base font-bold">{{ formatView(latestVideo?.viewCount) }}</span>
-              </div>
-              <div class="flex justify-between">
-                <span class="text-base">Total REPs received</span>
-                <span class="text-base font-bold"
-                  >{{ formatNumber(latestVideo?.totalReps || 0) }} REPs</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-base">Ratings</span>
-                <div class="flex items-center">
-                  <span class="text-base font-bold">{{ formatRating(latestVideo?.ratings) }}</span>
-                  <rate class="ml-1 mb-1" />
-                </div>
-              </div>
-            </div>
-            <RouterLink :to="`/dashboard-streamer/video-analytics/${latestVideo?.id}`">
-              <div class="text-base text-primary pt-2">Go to video analytics</div></RouterLink
-            >
-          </div>
+          <LatestAnalyticsCard
+            v-if="analyticsStreamerStore.latestVideo"
+            title="Latest video"
+            :latestVideo="analyticsStreamerStore.latestVideo"
+          />
           <div v-else class="bg-white shadow-lg p-8 rounded-md space-y-4">
             <div class="text-[18px] font-bold">Latest video</div>
             <div>No video data available.</div>
           </div>
+          <!-- ---------- -->
         </div>
       </div>
     </div>
