@@ -53,6 +53,8 @@
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
+      isLoadingPaymentHistory.value = true;
+
       fetchPaymentHistory();
     }
   };
@@ -61,6 +63,8 @@
       console.log(1);
 
       currentPage.value++;
+      isLoadingPaymentHistory.value = true;
+
       fetchPaymentHistory();
     }
   };

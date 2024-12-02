@@ -14,9 +14,9 @@
   });
   const formattedValue = () => {
     if (props.title === 'Average view time') {
-      return formatAvgViewTime(props.value);
+      return formatAvgViewTime(props.value || 0);
     }
-    return formatNumber(props.value) || 0;
+    return formatNumber(props.value || 0);
   };
 </script>
 

@@ -111,40 +111,47 @@
 
         <!-- Latest Live Stream Card -->
         <div class="space-y-6 pb-6">
-          <div class="bg-white shadow-lg p-8 rounded-md space-y-4">
+          <div v-if="latestStream" class="bg-white shadow-lg p-8 rounded-md space-y-4">
             <div class="text-[18px] font-bold">Latest live stream</div>
             <div>
-              <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
-              <span class="text-[16px] font-bold">{{
-                truncateDescripton(latestStream?.title, 55)
-              }}</span>
-            </div>
-            <div class="space-y-2">
-              <div class="flex justify-between">
-                <span class="text-base">Total views</span>
-                <span class="text-base font-bold">{{ formatView(latestStream?.totalView) }}</span>
+              <div>
+                <div class="text-xs text-[#666666] uppercase pb-2">Title of live stream</div>
+                <span class="text-[16px] font-bold">{{
+                  truncateDescripton(latestStream?.title, 55)
+                }}</span>
               </div>
-              <div class="flex justify-between">
-                <span class="text-base">Total REPs received</span>
-                <span class="text-base font-bold"
-                  >{{ formatNumber(latestStream?.totalReps) }} REPs</span
-                >
-              </div>
-              <div class="flex justify-between">
-                <span class="text-base">Ratings</span>
-                <div class="flex items-center">
-                  <span class="text-base font-bold">{{ formatRating(latestStream?.ratings) }}</span>
-                  <rate class="ml-1 mb-1" />
+              <div class="space-y-2">
+                <div class="flex justify-between">
+                  <span class="text-base">Total views</span>
+                  <span class="text-base font-bold">{{ formatView(latestStream?.totalView) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-base">Total REPs received</span>
+                  <span class="text-base font-bold"
+                    >{{ formatNumber(latestStream?.totalReps || 0) }} REPs</span
+                  >
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-base">Ratings</span>
+                  <div class="flex items-center">
+                    <span class="text-base font-bold">{{
+                      formatRating(latestStream?.ratings)
+                    }}</span>
+                    <rate class="ml-1 mb-1" />
+                  </div>
                 </div>
               </div>
+              <RouterLink :to="'/dashboard-streamer/live-stream-analytics'">
+                <div class="text-base text-primary pt-2">Go to live analytics</div></RouterLink
+              >
             </div>
-            <RouterLink :to="'/dashboard-streamer/live-stream-analytics'">
-              <div class="text-base text-primary pt-2">Go to live analytics</div></RouterLink
-            >
           </div>
-
+          <div v-else class="bg-white shadow-lg p-8 rounded-md space-y-4">
+            <div class="text-[18px] font-bold">Latest live stream</div>
+            <div>No live stream data available.</div>
+          </div>
           <!-- Latest Video Card -->
-          <div class="bg-white shadow-lg p-8 rounded-md space-y-4 mb-8">
+          <div v-if="latestVideo" class="bg-white shadow-lg p-8 rounded-md space-y-4 mb-8">
             <span class="text-[18px] font-bold">Latest video</span>
             <RouterLink :to="`/video/${latestVideo?.id}`">
               <div class="relative overflow-hidden rounded-lg">
@@ -159,7 +166,7 @@
               <div class="flex justify-between">
                 <span class="text-base">Total REPs received</span>
                 <span class="text-base font-bold"
-                  >{{ formatNumber(latestVideo?.totalReps) }} REPs</span
+                  >{{ formatNumber(latestVideo?.totalReps || 0) }} REPs</span
                 >
               </div>
               <div class="flex justify-between">
@@ -173,6 +180,10 @@
             <RouterLink :to="`/dashboard-streamer/video-analytics/${latestVideo?.id}`">
               <div class="text-base text-primary pt-2">Go to video analytics</div></RouterLink
             >
+          </div>
+          <div v-else class="bg-white shadow-lg p-8 rounded-md space-y-4">
+            <div class="text-[18px] font-bold">Latest video</div>
+            <div>No video data available.</div>
           </div>
         </div>
       </div>

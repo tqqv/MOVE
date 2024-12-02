@@ -7,6 +7,7 @@
     formatView,
     formatDateData,
     formatNumber,
+    truncateDescripton,
   } from '@/utils';
   import EmptyPage from '@/pages/EmptyPage.vue';
 
@@ -63,12 +64,16 @@
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
+      isLoadingCashoutHistory.value = true;
+
       fetchCashoutHistory();
     }
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
+      isLoadingCashoutHistory.value = true;
+
       fetchCashoutHistory();
     }
   };
@@ -136,7 +141,7 @@
         </Column>
         <Column field="rep" header="Bank Holder Name">
           <template #body="{ data }">
-            <span>{{ data.bankHolderName }}</span>
+            <span>{{ truncateDescripton(data.bankHolderName, 25) }}</span>
           </template>
         </Column>
         <Column field="rep" header="Bank Name">
@@ -146,7 +151,8 @@
         </Column>
         <Column field="count" header="Bank Number">
           <template #body="{ data }">
-            <span> {{ data.bankNumber }}</span>
+            <span class="items-center">****</span>
+            <span>{{ data.bankNumber }}</span>
           </template> </Column
         ><Column field="rep" header="REPs">
           <template #body="{ data }">
@@ -155,7 +161,7 @@
         </Column>
         <Column field="amount" header="Amount">
           <template #body="{ data }">
-            <span class="font-bold"> US$ {{ data.amount }} </span>
+            <span class="font-bold"> ${{ data.amount }} </span>
           </template>
         </Column>
         <Column field="status" header="Status">

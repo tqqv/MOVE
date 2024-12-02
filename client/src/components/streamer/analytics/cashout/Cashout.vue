@@ -23,7 +23,7 @@
   const withdrawInforStore = useWithdrawInfor();
 
   const userStore = useUserStore();
-  const exchangeRate = ref(0.005);
+  const exchangeRate = ref(0.015 * 0.3);
   const minWithdraw = ref(2500);
   const isRemoveVisible = ref(false);
   const isUpdateSuccessful = ref(false);
@@ -125,7 +125,9 @@
             {{ formatNumber(userStore.user?.Channel.rep) }} REPs
           </div>
           <div class="text-base">
-            (Estimated value ${{ (userStore.user?.Channel.rep * exchangeRate).toFixed(2) }})
+            (Estimated value ${{
+              formatNumber((userStore.user?.Channel.rep * exchangeRate).toFixed(2))
+            }})
           </div>
         </div>
         <div class="card">
@@ -138,8 +140,8 @@
           ></ProgressBar>
         </div>
         <div class="text-sm">
-          You need to earn at least <span class="font-bold">{{ minWithdraw }} REPs</span> to
-          withdraw.
+          You need to earn at least
+          <span class="font-bold">{{ formatNumber(minWithdraw) }} REPs</span> to withdraw.
         </div>
       </div>
       <div class="pt-8 space-y-4">

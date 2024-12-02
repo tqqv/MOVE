@@ -179,8 +179,9 @@ console.log(repInput);
       };
     }
 
-    const amount = Math.round(repInput * 0.005)
+    const amount = parseFloat((repInput * 0.015*0.3).toFixed(2));
 
+// const amount = (repInput * 0.005).toFixed(2);
 
     const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors[0].stripeBankId, amount)
 

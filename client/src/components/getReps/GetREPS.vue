@@ -69,7 +69,7 @@
         <div class="text-base">
           You have <span class="font-bold">{{ formatNumber(userStore.user.REPs) || 0 }} REP$</span>
         </div>
-        <div class="text-sm text-[#777777]">Prices are shown in USD</div>
+        <div class="text-sm text-[#777777]">Prices are shown in SGD</div>
       </div>
     </div>
 
