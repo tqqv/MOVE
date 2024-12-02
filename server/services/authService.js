@@ -3,7 +3,6 @@ var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
-const { createChannel, generatedStreamKey } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
 const { totp } = require('otplib');
@@ -432,53 +431,6 @@ const resetPassword = async (email, userId, newPassword, confirmPassword) => {
 };
 // logic Forgot password - END
 
-const statusRequestChannel = async(userId, status) => {
-  // API của admin
-  try {
-    const request = await RequestChannel.findOne({
-      where: {
-        userId: userId
-      }
-    })
-    if(!request){
-      return {
-        status: 400,
-        message: "Request not found."
-      }
-    }
-
-    const user = await User.findByPk(userId);
-
-    if(!user) {
-      return {
-        status: 400,
-        message: "User not found"
-      }
-    }
-
-    request.status = status;
-    await request.save()
-
-    if(status === "approved") {
-      const streamKey = await generatedStreamKey();
-      await createChannel(userId, user.username, user.avatar, streamKey);
-      user.role = "streamer";
-      await user.save();
-    }
-
-    return {
-      status: 200,
-      message: "Update status successfully."
-    }
-
-  } catch (error) {
-    return {
-      status: 500,
-      message: error.message
-    }
-  }
-}
-
 // Facebook send mail and verify account - START
 const sendMailVerifyFacebook = async (email, fullName) => {
   try {
@@ -653,7 +605,6 @@ module.exports = {
   verifyAccount,
   resetPassword,
   verifyTokenRs,
-  statusRequestChannel,
   generateJwtToken,
   sendMailVerifyFacebook,
   verifyAccountFacebook,
