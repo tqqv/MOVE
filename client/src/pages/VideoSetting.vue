@@ -247,7 +247,9 @@
         <Column selectionMode="multiple" headerStyle="width: 3rem"></Column>
         <Column header="Videos">
           <template #body="{ data }">
-            <img :src="data.thumbnailUrl" class="w-[200px] h-[100px] object-cover" />
+            <RouterLink :to="`/video/${data.id}`" :key="data.id">
+              <img :src="data.thumbnailUrl" class="w-[200px] h-[100px] object-cover"
+            /></RouterLink>
           </template>
         </Column>
         <Column header="Details">
