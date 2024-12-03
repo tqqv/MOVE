@@ -72,6 +72,7 @@ const donateLivestream = async (userId, donatorChannelId, livestreamId, donation
     const [donation] = await Promise.all([
       Donation.create({
         userId,
+        donatorChannelId,
         livestreamId,
         donationItemId,
         content,

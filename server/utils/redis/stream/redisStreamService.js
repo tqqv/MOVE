@@ -286,6 +286,9 @@ const takeFinalSnapshot = async (channelId) => {
         // Lấy snapshot cuối cùng
         const finalSnapshot = await takeSnapshot(channelId);
 
+        // Cleanup Redis keys
+        await clearStreamStats(channelId);
+
         console.log("Final snapshot success!");
 
         return finalSnapshot;
