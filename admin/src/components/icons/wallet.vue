@@ -3,6 +3,10 @@
     width: String,
     height: String,
     stroke: String,
+    fill: {
+      type: String,
+      default: '#ffffff',
+    },
   });
 </script>
 <template>
@@ -12,7 +16,7 @@
     :height="height ? height : '24px'"
     class="overflow-visible"
   >
-    <g id="Wallet" transform="translate(-158.01 -484.24)" fill="#ffffff">
+    <g id="Wallet" transform="translate(-158.01 -484.24)" :fill="fill">
       <path
         id="Path_607"
         data-name="Path 607"

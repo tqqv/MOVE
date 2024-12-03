@@ -45,7 +45,7 @@ html {
 
 @layer components {
   .container {
-    @apply max-w-full px-[25px];
+    @apply max-w-full px-[32px];
   }
 
   .text_title {
@@ -95,15 +95,17 @@ html {
   .input_custom {
     @apply px-2 py-3 pr-12 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full;
   }
+
   .select_customPayment {
-    @apply flex-1 px-2 py-3 text-[14px]  ring-1 ring-[#ccc] rounded-lg outline-none;
+    @apply flex-1 px-2 py-3 text-[14px] ring-1 ring-[#ccc] rounded-lg outline-none;
   }
+
   .select_custom {
     @apply flex-1 px-2 py-3 text-[14px] ring-1 ring-gray-dark rounded-lg outline-none focus-within:ring-primary;
   }
 
   .select_custom_error {
-    @apply bg-red/20 flex-1  text-[14px]  px-2  py-3   ring-1  rounded-lg outline-none ring-[#ccc]  focus:caret-[#ccc] text-sm;
+    @apply bg-red/20 flex-1 text-[14px] px-2 py-3 ring-1 rounded-lg outline-none ring-[#ccc] focus:caret-[#ccc] text-sm;
 
   }
 
@@ -126,15 +128,19 @@ html {
   .error_password {
     @apply bg-red/20 border-[1.7px] border-red text-red focus-within:border-red;
   }
+
   .error_payment {
     @apply bg-red/20 border-[1.7px] border-[#ccc] text-red focus-within:border-[#ccc];
   }
+
   .normal_password {
     @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary;
   }
+
   .normal_payment {
     @apply border-[1.7px] border-[#ccc];
   }
+
   .password_custom {
     @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg;
   }
@@ -145,6 +151,14 @@ html {
 
   .tab_custom {
     @apply w-full sm:w-1/2 md:w-32 text-center py-4 border-b-4 border-transparent whitespace-nowrap text-[#64748b] font-medium cursor-pointer hover:text-[#334155] transition-all duration-300 ease-in-out;
+  }
+
+  .paper-custom {
+    @apply bg-white p-5 rounded shadow-md
+  }
+
+  .paper-title {
+    @apply text-primary font-bold uppercase ml-2 mb-2
   }
 }
 

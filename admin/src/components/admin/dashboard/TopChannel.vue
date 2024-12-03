@@ -95,8 +95,8 @@
 </script>
 
 <template>
-  <div class="col-span-7 bg-white p-5 rounded shadow">
-    <h1 class="text-primary font-bold uppercase ml-2 mb-2">Top 5 channel followed</h1>
+  <div class="col-span-7 paper-custom">
+    <h1 class="paper-title">Top 5 channel followed</h1>
     <DataTable :value="topChannel" tableStyle="min-width: 50rem">
       <Column header="Avatar">
         <template #body="slotProps">
@@ -111,8 +111,8 @@
       <Column field="totalDonated" header="Donated"></Column>
     </DataTable>
   </div>
-  <div class="col-span-5 bg-white p-5 rounded shadow">
-    <h1 class="text-primary font-bold uppercase ml-2 mb-2">Top 5 users deposit the most money</h1>
+  <div class="col-span-5 paper-custom">
+    <h1 class="paper-title">Top 5 users deposit the most money</h1>
     <DataTable :value="topUserDeposit" tableStyle="min-width: 20rem">
       <Column header="Avatar">
         <template #body="slotProps">
