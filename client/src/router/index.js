@@ -48,6 +48,7 @@ import ScreenChat from '@/components/screenObs/ScreenChat.vue';
 import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
 import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
+import AdvertiseBooking from '@/components/streamer/advertiseBooking/AdvertiseBooking.vue';
 
 const routes = [
   // User router
@@ -123,6 +124,10 @@ const routes = [
       {
         path: 'cashout',
         component: Cashout,
+      },
+      {
+        path: 'advertise-booking',
+        component: AdvertiseBooking,
       },
       {
         path: 'cashout-history',
