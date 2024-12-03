@@ -39,7 +39,7 @@ const onClientJoinChannel = async (socket, channelId) => {
     broadcastStreamStats(channelId);
     // Nếu đây là client đầu tiên, khởi tạo setInterval
     if (currentView == 1 && !intervals[channelId]) {
-        intervals[channelId] = setInterval(() => broadcastStreamStats(channelId), 30000);
+        intervals[channelId] = setInterval(() => broadcastStreamStats(channelId), 3000);
     }
     socket.join(channelId);
 

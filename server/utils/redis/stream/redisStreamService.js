@@ -285,8 +285,7 @@ const takeFinalSnapshot = async (channelId) => {
     try {
         // Lấy snapshot cuối cùng
         const finalSnapshot = await takeSnapshot(channelId);
-        // Cleanup Redis keys
-        await clearStreamStats(channelId);
+
         console.log("Final snapshot success!");
 
         return finalSnapshot;
@@ -317,5 +316,6 @@ module.exports = {
     // setupPeriodicSnapshot
     takeFinalSnapshot,
     filterRoomsForDeletion,
-    reRankingTopDonators
+    reRankingTopDonators,
+    getTopDonatorsWithDetails
 };

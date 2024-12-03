@@ -1,40 +1,21 @@
+import MedalBronze from '@/components/icons/medalBronze.vue';
 <script setup>
-  import MedalBronze from '@/components/icons/medalBronze.vue';
   import MedalGold from '@/components/icons/medalGold.vue';
   import MedalSilver from '@/components/icons/medalSilver.vue';
-  const users = [
-    {
-      name: 'npmh310',
-      points: 85000,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'tuilahieu',
-      points: 5500,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'hieune320',
-      points: 5000,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'minhhieu120',
-      points: 1200,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'minhhieu120',
-      points: 1200,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
+  import TryAgain from '@/components/icons/tryAgain.vue';
 
-    // Add more users as needed
-  ];
+  const props = defineProps({
+    liveStreamData: Object,
+  });
 </script>
 <template>
   <div>
-    <div v-for="(user, index) in users" :key="index" class="flex justify-between items-center mb-4">
+    <div
+      v-if="props.liveStreamData?.livestream?.topDonators"
+      v-for="(user, index) in props.liveStreamData?.livestream?.topDonators"
+      :key="index"
+      class="flex justify-between items-center mb-4"
+    >
       <div class="flex items-center gap-x-3">
         <div v-if="index === 0">
           <MedalGold />
@@ -52,10 +33,14 @@
         <h2>{{ user.name }}</h2>
       </div>
       <div class="flex items-center">
-        <p class="font-medium" :class="user.points >= 5000 ? 'text-primary' : 'text-body'">
+        <p class="font-medium" :class="user.points >= 5000 ? 'text-yellow-dark' : 'text-body'">
           {{ user.points }}
         </p>
       </div>
+    </div>
+    <div v-else class="flex flex-col justify-center items-center gap-y-6 my-2">
+      <TryAgain />
+      <span class="font-semibold">Don't be sad because no one donates. Try harder next time.</span>
     </div>
   </div>
 </template>

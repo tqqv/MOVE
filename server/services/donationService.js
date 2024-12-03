@@ -107,6 +107,7 @@ const donateLivestream = async (userId, donatorChannelId, livestreamId, donation
         donatorName: donatorChannel ? donatorChannel.channelName : user.username,
         donatorId: donatorChannel ? donatorChannel.id : user.id,
         donatorAvatar: donatorChannel ? donatorChannel.avatar : user.avatar,
+        username: user.username,
         isChannel: donatorChannel ? true : false
       },
       totalDonateValue

@@ -5,6 +5,7 @@ const { set, get } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
 const StreamKeys = require("../utils/redis/key/streamKey.js");
 const _redis = require("../utils/redis/config.js");
+const { getTopDonatorsWithDetails, clearStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize, ViewVideo } = db;
 
 const createLivestream = async(data) => {
@@ -133,9 +134,17 @@ const getLivestreamService = async (username) => {
 
       ]
     });
+    let avgRates = await get(`channelStreamId:${channel.id}:avgRates`);
+    let totalReps = await get(`channelStreamId:${channel.id}:totalReps`);
+    const topDonators = await getTopDonatorsWithDetails(channel.id);
+    // Cleanup Redis keys
+    // await clearStreamStats(channel.id);
     return {
       status: 200,
-      data: {channel, livestream},
+      data: {
+        channel, 
+        livestream: { ...livestream.toJSON(), avgRates, totalReps, topDonators} 
+      },
       message: 'Retrieve data success'
     };
   } catch (error) {

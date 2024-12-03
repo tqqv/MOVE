@@ -4,7 +4,7 @@ const { listSubscribeOfUser } = require("./userService.js");
 const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout, Livestream, sequelize, ViewVideo, Comment, Donation } = db;
 const { v4: uuidv4 } = require('uuid');
 const { remove, get, set } = require("../utils/redis/base/redisBaseService.js");
-const {  takeFinalSnapshot } = require("../utils/redis/stream/redisStreamService.js");
+const {  takeFinalSnapshot, getTopDonatorsWithDetails } = require("../utils/redis/stream/redisStreamService.js");
 
 // Function này để lúc admin accept request live sẽ gọi
 const createChannel = async (userId, username, avatar) => {
@@ -530,7 +530,9 @@ const endStream = async(data) => {
     }
 
     // REDIS HANDLING
-    let avgRates = await get(`channelStreamId:${channel.id}:currentViews`);
+    let avgRates = await get(`channelStreamId:${channel.id}:avgRates`);
+    let totalReps = await get(`channelStreamId:${channel.id}:totalReps`);
+    const topDonators = await getTopDonatorsWithDetails(channel.id);
     let liveStatus = await get(`channel_${channel.id}_live_status`);
     if (liveStatus == 'streamPublished') {
       // FINAL SNAPSHOT
@@ -550,11 +552,13 @@ const endStream = async(data) => {
     return {
       status: 200,
       data: {channel,
-        livestream: { ...livestream.toJSON(), avgRates },
+        livestream: { ...livestream.toJSON(), avgRates, totalReps, topDonators},
       },
       message: "Stream ended suceess"
     }
   } catch (error) {
+    console.log(error);
+    
     return {
       status: 500,
       message: error.message
