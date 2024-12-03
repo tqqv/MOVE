@@ -180,7 +180,7 @@
   onBeforeUnmount(() => {
     handleUnload(currentVideoId.value);
   });
-  watch(videoId, async () => {
+  watch(videoId, async (newVideoId) => {
     actualWatchTime = 0;
     lastUpdateTime = 0;
     initializePlayer();
@@ -287,6 +287,7 @@
           </TabPanels>
         </Tabs>
         <Divider />
+
         <div v-if="isVideoLoading">
           <div class="grid grid-cols-12 items-center">
             <Skeleton shape="circle" size="4rem" class="col-span-1"></Skeleton>
@@ -307,7 +308,7 @@
         </div>
         <CommentPage
           v-else-if="videoId && !isVideoLoading"
-          :videoId="videoId"
+          :videoId="currentVideoId"
           :isCommentable="isCommentable"
         />
       </div>
