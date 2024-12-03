@@ -3,7 +3,7 @@ const  streamKeys = require("../../redis/key/streamKey.js");
 const _redis = require("../config.js");
 const db = require("../../../models/index.js");
 const { isValidUUID } = require('../../formatChecker.js');
-const { Livestream, User } = db;
+const { Livestream, User, Channel } = db;
 
 const updateStreamStats = async (channelId, action, field, amount) => {
     const key = streamKeys[field](channelId);
@@ -80,7 +80,6 @@ const getStreamStats = async (channelId) => {
             topDonators
         };
         let liveStatus = await get(`channel_${channelId}_live_status`);
-        console.log(statistics);
         console.log(liveStatus);
         return statistics;
     } catch (error) {
@@ -127,39 +126,60 @@ const getTopDonatorsWithDetails = async (channelId) => {
             attributes: ['id', 'username', 'avatar'], // Chỉ lấy các trường cần thiết
         });
 
-        // 3. Kết hợp thông tin từ Redis và User
+        // 3. Tìm các userId không tìm thấy trong bảng User
+        const foundUserIds = users.map((user) => user.id);
+        const missingUserIds = userIds.filter((id) => !foundUserIds.includes(id));
+
+        // 4. Lấy thông tin từ bảng Channel cho các userId không tìm thấy
+        let channels = [];
+        if (missingUserIds.length > 0) {
+            channels = await Channel.findAll({
+                where: {
+                    id: missingUserIds,
+                },
+                attributes: ['id', 'channelName', 'avatar'], // Tên và avatar của channel
+            });
+        }
+
+        // 5. Kết hợp thông tin từ Redis, User và Channel
         const topDonators = userIdsWithScores.map((entry) => {
             const user = users.find((u) => u.id === entry.userId);
+            const channel = channels.find((c) => c.id === entry.userId);
+
             return {
-                userId: entry.userId,
-                username: user?.username || 'Unknown',
-                avatar: user?.avatar || '',
+                donatorId: entry.userId,
+                donatorName: user?.username || channel?.channelName || 'Unknown',
+                avatar: user?.avatar || channel?.avatar || '',
                 totalReps: entry.totalReps,
+                isChannel: !!channel, // true nếu là Channel, false nếu là User
             };
         });
-        return topDonators
+
+        return topDonators;
     } catch (error) {
         console.error(`Error getting top donators with details for ${channelId}:`, error);
         throw error;
     }
 };
 
+
+
 const reRankingTopDonators = async (channelId, donator, totalDonate) => {
     const key = streamKeys["topDonators"](channelId);
     try {
-        const userId = donator.userId;
+        const donatorId = donator.donatorId;
 
-        // Lấy toàn bộ danh sách userId theo thứ tự giảm dần
+        // Lấy toàn bộ danh sách donatorId theo thứ tự giảm dần
         const currentTopDonators = await _redis.zrevrange(key, 0, -1, 'WITHSCORES');
 
-        // Tìm userId trùng khớp
+        // Tìm donatorId trùng khớp
         const existingDonatorIndex = currentTopDonators.findIndex((item, index) => {
-            return index % 2 === 0 && item === userId;
+            return index % 2 === 0 && item === donatorId;
         });
 
         // Nếu đã tồn tại, update score (totalReps)
         if (existingDonatorIndex !== -1) {
-            await _redis.zadd(key, totalDonate, userId);
+            await _redis.zadd(key, totalDonate, donatorId);
             return;
         }
 
@@ -167,21 +187,21 @@ const reRankingTopDonators = async (channelId, donator, totalDonate) => {
 
         // Nếu chưa đủ top
         if (currentCount < 7) {
-            await _redis.zadd(key, totalDonate, userId);
+            await _redis.zadd(key, totalDonate, donatorId);
             return;
         }
 
-        // Lấy userId có điểm thấp nhất trong top
+        // Lấy donatorId có điểm thấp nhất trong top
         const lowestScore = parseFloat(currentTopDonators[currentTopDonators.length - 1]);
 
         if (totalDonate > lowestScore) {
-            const lowestUserId = currentTopDonators[currentTopDonators.length - 2];
+            const lowestDonatorId = currentTopDonators[currentTopDonators.length - 2];
 
-            // Xóa userId có điểm thấp nhất
-            await _redis.zrem(key, lowestUserId);
+            // Xóa donatorId có điểm thấp nhất
+            await _redis.zrem(key, lowestDonatorId);
 
-            // Thêm userId mới
-            await _redis.zadd(key, totalDonate, userId);
+            // Thêm donatorId mới
+            await _redis.zadd(key, totalDonate, donatorId);
         }
 
         // Giới hạn top 7
@@ -282,7 +302,7 @@ const filterRoomsForDeletion = (rooms) => {
 
     // Filter rooms theo điều kiện và chỉ map với currentViews
     const roomKeys = roomsArray
-        .filter(room => (isValidUUID(room) || room == '3'))
+        .filter(room => (isValidUUID(room) || room))
         .map(room => streamKeys.currentViews(room));
 
     return roomKeys;

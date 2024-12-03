@@ -4,7 +4,7 @@ const { avgRates } = require("../utils/redis/key/streamKey.js");
 const { updateStreamStats, reRankingTopDonators } = require("../utils/redis/stream/redisStreamService.js");
 const { Donation, Livestream, DonationItem, Channel, User } = db;
 
-const donateLivestream = async (userId, livestreamId, donationItemId, content) => {
+const donateLivestream = async (userId, donatorChannelId, livestreamId, donationItemId, content) => {
   try {
     if (!livestreamId || !donationItemId) {
       return {
@@ -13,7 +13,7 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
       };
     }
 
-    const [livestream, donationItem, user] = await Promise.all([
+    const [livestream, donationItem] = await Promise.all([
       Livestream.findOne({
         where: {
           id: livestreamId,
@@ -25,12 +25,22 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
           id: donationItemId,
         },
       }),
-      User.findOne({
-        where: {
-          id: userId,
-        },
-      }),
+
     ]);
+    let donatorChannel;
+    if(donatorChannelId) {
+      donatorChannel = await Channel.findOne({
+        where: {
+          id: donatorChannelId,
+        },
+      })
+    }
+
+    let user = await User.findOne({
+      where: {
+        id: userId || donatorChannel.userId,
+      },
+    })
 
     if (!livestream) {
       return {
@@ -90,8 +100,17 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
 
     const totalDonateValue = totalDonate[0]?.totalDonation || 0;
 
-    updateStreamStats(livestream.streamerId, "increment", "avgRates", donationItem.REPs),
-    reRankingTopDonators(livestream.streamerId, {username: user.username, userId: user.id, avatar: user.avatar}, totalDonateValue)
+    updateStreamStats(livestream.streamerId, "increment", "totalReps", donationItem.REPs),
+    reRankingTopDonators(
+      livestream.streamerId,
+      {
+        donatorName: donatorChannel ? donatorChannel.channelName : user.username,
+        donatorId: donatorChannel ? donatorChannel.id : user.id,
+        donatorAvatar: donatorChannel ? donatorChannel.avatar : user.avatar,
+        isChannel: donatorChannel ? true : false
+      },
+      totalDonateValue
+    )
 
     return {
       status: 200,
@@ -99,6 +118,8 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
       message: "Donation successfully created.",
     };
   } catch (error) {
+    console.log(error);
+
     return {
       status: 500,
       message: error.message,

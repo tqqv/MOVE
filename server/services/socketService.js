@@ -38,7 +38,7 @@ const onClientJoinChannel = async (socket, channelId) => {
     let currentView = await get(`channelStreamId:${channelId}:currentViews`);
     broadcastStreamStats(channelId);
     // Nếu đây là client đầu tiên, khởi tạo setInterval
-    if (currentView >= 1) {
+    if (currentView == 1 && !intervals[channelId]) {
         intervals[channelId] = setInterval(() => broadcastStreamStats(channelId), 30000);
     }
     socket.join(channelId);
@@ -90,7 +90,6 @@ const connectSocket = (socket) => {
     socket.on('joinRoom', async (channelId) => {
         await updateStreamStats(channelId, 'increment', 'currentViews', 1)
         await updateStreamStats(channelId, 'increment', 'totalViews', 1)
-        await updateStreamStats(channelId, 'increment', 'totalReps', 1000)
         // socket.join(channelId);
         await onClientJoinChannel(socket, channelId);
     })
@@ -106,7 +105,7 @@ const connectSocket = (socket) => {
                 avatar,
                 channelName,
                 replyTo,
-                donation, 
+                donation,
                 timestamp: Date.now()
             };
 
