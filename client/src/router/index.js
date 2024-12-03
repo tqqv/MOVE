@@ -48,6 +48,8 @@ import ScreenChat from '@/components/screenObs/ScreenChat.vue';
 import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
 import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
+import AboutUs from '@/components/showMore/AboutUs.vue';
+import FAQ from '@/components/showMore/FAQ.vue';
 
 const routes = [
   // User router
@@ -92,6 +94,8 @@ const routes = [
       },
       { path: 'video/:videoId', component: VideoDetails },
       { path: 'browse/categories/:category', component: CategoryDetailsContent },
+      { path: 'about-us', component: AboutUs },
+      { path: 'faq', component: FAQ },
     ],
   },
   // LIVE STREAM LAYOUT

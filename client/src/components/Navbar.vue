@@ -33,6 +33,7 @@
   import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
   import Stream from './icons/Stream.vue';
   import CompletePurchase from '@/components/getReps/dialog/CompletePurchase.vue';
+  import ListShowMore from './showMore/listShowMore.vue';
 
   const popupStore = usePopupStore();
   const userStore = useUserStore();
@@ -45,6 +46,7 @@
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
   const isPaymentHistoryFetched = ref(false);
+  const isShowMore = ref(false);
   const router = useRouter();
 
   const isFirstTime = ref(false);
@@ -57,7 +59,9 @@
   const users = ref([]);
   const loading = ref(true);
   // SEARCH
-
+  const toggleShowMoreMenu = () => {
+    isShowMore.value = !isShowMore.value;
+  };
   const toggleMobileMenu = () => {
     isMobileMenuOpen.value = !isMobileMenuOpen.value;
   };
@@ -92,6 +96,7 @@
     isSearchPopupOpen.value = false;
     isGetREPsMenuOpen.value = false;
     isCreateMenuOpen.value = false;
+    isShowMore.value = false;
   };
   const toggleOpenOrder = () => {
     isOpenOrder.value = !isOpenOrder.value;
@@ -114,6 +119,8 @@
     const createMenuButton = document.getElementById('create-menu-button');
     const repsMenu = document.getElementById('reps-menu');
     const repsMenuButton = document.getElementById('reps-menu-button');
+    const showMoreMenu = document.getElementById('show-more');
+    const showMoreMenuButton = document.getElementById('show-more-button');
     const clickOutsideUserMenu =
       isElementOutside(userMenu, event.target) && isElementOutside(userMenuButton, event.target);
     const clickOutsideNotiMenu =
@@ -124,13 +131,17 @@
     const clickOutsideCreateMenu =
       isElementOutside(createMenu, event.target) &&
       isElementOutside(createMenuButton, event.target);
-
     const clickOutsideREPsMenu =
       isElementOutside(repsMenu, event.target) && isElementOutside(repsMenuButton, event.target);
+    const clickOutsideShowMoreMenu =
+      isElementOutside(showMoreMenu, event.target) &&
+      isElementOutside(showMoreMenuButton, event.target);
     if (clickOutsideUserMenu) {
       isUserMenuOpen.value = false;
     }
-
+    if (clickOutsideShowMoreMenu) {
+      isShowMore.value = false;
+    }
     if (clickOutsideNotiMenu) {
       isNotiMenuOpen.value = false;
     }
@@ -295,11 +306,28 @@
                 class="rounded-md px-3 py-2 text_nav hover:bg-primary font-bold"
                 >Browse</RouterLink
               >
-              <!-- <RouterLink
-                to="/browse/categories"
-                class="rounded-md px-3 py-2 text_nav font-bold items-center"
-                ><i class="pi pi-ellipsis-h"
-              /></RouterLink> -->
+              <!-- ------ABOUT US PAGE------------ -->
+
+              <div class="relative" id="show-more-button">
+                <div
+                  class="relative flex items-center justify-center cursor-pointer h-[30px] w-[40px]"
+                  @click="toggleShowMoreMenu"
+                >
+                  <div class="font-bold text-xl">. . .</div>
+                </div>
+                <div
+                  v-if="isShowMore"
+                  id="show-more"
+                  class="absolute left-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                  role="menu"
+                  aria-orientation="vertical"
+                  aria-labelledby="show-more-button"
+                  tabindex="-1"
+                >
+                  <ListShowMore @closeAllPopups="closeAllPopups" />
+                </div>
+              </div>
+              <!-- ---------------------------- -->
             </div>
           </div>
         </div>
