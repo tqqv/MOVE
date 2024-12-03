@@ -129,7 +129,9 @@ const createPayment = async(userId, paymentMethodId, repPackageId) => {
       }
     })
 
-    const paymentIntent = await createStripePaymentIntent(user.stripeCustomerId, paymentMethodId, repPackage.amount)
+    const totalAmount = repPackage.amount-(repPackage.amount*repPackage.discount)
+
+    const paymentIntent = await createStripePaymentIntent(user.stripeCustomerId, paymentMethodId, totalAmount)
 
     if (paymentIntent.status === 'succeeded') {
       await Payment.create({
@@ -138,7 +140,7 @@ const createPayment = async(userId, paymentMethodId, repPackageId) => {
         paymentMethodId: paymentMethodId,
         paymentIntentId: paymentIntent.id,
         paymentStatus: "completed",
-        amount: repPackage.amount,
+        amount: totalAmount,
         rep: repPackage.rep,
       })
 
