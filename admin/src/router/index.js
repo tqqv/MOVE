@@ -10,7 +10,7 @@ import UserDetail from '@/components/admin/users/UserDetail.vue';
 import ReportManagement from '@/components/admin/report/ReportManagement.vue';
 import ReportDetail from '@/components/admin/report/ReportDetail.vue';
 import AdminSetting from '@/components/admin/setting/AdminSetting.vue';
-import Cashout from '@/components/admin/rep/Cashout.vue';
+import Cashout from '@/components/admin/rep/Revenue.vue';
 import DonateItem from '@/components/admin/rep/DonateItem.vue';
 import DiscountItem from '@/components/admin/rep/DiscountItem.vue';
 
@@ -27,7 +27,7 @@ const routes = [
       { path: 'levelworkout', component: LevelworkoutManagement },
       { path: 'report', component: ReportManagement },
       { path: 'setting', component: AdminSetting },
-      { path: 'reps/cashout', component: Cashout },
+      { path: 'reps/Revenue', component: Cashout },
       { path: 'reps/donate', component: DonateItem },
       { path: 'reps/discount', component: DiscountItem },
       { path: 'users/:username', component: UserDetail },

@@ -74,7 +74,7 @@
             </div>
           </div>
         </div>
-        <!-- Spend  -->
+        <!-- Withdraw  -->
         <div class="bg-white flex flex-col shadow p-5 rounded-lg py-7">
           <div class="flex items-center gap-x-5">
             <div
@@ -84,7 +84,7 @@
             </div>
             <div class="truncate">
               <h1 class="font-bold text-[20px] truncate">$12,200</h1>
-              <h1 class="text-footer text-sm font-medium">Spend</h1>
+              <h1 class="text-footer text-sm font-medium">Withdraw</h1>
             </div>
           </div>
         </div>

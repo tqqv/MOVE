@@ -121,8 +121,8 @@
 </script>
 
 <template>
-  <div class="bg-white p-5 rounded shadow">
-    <h1 class="text-primary font-bold uppercase ml-2 mb-2">Top 5 video donated</h1>
+  <div class="paper-custom">
+    <h1 class="paper-title">Top 5 video donated</h1>
     <DataTable :value="topVideo" tableStyle="min-width: 50rem">
       <Column header="Thumbnail">
         <template #body="slotProps">
@@ -137,8 +137,8 @@
       <Column field="totalReps" header="REPs"></Column>
     </DataTable>
   </div>
-  <div class="bg-white p-5 rounded shadow">
-    <h1 class="text-primary font-bold uppercase ml-2 mb-2">Top 5 live stream</h1>
+  <div class="paper-custom">
+    <h1 class="paper-title">Top 5 live stream</h1>
     <DataTable :value="topLiveStream" tableStyle="min-width: 50rem">
       <Column header="Thumbnail">
         <template #body="slotProps">

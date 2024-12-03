@@ -290,6 +290,9 @@ body.p-overflow-hidden {
   background: rgba(19, 208, 180, 0.8);
   border-radius: 4px;
 }
+
 .p-datatable ::-webkit-scrollbar-thumb:hover {
   background: rgba(19, 208, 180, 0.8);
 }
+
+
