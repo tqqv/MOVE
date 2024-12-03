@@ -8,7 +8,6 @@ const {
   verifyTokenRsController,
   sendMailForgotPass,
   resetPasswordController,
-  setStatusRqChannel,
   googleLogin,
   googleCallbackController,
   facebookCallback,
@@ -26,13 +25,11 @@ authRouter.get("/logout", verifyUser, logoutController);
 
 // verify email
 authRouter.post("/mail-verify", verifyUser, sendMailVerifyController);
-authRouter.get("/verify-account/:token", verifyAccountController);
+authRouter.get("/verify-account/:token", verifyUser , verifyAccountController);
 // forgot pasword
 authRouter.get("/verify-token/:token", verifyTokenRsController);
 authRouter.post("/forgot-password", sendMailForgotPass);
 authRouter.post("/reset-password", resetPasswordController);
-
-authRouter.put("/setStatusRQ", verifyAdmin, setStatusRqChannel)
 
 // SSO google
 authRouter.get("/google", googleLogin);

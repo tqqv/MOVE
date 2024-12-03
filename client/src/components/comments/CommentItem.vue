@@ -16,6 +16,8 @@
 
   import { postReactionComment } from '@/services/comment';
   import { useUserStore, usePopupStore } from '@/stores';
+  import LogoIcon from '../icons/logoIcon.vue';
+  import { useCommentStore } from '@/stores/useCommentStore';
 
   dayjs.extend(relativeTime);
 
@@ -39,6 +41,9 @@
     isCommentable: Boolean,
   });
 
+  const commentStore = useCommentStore();
+  const { childComments } = commentStore;
+
   const emit = defineEmits(['fetchComments']);
   const formatCommentText = (text) => {
     return text.replace(/\n/g, '<br/>');
@@ -46,6 +51,7 @@
   const { showFullText, displayedText, toggleText, isLongText, isTallText, textElement } =
     useReadMore(formatCommentText(props.comment.content), 300);
   const userStore = useUserStore();
+  const popupStore = usePopupStore();
 
   const currentPageChild = ref(1);
   const commentsPerPageChild = ref(5);
@@ -65,6 +71,7 @@
 
   const likeCount = ref(props.comment.likeCount);
   const userReactionType = ref(props.comment.userReactionType);
+
   const openLoginPopup = () => {
     popupStore.openLoginPopup();
   };
@@ -91,6 +98,7 @@
     const data = { commentId: props.comment.id, reactionType: type };
     try {
       const response = await postReactionComment(data);
+
       if (response.status === 200) {
         if (type === 'like') {
           if (userReactionType.value === 'like') {
@@ -121,13 +129,13 @@
 
   const loadMoreChildComments = async () => {
     currentPageChild.value++;
-    await props.fetchChildComments(props.comment.id);
+    await props.fetchChildComments(props.comment.id, userStore.user?.id || null);
 
     if (props.totalRepliesCount[props.comment.id]) {
       props.totalRepliesCount[props.comment.id] += commentsPerPageChild.value;
     }
   };
-  const toggleReply = (commentId, parentId, username) => {
+  const toggleReply = (commentId, parentId) => {
     isReplyChild.value = !isReplyChild.value;
 
     if (isReplyChild.value) {
@@ -141,21 +149,26 @@
 
     if (isShowMoreChild.value && !hasFetchedChildComments.value) {
       await props.fetchChildComments(props.comment.id);
+      console.log(childComments);
+
       hasFetchedChildComments.value = true;
     }
+  };
+  const toggleHide = async () => {
+    isShowMoreChild.value = false;
   };
   const handleSendComment = async (newComment) => {
     if (newComment) {
       newComment.isNew = true;
       newComment.likeCount = newComment.likeCount || 0;
 
-      if (parentIdReply.value && props.childComments[parentIdReply.value]) {
-        props.childComments[parentIdReply.value].unshift(newComment);
+      if (parentIdReply.value && childComments[parentIdReply.value]) {
+        childComments[parentIdReply.value].unshift(newComment);
       } else {
-        if (!props.childComments[id.value]) {
-          props.childComments[id.value] = [];
+        if (!childComments[id.value]) {
+          childComments[id.value] = [];
         }
-        props.childComments[id.value].unshift(newComment);
+        childComments[id.value].unshift(newComment);
       }
 
       isReplyChild.value = false;
@@ -205,35 +218,81 @@
       }
     }
   });
+  const commentClasses = ref('');
+  onMounted(() => {
+    if (props.comment.isNew) {
+      commentClasses.value =
+        'border-l-4 border-primary/60 bg-primary/10 rounded-e-lg  transition-all duration-1000  ease-out';
+
+      setTimeout(() => {
+        commentClasses.value =
+          'border-l-2 border-primary/40 bg-primary/5 rounded-e-lg  transition-all duration-1000 ease-out';
+      }, 3000);
+
+      setTimeout(() => {
+        commentClasses.value =
+          'border-l-0 border-primary/20 bg-primary/0 rounded-e-lg  transition-all duration-1000 ease-out';
+      }, 4000);
+
+      // Sau 5 giây, làm mờ hoàn toàn và biến thành trong suốt
+      setTimeout(() => {
+        commentClasses.value = '';
+      }, 5000);
+    }
+  });
 </script>
 
 <template>
   <div
     class="flex gap-x-4"
     :id="`comment-${comment.id}`"
-    :class="{
-      'pl-6 py-4 px-3 border-l-2 border-gray-dark': comment.parentId !== null,
-      'border-l-4 border-primary/60 bg-primary/10 rounded-e-lg mb-1': comment.isNew,
-    }"
+    :class="[
+      commentClasses,
+      comment.parentId !== null
+        ? 'pl-6 py-4 px-3 border-l-2 border-gray-dark transition-all duration-300 ease-in-out '
+        : '',
+    ]"
   >
     <div class="flex-shrink-0">
-      <img
-        :src="comment?.userComments?.avatar"
-        alt="Avatar"
-        class="size-10 object-cover rounded-full"
-      />
+      <RouterLink :to="`/user/${comment.userComments?.username}`">
+        <img
+          :src="comment?.userComments?.avatar"
+          alt="Avatar"
+          class="size-10 object-cover rounded-full"
+      /></RouterLink>
     </div>
 
     <div class="space-y-2 w-full">
       <!-- USERNAME -->
+      <div
+        v-if="comment.rep > 0"
+        class="bg-[#FFB564] rounded-full flex gap-x-2 items-center px-3 py-1 w-max transition-all duration-300 hover:scale-110 hover:shadow-lg"
+      >
+        <div
+          class="bg-[#18DBC3] w-[20px] h-[20px] flex items-center justify-center rounded-full shadow-md"
+        >
+          <LogoIcon />
+        </div>
+        <div class="whitespace-nowrap text-white font-bold text-[12px]">REPs Sender</div>
+      </div>
+
       <div class="flex justify-between items-center gap-x-4 w-fit">
-        <h1 class="font-bold">{{ comment.userComments?.username }}</h1>
+        <RouterLink :to="`/user/${comment.userComments?.username}`">
+          <h1 class="font-bold">{{ comment.userComments?.username }}</h1></RouterLink
+        >
+
         <span v-if="comment.userComments?.isVerified">
           <Verified class="fill-blue" />
         </span>
-        <div v-if="comment.rep > 0" class="flex items-center whitespace-nowrap">
-          <Gift class="mr-1" />
-          <span class="text-xs mt-1 text-[#FFB564]">Gifted {{ comment.rep }} REPs</span>
+        <div v-if="comment.rep > 0" class="flex gap-x-2 items-center whitespace-nowrap">
+          <div class="flex-shrink-0 hover:scale-110">
+            <img
+              :src="comment?.commentDonationItem?.image"
+              alt="REPs"
+              class="w-[20px] h-[25px] rounded-full object-cover cursor-pointer"
+            />
+          </div>
+          <span class="text-xs mt-1 text-primary">Gifted {{ comment.rep }} REPs</span>
         </div>
         <p class="pt-0.5 whitespace-nowrap text-xs text-[#666666]">
           {{ timeFromNow(comment.createdAt) }}
@@ -291,18 +350,20 @@
               <i class="pi pi-ellipsis-v"></i>
             </button>
           </div>
-
           <div
             v-if="openReportComment"
             id="report-menu"
-            class="absolute left-0 z-10 mt-5 top-3 p-2 border border-primary origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+            class="absolute left-0 z-10 mt-5 top-3 p-2 origin-top-right rounded-md bg-white shadow-lg focus:outline-none text-black border-none"
           >
-            <span
-              @click="openPopupReport"
-              class="text-primary text-xs whitespace-nowrap cursor-pointer"
-            >
-              Report comment
-            </span>
+            <ul class="flex flex-col justify-center h-full gap-y-1 m-0 p-0">
+              <li
+                class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
+                @click="openPopupReport"
+              >
+                <i class="pi pi-flag text-sm"></i>
+                <span class="truncate"> Report comment</span>
+              </li>
+            </ul>
           </div>
         </div>
         <span
@@ -333,7 +394,7 @@
           :key="'new-' + child.id"
           :comment="child"
           :fetchChildComments="props.fetchChildComments"
-          :childComments="props.childComments"
+          :childComments="childComments"
           :totalRepliesCount="props.totalRepliesCount"
           :videoId="videoId"
           :isCommentable="isCommentable"
@@ -346,14 +407,13 @@
           !comment.commentReport?.some((report) => report.status === 'approved')
         "
       >
-        <div
-          class="flex gap-2 font-bold text-[13px] text-primary cursor-pointer"
-          @click="toggleShowMoreChild"
-        >
+        <div class="flex gap-2 font-bold text-[13px] text-primary cursor-pointer">
           <div>
-            <span v-if="!isShowMoreChild"> Show replies ({{ comment.totalRepliesCount }}) </span>
+            <span @click="toggleShowMoreChild" v-if="!isShowMoreChild">
+              Show replies ({{ comment.totalRepliesCount }})
+            </span>
 
-            <span v-else class="mt-4"> Hide replies </span>
+            <span @click="toggleHide" v-else class="mt-4"> Hide replies </span>
           </div>
           <div v-if="loadingReplies"><SmallLoading /></div>
         </div>
@@ -368,7 +428,7 @@
             :key="child.id"
             :comment="child"
             :fetchChildComments="props.fetchChildComments"
-            :childComments="props.childComments"
+            :childComments="childComments"
             :totalRepliesCount="props.totalRepliesCount"
             :videoId="videoId"
             :isCommentable="isCommentable"

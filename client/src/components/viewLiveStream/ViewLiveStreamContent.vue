@@ -17,10 +17,7 @@
     liveStatus: Boolean,
     liveStreamData: Object,
     metricsData: Object,
-  });
-
-  onMounted(() => {
-    console.log(props.liveStreamData.livestream);
+    listDonation: Array,
   });
 </script>
 <template>
@@ -49,6 +46,10 @@
       v-if="props.liveStreamData.channel"
       :channelDetails="props.liveStreamData?.channel"
       :usernameDetails="props.liveStreamData?.channel?.User?.username"
+      :channelId="props.liveStreamData?.channel?.id"
+      :liveStreamData="props.liveStreamData"
+      :listDonation="props.listDonation"
+      :isGiftVisible="true"
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">

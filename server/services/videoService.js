@@ -7,6 +7,10 @@ const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rat
 const { v4: uuidv4 } = require('uuid');
 const WEIGHTS = require('../models/enum/constants.js');
 const axios = require('axios');
+const { generateVideosYouMayLike } = require('../utils/AI/services/youmaylike/generateYouMayLikeVideos.js');
+const { generateVideoEmbeddings } = require('../utils/AI/services/youmaylike/generateEmbeddings.js');
+const { generateUserProfile } = require('../utils/AI/services/youmaylike/generateUserProfile.js');
+const _redis = require('../utils/redis/config.js');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -811,10 +815,10 @@ const getCountryDataWithStates = async (videoId, days) => {
       attributes: []
     }],
     attributes: [
-      [Sequelize.col('viewVideoUser.country'), 'country'],
+      [Sequelize.col('viewVideoUser.nationality'), 'nationality'],
       [Sequelize.fn('COUNT', Sequelize.col('ViewVideo.viewerId')), 'viewerCount']
     ],
-    group: ['viewVideoUser.country'],
+    group: ['viewVideoUser.nationality'],
     raw: true
   });
 
@@ -878,7 +882,7 @@ const getDataCountryByIp = async (videoId, days) => {
     where: whereCondition,
     attributes: [
       'country',
-      [Sequelize.fn('COUNT', Sequelize.col('country')), 'viewerCount']
+      [Sequelize.fn('COUNT', Sequelize.col('viewerId')), 'viewerCount']
     ],
     group: ['country'],
     raw: true
@@ -1502,6 +1506,76 @@ const renewTopVideos = async () => {
     };
   }
 };
+const
+getVideoYouMayLikeService = async (userId, page = 1, pageSize = 10, sortCondition = null) => {
+  try {
+    // 1. Embedding video
+    const videoEmbeddings = await generateVideoEmbeddings();
+
+    if (!videoEmbeddings || videoEmbeddings.length === 0) {
+      throw new Error('Video embeddings not generated or empty');
+    }
+
+    // 2. User profile
+    const userProfile = await generateUserProfile(userId, videoEmbeddings);
+
+    if (!userProfile || userProfile.length === 0) {
+      throw new Error('User profile not generated or empty');
+    }
+
+    console.log('User profile dimension:', userProfile.length);
+
+    // 3. Generate video recommendations
+    const youMayLikeVideosList = generateVideosYouMayLike(userProfile, videoEmbeddings);
+
+    if (!youMayLikeVideosList || youMayLikeVideosList.length === 0) {
+      return {
+        status: 200,
+        message: 'No recommended videos available',
+        data: {
+          listVideo: {
+            count: 0,
+            rows: [],
+          },
+        },
+      };
+    }
+
+    // 4. Extract video IDs and fetch details from Redis
+    const videoIds = youMayLikeVideosList.map(video => video.videoId);
+    const videosDetails = await _redis.hmget('topvideo:details', videoIds);
+
+    // 5. Enrich video data
+    const enrichedVideosList = youMayLikeVideosList.map((video, index) => {
+      const details = videosDetails[index] ? JSON.parse(videosDetails[index]) : {};
+      return {
+        ...video,
+        ...details,
+        id: video.videoId, // Map videoId to id for consistency
+        videoId: undefined, // Remove videoId
+      };
+    });
+
+    return {
+      status: 200,
+      message: 'You may like videos fetched successfully',
+      data: {
+        listVideo: {
+          count: enrichedVideosList.length,
+          rows: enrichedVideosList,
+        },
+      },
+    };
+  } catch (error) {
+    console.error('Error in youMayLikeVideosList:', error.message);
+
+    return {
+      status: 500,
+      message: `Error fetching recommended videos: ${error.message}`,
+      data: null,
+    };
+  }
+};
 
 module.exports = {
   generateUploadLink,
@@ -1524,5 +1598,6 @@ module.exports = {
   getVideoWatchAlso,
   deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
-  renewTopVideos
+  renewTopVideos,
+  getVideoYouMayLikeService
 };

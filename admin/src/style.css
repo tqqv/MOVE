@@ -1,0 +1,173 @@
+html {
+  overflow-y: hidden;
+  overflow-x: hidden;
+}
+
+/* scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #c2c2c3;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #fff;
+  border-radius: 4px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+@layer tailwind-base, primevue, tailwind-utilities;
+
+@layer tailwind-base {
+  @tailwind base;
+}
+
+@layer tailwind-utilities {
+  @tailwind components;
+  @tailwind utilities;
+}
+
+@layer base {
+  section {
+    @apply py-[30px];
+  }
+
+  button span {
+    @apply font-bold !important;
+  }
+}
+
+@layer components {
+  .container {
+    @apply max-w-full px-[32px];
+  }
+
+  .text_title {
+    @apply py-[15px] text-[24px] text-title font-bold;
+  }
+
+  .text_nav {
+    @apply text-base font-bold;
+  }
+
+  .text_subTitle {
+    @apply text-[18px] text-title font-bold;
+  }
+
+  .text_para {
+    @apply text-[14px] text-black font-normal;
+  }
+
+  .text_secondary {
+    @apply text-[14px] text-footer font-normal;
+  }
+
+  .text_link {
+    @apply text-[12px] text-link font-bold;
+  }
+
+  .btn {
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-primary border-none h-[36px] leading-none;
+  }
+
+  .notification_custom {
+    @apply border-2 border-yellow-dark bg-yellow-light rounded-lg p-4;
+  }
+
+  .btnDisable {
+    @apply text-[16px] text-white font-bold px-[20px] py-[10px] rounded-lg bg-[#999999] border-none h-[40px] cursor-default leading-none;
+  }
+
+  .tag {
+    @apply text-[11px] text-black font-bold px-[20px] py-[6px] rounded-xl bg-[#EEEEEE] cursor-pointer;
+  }
+
+  .tag_active {
+    @apply text-white bg-primary;
+  }
+
+  .input_custom {
+    @apply px-2 py-3 pr-12 text-[14px] rounded-lg border border-gray-dark focus:outline-primary focus:caret-primary w-full;
+  }
+
+  .select_customPayment {
+    @apply flex-1 px-2 py-3 text-[14px] ring-1 ring-[#ccc] rounded-lg outline-none;
+  }
+
+  .select_custom {
+    @apply flex-1 px-2 py-3 text-[14px] ring-1 ring-gray-dark rounded-lg outline-none focus-within:ring-primary;
+  }
+
+  .select_custom_error {
+    @apply bg-red/20 flex-1 text-[14px] px-2 py-3 ring-1 rounded-lg outline-none ring-[#ccc] focus:caret-[#ccc] text-sm;
+
+  }
+
+  .select_custom_error option {
+    @apply bg-white;
+  }
+
+  .btn_eyes {
+    @apply flex justify-center items-center absolute top-1/2 right-2 transform -translate-y-1/2 z-20 px-3 cursor-pointer text-[#666666];
+  }
+
+  .text_subLabel {
+    @apply text-[13px] text-[#777777];
+  }
+
+  .error_input {
+    @apply focus:outline-red text-red focus:caret-red border-red;
+  }
+
+  .error_password {
+    @apply bg-red/20 border-[1.7px] border-red text-red focus-within:border-red;
+  }
+
+  .error_payment {
+    @apply bg-red/20 border-[1.7px] border-[#ccc] text-red focus-within:border-[#ccc];
+  }
+
+  .normal_password {
+    @apply border-[1.7px] border-[#dee3e9] focus-within:border-primary;
+  }
+
+  .normal_payment {
+    @apply border-[1.7px] border-[#ccc];
+  }
+
+  .password_custom {
+    @apply bg-transparent px-2 py-3 w-full focus:outline-none rounded-lg;
+  }
+
+  .error_message {
+    @apply text-[11px] italic text-red font-semibold pl-1;
+  }
+
+  .tab_custom {
+    @apply w-full sm:w-1/2 md:w-32 text-center py-4 border-b-4 border-transparent whitespace-nowrap text-[#64748b] font-medium cursor-pointer hover:text-[#334155] transition-all duration-300 ease-in-out;
+  }
+
+  .paper-custom {
+    @apply bg-white p-5 rounded shadow-md
+  }
+
+  .paper-title {
+    @apply text-primary font-bold uppercase ml-2 mb-2
+  }
+}
+
+@media only screen and (max-width: 1024px) {
+  .container {
+    @apply w-full px-[20px];
+  }
+
+  section {
+    @apply py-[20px];
+  }
+}

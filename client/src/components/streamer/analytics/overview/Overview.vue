@@ -1,129 +1,109 @@
 <script setup>
+  import { ref, onMounted } from 'vue';
   import StatsCard from '@components/streamer/analytics/StatsCard.vue';
   import rate from '@components/icons/rate.vue';
+  import { getOverviewAnalytic } from '@services/streamer';
+  import { formatNumber, formatRating, formatView, truncateDescripton } from '@/utils';
+  import Skeleton from 'primevue/skeleton';
 
-  const overviewStats = [
-    { title: 'Total followers', value: 12040 },
-    { title: 'Total REPs earned', value: 51206 },
-  ];
+  import LatestAnalyticsCard from '@components/streamer/analytics/LatestAnalyticsCard.vue';
+  import { useAnalyticsStreamerStore } from '@/stores';
 
-  const liveSummaryStats = [
-    { title: 'Total live views', value: 12040 },
-    { title: 'Average view time', value: '10:34' },
-  ];
+  const analyticsStreamerStore = useAnalyticsStreamerStore();
 
-  const videoSummaryStats = [
-    { title: 'Total video views', value: 6160240 },
-    { title: 'Average view time', value: '10:34' },
-  ];
+  onMounted(() => {
+    analyticsStreamerStore.fetchOverviewAnalytic();
+  });
 </script>
 
 <template>
-  <div class="container">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-6">
+  <section class="container">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 pt-6">
       <div class="space-y-12">
         <!-- Overview Section -->
-        <div>
-          <span class="text-[22px] font-bold">Overview</span>
+        <div class="space-y-2">
+          <span class="font-bold text-[24px]">Overview</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
-              v-for="(stat, index) in overviewStats"
+              v-for="(stat, index) in analyticsStreamerStore.overviewStats"
               :key="index"
               :title="stat.title"
               :value="stat.value"
+              :isLoading="analyticsStreamerStore.isLoadingOverview"
             />
           </div>
         </div>
 
         <!-- Live Summary Section -->
-        <div>
-          <span class="text-[22px] font-bold">Live summary</span>
+        <div class="space-y-2">
+          <span class="font-bold text-[24px]">Live summary</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
-              v-for="(stat, index) in liveSummaryStats"
+              v-for="(stat, index) in analyticsStreamerStore.liveSummaryStats"
               :key="index"
               :title="stat.title"
               :value="stat.value"
+              :isLoading="analyticsStreamerStore.isLoadingOverview"
             />
           </div>
         </div>
 
         <!-- Video Summary Section -->
-        <div>
-          <span class="text-[22px] font-bold">Video summary</span>
+        <div class="space-y-2">
+          <span class="font-bold text-[24px]">Video summary</span>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <StatsCard
-              v-for="(stat, index) in videoSummaryStats"
+              v-for="(stat, index) in analyticsStreamerStore.videoSummaryStats"
               :key="index"
               :title="stat.title"
               :value="stat.value"
+              :isLoading="analyticsStreamerStore.isLoadingOverview"
             />
           </div>
         </div>
       </div>
 
-      <!-- Latest Analytics Section -->
-      <div>
-        <div class="text-[22px] font-bold">Latest analytics</div>
+      <!-- SKELETON -->
+      <div v-if="analyticsStreamerStore.isLoadingOverview" class="space-y-2">
+        <div class="font-bold text-[24px]">Latest analytics</div>
+        <!-- Latest Live Stream Card -->
+        <div class="pb-6">
+          <Skeleton width="100%" height="283px" class="rounded-md"></Skeleton>
+        </div>
+        <!-- Latest Video Card -->
+        <Skeleton width="100%" height="315px" class="rounded-md mt-6"></Skeleton>
+      </div>
+
+      <!-- Latest analytics -->
+      <div v-else class="space-y-2">
+        <div class="font-bold text-[24px]">Latest analytics</div>
 
         <!-- Latest Live Stream Card -->
-        <div class="bg-white shadow-lg p-6 rounded-md space-y-6">
-          <div class="text-[18px] font-bold">Latest live stream</div>
-          <div>
-            <div class="text-xs text-[#666666] uppercase">Title of live stream</div>
-            <span class="text-[16px] font-bold">Lorem ipsum dolor sit amet, consetetur…</span>
-          </div>
-          <div class="space-y-2">
-            <div class="flex justify-between">
-              <span class="text-base">Total views</span>
-              <span class="text-base font-bold">15,519</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-base">Total REPs received</span>
-              <span class="text-base font-bold">15,519 REPs</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-base">Ratings</span>
-              <div class="flex items-center">
-                <span class="text-base font-bold">4.5</span>
-                <rate class="ml-1 mb-1" />
-              </div>
-            </div>
-          </div>
-          <div class="text-base text-primary">Go to live analytics</div>
-        </div>
+        <div class="space-y-6 pb-6">
+          <LatestAnalyticsCard
+            v-if="analyticsStreamerStore.latestStream"
+            title="Latest live stream"
+            :latestStream="analyticsStreamerStore.latestStream"
+          />
 
-        <!-- Latest Video Card -->
-        <div class="bg-white shadow-lg p-6 rounded-md mt-6 space-y-6">
-          <span class="text-[18px] font-bold">Latest video</span>
+          <div v-else class="bg-white shadow-lg p-8 rounded-md space-y-4">
+            <div class="text-[18px] font-bold">Latest live stream</div>
+            <div>No live stream data available.</div>
+          </div>
 
-          <div class="relative w-full aspect-[16/9] overflow-hidden rounded-lg">
-            <img
-              src="https://i.vimeocdn.com/video/1941683458-d4300a0c841dadba7870e288c4b6b59fcdd96af6d7a87dd2664eea2bf2e6a921-d"
-              class="object-cover w-full h-full"
-            />
+          <!-- Latest Video Card -->
+          <LatestAnalyticsCard
+            v-if="analyticsStreamerStore.latestVideo"
+            title="Latest video"
+            :latestVideo="analyticsStreamerStore.latestVideo"
+          />
+          <div v-else class="bg-white shadow-lg p-8 rounded-md space-y-4">
+            <div class="text-[18px] font-bold">Latest video</div>
+            <div>No video data available.</div>
           </div>
-          <div class="text-base font-bold">Leg days</div>
-          <div>
-            <div class="flex justify-between">
-              <span class="text-base">Total views</span>
-              <span class="text-base font-bold">15,519</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-base">Total REPs received</span>
-              <span class="text-base font-bold">15,519 REPs</span>
-            </div>
-            <div class="flex justify-between">
-              <span class="text-base">Ratings</span>
-              <div class="flex items-center">
-                <span class="text-base font-bold">4.5</span>
-                <rate class="ml-1 mb-1" />
-              </div>
-            </div>
-          </div>
-          <div class="text-base text-primary">Go to video analytics</div>
+          <!-- ---------- -->
         </div>
       </div>
     </div>
-  </div>
+  </section>
 </template>

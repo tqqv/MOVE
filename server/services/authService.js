@@ -3,9 +3,9 @@ var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
-const { createChannel, generatedStreamKey } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
+const { totp } = require('otplib');
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -224,7 +224,7 @@ const sendMailVerify = async (email, id) => {
 
     const verificationToken = generateVerificationToken(id, email);
 
-    const verificationUrl = `${process.env.CLIENT_HOST}/verify-email?token=${verificationToken}`;
+    const verificationUrl = `${process.env.CLIENT_HOST}/verify-email/${verificationToken}`;
 
     const mailOptions = {
       from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
@@ -234,7 +234,10 @@ const sendMailVerify = async (email, id) => {
         <h2 style="color: #04ddb2;">Reset Your Password</h2>
         <p>Dear ${email},</p>
         <p>Please click the link below to verify your email address:</p>
-        <a href="${verificationUrl}">${verificationUrl}" style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">Reset Password</a>
+      <a href="${verificationUrl}"
+          style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2; text-decoration: none; border-radius: 5px;">
+         Verify email
+        </a>
         <p>This link will expire in 15 minutes.</p>
         <p>Thank you,<br> Move Team</p>
       `,
@@ -256,9 +259,15 @@ const sendMailVerify = async (email, id) => {
   }
 };
 
-const verifyAccount = async (token) => {
+const verifyAccount = async (userId, token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
+    if(userId !== decoded.userId){
+      return {
+        status: 404,
+        message: "Not right"
+      }
+    }
     const user = await User.findByPk(decoded.userId);
     if (!user) {
       return {
@@ -422,53 +431,6 @@ const resetPassword = async (email, userId, newPassword, confirmPassword) => {
 };
 // logic Forgot password - END
 
-const statusRequestChannel = async(userId, status) => {
-  // API của admin
-  try {
-    const request = await RequestChannel.findOne({
-      where: {
-        userId: userId
-      }
-    })
-    if(!request){
-      return {
-        status: 400,
-        message: "Request not found."
-      }
-    }
-
-    const user = await User.findByPk(userId);
-
-    if(!user) {
-      return {
-        status: 400,
-        message: "User not found"
-      }
-    }
-
-    request.status = status;
-    await request.save()
-
-    if(status === "approved") {
-      const streamKey = await generatedStreamKey();
-      await createChannel(userId, user.username, user.avatar, streamKey);
-      user.role = "streamer";
-      await user.save();
-    }
-
-    return {
-      status: 200,
-      message: "Update status successfully."
-    }
-
-  } catch (error) {
-    return {
-      status: 500,
-      message: error.message
-    }
-  }
-}
-
 // Facebook send mail and verify account - START
 const sendMailVerifyFacebook = async (email, fullName) => {
   try {
@@ -557,6 +519,84 @@ const verifyAccountFacebook = async (accountInfor, token) => {
 };
 //// Send mail and verify account - END
 
+
+// Send mail OTP and verify OTP create Withdraw infor
+totp.options = { digits: 6, step: 120 };
+
+const generateOtp = (userId) => {
+  return totp.generate(process.env.OTP_SECRET_KEY + userId);
+}
+
+const verifyOtp = (userId, inputOtp) => {
+  try {
+
+    const check = totp.check(inputOtp, process.env.OTP_SECRET_KEY + userId);
+    if(check) {
+      return{
+        status: 200,
+        data: check,
+        message: "Verified."
+      }
+    } else {
+
+      return{
+        status: 400,
+        data: null,
+        message: "OTP is incorrect."
+      }
+    }
+
+  } catch (error) {
+    return{
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const sendMailConfirmWithdrawMethod = async (userId) => {
+  try {
+    const user = await User.findOne({ where: { id: userId } });
+    if(!user) {
+      return {
+        status: 400,
+        message: "User not found",
+      }
+    }
+
+    const otp = generateOtp(userId)
+    var mailOptions = {
+      from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
+      to: user.email,
+      subject: "OTP code - Move",
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+            <h2 style="color: #04ddb2;">OTP confirm add withdraw method</h2>
+            <p>Dear ${user.fullName},</p>
+            <p>Your OTP code:</p>
+            <span style="display: inline-block; padding: 10px 20px; margin: 10px 0; font-size: 16px; color: white; background-color: #04ddb2;
+            text-decoration: none; border-radius: 5px;">${otp}</span>
+            <p>If you didn't request add withdraw method, please ignore this email.</p>
+            <p>Thank you,<br> Move Team</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return {
+      status: 200,
+      message: "Mail sent successfully",
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message,
+    };
+  }
+};
+
 module.exports = {
   login,
   register,
@@ -565,9 +605,11 @@ module.exports = {
   verifyAccount,
   resetPassword,
   verifyTokenRs,
-  statusRequestChannel,
   generateJwtToken,
   sendMailVerifyFacebook,
   verifyAccountFacebook,
   generateUniqueReferralCode,
+  sendMailConfirmWithdrawMethod,
+  verifyOtp
+
 };

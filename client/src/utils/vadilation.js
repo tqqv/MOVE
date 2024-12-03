@@ -53,20 +53,25 @@ const isAgeValid = (dob) => {
 export const updateProfileSchema = yup.object({
   username: yup
     .string()
-    .required('Username is required')
+    .nullable()
     .min(6, 'Username must be at least 6 characters')
-    .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
+    .max(32, 'Username must be at most 32 characters')
+    .matches(
+      /^[a-z0-9_.]*$/,
+      'Username must not contain uppercase letters, spaces, or special characters',
+    ),
   fullName: yup
     .string()
-    .required('Username is required')
+    .nullable()
     .matches(/.*\s+.*/, 'Full name must contain at least one space')
     .matches(/^[\p{L}\s_.]*$/u, 'Full name cannot contain special characters'),
   city: yup
     .string()
+    .nullable()
     .matches(/^[\p{L}\s_.]*$/u, 'City cannot contain numbers or special characters'),
   dob: yup
     .string()
-    .required('Date of birth is required')
+    .nullable()
     .test('is-age-valid', 'User must be between 12 and 140 years old', (value) =>
       isAgeValid(value),
     ),
@@ -75,9 +80,13 @@ export const updateProfileSchema = yup.object({
 export const updateChannelSchema = yup.object({
   username: yup
     .string()
-    .required('Username is required')
+    .nullable()
     .min(6, 'Username must be at least 6 characters')
-    .matches(/^[a-zA-Z0-9_.]*$/, 'Username cannot contain spaces or special characters'),
+    .max(32, 'Username must be at most 32 characters')
+    .matches(
+      /^[a-z0-9_.]*$/,
+      'Username must not contain uppercase letters, spaces, or special characters',
+    ),
   channelName: yup
     .string()
     .required('Channel name is required')
@@ -88,7 +97,7 @@ export const paymentSchema = yup.object({
     .string()
     .matches(
       /^[A-Z]+(?:\s[A-Z]+)*$/,
-      'Cardholder name must be uppercase, contain only letters without accents, and single spaces between words',
+      'Cardholder name must be contain only letters without accents, and single spaces between words',
     )
     .trim('Cardholder name must not have leading or trailing spaces')
     .min(3, 'Cardholder name must be at least 3 characters')
@@ -96,4 +105,29 @@ export const paymentSchema = yup.object({
     .required('Cardholder name is required'),
 
   country: yup.string().required('Country is required'),
+});
+export const cashoutSchema = yup.object({
+  bankHolderName: yup
+    .string()
+    .matches(
+      /^[A-Z]+(?:\s[A-Z]+)*$/,
+      'Bank Holder Name must contain only letters without accents and single spaces between words',
+    )
+    .trim('Bank Holder Name must not have leading or trailing spaces')
+    .min(3, 'Bank Holder Name must be at least 3 characters')
+    .max(50, 'Bank Holder Name must be less than 50 characters')
+    .required('Bank Holder Name is required'),
+
+  bankNumber: yup
+    .string()
+    .matches(/^[0-9]{9,16}$/, 'Bank Account Number must be between 9 and 16 digits')
+    .required('Bank Account Number is required'),
+
+  routingNumber: yup
+    .string()
+    .matches(
+      /^[A-Za-z0-9]+-[A-Za-z0-9]+$/,
+      'Bank Code - Branch Code must be in the format BankCode-BranchCode',
+    )
+    .required('Bank Code - Branch Code is required'),
 });

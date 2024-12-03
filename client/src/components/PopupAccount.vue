@@ -8,6 +8,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+  import { formatNumber } from '@/utils';
   const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
@@ -49,14 +50,22 @@
       >
         <div class="flex items-center justify-center size-12 rounded-full flex-shrink-0">
           <img
-            :src="props.user.avatar"
+            :src="
+              userStore.user?.Channel ? userStore.user?.Channel?.avatar : userStore.user?.avatar
+            "
             :alt="props.user.username"
             alt="Avatar"
             class="w-full h-full rounded-full object-cover"
           />
         </div>
-        <h1 class="text_subTitle whitespace-nowrap">{{ props.user.username }}</h1>
-        <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
+        <h1 class="text_subTitle whitespace-nowrap truncate">
+          {{
+            userStore.user?.Channel
+              ? userStore.user?.Channel?.channelName
+              : userStore.user?.username
+          }}
+        </h1>
+        <verified v-if="props.user.isVerified" class="fill-blue flex-shrink-0" />
       </RouterLink>
       <hr class="h-px bg-gray-dark border-0 mb-4" />
       <div class="flex flex-col justify-start text-[13px]">
@@ -78,18 +87,18 @@
             <dashboard class="fill-black group-hover:fill-primary" />
             <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
           </div>
-          <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
-            <RouterLink
-              to="/wallet/payment-method"
-              class="flex flex-row items-center gap-x-2 group cursor-pointer"
-              @click="emit('closeAllPopups')"
-            >
+          <RouterLink
+            to="/wallet/payment-method"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="emit('closeAllPopups')"
+          >
+            <div class="flex flex-row items-center gap-x-2 group cursor-pointer">
               <wallet class="fill-black group-hover:fill-primary" />
               <h1 class="mb-1 group-hover:text-primary">
-                Wallet ({{ props.user?.REPs ?? 0 }} REPs)
-              </h1></RouterLink
-            >
-          </div>
+                Wallet ({{ formatNumber(props.user?.REPs) ?? 0 }} REPs)
+              </h1>
+            </div>
+          </RouterLink>
         </div>
         <hr class="h-px bg-gray-dark border-0 my-4" />
         <div class="flex flex-col gap-y-4 px-[2px]">

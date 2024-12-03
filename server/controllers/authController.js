@@ -1,4 +1,3 @@
-const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
 const { setCookies, clearCookies } = require("../utils/cookies.js");
 var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
@@ -18,7 +17,6 @@ var {
   forgotPassword,
   resetPassword,
   verifyTokenRs,
-  statusRequestChannel,
 } = require("../services/authService");
 
 // authenticate
@@ -70,7 +68,8 @@ const sendMailVerifyController = async (req, res, next) => {
 
 const verifyAccountController = async (req, res, next) => {
   const token = req.params.token;
-  const result = await verifyAccount(token);
+  const userId = req.user.id;
+  const result = await verifyAccount(userId, token);
 
   responseHandler(result.status, null, result.message)(req, res, next);
 };
@@ -102,15 +101,6 @@ const resetPasswordController = async (req, res, next) => {
 
   responseHandler(result.status, null, result.message)(req, res, next);
 };
-
-
-
-const setStatusRqChannel = async (req, res, next) => {
-  const data = req.body;
-  const result = await statusRequestChannel(data.userId, data.status)
-
-  responseHandler(result.status, null, result.message)(req, res, next);
-}
 
 const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
 
@@ -200,7 +190,6 @@ module.exports = {
   sendMailForgotPass,
   resetPasswordController,
   verifyTokenRsController,
-  setStatusRqChannel,
   googleLogin,
   googleCallbackController,
   facebookLogin,

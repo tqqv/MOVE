@@ -1,11 +1,11 @@
 <script setup>
-  import { computed, onMounted, ref, watch } from 'vue';
+  import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
-  import Paginator from 'primevue/paginator';
   import EmptyPage from '@/pages/EmptyPage.vue';
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     title: {
@@ -20,6 +20,11 @@
       type: Array,
       required: true,
     },
+    categoryTitle: {
+      type: String,
+      required: true,
+    },
+    isVisibleCategory: Boolean,
   });
 
   const categoriesStore = useCategoriesStore();
@@ -28,7 +33,10 @@
   const videos = ref([]);
   const currentPage = ref(1);
   const totalPage = ref();
-  const pageSize = ref(12);
+  const pageSize = ref(8);
+  const loading = ref(true);
+  const loadingMore = ref(false);
+  const isFetchingMore = ref(false);
 
   const categoryOptions = computed(() => categoriesStore.categoryOptions);
   const levelWorkoutOptions = computed(() => levelWorkoutStore.levelWorkoutOptions);
@@ -37,15 +45,6 @@
   const selectLevelWorkoutOptions = ref('');
   const selectedSortBy = ref(props.sortByOptions[0].value);
   const selectedOrder = ref(props.sortByOptions[0].order);
-
-  const onPageChange = (event) => {
-    const newPage = event.page + 1;
-    if (newPage <= totalPage.value) {
-      currentPage.value = newPage;
-      fetchVideos();
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-  };
 
   // CREATE PARAM TO BE
   const handleSortChange = (newValue) => {
@@ -56,23 +55,63 @@
   // FETCH VIDEO
   const fetchVideos = async () => {
     try {
+      loading.value = true;
       const response = await props.fetchVideosFunction(
         currentPage.value,
         pageSize.value,
         selectLevelWorkoutOptions.value,
-        selectCategoryOptions.value,
+        selectCategoryOptions.value || props.categoryTitle,
         selectedSortBy.value,
         selectedOrder.value,
       );
       videos.value = response.data.data.listVideo.rows;
-      console.log(videos.value);
-
       totalPage.value = response.data.data.totalPages;
     } catch (error) {
       console.log(error);
+    } finally {
+      loading.value = false;
     }
   };
 
+  // LOADING MORE
+  async function loadMoreData() {
+    if (videos.value.length === 0 || isFetchingMore.value || currentPage.value >= totalPage.value)
+      return;
+    isFetchingMore.value = true;
+    loadingMore.value = true;
+    currentPage.value += 1;
+
+    try {
+      const response = await props.fetchVideosFunction(
+        currentPage.value,
+        pageSize.value,
+        selectLevelWorkoutOptions.value,
+        selectCategoryOptions.value || props.categoryTitle,
+        selectedSortBy.value,
+        selectedOrder.value,
+      );
+      if (response.data?.data?.listVideo?.rows) {
+        videos.value.push(...response.data.data.listVideo.rows);
+        totalPage.value = response.data.data.totalPages;
+      } else {
+        console.error('Invalid response structure:', response);
+      }
+    } catch (error) {
+      console.error('Error loading more data:', error);
+    } finally {
+      isFetchingMore.value = false;
+      loadingMore.value = false;
+    }
+  }
+  watch(
+    () => props.categoryTitle,
+    (newCategoryTitle, oldCategoryTitle) => {
+      if (newCategoryTitle !== oldCategoryTitle) {
+        currentPage.value = 1;
+        fetchVideos();
+      }
+    },
+  );
   watch(categoryOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectCategoryOptions.value) {
       selectCategoryOptions.value = newOptions[0].value || '';
@@ -82,6 +121,7 @@
   watch(levelWorkoutOptions, (newOptions) => {
     if (newOptions.length > 0 && !selectLevelWorkoutOptions.value) {
       selectLevelWorkoutOptions.value = newOptions[0].value || '';
+      fetchVideos();
     }
   });
 
@@ -98,7 +138,18 @@
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
-    await fetchVideos();
+  });
+
+  onMounted(() => {
+    const container = document.querySelector('.flex-1.overflow-y-scroll');
+    container?.addEventListener('near-bottom', loadMoreData);
+  });
+
+  onUnmounted(() => {
+    const container = document.querySelector('.flex-1.overflow-y-scroll');
+    if (container) {
+      container.removeEventListener('near-bottom', loadMoreData);
+    }
   });
 </script>
 
@@ -115,6 +166,7 @@
           @change="selectLevelWorkoutOptions = $event.value"
         />
         <Filter
+          v-if="isVisibleCategory"
           title="CATEGORY"
           :options="categoryOptions"
           @change="selectCategoryOptions = $event.title"
@@ -131,15 +183,25 @@
         <p>Sort & Filter</p>
       </button>
     </div>
-    <GirdVideo v-if="videos.length > 0" :videos="videos" />
-    <Paginator
-      v-if="totalPage > 1"
-      :rows="pageSize"
-      :first="(currentPage - 1) * pageSize"
-      :totalRecords="totalPage * pageSize"
-      @page="onPageChange"
-    />
-    <div v-if="!videos.length" class="h-full flex justify-center items-center mt-20">
+
+    <GirdVideo :videos="videos" :loading="loading" />
+    <div
+      v-if="loadingMore"
+      class="flex-wrap grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-y-8 h-[230px] gap-x-5"
+    >
+      <div v-for="n in 4" :key="n" class="flex flex-col gap-y-3">
+        <Skeleton height="200px" />
+        <div class="flex mt-4">
+          <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+          <div>
+            <Skeleton width="10rem" class="mb-2"></Skeleton>
+            <Skeleton width="5rem" class="mb-2"></Skeleton>
+            <Skeleton height=".5rem"></Skeleton>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div v-if="!videos.length && !loading" class="h-full flex justify-center items-center mt-20">
       <EmptyPage
         title="There are no matching videos"
         subTitle="Try different keywords or remove search filters"

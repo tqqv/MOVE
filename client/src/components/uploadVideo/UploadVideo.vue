@@ -120,17 +120,20 @@
               // check if video is precessed duration and thumbnailUrl is not default
               if (videoData.data.data.upload.status === 'complete') {
                 const { duration, thumbnailUrl } = await getVideoData(uri);
-                if (duration !== 0 && thumbnailUrl !== 'https://i.vimeocdn.com/video/default') {
+                if (
+                  duration !== 0 &&
+                  thumbnailUrl !== 'https://i.vimeocdn.com/video/default-2308240'
+                ) {
                   toast.success('Upload successful');
                   setThumbnailPreview(thumbnailUrl);
                   setDuration(duration);
                   return videoData.data.data;
                 } else {
-                  await new Promise((resolve) => setTimeout(resolve, 5000));
+                  await new Promise((resolve) => setTimeout(resolve, 10000));
                   return await checkProcessing();
                 }
               } else {
-                await new Promise((resolve) => setTimeout(resolve, 5000));
+                await new Promise((resolve) => setTimeout(resolve, 10000));
                 return await checkProcessing();
               }
             };

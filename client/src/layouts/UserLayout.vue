@@ -1,15 +1,15 @@
 <script setup>
   import Navbar from '@/components/Navbar.vue';
   import SideBarFollow from '@/components/SideBarFollow.vue';
-
+  import ScrollWrapper from './ScrollWrapper.vue';
 </script>
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px]">
+  <div class="flex pt-[64px] h-screen">
     <SideBarFollow />
-    <div class="flex-1 overflow-y-auto">
+    <ScrollWrapper>
       <router-view />
-    </div>
+    </ScrollWrapper>
   </div>
 </template>

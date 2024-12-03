@@ -17,9 +17,9 @@
   import { usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import { useUserStore } from '@/stores/user.store';
-  import { RouterLink } from 'vue-router';
+  import { RouterLink, useRouter } from 'vue-router';
   import SearchPopup from './search/SearchPopup.vue';
-  import { debounce } from '@/utils';
+  import { debounce, formatView } from '@/utils';
   import { searchInformation } from '@/services/search';
   import UploadVideo from './uploadVideo/UploadVideo.vue';
   import VideoDetail from './uploadVideo/VideoDetail.vue';
@@ -29,11 +29,11 @@
   import { getPaymentHistory } from '@/services/payment';
 
   import GetREPS from './getReps/GetREPS.vue';
-  import CompletePurchaseNoInfo from '@components/getReps/dialog/CompletePurchaseNoInfo.vue';
-  import CompletePurchaseHaveInfo from '@components/getReps/dialog/CompletePurchaseHaveInfo.vue';
   import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
   import OrderStatusPopup from '@components/getReps/dialog/OrderStatusPopup.vue';
-  import SelectPaymentMethod from './getReps/dialog/SelectPaymentMethod.vue';
+  import Stream from './icons/Stream.vue';
+  import CompletePurchase from '@/components/getReps/dialog/CompletePurchase.vue';
+
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
@@ -45,6 +45,7 @@
   const isNotiMenuOpen = ref(false);
   const isCreateMenuOpen = ref(false);
   const isPaymentHistoryFetched = ref(false);
+  const router = useRouter();
 
   const isFirstTime = ref(false);
   // SEARCH
@@ -54,6 +55,7 @@
   const categories = ref([]);
   const videos = ref([]);
   const users = ref([]);
+  const loading = ref(true);
   // SEARCH
 
   const toggleMobileMenu = () => {
@@ -167,6 +169,7 @@
 
   const debouncedSearch = debounce(async (newSearchData) => {
     if (newSearchData) {
+      loading.value = true;
       try {
         const response = await searchInformation(newSearchData, 2, 0);
         const data = response.data.data;
@@ -175,13 +178,17 @@
         users.value = data.users;
       } catch (error) {
         console.error('Error fetching search results:', error);
+      } finally {
+        loading.value = false;
       }
     } else {
       categories.value = [];
       videos.value = [];
       users.value = [];
+      loading.value = false;
     }
   }, 500);
+
   const fetchPaymentHistory = async () => {
     try {
       const res = await getPaymentHistory();
@@ -209,7 +216,10 @@
 
   const performSearch = () => {
     if (searchData.value.trim()) {
-      window.location.href = `/search?q=${encodeURIComponent(searchData.value.trim())}`;
+      router.push({
+        path: '/search',
+        query: { q: searchData.value.trim() },
+      });
       isSearchPopupOpen.value = false;
     }
   };
@@ -228,7 +238,7 @@
 <template>
   <nav class="bg-[#18181b] text-white fixed w-full z-[100]">
     <div class="mx-auto px-4 py-1 sm:px-6 lg:px-8">
-      <div class="relative flex h-16 items-center justify-between">
+      <div class="relative flex h-14 items-center justify-between">
         <!-- Mobile menu button-->
         <div class="absolute inset-y-0 left-0 flex items-center md:hidden">
           <button
@@ -270,30 +280,36 @@
           </button>
         </div>
         <!-- Nav items -->
-        <div class="flex items-center w-1/3 justify-center md:items-stretch md:justify-start">
+        <div class="flex items-center w-2/5 justify-center md:items-stretch md:justify-start">
           <div class="hidden md:block">
             <div class="flex space-x-4">
               <RouterLink
                 to="/following"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                class="rounded-md px-3 py-2 text_nav hover:bg-primary font-bold"
                 aria-current="page"
+                v-if="userStore.user"
                 >Following</RouterLink
               >
               <RouterLink
                 to="/browse/categories"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold"
+                class="rounded-md px-3 py-2 text_nav hover:bg-primary font-bold"
                 >Browse</RouterLink
               >
+              <!-- <RouterLink
+                to="/browse/categories"
+                class="rounded-md px-3 py-2 text_nav font-bold items-center"
+                ><i class="pi pi-ellipsis-h"
+              /></RouterLink> -->
             </div>
           </div>
         </div>
-        <div class="w-1/3 h-8 flex justify-center items-center">
+        <div class="w-1/5 h-8 flex justify-center items-center">
           <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
-        <div class="w-1/3 items-center justify-end gap-x-6 hidden md:flex">
+        <div class="w-2/5 items-center justify-end gap-x-6 hidden md:flex">
           <!-- User -->
-          <div class="relative w-[292px] min-w-[120px]">
-            <InputGroup class="h-[40px] hidden md:flex">
+          <div class="relative w-[262px] min-w-[120px]">
+            <InputGroup class="h-[36px] hidden md:flex">
               <InputText
                 class="text-sm"
                 id="search-menu-button"
@@ -305,7 +321,11 @@
                 @focus="handleFocus"
                 @blur="handleBlur"
               />
-              <Button icon="pi pi-search" class="btn rounded-s-none" @click="performSearch" />
+              <Button
+                icon="pi pi-search text-sm"
+                class="btn rounded-s-none"
+                @click="performSearch"
+              />
             </InputGroup>
             <div
               v-if="isSearchPopupOpen"
@@ -317,53 +337,16 @@
               tabindex="-1"
             >
               <SearchPopup
+                :loading="loading"
                 :categories="categories"
                 :videos="videos"
                 :users="users"
                 :searchData="searchData"
+                @closeAllPopups="closeAllPopups"
               />
             </div>
           </div>
-          <template v-if="userStore.user?.role == 'streamer'">
-            <div class="relative">
-              <div>
-                <button class="btn leading-none" @click="toggleCreateMenu" id="create-menu-button">
-                  Create
-                </button>
-              </div>
 
-              <div
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
-                v-if="isCreateMenuOpen"
-                id="create-menu"
-              >
-                <div class="shadow-lg rounded-md w-[180px]">
-                  <div class="px-4 py-5">
-                    <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
-                      <RouterLink
-                        :to="
-                          !userStore.user?.isLive
-                            ? '/streaming/stream-setup'
-                            : '/streaming/dashboard-live'
-                        "
-                        class="flex flex-row items-center gap-x-2 group cursor-pointer"
-                      >
-                        <GoLive />
-                        <h1 class="group-hover:text-primary">Go Live</h1>
-                      </RouterLink>
-                      <button
-                        class="flex flex-row items-center gap-x-2 group cursor-pointer"
-                        @click="popupStore.openUploadVideoPopup"
-                      >
-                        <upload />
-                        <h1 class="group-hover:text-primary">Upload a video</h1>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </template>
           <!-- Guest -->
           <template v-if="!userStore.user">
             <Button class="btn px-[40px] text-nowrap" @click="openLoginPopup">Log In</Button>
@@ -371,11 +354,11 @@
 
           <!-- User -->
           <template v-else>
-            <div v-if="userStore.user?.role == 'user'" class="relative">
+            <div v-if="userStore.user?.role == 'user' || 'streamer'" class="relative text-sm">
               <div
                 v-if="userStore.user?.REPs === 0"
                 @click="toggleGetREPsMenu"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
+                class="rounded-md px-3 py-2 text-gray-300 hover:bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
                 Get REP$
@@ -383,14 +366,14 @@
               <div
                 v-else
                 @click="toggleGetREPsMenu"
-                class="rounded-md px-3 py-2 text_nav text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
+                class="rounded-md px-3 py-2 text-gray-300 bg-primary font-bold text-nowrap cursor-pointer"
                 id="reps-menu-button"
               >
-                {{ userStore.user?.REPs }} REP$
+                {{ formatView(userStore.user?.REPs) }} REP$
               </div>
               <div
                 id="reps-menu"
-                class="absolute right-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="reps-menu-button"
@@ -406,6 +389,45 @@
               </div>
             </div>
 
+            <template v-if="userStore.user?.role == 'streamer'">
+              <div class="relative">
+                <div class="cursor-pointer" @click="toggleCreateMenu" id="create-menu-button">
+                  <Stream />
+                </div>
+
+                <div
+                  class="absolute right-0 z-10 mt-6 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                  v-if="isCreateMenuOpen"
+                  id="create-menu"
+                >
+                  <div class="shadow-lg rounded-md w-[180px]">
+                    <div class="px-4 py-5">
+                      <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
+                        <RouterLink
+                          :to="
+                            !userStore.user?.Channel?.isLive
+                              ? '/streaming/stream-setup'
+                              : '/streaming/dashboard-live'
+                          "
+                          class="flex flex-row items-center gap-x-2 group cursor-pointer"
+                        >
+                          <GoLive />
+                          <h1 class="group-hover:text-primary">Go Live</h1>
+                        </RouterLink>
+                        <button
+                          class="flex flex-row items-center gap-x-2 group cursor-pointer"
+                          @click="popupStore.openUploadVideoPopup"
+                        >
+                          <upload />
+                          <h1 class="group-hover:text-primary">Upload a video</h1>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
             <div class="relative" id="noti-menu-button">
               <div class="relative cursor-pointer" @click="toggleNotiMenu">
                 <div class="mt-0.5">
@@ -414,7 +436,7 @@
                 <div
                   class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
                 >
-                  1
+                  4
                 </div>
               </div>
               <div
@@ -441,8 +463,12 @@
                 >
                   <span class="sr-only">Open user menu</span>
                   <img
-                    class="size-[40px] rounded-full"
-                    :src="userStore.user?.avatar"
+                    class="size-[40px] rounded-full object-cover"
+                    :src="
+                      userStore.user?.Channel
+                        ? userStore.user?.Channel?.avatar
+                        : userStore.user?.avatar
+                    "
                     :alt="userStore.user?.username || 'User'"
                   />
                 </button>
@@ -450,7 +476,7 @@
               <div
                 v-if="isUserMenuOpen"
                 id="user-menu"
-                class="absolute right-0 z-10 mt-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
+                class="absolute right-0 z-10 mt-[18px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                 role="menu"
                 aria-orientation="vertical"
                 aria-labelledby="user-menu-button"
@@ -534,21 +560,19 @@
   <UploadVideo />
   <VideoDetail />
   <!-- POPUP GET REPS -->
-  <SelectPaymentMethod title="Select payment method" />
-  <CompletePurchaseNoInfo
-    v-if="!popupStore.isHaveCard"
+  <CompletePurchase
     title="Complete Purchase"
     :isOpenBuyREPs="popupStore.showOpenBuyREPs"
     @toggleOpenOrder="toggleOpenOrder"
     :isFirstTime="isFirstTime"
   />
-  <CompletePurchaseHaveInfo
-    v-else
-    title="Complete Purchase"
-    :isOpenBuyREPs="popupStore.showOpenBuyREPs"
-    @toggleOpenOrder="toggleOpenOrder"
-    :isFirstTime="isFirstTime"
-  />
+
   <ProcessingPayment />
   <OrderStatusPopup :isOpenOrder="isOpenOrder" @toggleOpenOrder="toggleOpenOrder" />
 </template>
+
+<style>
+  .p-inputtext {
+    color: #000000 !important;
+  }
+</style>

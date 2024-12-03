@@ -24,10 +24,8 @@
 
   watch(selectCategory, (newOptions) => {
     videoStore.setSelectCategoryOptions(newOptions);
-    console.log(newOptions);
   });
   watch(selectLevelWorkout, (newOptions) => {
-    console.log(selectLevelWorkout.value);
     videoStore.setSelectLevelWorkoutOptions(newOptions);
   });
   watch(duration, () => {

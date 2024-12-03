@@ -17,6 +17,7 @@
   import { useReadMore } from '@/utils';
   import { postReactionComment } from '@/services/comment';
   import { useUserStore } from '@/stores';
+  import LogoIcon from '@components/icons/logoIcon.vue';
 
   const props = defineProps({
     comment: Object,
@@ -208,27 +209,35 @@
   <tr class="bg-white border-b-[1px] border-gray-dark">
     <!-- COMMENT -->
     <td class="w-[50%] px-6 py-4 font-normal align-top text-gray-900">
-      <div class="flex gap-x-4">
+      <div class="flex gap-x-4">    <div class="flex-shrink-0">
+
+        <RouterLink :to="`/user/${comment.userComments?.username}`">
+
         <img
           :src="comment.channelComments?.avatar || comment.userComments?.avatar"
           alt="avatar"
-          class="size-14 object-cover rounded-full flex-shrink-0"
-        />
+          class="size-12 object-cover rounded-full "
+        /></RouterLink></div>
         <!-- RIGHT COMMENT -->
         <div class="flex flex-col flex-grow gap-y-1">
           <!-- REPS SENDER -->
           <div
-            v-if="comment.rep"
-            class="flex items-center rounded-full bg-yellow-dark px-3 py-1 gap-x-1 mb-2 w-fit"
-          >
-            <rep />
-            <h1 class="text-white font-bold text-[10px]">REPs Sender</h1>
-          </div>
+        v-if="comment.rep > 0"
+        class="bg-[#FFB564] rounded-full flex gap-x-2 items-center px-3 py-1 w-max transition-all duration-300 hover:scale-110 hover:shadow-lg"
+      >
+        <div
+          class="bg-[#18DBC3] w-[20px] h-[20px] flex items-center justify-center rounded-full shadow-md"
+        >
+          <LogoIcon />
+        </div>
+        <div class="whitespace-nowrap text-white font-bold text-[12px]">REPs Sender</div>
+      </div>
           <!-- USERNAME -->
-          <div class="flex items-center gap-x-4">
+          <div class="flex items-center gap-x-4">        <RouterLink :to="`/user/${comment.userComments?.username}`">
+
             <h1 class="font-bold">
               {{ comment.channelComments?.channelName || comment.userComments?.username }}
-            </h1>
+            </h1></RouterLink>
             <span v-if="comment.channelComments?.popularCheck" class="mb-1">
               <verified fill="fill-blue" />
             </span>
@@ -336,8 +345,14 @@
     <!-- REPS RECEIVED -->
     <td class="w-[16%] px-6 py-4 align-top">
       <div v-if="comment.rep" class="flex items-center gap-x-2">
-        <div class="scale-50"><rep2500 /></div>
-        <p class="font-semibold text-base">{{ comment.rep }}</p>
+        <div class="flex-shrink-0 hover:scale-110">
+            <img
+              :src="comment?.commentDonationItem?.image"
+              alt="REPs"
+              class="w-[20px] h-[25px] rounded-full object-cover cursor-pointer"
+            />
+          </div>
+          <span class="text-xs mt-1 text-primary whitespace-nowrap">Gifted {{ comment.rep }} REPs</span>
       </div>
     </td>
     <!-- VIDEO -->

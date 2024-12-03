@@ -9,8 +9,10 @@
     listenStreamMetrics,
     listenStreamReady,
   } from '@/services/socketService';
-import { useRoute } from 'vue-router';
+  import { useRoute } from 'vue-router';
+  import ScrollWrapper from '@/layouts/ScrollWrapper.vue';
 
+  const route = useRoute();
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
   const connectOBS = ref(null);
@@ -22,11 +24,15 @@ import { useRoute } from 'vue-router';
 
   const startTimer = () => {
     const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
-    timer = setInterval(() => {
-      const currentTime = new Date();
-      elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
-      // console.log(elapsedTime.value);
-    }, 1000);
+    if (createdAt) {
+      timer = setInterval(() => {
+        console.log('create', createdAt);
+        const currentTime = new Date();
+        console.log('curre', currentTime);
+        elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
+        // console.log(elapsedTime.value);
+      }, 1000);
+    }
   };
 
   const stopTimer = () => {
@@ -38,10 +44,12 @@ import { useRoute } from 'vue-router';
   };
 
   // CONNECT OBS
-  const handleConnectOBS = () => {
+  const handleConnectOBS = async () => {
+    if (!streamerStore.streamerChannel?.id) {
+      await streamerStore.fetchProfileChannel();
+    }
     if (streamerStore.streamerChannel?.id) {
       joinRoom(streamerStore.streamerChannel.id);
-
       listenStreamReady((isReady) => {
         streamerStore.fetchProfileChannel();
         connectOBS.value = isReady;
@@ -64,29 +72,36 @@ import { useRoute } from 'vue-router';
   });
 
   watch(
-    () => streamerStore.streamerChannel?.liveStatus,
-    async (newLiveStatus) => {
-      liveStatus.value = newLiveStatus;
-      if (newLiveStatus === 'streamPublished') {
-        try {
-          const username = streamerStore.streamerChannel?.User?.username;
-          if (username) {
-            await liveStreamStore.fetchLiveStreamData(username);
-            if (newLiveStatus === 'streamPublished' && liveStreamStore.liveStreamData?.createdAt) {
-              startTimer();
+    () => streamerStore.streamerChannel,
+    async (newChannel) => {
+      const newLiveStatus = newChannel?.liveStatus;
+      if (newLiveStatus) {
+        liveStatus.value = newLiveStatus;
+        if (newLiveStatus === 'streamPublished') {
+          try {
+            const username = newChannel?.User?.username;
+            if (username) {
+              await liveStreamStore.fetchLiveStreamData(username);
+              if (
+                liveStatus.value === 'streamPublished' &&
+                liveStreamStore.liveStreamData?.createdAt
+              ) {
+                startTimer();
+              }
             }
+          } catch (error) {
+            console.error('Error fetching live stream data:', error);
           }
-        } catch (error) {
-          console.error('Error fetching live stream data:', error);
         }
       }
     },
+    { deep: true },
   );
 
-  // watch(() => {
-  //   console.log('livestatus: ', liveStatus.value);
-  //   console.log('connectobs: ', connectOBS.value);
-  // });
+  watch(() => {
+    console.log('livestatus: ', liveStatus.value);
+    console.log('connectobs: ', connectOBS.value);
+  });
   watch(
     () => streamerStore.streamerChannel?.User?.username,
     (newUsername) => {
@@ -97,7 +112,6 @@ import { useRoute } from 'vue-router';
   );
 
   // Re-fetch data when route changes
-  const route = useRoute();
   watch(
     () => route.fullPath,
     async (newPath) => {
@@ -111,7 +125,7 @@ import { useRoute } from 'vue-router';
 
 <template>
   <Navbar />
-  <div class="flex pt-[72px] bg-[#f0f2f5]">
+  <div class="flex pt-[64px] bg-[#f0f2f5] h-screen">
     <SideBarLive
       :elapsedTime="elapsedTime"
       :connectOBS="connectOBS"
@@ -119,13 +133,13 @@ import { useRoute } from 'vue-router';
       @startTimer="startTimer"
       @stopTimer="stopTimer"
     />
-    <div class="flex-1 overflow-y-auto">
+    <ScrollWrapper>
       <router-view
         :elapsedTime="elapsedTime"
         :connectOBS="connectOBS"
         :liveStatus="liveStatus"
         :metricsData="metricsData"
       />
-    </div>
+    </ScrollWrapper>
   </div>
 </template>

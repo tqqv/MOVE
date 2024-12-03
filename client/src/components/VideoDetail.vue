@@ -5,13 +5,14 @@
   import share from './icons/share.vue';
   import heart from './icons/heart.vue';
   import { postFollowChannel } from '@/services/user';
-  import { getAllDonationItems } from '@/services/donationItem';
+  import { donateInLivestream, getAllDonationItems } from '@/services/donate';
 
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useUserStore, useStreamerStore } from '@/stores';
   import ReportChannel from './ReportChannel.vue';
   import DonateModal from './DonateModal.vue';
   import GetREPS from './getReps/GetREPS.vue';
+  import Skeleton from 'primevue/skeleton';
   const props = defineProps({
     isUserAction: {
       type: Boolean,
@@ -38,6 +39,14 @@
       type: Boolean,
       default: false,
     },
+    isGiftVisible: Boolean,
+    loading: {
+      type: Boolean,
+      required: true,
+    },
+    liveStreamData: Object,
+    listDonation: Array,
+    isCommentable: Boolean,
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -49,12 +58,28 @@
   const isButtonGiftVisible = ref(false);
   const donationItems = ref({});
   const isGetREPsMenuOpen = ref(false);
+  const loadingItem = ref(true);
+
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
   };
 
   const toggleButtonGiftVisible = () => {
-    isButtonGiftVisible.value = !isButtonGiftVisible.value;
+    console.log('isButtonGiftVisible', isButtonGiftVisible.value);
+    console.log('isGetREPsMenuOpen', isGetREPsMenuOpen.value);
+    console.log('isGiftVisible', props.isGiftVisible);
+
+    if (!userStore.user) {
+      popupStore.openLoginPopup();
+      return;
+    }
+    if (isGetREPsMenuOpen.value === true && isButtonGiftVisible.value === false) {
+      isGetREPsMenuOpen.value = false;
+      return;
+    } else {
+      isButtonGiftVisible.value = !isButtonGiftVisible.value;
+    }
+
     fetchAllDonationItems();
   };
   const toggleMenu = () => {
@@ -63,8 +88,10 @@
   const closeMenu = () => {
     isMenuVisible.value = false;
   };
+
   const fetchAllDonationItems = async () => {
     try {
+      loadingItem.value = true;
       const response = await getAllDonationItems();
 
       if (response.status === 200) {
@@ -74,6 +101,8 @@
       }
     } catch (error) {
       console.error('Error fetching donation items:', error);
+    } finally {
+      loadingItem.value = false;
     }
   };
 
@@ -111,10 +140,7 @@
       channel.channelId === props.channelId ? props.channelId.toString() : null,
     );
   });
-  watch(
-    () => props.usernameDetails,
-    (newVal) => {},
-  );
+
   onMounted(() => {
     if (userStore.user) {
       userStore.loadFollowers();
@@ -123,7 +149,17 @@
 </script>
 
 <template>
-  <div class="block lg:flex items-center space-x-4 mb-3 w-full">
+  <div v-if="props.loading" class="flex justify-between items-center">
+    <div class="flex items-center gap-x-4 px-3">
+      <Skeleton shape="circle" size="4rem" class="mr-2"></Skeleton>
+      <div class="flex flex-col gap-y-2">
+        <Skeleton width="20rem" class="mb-2"></Skeleton>
+        <Skeleton width="6rem" class="mb-2"></Skeleton>
+      </div>
+    </div>
+    <Skeleton width="12rem" height="1.4rem"></Skeleton>
+  </div>
+  <div v-else class="block lg:flex items-center space-x-4 mb-3 w-full">
     <div class="flex-grow flex items-center space-x-4">
       <RouterLink :to="`/user/${usernameDetails}`">
         <div class="relative inline-block">
@@ -174,14 +210,10 @@
     <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
       <div
         v-if="username !== props.usernameDetails"
-        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
+        class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase"
         @click="toggleFollow"
       >
-        <heart
-          :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'"
-          stroke="stroke-primary"
-          class="mr-1"
-        />
+        <heart :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'" stroke="stroke-primary" />
         Follow
       </div>
       <div
@@ -193,23 +225,28 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="username !== props.usernameDetails"
+          v-if="isGiftVisible && username !== props.usernameDetails"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
         </div>
         <DonateModal
-          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isButtonGiftVisible"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           @toggleGetREPsMenu="toggleGetREPsMenu"
           :donationItems="donationItems"
+          :loadingItem="loadingItem"
+          :liveStreamData="props.liveStreamData"
+          :channelId="props.channelId"
+          :listDonation="props.listDonation"
+          @closeDonateModal="isButtonGiftVisible = false"
         />
         <GetREPS
-          class="absolute top-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isGetREPsMenuOpen"
           @toggleGetREPsMenu="toggleGetREPsMenu"
-          @toggleBuyREPs="popupStore.toggleBuyREPs"
+          @toggleBuyREPs="popupStore.toggleBuyREPs()"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           :isBackVisible="true"
         />

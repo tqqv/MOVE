@@ -39,7 +39,10 @@
       const result = await getRateStreamOfUser(props.livestreamId);
       if (result && result.data) {
         dataRate.value = result.data.rating;
+        console.log(result.data.rating);
+
         isRated.value = dataRate.value > 0;
+        console.log(isRated.value);
       } else {
         dataRate.value = null;
         isRated.value = false;
@@ -87,7 +90,7 @@
     },
   );
   onMounted(() => {
-    if (props.videoId && userStore.user) {
+    if ((props.videoId || props.livestreamId) && userStore.user) {
       fetchUserRating(props.videoId);
     }
   });
@@ -111,6 +114,7 @@
       class="absolute right-0 z-10 mt-5 bottom-5 origin-top-right rounded-md bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black"
     >
       <RatePopup
+        titleRatePopup="Rate the video"
         :videoId="videoId"
         :livestreamId="props.livestreamId"
         :dataRate="dataRate"
