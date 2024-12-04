@@ -45,7 +45,94 @@ const getAllDonationItem = async() => {
   }
 }
 
+const getDonationItemById = async(donationItemId) => {
+  try {
+    const donationItem = await DonationItem.findByPk(donationItemId)
+
+    if(!donationItem) {
+      return {
+        status: 400,
+        data: null,
+        message: "donation item not found"
+      }
+    }
+
+    return {
+      status: 200,
+      data: donationItem,
+      message: "Get donation item by id successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const editDonationItem = async(donationItemId, data) => {
+  try {
+    // Tìm DonationItem trong DB
+    const donationItem = await DonationItem.findByPk(donationItemId)
+    if(!donationItem) {
+      return {
+        status: 400,
+        data: null,
+        message: "donation item not found"
+      }
+    }
+
+    await donationItem.update(data)
+
+    return {
+      status: 200,
+      data: donationItem,
+      message: "donation item edit successfully."
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const deleteDonationItem = async (donationItemId) => {
+  try {
+    const donationItem = await DonationItem.findByPk(donationItemId);
+    if (!donationItem) {
+      return {
+        status: 404,
+        data: null,
+        message: "donation item not found."
+      };
+    }
+
+    await donationItem.destroy();
+
+    return {
+      status: 200,
+      data: null,
+      message: "donation item deleted successfully."
+    };
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
 
 module.exports = {
-  createDonationItem,getAllDonationItem
+  createDonationItem,
+  getAllDonationItem,
+  getDonationItemById,
+  editDonationItem,
+  deleteDonationItem
 }
