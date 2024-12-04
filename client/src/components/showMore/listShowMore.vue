@@ -22,26 +22,17 @@
             class="h-[2px] w-0 bg-primary group-hover:w-full transition-all duration-200"
           ></div></li
       ></RouterLink>
-      <li class="group">
-        <span
-          class="block hover:text-primary font-medium transition-colors duration-200 whitespace-nowrap"
-        >
-          Community Guideline
-        </span>
-        <div class="h-[2px] w-0 bg-primary group-hover:w-full transition-all duration-200"></div>
-      </li>
-      <li class="group">
-        <span class="block hover:text-primary font-medium transition-colors duration-200">
-          Terms of Service
-        </span>
-        <div class="h-[2px] w-0 bg-primary group-hover:w-full transition-all duration-200"></div>
-      </li>
-      <li class="group">
-        <span class="block hover:text-primary font-medium transition-colors duration-200">
-          Privacy Policy
-        </span>
-        <div class="h-[2px] w-0 bg-primary group-hover:w-full transition-all duration-200"></div>
-      </li>
+      <RouterLink :to="`/community-guidelines`" @click="emit('closeAllPopups')">
+        <li class="group">
+          <span
+            class="block hover:text-primary font-medium transition-colors duration-200 whitespace-nowrap"
+          >
+            Community Guideline
+          </span>
+          <div
+            class="h-[2px] w-0 bg-primary group-hover:w-full transition-all duration-200"
+          ></div></li
+      ></RouterLink>
     </ul>
   </div>
 </template>

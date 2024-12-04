@@ -73,7 +73,7 @@
 </script>
 
 <template>
-  <div class="container mx-auto h-screen py-10 px-4 lg:px-20 rounded-lg shadow-lg">
+  <div class="container mx-auto h-screen py-10 px-4 lg:px-20 mb-6">
     <!-- Header Section -->
     <div class="mb-8">
       <h1 class="text-4xl font-bold text-black mb-4">FAQ</h1>
