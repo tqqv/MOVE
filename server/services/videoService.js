@@ -91,7 +91,8 @@ const reupStreamService = async (livestreamId, videoId, userId, title, descripti
         status: status,
         livestreamId,
         categoryId, 
-        levelWorkoutsId
+        levelWorkoutsId,
+        isCommentAble: true,
     });
     if (!video) {
       return {

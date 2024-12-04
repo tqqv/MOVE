@@ -10,6 +10,7 @@
   import TabPanel from 'primevue/tabpanel';
   import NoneLiveStream from './NoneLiveStream.vue';
   import { onMounted, watch } from 'vue';
+  import ViewReupLive from './ViewReupLive.vue';
 
   const props = defineProps({
     username: String,
@@ -25,6 +26,8 @@
     v-if="props.connectOBS === 'streamPublished' || (props.liveStatus && props.connectOBS == null)"
     :username="username"
   />
+
+  <!-- <ViewReupLive  /> -->
   <NoneLiveStream
     v-if="
       props.connectOBS === 'streamEnded' ||
