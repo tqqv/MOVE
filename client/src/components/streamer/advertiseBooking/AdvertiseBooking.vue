@@ -44,16 +44,15 @@
       donateReps: 40,
     },
     {
-      id: 1,
-      name: 'Video 1',
+      id: 2,
+      name: 'Video 2',
       image: 'https://via.placeholder.com/100x100',
-      description: 'This is the description for Video 1',
+      description: 'This is the description for Video 2',
       selected: false,
       category: 'MMA',
       levelWorkout: 'Beginner',
-      duration: 10,
-      views: 100,
-      donateReps: 50,
+      views: 80,
+      donateReps: 40,
     },
     {
       id: 2,
@@ -67,12 +66,6 @@
       donateReps: 40,
     },
   ]);
-
-  const showVideoList = ref(false);
-
-  const toggleVideoList = () => {
-    showVideoList.value = !showVideoList.value;
-  };
 
   const toggleVideoSelection = (video) => {
     if (video.selected) {
@@ -92,8 +85,20 @@
       video.name.toLowerCase().includes(searchTerm.value.toLowerCase()),
     );
   });
-</script>
 
+  const goToNextStep = () => {
+    if (currentStep.value === '1') currentStep.value = '2';
+    else if (currentStep.value === '2') currentStep.value = '3';
+  };
+
+  const goToPreviousStep = () => {
+    if (currentStep.value === '2') currentStep.value = '1';
+    else if (currentStep.value === '3') currentStep.value = '2';
+  };
+
+  const isBackDisabled = computed(() => currentStep.value === '1');
+  const isNextDisabled = computed(() => currentStep.value === '3');
+</script>
 <template>
   <section class="container">
     <div class="flex justify-between pb-4">
@@ -112,7 +117,7 @@
 
             <StepPanels>
               <!-- Step 1: Select Date -->
-              <StepPanel v-slot="{ activateCallback }" value="1">
+              <StepPanel value="1">
                 <div class="flex flex-col h-[300px]">
                   <DatePicker
                     v-model="selectedDate"
@@ -122,103 +127,69 @@
                     @update:model-value="handleDateChange"
                   />
                 </div>
-                <div class="flex pt-6 justify-end">
-                  <Button
-                    class="btn"
-                    label="Next"
-                    icon="pi pi-arrow-right"
-                    iconPos="right"
-                    @click="activateCallback('2')"
-                  />
-                </div>
               </StepPanel>
 
               <!-- Step 2: Select Option -->
-              <StepPanel v-slot="{ activateCallback }" value="2">
+              <StepPanel value="2">
                 <div class="flex flex-col h-[300px]">
-                  <div class="flex gap-x-12 pl-4 mb-4 items-center">
-                    <!-- Tiêu đề -->
-                    <div class="text-xl font-semibold">Select Alternative Content (Video)</div>
-
-                    <!-- Input tìm kiếm -->
-                    <div class="flex items-center">
-                      <div class="relative">
-                        <input
-                          v-model="searchTerm"
-                          type="text"
-                          placeholder="Search"
-                          class="w-full py-2 pl-10 pr-4 border rounded-lg focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition duration-300"
-                        />
-                        <span
-                          class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
-                        >
-                          <i class="pi pi-search"></i>
-                        </span>
-                      </div>
+                  <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-2xl font-bold text-gray-800">
+                      Select Alternative Content (Video)
+                    </h2>
+                    <div class="relative max-w-sm w-full">
+                      <input
+                        v-model="searchTerm"
+                        type="text"
+                        placeholder="Search videos..."
+                        class="w-full py-2 pl-10 pr-4 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition duration-300"
+                      />
+                      <span
+                        class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"
+                      >
+                        <i class="pi pi-search"></i>
+                      </span>
                     </div>
                   </div>
-                  <div class="flex flex-col gap-2">
-                    <div class="mt-2 h-[200px] overflow-y-auto">
-                      <div
-                        v-for="video in filteredVideos"
-                        :key="video.id"
-                        class="flex gap-4 items-start bg-white p-4 rounded shadow hover:shadow-md"
-                      >
-                        <!-- Hiển thị hình ảnh -->
-                        <img
-                          :src="video.image"
-                          :alt="video.name"
-                          class="w-20 h-20 object-cover rounded-md border"
-                        />
+                  <div class="mt-2 h-[300px] overflow-y-auto">
+                    <div
+                      v-for="video in filteredVideos"
+                      :key="video.id"
+                      class="flex gap-4 items-start bg-white p-4 rounded shadow hover:shadow-md"
+                    >
+                      <img
+                        :src="video.image"
+                        :alt="video.name"
+                        class="w-20 h-20 object-cover rounded-md border"
+                      />
+                      <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                          <h4 class="font-semibold text-lg">{{ video.name }}</h4>
+                          <input
+                            v-if="!selectedVideo || selectedVideo.id === video.id"
+                            type="checkbox"
+                            v-model="video.selected"
+                            class="h-5 w-5 cursor-pointer"
+                            @change="toggleVideoSelection(video)"
+                          />
+                        </div>
+                        <p class="text-sm">{{ video.description }}</p>
 
-                        <!-- Hiển thị thông tin video -->
-                        <div class="flex-1">
-                          <div class="flex justify-between items-center">
-                            <h4 class="font-semibold text-lg">{{ video.name }}</h4>
-                            <input
-                              v-if="!selectedVideo || selectedVideo.id === video.id"
-                              type="checkbox"
-                              v-model="video.selected"
-                              class="h-5 w-5 cursor-pointer"
-                              @change="toggleVideoSelection(video)"
-                            />
-                          </div>
-                          <p class="text-sm">{{ video.description }}</p>
-
-                          <div
-                            class="flex gap-2 items-center text-[10px] font-bold pt-2 text-black"
-                          >
-                            <span class="bg-[#EEEEEE] rounded-full px-3">{{
-                              video.levelWorkout
-                            }}</span>
-                            <span v-if="video.duration" class="bg-[#EEEEEE] rounded-full px-3">{{
-                              genreDuration(video.duration)
-                            }}</span>
-                          </div>
+                        <div class="flex gap-2 items-center text-[10px] font-bold pt-2 text-black">
+                          <span class="bg-[#EEEEEE] rounded-full px-3">{{
+                            video.levelWorkout
+                          }}</span>
+                          <span v-if="video.duration" class="bg-[#EEEEEE] rounded-full px-3">{{
+                            genreDuration(video.duration)
+                          }}</span>
                         </div>
                       </div>
                     </div>
                   </div>
                 </div>
-                <div class="flex pt-6 justify-between">
-                  <Button
-                    label="Back"
-                    severity="secondary"
-                    icon="pi pi-arrow-left"
-                    @click="activateCallback('1')"
-                  />
-                  <Button
-                    class="btn"
-                    label="Next"
-                    icon="pi pi-arrow-right"
-                    iconPos="right"
-                    @click="activateCallback('3')"
-                  />
-                </div>
               </StepPanel>
 
               <!-- Step 3: Booking Summary -->
-              <StepPanel v-slot="{ activateCallback }" value="3">
+              <StepPanel value="3">
                 <div class="flex flex-col h-[300px]">
                   <div
                     class="border-2 border-dashed border-surface-200 rounded bg-surface-50 flex-auto flex justify-center items-center font-medium"
@@ -226,17 +197,27 @@
                     Payment
                   </div>
                 </div>
-                <div class="pt-6">
-                  <Button
-                    label="Back"
-                    severity="secondary"
-                    icon="pi pi-arrow-left"
-                    @click="activateCallback('2')"
-                  />
-                </div>
               </StepPanel>
             </StepPanels>
           </Stepper>
+          <!-- Common Buttons -->
+          <div class="flex justify-between mt-6">
+            <Button
+              label="Back"
+              severity="secondary"
+              icon="pi pi-arrow-left"
+              :disabled="isBackDisabled"
+              @click="goToPreviousStep"
+            />
+            <Button
+              class="btn"
+              label="Next"
+              icon="pi pi-arrow-right"
+              iconPos="right"
+              :disabled="isNextDisabled"
+              @click="goToNextStep"
+            />
+          </div>
         </div>
 
         <!-- Booking Details Column -->
