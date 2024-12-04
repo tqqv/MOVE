@@ -8,62 +8,6 @@
   import REPs4 from '../icons/REPsItems/REPs4.vue';
   import REPs3 from '../icons/REPsItems/REPs3.vue';
 
-  const users = [
-    {
-      name: 'npmh310',
-      points: 85000,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'tuilahieu',
-      points: 5500,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'hieune320',
-      points: 5000,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-  ];
-
-  const fiveUsers = [
-    {
-      name: 'npmh310',
-      points: 85000,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'tuilahieu',
-      points: 5500,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'hieune320',
-      points: 5000,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'minhhieu120 minhhieu120 minhhieu120 minhhieu120 minhhieu120',
-      points: 1200,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'minhhieu120',
-      points: 1200,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'minhhieu120 minhhieu120 minhhieu120 minhhieu120 minhhieu120',
-      points: 1200,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    {
-      name: 'minhhieu120',
-      points: 1200,
-      image: 'https://images.pexels.com/photos/3785079/pexels-photo-3785079.jpeg',
-    },
-    // Add more users as needed
-  ];
 
   const props = defineProps({
     isStreamer: Boolean,
