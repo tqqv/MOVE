@@ -1,6 +1,7 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
   import { Chart, registerables } from 'chart.js';
+  import Filter from '@/components/Filter.vue';
 
   const props = defineProps({
     chartMoneyData: {
@@ -8,20 +9,47 @@
       required: true,
     },
   });
+  const emit = defineEmits(['yearSelected']);
+
+  const selectedYear = ref(new Date().getFullYear());
+  const availableYears = ref(
+    Array.from({ length: 3 }, (_, i) => ({
+      id: i + 1,
+      name: selectedYear.value - 2 + i,
+      value: selectedYear.value - 2 + i,
+    })),
+  );
+
+  const onYearChange = (year) => {
+    console.log(year.value);
+
+    selectedYear.value = year.value;
+
+    emit('yearSelected', year.value);
+  };
 
   const lineChart = ref(null);
   let chartInstance = null;
 
-  const formatChartData = (chartMoneyData) => {
+  const formatChartData = (chartMoneyData, year) => {
     const months = Array.from({ length: 12 }, (_, i) => i + 1); // Tháng 1-12
     const earnings = months.map(
-      (month) => chartMoneyData.moneyEarn.find((data) => data.month === month)?.totalMoney || 0,
+      (month) =>
+        chartMoneyData?.moneyEarn
+          .filter((data) => data.year === year)
+          .find((data) => data.month === month)?.totalMoney || 0,
     );
     const spend = months.map(
-      (month) => chartMoneyData.moneyWithdraw.find((data) => data.month === month)?.totalMoney || 0,
+      (month) =>
+        chartMoneyData?.moneyWithdraw
+          .filter((data) => data.year === year)
+          .find((data) => data.month === month)?.totalMoney || 0,
     );
     const revenue = months.map(
-      (month) => chartMoneyData.revenue.find((data) => data.month === month)?.totalMoney || 0,
+      (month) =>
+        chartMoneyData?.revenue
+          .filter((data) => data.year === year)
+          .find((data) => data.month === month)?.totalMoney || 0,
     );
 
     return {
@@ -78,7 +106,7 @@
   };
 
   const createChart = () => {
-    const data = formatChartData(props.chartMoneyData);
+    const data = formatChartData(props.chartMoneyData, selectedYear.value);
     const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -87,7 +115,22 @@
           display: true,
         },
       },
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,
+          ticks: {
+            callback: function (value) {
+              return '$' + value.toLocaleString();
+            },
+          },
+        },
+      },
     };
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
 
     chartInstance = new Chart(lineChart.value, {
       type: 'line',
@@ -102,11 +145,8 @@
   });
 
   watch(
-    () => props.chartMoneyData,
+    [() => props.chartMoneyData, selectedYear],
     () => {
-      if (chartInstance) {
-        chartInstance.destroy();
-      }
       createChart();
     },
     { deep: true },
@@ -120,9 +160,19 @@
 </script>
 
 <template>
-  <div class="flex flex-col gap-y-2 h-[400px]">
-    <h1 class="text-primary font-bold uppercase">Income Chart</h1>
-    <div class="mb-4 h-full">
+  <div class="flex flex-col gap-y-4 h-[450px]">
+    <div class="flex justify-between">
+      <h1 class="text-primary font-bold uppercase">Income Chart</h1>
+      <!-- Dropdown chọn năm -->
+      <Filter
+        title="Select Year"
+        :options="availableYears"
+        @change="onYearChange"
+        :defaultValue="selectedYear"
+      />
+    </div>
+    <!-- Biểu đồ -->
+    <div class="h-full">
       <canvas ref="lineChart"></canvas>
     </div>
   </div>

@@ -1,18 +1,23 @@
 <script setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
   import { Chart, registerables } from 'chart.js';
+
+  const props = defineProps({
+    userTypeData: {
+      type: Object,
+      required: true,
+    },
+  });
 
   const pieChart = ref(null);
   let chartInstance = null;
 
-  onMounted(() => {
-    Chart.register(...registerables);
-
+  const createChart = () => {
     const data = {
-      labels: ['Users', 'Videos', 'Livestreams'],
+      labels: ['Users', 'Streamer', 'Admin'],
       datasets: [
         {
-          data: [1200, 500, 150],
+          data: [props.userTypeData?.user, props.userTypeData?.streamer, props.userTypeData?.admin],
           backgroundColor: ['rgb(19, 208, 180)', 'rgb(103, 191, 255)', 'rgba(153, 102, 255, 0.7)'],
           hoverOffset: 4,
         },
@@ -24,16 +29,25 @@
       maintainAspectRatio: false,
       plugins: {
         legend: {
-          position: 'top', // Vị trí chú thích
+          position: 'top',
         },
       },
     };
+
+    if (chartInstance) {
+      chartInstance.destroy();
+    }
 
     chartInstance = new Chart(pieChart.value, {
       type: 'pie',
       data,
       options,
     });
+  };
+
+  onMounted(() => {
+    Chart.register(...registerables);
+    createChart();
   });
 
   onBeforeUnmount(() => {
@@ -41,12 +55,20 @@
       chartInstance.destroy();
     }
   });
+
+  watch(
+    () => props.userTypeData,
+    () => {
+      createChart();
+    },
+    { deep: true },
+  );
 </script>
 
 <template>
   <div class="flex flex-col gap-y-2 h-[400px]">
     <h1 class="text-primary font-bold uppercase">Overview Chart</h1>
-    <div class="mb-4 h-full">
+    <div class="h-full">
       <canvas ref="pieChart"></canvas>
     </div>
   </div>
