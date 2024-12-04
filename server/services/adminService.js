@@ -202,7 +202,7 @@ const getTop5Channel = async() => {
       attributes: [
         'channelName',
         'rep',
-        'avatar'
+        'avatar',
         [
           sequelize.literal(`(
             SELECT COUNT(*)
@@ -292,6 +292,29 @@ const getTop5UserDeposit = async() => {
   }
 }
 
+const userCount = async() => {
+  try {
+    const user = await User.count({where: { role: "user" }})
+    const streamer = await User.count({where: { role: "streamer" }})
+    const admin = await User.count({where: { role: "admin" }})
+
+    return {
+      status: 200,
+      data: {
+        user,
+        streamer,
+        admin
+      },
+      message: "Get data user count successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
 
 module.exports = {
   setStatusRequestChannel,
@@ -299,4 +322,5 @@ module.exports = {
   getDataChartMoney,
   getTop5Channel,
   getTop5UserDeposit,
+  userCount,
 }

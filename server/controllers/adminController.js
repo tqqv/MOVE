@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, userCount } = require("../services/adminService");
 
 const setStatusRequestChannelController = async (req, res, next) => {
   const data = req.body;
@@ -34,10 +34,16 @@ const getTop5UserDepositController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const userCountController = async (req, res, next) => {
+  const result = await userCount()
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
   getDataChartMoneyController,
   getTop5ChannelController,
-  getTop5UserDepositController
+  getTop5UserDepositController,
+  userCountController
 }
