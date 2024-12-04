@@ -5,6 +5,7 @@
   import TopDonates from './TopDonates.vue';
   import { useLiveStreamStore } from '@/stores';
   import { formatTimeEndLive } from '@/utils';
+  import ReuploadLiveStream from './ReuploadLiveStream.vue';
 
   const props = defineProps({
     liveStatus: String,
@@ -35,10 +36,10 @@
         <!-- SCREEN CONNECT OBCS -->
       </div>
     </div>
-    <!-- LEFT -->
     <div class="w-full flex gap-x-3 justify-center">
+      <!-- LEFT -->
       <div
-        class="flex flex-col max-w-[500px] self-start basis-1/2 p-4 bg-white rounded-lg shadow-md w-fit"
+        class="flex flex-col max-w-[550px] self-start basis-1/2 p-4 bg-white rounded-lg shadow-md w-fit"
       >
         <h1 class="font-semibold mb-4">Information live stream</h1>
         <div class="flex items-center gap-x-4">
@@ -78,12 +79,16 @@
         </div>
       </div>
       <!-- RIGHT -->
-      <div
-        class="flex flex-col max-w-[500px] self-start basis-1/2 p-4 bg-white rounded-lg shadow-md w-fit"
-      >
-        <h1 class="font-semibold mb-4">Top donates</h1>
-        <div class="flex flex-col gap-y-4">
-          <TopDonates :liveStreamData="liveStreamStore.liveStreamData" />
+      <div class="flex max-w-[540px] flex-col gap-y-3">
+        <div class="flex flex-col self-start p-4 bg-white rounded-lg shadow-md w-fit">
+          <h1 class="font-semibold mb-4">Top donates</h1>
+          <div class="flex flex-col gap-y-4">
+            <TopDonates :liveStreamData="liveStreamStore.liveStreamData" />
+          </div>
+        </div>
+
+        <div class="flex flex-col self-start p-4 bg-white rounded-lg shadow-md w-full">
+          <ReuploadLiveStream />
         </div>
       </div>
     </div>

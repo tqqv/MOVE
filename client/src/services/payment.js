@@ -1,3 +1,4 @@
+import axiosInstance from './axios';
 import axios from './axios';
 
 const createCardInfo = async (data) => {
@@ -68,6 +69,16 @@ const getPaymentHistory = async (page, pageSize, startDate, endDate) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+
+const reUploadLive = async (data) => {
+  try {
+    const response = await axiosInstance.post('video/reup', data);
+    return response;
+  } catch (error) {
+    toast.error(error.message);
+    throw error; 
+  }
+};
 export {
   createCardInfo,
   getPaymentHistory,
@@ -76,4 +87,5 @@ export {
   deleteCardInfo,
   getListRepPackage,
   checkout,
+  reUploadLive,
 };
