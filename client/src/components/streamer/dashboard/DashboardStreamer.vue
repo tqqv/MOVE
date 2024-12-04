@@ -56,8 +56,14 @@
   };
 
   onMounted(async () => {
-    await streamerStore.fetchProfileChannel();
-    analyticsStreamerStore.fetchOverviewAnalytic();
+    if (!streamerStore?.streamerChannel?.id) {
+      await streamerStore.fetchProfileChannel();
+    }
+
+    if (!analyticsStreamerStore?.overviewData) {
+      analyticsStreamerStore.fetchOverviewAnalytic();
+    }
+
     fetchAllCommentStreamer();
   });
 </script>
