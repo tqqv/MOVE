@@ -34,13 +34,15 @@
     handleSendComment,
     isLoadingComments,
   } = commentStore;
+  console.log(props.videoId);
+  resetComments(props.videoId);
 
-  watch(
-    () => props.videoId,
-    () => {
-      resetComments(props.videoId);
-    },
-  );
+  // watch(
+  //   () => props.videoId,
+  //   () => {
+  //     console.log('change ne', props.videoId);
+  //   },
+  // );
   watch(
     () => commentStore.hasMoreComments,
     (newVal) => {},
@@ -79,8 +81,8 @@
       :isCommentable="isCommentable"
     />
     <!-- <p    v-if="!comments.length > 0 " class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">
-    No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
-  </p > -->
+      No comments to display. <div class="text-[#979494]">Leave a comment to get started!</div>
+    </p > -->
     <div
       v-if="commentStore.hasMoreComments && comments.length > 0"
       class="font-bold text-[13px] text-primary cursor-pointer pt-2"

@@ -5,6 +5,7 @@ module.exports = (sequelize, DataTypes) => {
   class Donation extends Model {
     static associate(models) {
         this.belongsTo(models.User);
+        this.belongsTo(models.Channel, { foreignKey: 'donatorChannelId' });
 
         this.belongsTo(models.Livestream, {
           foreignKey: 'livestreamId',
@@ -25,6 +26,16 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         references: {
           model: 'users', // Tên bảng users
+          key: 'id',      // Khóa chính từ bảng users
+        },
+        onDelete: 'CASCADE', // Xóa follow khi user bị xóa
+        onUpdate: 'CASCADE', // Cập nhật khi user thay đổi
+      },
+      donatorChannelId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'channels', // Tên bảng users
           key: 'id',      // Khóa chính từ bảng users
         },
         onDelete: 'CASCADE', // Xóa follow khi user bị xóa

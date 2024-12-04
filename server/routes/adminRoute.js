@@ -4,7 +4,10 @@ const { setStatusRequestChannelController, getStatisticController, getDataChartM
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController } = require("../controllers/reportController");
+const { loginAdminController } = require("../controllers/authController");
 const adminRoute = express.Router();
+
+adminRoute.post("/login", loginAdminController);
 
 adminRoute.get("/getStatistic", verifyAdmin, getStatisticController)
 adminRoute.get("/getTop5Channel", verifyAdmin, getTop5ChannelController)

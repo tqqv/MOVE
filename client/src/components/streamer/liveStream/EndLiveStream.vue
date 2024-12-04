@@ -83,7 +83,7 @@
       >
         <h1 class="font-semibold mb-4">Top donates</h1>
         <div class="flex flex-col gap-y-4">
-          <TopDonates />
+          <TopDonates :liveStreamData="liveStreamStore.liveStreamData" />
         </div>
       </div>
     </div>

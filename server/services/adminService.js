@@ -202,7 +202,7 @@ const getTop5Channel = async() => {
       attributes: [
         'channelName',
         'rep',
-        'avatar'
+        'avatar',
         [
           sequelize.literal(`(
             SELECT COUNT(*)

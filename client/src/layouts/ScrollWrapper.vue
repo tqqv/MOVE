@@ -16,7 +16,6 @@
     { deep: true },
   );
 
-
   // check scroll near bottom
   function emitScrollEvent() {
     const container = scrollContainerRef.value;

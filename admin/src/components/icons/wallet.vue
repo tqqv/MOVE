@@ -2,18 +2,21 @@
   const props = defineProps({
     width: String,
     height: String,
-    fill: String,
     stroke: String,
+    fill: {
+      type: String,
+      default: '#ffffff',
+    },
   });
 </script>
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    :width="width ? width : '24px'"
+    :width="width ? width : '20px'"
     :height="height ? height : '24px'"
     class="overflow-visible"
   >
-    <g id="Wallet" transform="translate(-158.01 -484.24)" :class="[fill, stroke]">
+    <g id="Wallet" transform="translate(-158.01 -484.24)" :fill="fill">
       <path
         id="Path_607"
         data-name="Path 607"

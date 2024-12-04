@@ -26,10 +26,10 @@
     {
       name: 'REP$ System',
       icon: CashoutIcon,
-      link: '/reps/cashout',
+      link: '/reps/revenue',
       hasDropdown: true,
       submenu: [
-        { name: 'Cashout', link: '/reps/cashout' },
+        { name: 'Revenue', link: '/reps/revenue' },
         { name: 'Donate Item', link: '/reps/donate' },
         { name: 'Discount Item', link: '/reps/discount' },
       ],
