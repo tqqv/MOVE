@@ -6,8 +6,7 @@ var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
 const passport = require('passport');
 require('../utils/google/passport.js');
-require('../utils/facebook/passport.js');
-
+require('../utils/facebook/passport.js'); 
 
 var {
   login,

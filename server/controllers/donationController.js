@@ -3,11 +3,12 @@ const { donateLivestream, getDonateByLivestreamId } = require("../services/donat
 
 const donateLivestreamController = async(req, res, next) => {
   const userId = req.user.id;
+  const donatorChannelId = req.user.channelId;
   const livestreamId = req.body.livestreamId;
   const donationItemId = req.body.donationItemId;
   const content = req.body.content;
 
-  const result = await donateLivestream(userId, livestreamId, donationItemId, content);
+  const result = await donateLivestream(userId, donatorChannelId, livestreamId, donationItemId, content);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
