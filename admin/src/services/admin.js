@@ -24,12 +24,30 @@ const getTop5UserDeposit = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
-const getDataChartMoney = async () => {
+const getDataChartMoney = async (year) => {
   try {
-    const response = await axios.get('/admin/getDataChartMoney');
+    const response = await axios.get('/admin/getDataChartMoney', {
+      params: { year },
+    });
     return response;
   } catch (error) {
-    return { error: true, status: error.response.status, message: error.response.data.message };
+    return {
+      error: true,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'An error occurred',
+    };
   }
 };
-export { getStatistic, getTop5Channel, getTop5UserDeposit, getDataChartMoney };
+const getDataUserType = async (year) => {
+  try {
+    const response = await axios.get('/admin/userCount');
+    return response;
+  } catch (error) {
+    return {
+      error: true,
+      status: error.response?.status || 500,
+      message: error.response?.data?.message || 'An error occurred',
+    };
+  }
+};
+export { getStatistic, getTop5Channel, getTop5UserDeposit, getDataChartMoney, getDataUserType };

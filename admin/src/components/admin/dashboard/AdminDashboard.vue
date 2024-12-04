@@ -2,8 +2,7 @@
   import { ref, onMounted } from 'vue';
 
   import Earning from '@/components/icons/earning.vue';
-  import GoLive from '@/components/icons/goLive.vue';
-  import Live from '@/components/icons/live.vue';
+
   import Sales from '@/components/icons/sales.vue';
   import Stream from '@/components/icons/Stream.vue';
   import User from '@/components/icons/user.vue';
@@ -12,16 +11,18 @@
   import ChartIncome from './ChartIncome.vue';
   import ChartUser from './ChartUser.vue';
   import TopChannel from './TopChannel.vue';
-  import TopVideo from './TopVideo.vue';
   import StatisticCard from './StatisticCard.vue';
+  import Skeleton from 'primevue/skeleton';
   import {
     getStatistic,
     getDataChartMoney,
     getTop5Channel,
     getTop5UserDeposit,
+    getDataUserType,
   } from '@/services/admin';
 
-  // Make statistics a reactive array
+  const selectedYear = ref();
+
   const statistics = ref([
     { label: 'Total User', icon: User, value: 0 },
     { label: 'Total Video', icon: Videos, value: 0 },
@@ -33,35 +34,31 @@
   const topUserDepositData = ref();
   const topChannelData = ref();
   const chartMoneyData = ref();
-
+  const userTypeData = ref();
+  const isLoadingDashboard = ref(false);
   const fetchStatistic = async () => {
+    isLoadingDashboard.value = true;
     try {
       const response = await getStatistic();
       if (response.status === 200) {
-        console.log(response);
-
         statistics.value[0].value = response.data.data.totalUser;
         statistics.value[1].value = response.data.data.totalVideo;
         statistics.value[2].value = response.data.data.totalStream;
         statistics.value[3].value = response.data.data.totalMoneyEarn;
         statistics.value[4].value = response.data.data.totalMoneyWithdraw;
         statistics.value[5].value = response.data.data.revenue;
-      } else {
-        console.error('Unexpected status code:', response.status);
       }
     } catch (error) {
       console.error(error.message);
+    } finally {
+      isLoadingDashboard.value = false;
     }
   };
   const fetchTop5UserDeposit = async () => {
     try {
       const response = await getTop5UserDeposit();
       if (response.status === 200) {
-        console.log(response);
-
         topUserDepositData.value = response.data.data;
-      } else {
-        console.error('Unexpected status code:', response.status);
       }
     } catch (error) {
       console.error(error.message);
@@ -71,42 +68,56 @@
     try {
       const response = await getTop5Channel();
       if (response.status === 200) {
-        console.log(response);
-
         topChannelData.value = response.data.data;
-      } else {
-        console.error('Unexpected status code:', response.status);
       }
     } catch (error) {
       console.error(error.message);
     }
   };
-  const fetchDataChartMoney = async () => {
+  const fetchDataChartMoney = async (year) => {
     try {
-      const response = await getDataChartMoney();
+      const response = await getDataChartMoney(year);
       if (response.status === 200) {
-        console.log(response);
-
         chartMoneyData.value = response.data.data;
-      } else {
-        console.error('Unexpected status code:', response.status);
       }
     } catch (error) {
       console.error(error.message);
     }
   };
+  const fetchDataUserType = async (year) => {
+    try {
+      const response = await getDataUserType(year);
+      if (response.status === 200) {
+        userTypeData.value = response.data.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const handleYearChange = (year) => {
+    selectedYear.value = year;
+    fetchDataChartMoney(year);
+  };
+
   onMounted(() => {
     fetchStatistic();
     fetchTop5UserDeposit();
     fetchTop5Channel();
-    fetchDataChartMoney();
+    fetchDataChartMoney(selectedYear.value);
+    fetchDataUserType();
   });
 </script>
 
 <template>
   <section class="container">
     <!-- INFOR -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div v-if="isLoadingDashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div v-for="(stat, index) in statistics.slice(0, 6)" :key="index">
+        <Skeleton width="100%" height="100px" />
+      </div>
+    </div>
+
+    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       <StatisticCard
         v-for="(stat, index) in statistics"
         :key="index"
@@ -118,18 +129,36 @@
         </template>
       </StatisticCard>
     </div>
+
     <!-- CHART -->
     <div class="grid grid-cols-12 gap-4 mt-5">
       <div class="col-span-7 bg-white p-5 rounded shadow">
-        <ChartIncome :chartMoneyData="chartMoneyData" />
+        <Skeleton v-if="isLoadingDashboard" width="100%" height="450px" />
+
+        <ChartIncome v-else :chartMoneyData="chartMoneyData" @yearSelected="handleYearChange" />
+
+        <!-- Skeleton loader for chart -->
       </div>
-      <div class="col-span-5 bg-white p-5 rounded shadow">
-        <ChartUser />
+      <div class="col-span-5 bg-white p-5 rounded shadow items-center">
+        <div v-if="isLoadingDashboard" class="flex justify-center py-8">
+          <Skeleton width="400px" height="400px" shape="circle" />
+        </div>
+
+        <ChartUser v-else class="flex justify-center" :userTypeData="userTypeData" />
+
+        <!-- Skeleton loader for user type chart -->
       </div>
     </div>
+
     <!-- TOP USER -->
     <div class="grid grid-cols-12 gap-4 mt-5 pb-20">
-      <TopChannel :topUserDepositData="topUserDepositData" :topChannelData="topChannelData" />
+      <TopChannel
+        :isLoadingDashboard="isLoadingDashboard"
+        :topUserDepositData="topUserDepositData"
+        :topChannelData="topChannelData"
+      />
+
+      <!-- Skeleton loader for top user/channel -->
     </div>
   </section>
 </template>

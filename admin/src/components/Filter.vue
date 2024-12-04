@@ -16,25 +16,36 @@
       type: [Array, String],
     },
     optionLabel: { type: String, default: 'name' },
+    defaultValue: { type: [String, Number], default: null }, // Giá trị mặc định
   });
+
   const selectedOption = ref(null);
+
+  // Watch for selectedOption change and emit the new value
   watch(selectedOption, (newValue) => {
     if (newValue) {
       emit('change', newValue);
     }
   });
+
   watch(
     () => props.options,
     (newOptions) => {
       if (newOptions && newOptions.length > 0) {
-        selectedOption.value = newOptions[0];
+        selectedOption.value =
+          newOptions.find((option) => option.value === props.defaultValue) || newOptions[0];
       }
     },
+    { immediate: true },
   );
 
   onMounted(() => {
     if (props.options && props.options.length > 0) {
-      selectedOption.value = props.options[0];
+      // Nếu có giá trị defaultValue, tìm kiếm trong options
+      selectedOption.value =
+        props.defaultValue !== null
+          ? props.options.find((option) => option.value === props.defaultValue) || props.options[0]
+          : props.options[0];
     }
   });
 </script>
