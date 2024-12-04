@@ -157,11 +157,9 @@ const createFeatureContentService = async(livestreamId, videoId, startAt, expire
 //   }
 // };
 
-const getAllFeatureContentService = async (page, pageSize) => {
+const getAllFeatureContentService = async (datetime) => {
   try {
-
-    const currentDate = moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
-    console.log(currentDate);
+    // const currentDate = moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
 
     // Fetch featured contents with related models
     const featuredContents = await FeaturedContent.findAll({
@@ -169,24 +167,45 @@ const getAllFeatureContentService = async (page, pageSize) => {
         date: sequelize.where(
           sequelize.fn('DATE', sequelize.col('date')),
           '=',
-          currentDate
+          // currentDate
+          datetime
         )
-      }
+      },
+      attributes: [],
+      include: [
+        {
+          model: Channel,
+          attributes: ["isLive"],
+          as: "channelBooking",
+          include: [
+            {
+              model: Livestream,
+              where: {isLive: true},
+              as: "channelLivestreams",
+            }
+          ]
+        },
+        {
+          model: Video,
+          as:"video"
+        }
+      ]
     });
 
-    if (!featuredContents.count) {
+    if (!featuredContents) {
       return {
         status: 200,
         message: "No featured contents exist."
       };
     }
 
+
     // Now, iterate through the livestreams to get current views
     const updatedLivestreams = await Promise.all(featuredContents.map(async (content) => {
       let currentViews;
-      if (content.livestream) {
-        currentViews = await get(`channelStreamId:${content.livestream.livestreamChannel?.dataValues?.id}:currentViews`);
-        content.livestream.currentViews = currentViews || 0; // Set current views for each livestream
+      if (content.channelBooking) {
+        currentViews = await get(`channelStreamId:${content.channelBooking.livestreamChannel?.dataValues?.id}:currentViews`);
+        content.channelBooking.currentViews = currentViews || 0; // Set current views for each livestream
       }
       return {
         ...content.toJSON(),
@@ -196,9 +215,8 @@ const getAllFeatureContentService = async (page, pageSize) => {
 
     return {
       status: 200,
-      data: {
+      data:
         updatedLivestreams,
-      },
       message: "Get all featured contents successfully"
     };
 
@@ -252,7 +270,7 @@ const createBookingFeatureContentService = async (date, featuredContentBaseId, f
     if (isBooked) {
       return {
         status: 400,
-        message: "Already",
+        message: "Already booked",
       };
     }
     const featuredContentBase = await FeaturedContentBase.findOne({where: { id: featuredContentBaseId || null }})

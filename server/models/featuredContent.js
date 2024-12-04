@@ -8,6 +8,10 @@ module.exports = (sequelize, DataTypes) => {
           foreignKey: 'videoId',
           as: 'video'
         });
+        this.belongsTo(models.Channel, {
+          foreignKey: 'channelId',
+          as: 'channelBooking'
+        });
         this.belongsTo(models.FeaturedContentBase, {
           foreignKey: 'featuredContentBaseId',
           as: 'featuredBase'
