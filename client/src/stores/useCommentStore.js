@@ -17,7 +17,7 @@ export const useCommentStore = defineStore('comment', () => {
   const hasMoreChildComments = ref({});
   const loadingRepliesForComment = ref({});
   const isLoadingComments = ref(false);
-  const fetchComments = async (videoId, userId) => {
+  const fetchComments = async (videoId) => {
     try {
       const response = await getAllComments(videoId, userStore?.user?.id || null, {
         page: currentPage.value,
@@ -103,11 +103,11 @@ export const useCommentStore = defineStore('comment', () => {
     }
   };
 
-  const resetComments = (videoId, userId) => {
+  const resetComments = async (videoId) => {
     comments.value = [];
     currentPage.value = 1;
     hasMoreComments.value = true;
-    fetchComments(videoId, userStore?.user?.id || null);
+    await fetchComments(videoId);
   };
 
   const handleSendComment = (newComment) => {
