@@ -21,6 +21,7 @@ const {
   getStateByCountryAndVideoIdFromIp,
   getVideoYouMayLikeService,
   reupStreamService,
+  getLatestReupStreamService,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 const { createHashmapFromDBData, getFilteredSortedTopVideos } = require('../utils/redis/cache/videoCache');
@@ -264,9 +265,9 @@ const getVideoYouMayLikeController = async(req, res, next) => {
 
 const reupStreamController = async (req, res, next) => {
   const channelId = req.user.channelId;
-  const { livestreamId, videoId, title, description, thumbnailUrl, videoUrl, duration, status } = req.body;
+  const { livestreamId, videoId, title, description, thumbnailUrl, videoUrl, duration, status, categoryId, levelWorkoutsId } = req.body;
   try {
-    const result = await reupStreamService(livestreamId, videoId, channelId, title, description, thumbnailUrl, videoUrl, duration, status);
+    const result = await reupStreamService(livestreamId, videoId, channelId, title, description, thumbnailUrl, videoUrl, duration, status, categoryId, levelWorkoutsId);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
     responseHandler(error.status, error.data, error.message)(req, res, next);

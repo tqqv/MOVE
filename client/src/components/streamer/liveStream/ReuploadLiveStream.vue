@@ -1,13 +1,12 @@
 <script setup>
-  import { ref, computed } from 'vue';
+  import { ref } from 'vue';
   import EmptyImage from '@/components/icons/emptyImage.vue';
-  import VideoUpload from '@/components/icons/videoUpload.vue';
   import axiosInstance from '@services/axios';
   import * as tus from 'tus-js-client';
   import { toast } from 'vue3-toastify';
-  import axios from 'axios';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { useLiveStreamStore } from '@/stores';
+  import { reUploadLive } from '@/services/payment';
 
   const liveStreamStore = useLiveStreamStore();
 
@@ -18,6 +17,7 @@
   const duration = ref('');
   const isUploading = ref(false);
   const videoUri = ref('');
+  const videoId = ref('');
   const loadingPublic = ref(false);
   const publish = ref(false);
 
@@ -32,22 +32,24 @@
 
   //   SAVE LIVE
   const saveVideo = async (videoId) => {
+    const data = {
+      videoId,
+      livestreamId: liveStreamStore.liveStreamData?.id,
+      title: liveStreamStore.liveStreamData?.title,
+      description: liveStreamStore.liveStreamData?.description,
+      categoryId: liveStreamStore.liveStreamData?.categoryId,
+      levelWorkoutsId: liveStreamStore.liveStreamData?.levelWorkoutsId,
+      thumbnailUrl: liveStreamStore.liveStreamData?.thumbnailUrl,
+      videoUrl: uploadedVideoUrl.value,
+      duration: duration.value,
+      status: 'private',
+    };
+
     try {
-      const response = await axiosInstance.post('video/save-video', {
-        videoId,
-        title: liveStreamStore.liveStreamData?.title,
-        description: liveStreamStore.liveStreamData?.description,
-        categories: liveStreamStore.liveStreamData?.category.id,
-        levelWorkout: liveStreamStore.liveStreamData?.livestreamLevelWorkout.id,
-        thumbnailUrl: liveStreamStore.liveStreamData?.thumbnailUrl,
-        videoUrl: uploadedVideoUrl.value,
-        duration: duration.value,
-        status: 'private',
-      });
+      const response = await reUploadLive(data);
       return response;
     } catch (error) {
-      toast.error(error.message);
-      throw error; // Re-throw to allow caller to handle
+      console.error('Error in reUploadLive:', error);
     }
   };
 
@@ -174,7 +176,7 @@
 
 <template>
   <div class="flex justify-between items-center">
-    <h1 class="font-semibold">Reupload livestream</h1>
+    <h1 class="font-semibold">Repost livestream</h1>
     <input
       type="file"
       id="myFile"
@@ -182,7 +184,7 @@
       ref="fileInputRef"
       class="hidden"
       @change="onFileSelected"
-      accept="video/*"
+      accept="video/*, .mkv"
     />
     <h1 class="text-sm cursor-pointer text-primary underline" @click="handleSelectedFile">
       Choose livestream
@@ -242,8 +244,15 @@
     </div>
   </div>
 
-  <div v-if="publish" class="flex justify-end mt-3">
-    <span class="bg-primary w-32 text-center">Successfully</span>
+  <div v-if="publish" class="flex gap-x-1 justify-end mt-4 text-sm">
+    <RouterLink :to="`/video/${videoUri.split('/').pop()}`">
+      <button class="learn-more">
+        <span class="circle" aria-hidden="true">
+          <span class="icon arrow"></span>
+        </span>
+        <span class="button-text">View video</span>
+      </button>
+    </RouterLink>
   </div>
 </template>
 
@@ -304,5 +313,94 @@
     80% {
       width: 100%;
     }
+  }
+
+  button {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    outline: none;
+    border: 0;
+    vertical-align: middle;
+    text-decoration: none;
+    background: transparent;
+    padding: 0;
+    font-size: inherit;
+    font-family: inherit;
+  }
+
+  button.learn-more {
+    width: 8rem;
+    height: auto;
+  }
+
+  button.learn-more .circle {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    position: relative;
+    display: block;
+    margin: 0;
+    width: 2rem;
+    height: 2rem;
+    background: #13d0b4;
+    border-radius: 1rem;
+  }
+
+  button.learn-more .circle .icon {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    margin: auto;
+    background: #fff;
+  }
+
+  button.learn-more .circle .icon.arrow {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    left: 0.5rem;
+    width: 0.74rem;
+    height: 0.02rem;
+    background: none;
+  }
+
+  button.learn-more .circle .icon.arrow::before {
+    position: absolute;
+    content: '';
+    top: -0.1478rem;
+    right: 0.05rem;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-top: 0.1rem solid #fff;
+    border-right: 0.1rem solid #fff;
+    transform: rotate(45deg);
+  }
+
+  button.learn-more .button-text {
+    transition: all 0.45s cubic-bezier(0.65, 0, 0.076, 1);
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    padding: 0.5rem 0;
+    margin: 0 0 0 1.5rem;
+    color: #13d0b4;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+  }
+
+  button:hover .circle {
+    width: 100%;
+  }
+
+  button:hover .circle .icon.arrow {
+    background: #fff;
+    transform: translate(0.8rem, 0);
+  }
+
+  button:hover .button-text {
+    color: #fff;
   }
 </style>

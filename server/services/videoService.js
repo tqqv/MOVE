@@ -78,7 +78,7 @@ const saveVideoService = async (videoId, userId, title, description, thumbnailUr
   }
 };
 
-const reupStreamService = async (livestreamId, videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status) => {
+const reupStreamService = async (livestreamId, videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status, categoryId, levelWorkoutsId) => {
   try {
     const video = await Video.create({
         id: videoId,
@@ -89,7 +89,9 @@ const reupStreamService = async (livestreamId, videoId, userId, title, descripti
         videoUrl: videoUrl,
         duration: duration,
         status: status,
-        livestreamId
+        livestreamId,
+        categoryId, 
+        levelWorkoutsId
     });
     if (!video) {
       return {
