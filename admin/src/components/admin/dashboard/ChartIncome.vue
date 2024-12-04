@@ -26,7 +26,6 @@
     console.log(year.value);
 
     selectedYear.value = year.value;
-
     emit('yearSelected', year.value);
   };
 

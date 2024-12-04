@@ -96,6 +96,7 @@
   };
   const handleYearChange = (year) => {
     selectedYear.value = year;
+
     fetchDataChartMoney(year);
   };
 

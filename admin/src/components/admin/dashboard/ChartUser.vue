@@ -85,7 +85,7 @@
     />
 
     <div v-else class="h-full">
-      <canvas ref="pieChart"></canvas>
+      <canvas class="pt-6" ref="pieChart"></canvas>
     </div>
   </div>
 </template>
