@@ -4,13 +4,17 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class FeaturedContent extends Model {
     static associate(models) {
-        this.belongsTo(models.Livestream, {
-          foreignKey: 'livestreamId',
-          as: 'livestream'
-        });
         this.belongsTo(models.Video, {
           foreignKey: 'videoId',
           as: 'video'
+        });
+        this.belongsTo(models.FeaturedContentBase, {
+          foreignKey: 'featuredContentBaseId',
+          as: 'featuredBase'
+        });
+        this.belongsTo(models.FeaturedContentAbnormal, {
+          foreignKey: 'featuredContentAbnormalId',
+          as: 'featuredAbnormal'
         });
     }
   }
@@ -22,16 +26,45 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         primaryKey: true,
       },
-      livestreamId: {
+
+      channelId: {
+        type: DataTypes.UUID,
+        allowNull: false,
+        references: {
+          model: 'channels',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+
+      featuredContentBaseId: {
         type: DataTypes.UUID,
         allowNull: true,
         references: {
-          model: 'livestreams',
-          key: 'id'
+          model: 'featuredContentBases',
+          key: 'id',
         },
-        onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
       },
+
+      featuredContentAbnormalId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'featuredContentAbnormals',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+        onUpdate: 'CASCADE',
+      },
+
+      date: {
+        type: DataTypes.DATE,
+        defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
+      },
+
       videoId: {
         type: DataTypes.UUID,
         allowNull: true,
@@ -41,12 +74,6 @@ module.exports = (sequelize, DataTypes) => {
         },
         onUpdate: 'CASCADE',
         onDelete: 'CASCADE',
-      },
-      startAt: {
-        type: DataTypes.DATE,
-      },
-      expireAt: {
-        type: DataTypes.DATE,
       },
     },
     {

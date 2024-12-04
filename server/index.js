@@ -24,6 +24,8 @@ const donationRouter = require("./routes/donationRoute.js");
 const cashoutRoute = require("./routes/cashoutRoute.js");
 const categoryFollowRoute = require("./routes/categoryFollowRoute.js");
 const adminRoute = require("./routes/adminRoute.js");
+const featuredContentBaseRouter = require("./routes/featuredContentBaseRoute.js");
+const featuredContentAbnormalRouter = require("./routes/featuredContentAbnormalRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -67,6 +69,8 @@ app.use("/api/repPackage", repPackageRouter);
 app.use("/api/cashout", cashoutRoute);
 app.use("/api/categoryFollow", categoryFollowRoute);
 app.use("/api/featuredContent", featuredContentRouter);
+app.use("/api/featuredContentBase", featuredContentBaseRouter);
+app.use("/api/featuredContentAbnormal", featuredContentAbnormalRouter);
 app.use('/api/search', searchRouter)
 app.use("/api/donationItem", donationItemRouter);
 app.use("/api/donate", donationRouter);
