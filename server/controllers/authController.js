@@ -1,12 +1,12 @@
 const responseHandler = require("../middlewares/responseHandler");
 const { setCookies, clearCookies } = require("../utils/cookies.js");
-var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, loginAdmin } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
 const passport = require('passport');
 require('../utils/google/passport.js');
-require('../utils/facebook/passport.js'); 
+require('../utils/facebook/passport.js');
 
 var {
   login,
@@ -21,6 +21,23 @@ var {
 // authenticate
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
+
+  if (loginResult.cookie) {
+    setCookies([
+      {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
+      {name: 'isLogin', value: 'true', days: 15}
+    ])(req, res);
+  }
+
+  responseHandler(loginResult.status, loginResult.data, loginResult.message)(
+    req,
+    res,
+    next
+  );
+};
+
+const loginAdminController = async (req, res, next) => {
+  const loginResult = await loginAdmin(req.body);
 
   if (loginResult.cookie) {
     setCookies([
@@ -195,4 +212,5 @@ module.exports = {
   facebookCallback,
   sendMailVerifyFacebookController,
   verifyAccountFacebookController,
+  loginAdminController,
 };
