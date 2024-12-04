@@ -1,13 +1,30 @@
 <script setup>
-  import { ref, onMounted, onBeforeUnmount } from 'vue';
+  import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
   import { Chart, registerables } from 'chart.js';
+
+  const props = defineProps({
+    chartMoneyData: {
+      type: Object,
+      required: true,
+    },
+  });
 
   const lineChart = ref(null);
   let chartInstance = null;
-  onMounted(() => {
-    Chart.register(...registerables);
 
-    const data = {
+  const formatChartData = (chartMoneyData) => {
+    const months = Array.from({ length: 12 }, (_, i) => i + 1); // Tháng 1-12
+    const earnings = months.map(
+      (month) => chartMoneyData.moneyEarn.find((data) => data.month === month)?.totalMoney || 0,
+    );
+    const spend = months.map(
+      (month) => chartMoneyData.moneyWithdraw.find((data) => data.month === month)?.totalMoney || 0,
+    );
+    const revenue = months.map(
+      (month) => chartMoneyData.revenue.find((data) => data.month === month)?.totalMoney || 0,
+    );
+
+    return {
       labels: [
         'January',
         'February',
@@ -25,7 +42,7 @@
       datasets: [
         {
           label: 'Earnings',
-          data: [0, 2, 43, 12, 10, 32, 0, 0, 43, 40, 32, 90],
+          data: earnings,
           borderColor: 'rgb(0, 143, 251,1)',
           backgroundColor: 'rgb(0, 143, 251,0.2)',
           tension: 0.4,
@@ -36,7 +53,7 @@
         },
         {
           label: 'Spend',
-          data: [12, 30, 25, 50, 60, 75, 80, 85, 100, 90, 95, 110],
+          data: spend,
           borderColor: 'rgb(254, 176, 25, 1)',
           backgroundColor: 'rgb(254, 176, 25, 0.2)',
           tension: 0.4,
@@ -47,7 +64,7 @@
         },
         {
           label: 'Revenue',
-          data: [5, 10, 15, 20, 25, 30, 35, 45, 55, 65, 75, 85],
+          data: revenue,
           borderColor: 'rgb(19, 208, 180)',
           backgroundColor: 'rgb(19, 208, 180, 0.2)',
           tension: 0.4,
@@ -58,7 +75,10 @@
         },
       ],
     };
+  };
 
+  const createChart = () => {
+    const data = formatChartData(props.chartMoneyData);
     const options = {
       responsive: true,
       maintainAspectRatio: false,
@@ -69,13 +89,28 @@
       },
     };
 
-    // Khởi tạo biểu đồ
     chartInstance = new Chart(lineChart.value, {
       type: 'line',
       data,
       options,
     });
+  };
+
+  onMounted(() => {
+    Chart.register(...registerables);
+    createChart();
   });
+
+  watch(
+    () => props.chartMoneyData,
+    () => {
+      if (chartInstance) {
+        chartInstance.destroy();
+      }
+      createChart();
+    },
+    { deep: true },
+  );
 
   onBeforeUnmount(() => {
     if (chartInstance) {
