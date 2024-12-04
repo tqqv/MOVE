@@ -2,12 +2,14 @@
   import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
   import { Chart, registerables } from 'chart.js';
   import Filter from '@/components/Filter.vue';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     chartMoneyData: {
       type: Object,
       required: true,
     },
+    isLoadingDashboard: Boolean,
   });
   const emit = defineEmits(['yearSelected']);
 
@@ -164,15 +166,20 @@
     <div class="flex justify-between">
       <h1 class="text-primary font-bold uppercase">Income Chart</h1>
       <!-- Dropdown chọn năm -->
+      <Skeleton v-if="isLoadingDashboard" width="10rem" height="30px" />
+
       <Filter
+        v-else
         title="Select Year"
         :options="availableYears"
         @change="onYearChange"
         :defaultValue="selectedYear"
       />
     </div>
+    <Skeleton v-if="isLoadingDashboard" width="100%" height="450px" />
+
     <!-- Biểu đồ -->
-    <div class="h-full">
+    <div v-else class="h-full">
       <canvas ref="lineChart"></canvas>
     </div>
   </div>

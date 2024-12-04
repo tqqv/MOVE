@@ -1,12 +1,14 @@
 <script setup>
   import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
   import { Chart, registerables } from 'chart.js';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     userTypeData: {
       type: Object,
       required: true,
     },
+    isLoadingDashboard: Boolean,
   });
 
   const pieChart = ref(null);
@@ -68,7 +70,21 @@
 <template>
   <div class="flex flex-col gap-y-2 h-[400px]">
     <h1 class="text-primary font-bold uppercase">Overview Chart</h1>
-    <div class="h-full">
+    <Skeleton
+      v-if="isLoadingDashboard"
+      width="10rem"
+      height="20px"
+      class="flex justify-center items-center mx-auto mb-6"
+    />
+    <Skeleton
+      v-if="isLoadingDashboard"
+      width="350px"
+      height="400px"
+      shape="circle"
+      class="flex justify-center items-center mx-auto"
+    />
+
+    <div v-else class="h-full">
       <canvas ref="pieChart"></canvas>
     </div>
   </div>
