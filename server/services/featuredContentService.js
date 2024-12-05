@@ -175,19 +175,79 @@ const getAllFeatureContentService = async (datetime) => {
       include: [
         {
           model: Channel,
-          attributes: ["isLive"],
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
           as: "channelBooking",
           include: [
             {
               model: Livestream,
+              attributes: [
+                'title', 'description', 'thumbnailUrl', 'isLive',
+                [
+                  sequelize.literal(`(
+                    SELECT AVG(rating) as ratings
+                    FROM ratings
+                    WHERE ratings.livestreamId = id
+                  )`),
+                  'ratings'
+                ]
+              ],
               where: {isLive: true},
               as: "channelLivestreams",
+              include: [
+                {
+                  model: LevelWorkout,
+                  attributes: ["levelWorkout"],
+                  as: "livestreamLevelWorkout",
+                },
+                {
+                  model: Category,
+                  attributes: ["title"],
+                  as: "category",
+                },
+              ]
+            },
+            {
+              model: User,
+              attributes: ["username"]
             }
           ]
         },
         {
           model: Video,
-          as:"video"
+          as:"video",
+          include: [
+            {
+              model: Channel,
+              as: 'channel',
+              attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
+
+                [
+                                sequelize.literal(`(
+                                  SELECT AVG(rating)
+                                  FROM ratings
+                                  WHERE ratings.videoId = video.id
+                                )`),
+                                'averageRating'
+                ]
+              ],
+              include: [
+                {
+                  model: User,
+                  attributes: ["username"]
+                },
+              ]
+            },
+            {
+              model: Category,
+              as: 'category',
+              attributes: ['title']
+            },
+            {
+              model: LevelWorkout,
+              as: 'levelWorkout',
+              attributes: ['levelWorkout']
+            }
+          ]
         }
       ]
     });

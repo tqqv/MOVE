@@ -67,7 +67,7 @@
       </div>
       <div class="space-y-2">
         <div class="text-base">
-          You have <span class="font-bold">{{ formatNumber(userStore.user.REPs) || 0 }} REP$</span>
+          You have <span class="font-bold">{{ formatNumber(userStore.user.REPs) || 0 }} REPs</span>
         </div>
         <div class="text-sm text-[#777777]">Prices are shown in SGD</div>
       </div>

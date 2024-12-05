@@ -63,7 +63,7 @@
     :perspective="5"
     :space="300"
     height="350"
-    width="961"
+    width="870"
     :controlsVisible="true"
     :startIndex="currentSlide"
     :on-slide-change="handleSlideChanged"
@@ -76,27 +76,28 @@
           <!-- Cột hình ảnh -->
           <div
             class="h-full w-full rounded-md relative transition-all duration-500"
-            :class="{ 'w-[80%]': currentSlide === i }"
+            :class="{ 'w-[75%]': currentSlide === i }"
           >
             <RouterLink
               :to="
                 currentSlide === i
-                  ? slide.livestream
-                    ? `/live/${slide.livestream.livestreamChannel.User.username}`
-                    : `/video/${slide.videoId}`
+                  ? slide.channelBooking
+                    ? `/live/${slide?.channelBooking.User.username}`
+                    : `/video/${slide.video.id}`
                   : ''
               "
               :key="slide.id"
             >
               <LiveStreamScreen
-                v-if="slide.livestream && currentSlide === i"
-                :username="slide.livestream?.livestreamChannel.User.username"
-                :isSlider="true"
+                v-if="slide.channelBooking && currentSlide === i"
+                :username="slide?.channelBooking.User.username"
               />
 
               <img
                 v-else
-                :src="slide.livestream?.thumbnailUrl || slide.video?.thumbnailUrl"
+                :src="
+                  slide.channelBooking?.channelLivestreams.thumbnailUrl || slide.video?.thumbnailUrl
+                "
                 alt="Thumbnail"
                 class="w-full h-full object-cover"
               />
@@ -108,35 +109,31 @@
             v-show="isInfoVisible && currentSlide === i"
             class="flex-col p-6 w-[30%] h-full justify-between hidden xl:block shadow-lg border-2 border-l-0 border-[#f2f1f1] rounded-r-[16px]"
           >
-            <div
-              v-if="slide.livestream?.livestreamChannel.isLive"
-              class="flex items-center space-x-2 pb-2"
-            >
+            <div v-if="slide.channelBooking" class="flex items-center space-x-2 pb-2">
               <div class="size-2 bg-red rounded-full"></div>
               <h3 class="font-bold text-lg">Currently live</h3>
             </div>
             <div class="flex items-center space-x-4">
               <!-- AVATAR -->
               <div class="relative inline-block">
-                <div class="flex items-center justify-center size-14 rounded-full flex-shrink-0">
-                  <img
-                    :src="slide.video?.channel.avatar || slide.livestream?.livestreamChannel.avatar"
-                    alt="Avatar"
-                    class="w-full h-full rounded-full object-cover"
-                  />
-                </div>
+                <RouterLink :to="`/user/${slide.video.channel.User.username}`">
+                  <div class="flex items-center justify-center size-14 rounded-full flex-shrink-0">
+                    <img
+                      :src="slide.video?.channel.avatar || slide?.channelBooking.avatar"
+                      alt="Avatar"
+                      class="w-full h-full rounded-full object-cover"
+                    /></div
+                ></RouterLink>
               </div>
               <div class="flex flex-col justify-center">
                 <!-- CHANNEL NAME -->
                 <div class="flex items-center pt-2">
                   <p class="text-[18px] flex items-center">
-                    <span class="mr-2">
-                      {{
-                        slide.video?.channel.channelName ||
-                        slide.livestream?.livestreamChannel.channelName
-                      }}
-                    </span>
-
+                    <RouterLink :to="`/user/${slide.video.channel.User.username}`">
+                      <span class="mr-2">
+                        {{ slide.video?.channel.channelName || slide?.channelBooking.channelName }}
+                      </span>
+                    </RouterLink>
                     <Verified class="fill-blue" />
                   </p>
                 </div>
@@ -148,7 +145,12 @@
                 <div class="flex items-center mt-2">
                   <rate class="mr-1" />
                   <span class="text-sm font-bold">
-                    {{ formatRating(slide.video?.averageRating || slide.livestream?.ratings) }}
+                    {{
+                      formatRating(
+                        slide.video?.channel.averageRating ||
+                          slide.channelBooking?.channelLivestreams.ratings,
+                      )
+                    }}
                   </span>
                 </div>
               </div>
@@ -157,23 +159,30 @@
               <span class="bg-[#EEEEEE] rounded-full text-black p-2">
                 {{
                   slide.video?.levelWorkout.levelWorkout ||
-                  slide.livestream?.livestreamLevelWorkout.levelWorkout
+                  slide.channelBooking?.channelLivestreams.livestreamLevelWorkout.levelWorkout
                 }}
               </span>
 
               <span class="bg-[#EEEEEE] rounded-full text-black p-2">
-                {{ genreDuration(slide.video?.duration) || slide.livestream?.category.title }}
+                {{
+                  genreDuration(slide.video?.duration) ||
+                  slide.channelBooking?.channelLivestreams.category.title
+                }}
               </span>
             </div>
 
             <div
               class="w-full truncate"
-              :title="slide.video?.description || slide.livestream?.description"
+              :title="
+                slide.video?.description || slide.channelBooking?.channelLivestreams.description
+              "
             >
               <span
                 class="text-[14px] text-body truncate w-full overflow-hidden whitespace-nowrap text-ellipsis"
               >
-                {{ slide.video?.description || slide.livestream?.description }}
+                {{
+                  slide.video?.description || slide.channelBooking?.channelLivestreams.description
+                }}
               </span>
             </div>
           </div>
