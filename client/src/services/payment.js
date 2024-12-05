@@ -70,15 +70,6 @@ const getPaymentHistory = async (page, pageSize, startDate, endDate) => {
   }
 };
 
-const reUploadLive = async (data) => {
-  try {
-    const response = await axiosInstance.post('video/reup', data);
-    return response;
-  } catch (error) {
-    toast.error(error.message);
-    throw error; 
-  }
-};
 export {
   createCardInfo,
   getPaymentHistory,
@@ -87,5 +78,4 @@ export {
   deleteCardInfo,
   getListRepPackage,
   checkout,
-  reUploadLive,
 };

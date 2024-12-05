@@ -431,42 +431,46 @@ const getAllVideosService = async (page, pageSize) => {
   };
 };
 
-const getLatestReupStreamService = async (channelName) => {
+const getLatestReupStreamService = async (channelId) => {
+  try {
   const video = await Video.findOne({
-    where: {
-      livestreamId: { [sequelize.Op.ne]: null },
-    },
-    include: [
-      {
-        model: Channel,
-        where: {
-          channelName: channelName,
+      where: {
+        livestreamId: {
+          [Op.ne]: null // Use Op.ne instead of Op.not
         },
-        attributes: [
-          'channelName', 'bio', 'avatar', 'isLive', 'popularCheck',
-          'facebookUrl', 'instaUrl', 'youtubeUrl',
-          [
-            sequelize.literal(`(
-              SELECT COUNT(*)
-              FROM subscribes
-              WHERE subscribes.channelId = channel.id
-            )`),
-            'followCount',
-          ],
+        status: "public"
+      },
+      include: [
+        {
+          model: Channel,
+          where: {
+            id: channelId,
+          },
+          attributes: [
+            'channelName', 'bio', 'avatar', 'isLive', 'popularCheck',
+            'facebookUrl', 'instaUrl', 'youtubeUrl',
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM subscribes
+                WHERE subscribes.channelId = channel.id
+                )`),
+                'followCount',
+              ],
+            ],
+            as: 'channel',
+          },
+          {
+            model: Category,
+            as: 'category',
+          },
+          {
+            model: LevelWorkout,
+            as: "levelWorkout",
+          },
         ],
-        as: 'channel',
-      },
-      {
-        model: Category,
-        as: 'category',
-      },
-      {
-        model: LevelWorkout,
-        as: "levelWorkout",
-      },
-    ],
-    order: [['createdAt', 'DESC']], // Sắp xếp theo createdAt mới nhất
-  });
+        order: [['createdAt', 'DESC']], // Sắp xếp theo createdAt mới nhất
+      });
 
   if (!video) {
     return {
@@ -481,6 +485,15 @@ const getLatestReupStreamService = async (channelName) => {
     message: 'Get reup stream successfully',
     data: video,
   };
+} catch (error) {
+  console.log(error);
+
+  return {
+    status: 500,
+    message: 'Cannot Get reup stream ',
+    data: null,
+  };
+}
 };
 
 const getVideoByUserIdService = async (channelId, page, pageSize, level, category, sortCondition) => {

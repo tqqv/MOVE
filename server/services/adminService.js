@@ -1,10 +1,13 @@
 const { Op } = require("sequelize");
+var bcrypt = require("bcryptjs");
+var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize } = db;
+const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
 const moment = require('moment');
 
 const setStatusRequestChannel = async(userId, status, text) => {
+  console.log(status);
   try {
     if(!status || !userId) {
       return {
@@ -12,7 +15,7 @@ const setStatusRequestChannel = async(userId, status, text) => {
         message: "Not null."
       }
     }
-    if( status !== "approved" || status !== "rejected" ){
+    if( status !== "approved" && status !== "rejected" ){
       return {
         status: 400,
         message: "Invalid status."
@@ -202,7 +205,7 @@ const getTop5Channel = async() => {
       attributes: [
         'channelName',
         'rep',
-        'avatar'
+        'avatar',
         [
           sequelize.literal(`(
             SELECT COUNT(*)
@@ -292,11 +295,78 @@ const getTop5UserDeposit = async() => {
   }
 }
 
+const userCount = async() => {
+  try {
+    const user = await User.count({where: { role: "user" }})
+    const streamer = await User.count({where: { role: "streamer" }})
+    const admin = await User.count({where: { role: "admin" }})
 
+    return {
+      status: 200,
+      data: {
+        user,
+        streamer,
+        admin
+      },
+      message: "Get data user count successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const getAllUsersRequest = async (page, pageSize, sortCondition) => {
+  try {
+    const requestChannels = await RequestChannel.findAndCountAll({
+      attributes: [
+        'id', 'userId', 'status', 'text', 'createdAt', 'updatedAt',
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM reports
+            WHERE reports.targetCommentId IN (SELECT id FROM comments WHERE comments.id = RequestChannel.text)
+            OR reports.targetAccountId = RequestChannel.userId
+          )`),
+          'totalReportCount'
+        ]
+      ],
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'username', 'avatar', 'phoneNumber', 'email', 'REPs', 'createdAt'],
+          where: {
+            isBanned: { [Op.ne]: true } 
+          },
+        }
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+    return {
+      status: 200,
+      data: {
+        data: requestChannels,
+        totalPages: Math.ceil(requestChannels.count/pageSize)
+      },
+      message: "Fetched all request channels with user info and total report count successfully."
+    };
+  } catch (error) {
+      return {
+        status: 500,
+        message: error.message || "Internal Server Error"
+      };
+    }
+  };
 module.exports = {
   setStatusRequestChannel,
   getStatistic,
   getDataChartMoney,
   getTop5Channel,
   getTop5UserDeposit,
+  getAllUsersRequest,
+  userCount,
 }
