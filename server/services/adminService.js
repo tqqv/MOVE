@@ -37,7 +37,14 @@ const setStatusRequestChannel = async(userId, status, text) => {
 
     if(status === "approved") {
       const streamKey = await generatedStreamKey();
-      await createChannel(userId, user.username, user.avatar, streamKey);
+      const channel = await Channel.create({ userId, channelName: user.username, avatar: user.avatar, streamKey })
+      if(!channel) {
+        return {
+            status: 400,
+            data: channel,
+            message: "Create channel failed."
+        }
+      }
       request.status = status;
       await request.save()
       user.role = "streamer";

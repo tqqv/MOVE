@@ -6,6 +6,7 @@ var nodemailer = require("nodemailer");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
 const { totp } = require('otplib');
+const { Op } = require("sequelize");
 
 const generateJwtToken = (user) => {
   return new Promise((resolve, reject) => {
@@ -134,7 +135,12 @@ const register = async (userData) => {
 
 const login = async (userData) => {
   const user = await User.findOne({
-    where: { email: userData.email },
+    where: {
+      email: userData.email,
+      role: {
+        [Op.or]: ['user', 'streamer'],
+      },
+    },
   });
 
   if (!user) {

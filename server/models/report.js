@@ -4,11 +4,11 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Report extends Model {
     static associate(models) {
-      this.belongsTo(models.User, { foreignKey: "reporterId" });
+      this.belongsTo(models.User, { foreignKey: "reporterId", as: "reporter" });
       this.belongsTo(models.Comment, { foreignKey: "targetCommentId" });
       this.belongsTo(models.Video, { foreignKey: "targetVideoId" });
       this.belongsTo(models.Livestream, { foreignKey: "targetLivestreamId" });
-      this.belongsTo(models.User, { foreignKey: "targetAccountId" });
+      this.belongsTo(models.User, { foreignKey: "targetAccountId", as: "targetUser"});
       this.belongsTo(models.Channel, { foreignKey: "targetChannelId" });
       this.belongsTo(models.ReportType, { foreignKey: "reportTypeId" });
     }
