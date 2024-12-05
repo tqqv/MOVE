@@ -5,9 +5,7 @@
   import ChannelList from '../ChannelList.vue';
   import CategoryImage from '../CategoryImage.vue';
   import { onMounted, onUnmounted, ref } from 'vue';
-  import VideoCard from '../VideoCard.vue';
   import Skeleton from 'primevue/skeleton';
-  import { loadMoreScroll } from '@/utils';
   import GirdVideo from '../GirdVideo.vue';
 
   const route = useRoute();
@@ -81,14 +79,22 @@
       } finally {
         loading.value = false;
       }
-      window.addEventListener('scroll', loadMoreScroll(loadMoreData, 200));
     } else {
       loading.value = false;
     }
   });
 
+  onMounted(() => {
+    const container = document.querySelector('.flex-1.overflow-y-scroll');
+    // when near-bottom xay? ra thuc. hien. loadMore
+    container?.addEventListener('near-bottom', loadMoreData);
+  });
+
   onUnmounted(() => {
-    window.removeEventListener('scroll', loadMoreScroll(loadMoreData, 200));
+    const container = document.querySelector('.flex-1.overflow-y-scroll');
+    if (container) {
+      container.removeEventListener('near-bottom', loadMoreData);
+    }
   });
 </script>
 
@@ -125,7 +131,7 @@
             </div>
             <div v-if="loading" class="grid grid-cols-1 lg:grid-cols-4 gap-4 ml-4 my-4">
               <div v-for="n in 4" :key="n" class="flex items-center gap-x-3">
-                <Skeleton shape="circle" size="5rem"></Skeleton>
+                <Skeleton shape="circle" size="5rem" class="flex-shrink-0"></Skeleton>
                 <div class="flex flex-col gap-y-3">
                   <Skeleton width="9rem" height="1rem"></Skeleton>
                   <Skeleton width="5rem" height="1rem"></Skeleton>
@@ -135,7 +141,7 @@
             <ChannelList v-if="!loading" :users="users" />
             <div v-if="loadingMore" class="grid grid-cols-1 lg:grid-cols-4 gap-4 ml-4 my-4">
               <div v-for="n in 4" :key="n" class="flex items-center gap-x-3">
-                <Skeleton shape="circle" size="5rem"></Skeleton>
+                <Skeleton shape="circle" size="5rem" class="flex-shrink-0"></Skeleton>
                 <div class="flex flex-col gap-y-3">
                   <Skeleton width="9rem" height="1rem"></Skeleton>
                   <Skeleton width="5rem" height="1rem"></Skeleton>

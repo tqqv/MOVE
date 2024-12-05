@@ -20,7 +20,7 @@
 <template>
   <div
     ref="scrollContainerRef"
-    class="flex-1 mr-0.5 mt-[72px] min-h-screen overflow-y-scroll bg-[#fafafb]"
+    class="flex-1 mr-0.5 mt-[72px] min-h-screen overflow-y-scroll mb-7 bg-[#fafafb] "
   >
     <slot></slot>
   </div>

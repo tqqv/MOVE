@@ -76,6 +76,10 @@
 
   const handleEndLive = async () => {
     try {
+      await updateLiveStream({
+        livestreamId: liveStreamId.value,
+        duration: props.elapsedTime,
+      });
       const response = await endLiveStream({ streamKey: streamerStore.streamerChannel.streamKey });
       // console.log(response);
       // router.push('/streaming/dashboard-live');
@@ -102,10 +106,6 @@
     () => props.liveStatus,
     async (newValue) => {
       if (newValue === 'streamEnded') {
-        const response = await updateLiveStream({
-          livestreamId: liveStreamId.value,
-          duration: props.elapsedTime,
-        });
         emit('stopTimer');
         await liveStreamStore.fetchLiveStreamData(streamerStore.streamerChannel?.User?.username);
       } else if (newValue === 'streamReady') {
@@ -115,16 +115,6 @@
       }
     },
   );
-
-  watch(
-    () => props.elapsedTime,
-    (newVal, oldVal) => {
-      console.log('Elapsed Time changed:', oldVal, '=>', newVal);
-    },
-  );
-  onMounted(() => {
-    console.log(props.elapsedTime);
-  });
 </script>
 <template>
   <section

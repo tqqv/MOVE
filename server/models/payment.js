@@ -26,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
         onDelete: 'CASCADE',
     },
       amount: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.FLOAT,
         allowNull: false,
       },
       rep: {

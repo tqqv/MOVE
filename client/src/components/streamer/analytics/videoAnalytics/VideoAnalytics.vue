@@ -60,7 +60,6 @@
   const selectedPageSize = ref(pageSizeOptions[0].name);
 
   const fetchVideos = async () => {
-    isLoadingVideoAnalytics.value = true;
     try {
       const response = await getVideoSetting(
         currentPage.value,
@@ -82,12 +81,16 @@
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
+      isLoadingVideoAnalytics.value = true;
+
       fetchVideos();
     }
   };
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
+      isLoadingVideoAnalytics.value = true;
+
       fetchVideos();
     }
   };

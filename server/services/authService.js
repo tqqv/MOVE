@@ -3,7 +3,6 @@ var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const { User, RequestChannel, Channel } = db;
 var nodemailer = require("nodemailer");
-const { createChannel, generatedStreamKey } = require("./channelService.js");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
 const { totp } = require('otplib');
@@ -173,6 +172,51 @@ const login = async (userData) => {
       { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
     );
   }
+
+  // set token in cookies
+  return {
+    cookie: {
+      cookieName: "accessToken",
+      token: token,
+    },
+    status: 200,
+    message: "Successfully login",
+    data: {
+      token: token,
+      role: user.dataValues.role,
+    },
+  };
+};
+
+const loginAdmin = async (userData) => {
+  const user = await User.findOne({
+    where: { email: userData.email, role: "admin" },
+  });
+
+  if (!user) {
+    return {
+      status: 400,
+      message: "Email does not exist",
+    };
+  }
+
+  const checkCorrectPassword = await bcrypt.compare(
+    userData.password,
+    user.password
+  );
+
+  if (!checkCorrectPassword) {
+    return {
+      status: 400,
+      message: "Incorrect email or password",
+    };
+  }
+
+  token = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+  );
 
   // set token in cookies
   return {
@@ -432,53 +476,6 @@ const resetPassword = async (email, userId, newPassword, confirmPassword) => {
 };
 // logic Forgot password - END
 
-const statusRequestChannel = async(userId, status) => {
-  // API của admin
-  try {
-    const request = await RequestChannel.findOne({
-      where: {
-        userId: userId
-      }
-    })
-    if(!request){
-      return {
-        status: 400,
-        message: "Request not found."
-      }
-    }
-
-    const user = await User.findByPk(userId);
-
-    if(!user) {
-      return {
-        status: 400,
-        message: "User not found"
-      }
-    }
-
-    request.status = status;
-    await request.save()
-
-    if(status === "approved") {
-      const streamKey = await generatedStreamKey();
-      await createChannel(userId, user.username, user.avatar, streamKey);
-      user.role = "streamer";
-      await user.save();
-    }
-
-    return {
-      status: 200,
-      message: "Update status successfully."
-    }
-
-  } catch (error) {
-    return {
-      status: 500,
-      message: error.message
-    }
-  }
-}
-
 // Facebook send mail and verify account - START
 const sendMailVerifyFacebook = async (email, fullName) => {
   try {
@@ -653,12 +650,11 @@ module.exports = {
   verifyAccount,
   resetPassword,
   verifyTokenRs,
-  statusRequestChannel,
   generateJwtToken,
   sendMailVerifyFacebook,
   verifyAccountFacebook,
   generateUniqueReferralCode,
   sendMailConfirmWithdrawMethod,
-  verifyOtp
-
+  verifyOtp,
+  loginAdmin,
 };

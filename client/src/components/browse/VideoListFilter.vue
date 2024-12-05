@@ -2,12 +2,10 @@
   import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
   import Filter from '@components/Filter.vue';
   import GirdVideo from '@/components/GirdVideo.vue';
-  import Paginator from 'primevue/paginator';
   import EmptyPage from '@/pages/EmptyPage.vue';
   import { useCategoriesStore } from '@/stores';
   import { useLevelWorkoutStore } from '@/stores';
   import Skeleton from 'primevue/skeleton';
-  import { loadMoreScroll } from '@/utils';
 
   const props = defineProps({
     title: {
@@ -77,7 +75,8 @@
 
   // LOADING MORE
   async function loadMoreData() {
-    if (isFetchingMore.value || currentPage.value >= totalPage.value) return;
+    if (videos.value.length === 0 || isFetchingMore.value || currentPage.value >= totalPage.value)
+      return;
     isFetchingMore.value = true;
     loadingMore.value = true;
     currentPage.value += 1;
@@ -139,12 +138,18 @@
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
-    // await fetchVideos();
-    window.addEventListener('scroll', loadMoreScroll(loadMoreData, 200));
+  });
+
+  onMounted(() => {
+    const container = document.querySelector('.flex-1.overflow-y-scroll');
+    container?.addEventListener('near-bottom', loadMoreData);
   });
 
   onUnmounted(() => {
-    window.removeEventListener('scroll', loadMoreScroll(loadMoreData, 200));
+    const container = document.querySelector('.flex-1.overflow-y-scroll');
+    if (container) {
+      container.removeEventListener('near-bottom', loadMoreData);
+    }
   });
 </script>
 

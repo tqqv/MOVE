@@ -3,6 +3,9 @@ const db = require("../models/index.js");
 const livestream = require("../models/livestream.js");
 const { set, get } = require("../utils/redis/base/redisBaseService.js");
 const { getNumOfConnectInRoom } = require("./socketService.js");
+const StreamKeys = require("../utils/redis/key/streamKey.js");
+const _redis = require("../utils/redis/config.js");
+const { getTopDonatorsWithDetails, clearStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize, ViewVideo } = db;
 
 const createLivestream = async(data) => {
@@ -114,6 +117,7 @@ const getLivestreamService = async (username) => {
     const channel = await Channel.findOne({
       where: { userId: user.id}
     });
+
     const livestream = await Livestream.findOne({
       where: { streamerId: channel.id },
       order: [['createdAt', 'DESC']],
@@ -131,9 +135,93 @@ const getLivestreamService = async (username) => {
 
       ]
     });
+
+    const totalRepsData = await Livestream.findOne({
+      where: { id: livestream.id },
+      attributes: [
+        'totalShare',
+        [Sequelize.fn('SUM', Sequelize.col('streamDonator.REPs')), 'totalReps']
+      ],
+      include: [
+        {
+          model: Donation,
+          as: 'streamDonator',
+          attributes: []
+        }
+      ],
+      group: ['Livestream.id']
+    });
+
+    const averageRatingData = await Livestream.findOne({
+      where: { id: livestream.id },
+      attributes: [
+        [Sequelize.fn('AVG', Sequelize.col('streamRator.rating')), 'averageRating']
+      ],
+      include: [
+        {
+          model: Rating,
+          as: 'streamRator',
+          attributes: []
+        }
+      ],
+      group: ['Livestream.id']
+    });
+
+
+    // Lấy topDonators
+    const donations = await Donation.findAll({
+      where: { livestreamId: livestream.id }, // Lọc theo livestream cụ thể
+      attributes: [
+        'userId',
+        [Sequelize.fn('SUM', Sequelize.col('Donation.REPs')), 'totalReps'], // Tổng số REPs
+      ],
+      group: ['Donation.userId', 'User.id', 'Channel.id'], // Nhóm theo userId, User.id và Channel.id
+      order: [[Sequelize.literal('totalReps'), 'DESC']], // Sắp xếp giảm dần theo REPs
+      limit: 7, // Lấy top 7
+      include: [
+        {
+          model: User, // Thông tin user
+          attributes: ['id', 'username', 'avatar'], // Lấy các cột từ User
+        },
+        {
+          model: Channel, // Thông tin channel
+          attributes: ['id', 'channelName', 'avatar'], // Các cột từ Channel
+          required: false, // Đảm bảo truy vấn vẫn chạy nếu không có Channel (nếu không có channel)
+        },
+      ],
+    });
+
+    console.log(donations);
+
+
+    // Định dạng dữ liệu theo yêu cầu
+    // Định dạng dữ liệu theo yêu cầu
+    const topDonators = donations.map((donation) => {
+      const channel = donation.dataValues.Channel; // Lấy Channel từ donation
+      const user = donation.dataValues.User; // Lấy User từ donation
+      const donator = channel || user; // Nếu có Channel thì lấy, nếu không lấy User
+
+      return {
+        donatorId: donator.id, // Lấy ID từ Channel nếu có, nếu không lấy ID từ User
+        donatorName: donator.channelName || donator.username, // Lấy tên từ Channel nếu có, nếu không lấy từ User
+        donatorAvatar: donator.avatar, // Lấy avatar từ Channel hoặc User
+        username: user.username, // Luôn trả về username
+        totalReps: parseInt(donation.dataValues.totalReps), // Tổng REPs
+        isChannel: !!channel, // Kiểm tra nếu là channel
+      };
+    });
+    // await clearStreamStats(channel.id);
     return {
       status: 200,
-      data: {channel, livestream},
+      data: {
+        channel,
+        livestream: {
+          ...livestream.toJSON(),
+          totalReps: totalRepsData.get('totalReps') || 0,
+          avgRates: averageRatingData.get('averageRating') || 0,
+          topDonators,
+        }
+      },
       message: 'Retrieve data success'
     };
   } catch (error) {
@@ -657,7 +745,6 @@ const countNewFollowersDuringStream = async (channelId, createdAt, duration) => 
     throw error;
   }
 };
-
 
 
 module.exports = {

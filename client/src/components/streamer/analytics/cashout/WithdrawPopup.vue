@@ -32,7 +32,21 @@
   };
 
   const toogleProcessingPaymentVisible = async () => {
+    if (!repInput || repInput.value < 2500) {
+      toast.error(`You need to enter a REPs value greater than ${props.minWithdraw}.`);
+      return;
+    }
+    if (
+      !repInput.value ||
+      isNaN(repInput.value) ||
+      repInput.value <= 0 ||
+      !Number.isInteger(+repInput.value)
+    ) {
+      toast.error('Please enter a valid integer value.');
+      return;
+    }
     isLoadingWithdraw.value = true;
+
     try {
       console.log(repInput.value);
 
@@ -48,7 +62,6 @@
         await userStore.fetchUserProfile();
       } else {
         console.error(res.message);
-        toast.error(`You need to enter a REPs value greater than ${props.minWithdraw}.`);
       }
     } catch (error) {
       console.error(error);
@@ -97,12 +110,12 @@
         <div class="flex flex-col text-base w-2/3">
           <div class="flex gap-x-2 pb-2">
             <div>Withdraw value</div>
-            <div>(Estimated value ${{ estimatedValue }})</div>
+            <div>(Estimated value ${{ formatNumber(estimatedValue) }})</div>
           </div>
           <div class="flex items-center gap-x-4">
             <div class="relative text-[14px] rounded-lg normal_password flex-1">
               <input
-                type="text"
+                type="number"
                 required
                 class="password_custom h-full"
                 :placeholder="minWithdraw"
@@ -123,3 +136,15 @@
     </Dialog>
   </div>
 </template>
+<style>
+  /* Ẩn nút tăng giảm trên các trình duyệt khác nhau */
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  input[type='number'] {
+    -moz-appearance: textfield; /* Dành cho Firefox */
+  }
+</style>

@@ -23,13 +23,15 @@ const donationItemRouter = require("./routes/donationItemRoute.js");
 const donationRouter = require("./routes/donationRoute.js");
 const cashoutRoute = require("./routes/cashoutRoute.js");
 const categoryFollowRoute = require("./routes/categoryFollowRoute.js");
+const adminRoute = require("./routes/adminRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
 const corsOptions = {
-  origin: process.env.CLIENT_HOST,
+  origin: [process.env.CLIENT_HOST, process.env.CLIENT_HOST_ADMIN],
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 let server = app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
@@ -65,12 +67,12 @@ app.use("/api/report", reportRouter);
 app.use("/api/repPackage", repPackageRouter);
 app.use("/api/cashout", cashoutRoute);
 app.use("/api/categoryFollow", categoryFollowRoute);
-
-
 app.use("/api/featuredContent", featuredContentRouter);
 app.use('/api/search', searchRouter)
 app.use("/api/donationItem", donationItemRouter);
 app.use("/api/donate", donationRouter);
+app.use("/api/admin", adminRoute);
+
 // init socket connection
 global._io.on('connection', connectSocket);
 

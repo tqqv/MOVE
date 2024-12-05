@@ -22,7 +22,8 @@ export default {
       'yellow-light': "#FFF6E6",
       'yellow-dark': "#FFB564",
       'purple': "#e05fcd",
-      'dark': "#1c2434"
+      'dark': "#1c2434",
+      'green': '#35cd99'
     },
   },
   plugins: [],

@@ -1,14 +1,12 @@
-const { where } = require("sequelize");
 const responseHandler = require("../middlewares/responseHandler");
 const { setCookies, clearCookies } = require("../utils/cookies.js");
-var { login, register, sendMailVerifyFacebook, verifyAccountFacebook } = require("../services/authService");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, loginAdmin } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
 const passport = require('passport');
 require('../utils/google/passport.js');
 require('../utils/facebook/passport.js');
-
 
 var {
   login,
@@ -18,12 +16,28 @@ var {
   forgotPassword,
   resetPassword,
   verifyTokenRs,
-  statusRequestChannel,
 } = require("../services/authService");
 
 // authenticate
 const loginController = async (req, res, next) => {
   const loginResult = await login(req.body);
+
+  if (loginResult.cookie) {
+    setCookies([
+      {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
+      {name: 'isLogin', value: 'true', days: 15}
+    ])(req, res);
+  }
+
+  responseHandler(loginResult.status, loginResult.data, loginResult.message)(
+    req,
+    res,
+    next
+  );
+};
+
+const loginAdminController = async (req, res, next) => {
+  const loginResult = await loginAdmin(req.body);
 
   if (loginResult.cookie) {
     setCookies([
@@ -103,15 +117,6 @@ const resetPasswordController = async (req, res, next) => {
 
   responseHandler(result.status, null, result.message)(req, res, next);
 };
-
-
-
-const setStatusRqChannel = async (req, res, next) => {
-  const data = req.body;
-  const result = await statusRequestChannel(data.userId, data.status)
-
-  responseHandler(result.status, null, result.message)(req, res, next);
-}
 
 const googleLogin = passport.authenticate('google', { scope: ['profile', 'email'] });
 
@@ -201,11 +206,11 @@ module.exports = {
   sendMailForgotPass,
   resetPasswordController,
   verifyTokenRsController,
-  setStatusRqChannel,
   googleLogin,
   googleCallbackController,
   facebookLogin,
   facebookCallback,
   sendMailVerifyFacebookController,
   verifyAccountFacebookController,
+  loginAdminController,
 };

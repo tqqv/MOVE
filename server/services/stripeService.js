@@ -301,6 +301,12 @@ const deleteStripeAccountId = async(accountId) => {
     //   accountId,
     //   { stripeAccount: "acct_1QP5gA4P7oYbiP6k" }
     // );
+
+    // const account = await stripe.charges.create({
+    //   amount: 999*10000,
+    //   currency: 'sgd',
+    //   source: "tok_bypassPending",
+    // });
     return {
       status: 200,
       data: account,

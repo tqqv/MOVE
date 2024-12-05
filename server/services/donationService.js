@@ -1,7 +1,10 @@
+const { Sequelize } = require("sequelize");
 const db = require("../models/index.js");
+const { avgRates } = require("../utils/redis/key/streamKey.js");
+const { updateStreamStats, reRankingTopDonators } = require("../utils/redis/stream/redisStreamService.js");
 const { Donation, Livestream, DonationItem, Channel, User } = db;
 
-const donateLivestream = async (userId, livestreamId, donationItemId, content) => {
+const donateLivestream = async (userId, donatorChannelId, livestreamId, donationItemId, content) => {
   try {
     if (!livestreamId || !donationItemId) {
       return {
@@ -10,7 +13,7 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
       };
     }
 
-    const [livestream, donationItem, user] = await Promise.all([
+    const [livestream, donationItem] = await Promise.all([
       Livestream.findOne({
         where: {
           id: livestreamId,
@@ -22,12 +25,22 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
           id: donationItemId,
         },
       }),
-      User.findOne({
-        where: {
-          id: userId,
-        },
-      }),
+
     ]);
+    let donatorChannel;
+    if(donatorChannelId) {
+      donatorChannel = await Channel.findOne({
+        where: {
+          id: donatorChannelId,
+        },
+      })
+    }
+
+    let user = await User.findOne({
+      where: {
+        id: userId || donatorChannel.userId,
+      },
+    })
 
     if (!livestream) {
       return {
@@ -59,14 +72,47 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
     const [donation] = await Promise.all([
       Donation.create({
         userId,
+        donatorChannelId,
         livestreamId,
         donationItemId,
         content,
         REPs: donationItem.REPs,
       }),
-      user.update({ REPs: user.REPs - donationItem.REPs }),
-      channel.update({ rep: channel.rep + donationItem.REPs }),
+      User.decrement('REPs', {
+        by: donationItem.REPs,
+        where: { id: userId } // Điều kiện giảm REPs cho đúng user
+      }),
+      Channel.increment('rep', {
+        by: donationItem.REPs,
+        where: { id: channel.id } // Điều kiện tăng rep cho đúng channel
+      }),
     ]);
+
+    const totalDonate = await Donation.findAll({
+      where: {
+          userId: userId,
+          livestreamId: livestreamId
+      },
+      attributes: [
+          [Sequelize.fn('SUM', Sequelize.col('REPs')), 'totalDonation']
+      ],
+      raw: true
+    });
+
+    const totalDonateValue = totalDonate[0]?.totalDonation || 0;
+
+    updateStreamStats(livestream.streamerId, "increment", "totalReps", donationItem.REPs),
+    reRankingTopDonators(
+      livestream.streamerId,
+      {
+        donatorName: donatorChannel ? donatorChannel.channelName : user.username,
+        donatorId: donatorChannel ? donatorChannel.id : user.id,
+        donatorAvatar: donatorChannel ? donatorChannel.avatar : user.avatar,
+        username: user.username,
+        isChannel: donatorChannel ? true : false
+      },
+      totalDonateValue
+    )
 
     return {
       status: 200,
@@ -74,6 +120,8 @@ const donateLivestream = async (userId, livestreamId, donationItemId, content) =
       message: "Donation successfully created.",
     };
   } catch (error) {
+    console.log(error);
+
     return {
       status: 500,
       message: error.message,
