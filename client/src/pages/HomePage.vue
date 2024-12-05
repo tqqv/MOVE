@@ -16,6 +16,18 @@
   const dataSlider = ref([]);
   const isLoadingSlider = ref(true);
   const videos = ref([]);
+  const currentDate = ref('');
+  const localDate = new Date();
+
+  const formatDate = () => {
+    const year = localDate.getFullYear().toString();
+    const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
+    const day = localDate.getDate().toString().padStart(2, '0');
+
+    currentDate.value = `${year}/${month}/${day}`;
+  };
+
+  formatDate();
 
   const fetchAllCategoriesHaveView = async () => {
     try {
@@ -28,13 +40,13 @@
     }
   };
 
-  const fetchDataSlider = async () => {
+  const fetchDataSlider = async (currentDate) => {
     isLoadingSlider.value = true;
     try {
-      const res = await getDataSlider();
+      const res = await getDataSlider(currentDate);
 
       if (res.data.success) {
-        dataSlider.value = res.data.data.updatedLivestreams;
+        dataSlider.value = res.data.data;
       }
     } catch (error) {
       console.error(error.message);
@@ -55,15 +67,9 @@
   };
   onMounted(async () => {
     fetchAllCategoriesHaveView();
-    fetchDataSlider();
+    await fetchDataSlider(currentDate.value);
     fetchVideoYouMayLike();
   });
-  // watch(isLoadingSlider, (newVal, oldVal) => {
-  //   console.log(`isLoadingSlider changed from ${oldVal} to ${newVal}`);
-  //   if (!newVal) {
-  //     console.log('Slider has finished loading.');
-  //   }
-  // });
 </script>
 
 <template>
