@@ -17,7 +17,6 @@
       required: true,
     },
   });
-  console.log(props.videos);
 </script>
 <template>
   <div v-for="video in videos" :key="video.id" class="overflow-hidden w-full px-2">

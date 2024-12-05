@@ -84,7 +84,7 @@
           <RouterLink
             :to="item.isLive ? `/live/${item.User.username}` : `/user/${item.User.username}`"
           >
-            <div class="flex relative justify-center">
+            <div class="flex relative justify-cente">
               <div
                 :class="[
                   'flex items-center justify-center w-16 h-16 rounded-full',
@@ -106,15 +106,15 @@
           <RouterLink :to="`/user/${item.User.username}`">
             <div class="flex flex-col items-center text-center">
               <p
-                class="text-[20px] flex items-center justify-center pl-10 whitespace-nowrap"
+                class="text-[20px] flex items-center justify-center whitespace-nowrap"
                 :title="item.channelName"
               >
                 {{ truncateDescripton(item.channelName, 20) }}
                 <Verified v-if="item.popularCheck" class="mx-2 fill-blue" />
               </p>
               <p class="text-[14px] text-body">{{ item.followCount ?? 0 }} followers</p>
-            </div></RouterLink
-          >
+            </div>
+          </RouterLink>
         </div>
       </div>
     </div>

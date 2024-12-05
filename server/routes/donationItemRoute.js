@@ -4,7 +4,6 @@ const { createDonationItemController, getAllDonationItemController, editCategory
 const donationItemRouter = express.Router();
 
 
-donationItemRouter.post('/', verifyAdmin, createDonationItemController);
 donationItemRouter.get('/', getAllDonationItemController);
 
 

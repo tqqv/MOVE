@@ -26,11 +26,8 @@
     const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
     if (createdAt) {
       timer = setInterval(() => {
-        console.log('create', createdAt);
         const currentTime = new Date();
-        console.log('curre', currentTime);
         elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
-        // console.log(elapsedTime.value);
       }, 1000);
     }
   };
@@ -57,7 +54,6 @@
 
       listenStreamMetrics((metrics) => {
         metricsData.value = metrics;
-        // console.log('Stream Metrics:', metrics);
       });
     }
   };
@@ -114,7 +110,11 @@
   // Re-fetch data when route changes
   watch(
     () => route.fullPath,
-    async (newPath) => {
+    async (newPath, oldPath) => {
+      if (oldPath.includes('stream-setup')) {
+        disconnectLivestream();
+      }
+
       if (newPath.includes('dashboard-live')) {
         await streamerStore.fetchProfileChannel();
         handleConnectOBS();

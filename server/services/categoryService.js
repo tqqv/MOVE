@@ -83,7 +83,7 @@ const editCategory = async(cateId, data) => {
       }
     }
     // update cate trong db
-    const updateCate = await user.update(data)
+    const updateCate = await category.update(data)
     if(!updateCate) {
       return {
         status: 400,

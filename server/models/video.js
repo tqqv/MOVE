@@ -111,6 +111,15 @@ module.exports = (sequelize, DataTypes) => {
           type: DataTypes.UUID,
           allowNull: true,
         },
+        livestreamId: {
+          type: DataTypes.UUID,
+          references: {
+            model: 'livestreams', // Reference to the users table
+            key: 'id',
+          },
+          onDelete: 'CASCADE',
+          onUpdate: 'CASCADE',
+      },
         status: {
           type: DataTypes.ENUM('public', 'private', 'restricted'),
           allowNull: false,
