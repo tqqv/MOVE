@@ -12,8 +12,8 @@ const postSignup = async (data) => {
 
 const postLogin = async (data) => {
   try {
-    const response = await axios.post('/auth/login', data);
-    return response.data;
+    const response = await axios.post('/admin/login', data);
+    return response;
   } catch (error) {
     const errorData = error.response ? error.response.data : { message: error.message };
     return { error: true, ...errorData };
@@ -21,7 +21,7 @@ const postLogin = async (data) => {
 };
 
 const getLogout = () => {
-  return axios.get('/auth/logout');
+  return axios.get('/admin/logout');
 };
 
 const getLoginGoogle = () => {
