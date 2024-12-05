@@ -346,51 +346,47 @@ const getBookingFeatureContentService = async (startDate, endDate, channelId) =>
   }
 
   try {
-    const bookings = await FeaturedContent.findAll({
+    // Lấy thông tin chi tiết mà không bị trùng lặp
+    const detailedBookings = await FeaturedContent.findAll({
       attributes: [
         [fn("DATE", col("FeaturedContent.date")), "bookingDate"],
+        [fn("COUNT", col("FeaturedContent.id")), "currentBookings"],
         [
-          literal(`(
-            SELECT COUNT(*)
-            FROM featuredContents AS fc
-            WHERE DATE(fc.date) = DATE(FeaturedContent.date)
-          )`),
-          "currentBookings",
-        ],
-        [
-          literal(`(
-            SELECT COUNT(*) > 0
-            FROM featuredContents AS fc
-            WHERE DATE(fc.date) = DATE(FeaturedContent.date)
+          literal(`
+            MAX(CASE WHEN EXISTS (
+              SELECT 1
+              FROM featuredContents AS fc
+              WHERE DATE(fc.date) = DATE(FeaturedContent.date)
               AND fc.channelId = ${channelId}
-          )`),
-          "isBookedByChannel",
+            ) THEN 1 ELSE 0 END)
+          `),
+          "isBookedByChannel"
         ],
+        [fn("MAX", col("featuredBase.maxBookings")), "baseMaxBookings"], // Dùng MAX cho cột featuredBase.maxBookings
+        [fn("MAX", col("featuredAbnormal.maxBookings")), "abnormalMaxBookings"] // Dùng MAX cho cột featuredAbnormal.maxBookings
+      ],
+      include: [
+        {
+          model: FeaturedContentBase,
+          as: "featuredBase",
+          attributes: [] // Không cần lặp lại maxBookings trong include
+        },
+        {
+          model: FeaturedContentAbnormal,
+          as: "featuredAbnormal",
+          attributes: [] // Không cần lặp lại maxBookings trong include
+        }
       ],
       where: {
         date: {
           [Op.between]: [startDate, endDate],
         },
       },
-      include: [
-        {
-          model: FeaturedContentBase,
-          as: 'featuredBase',
-          required: false, // Thêm required: false để LEFT JOIN
-        },
-        {
-          model: FeaturedContentAbnormal,
-          as: 'featuredAbnormal',
-          required: false, // Thêm required: false để LEFT JOIN
-        },
-      ],
-      group: [
-        "FeaturedContent.date",
-        "featuredBase.id",
-        "featuredAbnormal.id"
-      ],
-      raw: false, // Chuyển về false để giữ cấu trúc object
+      group: [literal("DATE(FeaturedContent.date)")],
+      raw: true,
+      order: [[literal("DATE(FeaturedContent.date)"), "ASC"]],
     });
+
 
     const defaultData = await FeaturedContentBase.findOne({
       order: [['createdAt', 'DESC']],
@@ -398,7 +394,7 @@ const getBookingFeatureContentService = async (startDate, endDate, channelId) =>
 
     return {
       status: 200,
-      data: { bookings, defaultData },
+      data: { detailedBookings, defaultData },
       message: "Successfully retrieved bookings grouped by date",
     };
   } catch (error) {
@@ -406,14 +402,66 @@ const getBookingFeatureContentService = async (startDate, endDate, channelId) =>
     return {
       status: 500,
       data: null,
-      message: "An error occurred while fetching bookings",
+      message: error.message,
     };
   }
 };
+
+const getBookDateDetailService = async (datetime) => {
+  try {
+    const abnormal = await FeaturedContentAbnormal.findOne({
+      where: {
+        date: sequelize.where(
+          sequelize.fn('DATE', sequelize.col('FeaturedContentAbnormal.date')),
+          '=',
+          // currentDate
+          datetime
+        )
+      },
+    })
+    if(abnormal) {
+      const bookInfor = await FeaturedContent.findAndCountAll({
+        where: {
+          featuredContentAbnormalId: abnormal.id,
+        },
+      })
+      return {
+        status: 200,
+        data: {bookInfor, abnormal}
+      }
+    }
+
+    const defaultData = await FeaturedContentBase.findOne({
+      order: [['createdAt', 'DESC']],
+    });
+
+    const bookInfor = await FeaturedContent.findAndCountAll({
+      where: {
+        date: sequelize.where(
+          sequelize.fn('DATE', sequelize.col('FeaturedContent.date')),
+          '=',
+          // currentDate
+          datetime
+        )
+      },
+    })
+    return {
+      status: 200,
+      data: {bookInfor, defaultData}
+    }
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      message: error.message
+    }
+  }
+}
 
 module.exports = {
   createFeatureContentService,
   getAllFeatureContentService,
   createBookingFeatureContentService,
-  getBookingFeatureContentService
+  getBookingFeatureContentService,
+  getBookDateDetailService
 }
