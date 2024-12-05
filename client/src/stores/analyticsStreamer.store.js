@@ -13,10 +13,9 @@ export const useAnalyticsStreamerStore = defineStore('analytics', () => {
 
   const latestStream = ref(null);
   const latestVideo = ref(null);
-  const isLoadingOverview = ref(false);
+  const isLoadingOverview = ref(true);
 
   const fetchOverviewAnalytic = async () => {
-    isLoadingOverview.value = true;
     try {
       const response = await getOverviewAnalytic();
       if (response.status === 200) {

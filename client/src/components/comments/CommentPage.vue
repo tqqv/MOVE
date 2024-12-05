@@ -31,25 +31,47 @@
     fetchChildComments,
     loadMoreComments,
     resetComments,
-    handleSendComment,
     isLoadingComments,
   } = commentStore;
-  console.log(props.videoId);
-  resetComments(props.videoId);
 
-  // watch(
-  //   () => props.videoId,
-  //   () => {
-  //     console.log('change ne', props.videoId);
-  //   },
-  // );
+  watch(
+    () => props.videoId,
+    (newValue) => {
+      console.log('videoId changed:', newValue);
+      resetComments(newValue);
+    },
+    { immediate: true },
+  );
+
   watch(
     () => commentStore.hasMoreComments,
     (newVal) => {},
   );
 
-  onMounted(() => {
-    fetchComments(props.videoId);
+  const handleSendComment = (newComment) => {
+    if (newComment) {
+      commentStore.comments.unshift(newComment);
+
+      newComment.likeCount = newComment.likeCount || 0;
+      console.log(newComment);
+
+      if (newComment.parentId) {
+        totalRepliesCount[newComment.parentId] = (totalRepliesCount[newComment.parentId] || 0) + 1;
+
+        const parentComment = commentStore.comments.find(
+          (comment) => comment.id === newComment.parentId,
+        );
+        if (parentComment) {
+          parentComment.totalRepliesCount = (parentComment.totalRepliesCount || 0) + 1;
+        }
+      }
+    } else {
+      console.error('New comment is undefined or null');
+    }
+  };
+
+  onMounted(async () => {
+    await commentStore.fetchComments(props.videoId);
   });
 </script>
 
@@ -67,7 +89,7 @@
     />
 
     <CommentItem
-      v-for="(comment, index) in comments"
+      v-for="(comment, index) in commentStore.comments"
       v-if="isCommentable"
       :key="comment.id"
       :comment="comment"
@@ -77,7 +99,7 @@
       :hasMoreChildComments="commentStore.hasMoreChildComments[comment.id]"
       :loadingReplies="commentStore.loadingRepliesForComment[comment.id]"
       :videoId="videoId"
-      @fetchComments="fetchComments"
+      @fetchComments="commentStore.fetchComments()"
       :isCommentable="isCommentable"
     />
     <!-- <p    v-if="!comments.length > 0 " class="text-center text-base font-semibold mt-4 bg-gray-light p-8 rounded-lg">

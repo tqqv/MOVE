@@ -1,19 +1,9 @@
 import axios from './axios';
 
-const postSignup = async (data) => {
-  try {
-    const response = await axios.post('/auth/register', data);
-    return response.data;
-  } catch (error) {
-    const errorData = error.response ? error.response.data : { message: error.message };
-    return { error: true, ...errorData };
-  }
-};
-
 const postLogin = async (data) => {
   try {
     const response = await axios.post('/admin/login', data);
-    return response;
+    return response.data;
   } catch (error) {
     const errorData = error.response ? error.response.data : { message: error.message };
     return { error: true, ...errorData };
@@ -24,9 +14,6 @@ const getLogout = () => {
   return axios.get('/admin/logout');
 };
 
-const getLoginGoogle = () => {
-  return axios.get('/auth/google');
-};
 //Forgot
 const getVerifyToken = (token) => {
   return axios.get(`/auth/verify-token/${token}`);
@@ -48,7 +35,6 @@ const acpVerifyMail = (token) => {
 };
 
 export {
-  postSignup,
   postLogin,
   getLogout,
   getVerifyToken,

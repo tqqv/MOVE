@@ -205,7 +205,7 @@ const getTop5Channel = async() => {
       attributes: [
         'channelName',
         'rep',
-        'avatar'
+        'avatar',
         [
           sequelize.literal(`(
             SELECT COUNT(*)
@@ -295,52 +295,28 @@ const getTop5UserDeposit = async() => {
   }
 }
 
-const login = async (userData) => {
-  const user = await User.findOne({
-    where: {
-      email: userData.email,
-      role: 'admin', 
-    },
-  });
+const userCount = async() => {
+  try {
+    const user = await User.count({where: { role: "user" }})
+    const streamer = await User.count({where: { role: "streamer" }})
+    const admin = await User.count({where: { role: "admin" }})
 
-  if (!user) {
     return {
-      status: 400,
-      message: "User not found or not an admin",
+      status: 200,
+      data: {
+        user,
+        streamer,
+        admin
+      },
+      message: "Get data user count successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
     };
   }
-
-  const checkCorrectPassword = await bcrypt.compare(
-    userData.password,
-    user.password
-  );
-
-  if (!checkCorrectPassword) {
-    return {
-      status: 400,
-      message: "Incorrect email or password",
-    };
-  }
-
-  let token = jwt.sign(
-      { id: user.id, role: user.role },
-      process.env.JWT_SECRET_KEY,
-      { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
-    );
-
-  return {
-    cookie: {
-      cookieName: "accessToken",
-      token: token,
-    },
-    status: 200,
-    message: "Successfully login",
-    data: {
-      token: token,
-      role: user.dataValues.role,
-    },
-  };
-};
+}
 
 const getAllUsersRequest = async (page, pageSize, sortCondition) => {
   try {
@@ -370,7 +346,6 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
     });
-
     return {
       status: 200,
       data: {
@@ -380,19 +355,18 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
       message: "Fetched all request channels with user info and total report count successfully."
     };
   } catch (error) {
-    return {
-      status: 500,
-      message: error.message || "Internal Server Error"
-    };
-  }
-};
-
+      return {
+        status: 500,
+        message: error.message || "Internal Server Error"
+      };
+    }
+  };
 module.exports = {
   setStatusRequestChannel,
   getStatistic,
   getDataChartMoney,
   getTop5Channel,
   getTop5UserDeposit,
-  login,
-  getAllUsersRequest
+  getAllUsersRequest,
+  userCount,
 }

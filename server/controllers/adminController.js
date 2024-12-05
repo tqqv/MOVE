@@ -1,10 +1,8 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setCookies, clearCookies} = require("../utils/cookies");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, login, getAllUsersRequest } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount } = require("../services/adminService");
 
 const setStatusRequestChannelController = async (req, res, next) => {
   const data = req.body;
-  console.log(data);
   const result = await setStatusRequestChannel(data.userId, data.status, data.text || null)
 
   responseHandler(result.status, null, result.message)(req, res, next);
@@ -49,39 +47,17 @@ const getAllUsersRequestController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
-const loginController = async (req, res, next) => {
-  const loginResult = await login(req.body);
+const userCountController = async (req, res, next) => {
+  const result = await userCount()
 
-  if (loginResult.cookie) {
-    setCookies([
-      {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
-      {name: 'isLogin', value: 'true', days: 15}
-    ])(req, res);
-  }
-
-  responseHandler(loginResult.status, loginResult.data, loginResult.message)(
-    req,
-    res,
-    next
-  );
-};
-
-const logoutController = async (req, res, next) => {
-  clearCookies([
-    {name: 'accessToken', options: { httpOnly: true }},
-    {name: 'isLogin'}
-  ])(req, res, next);
-
-  responseHandler(200, null, "Logout successful")(req, res, next);
-};
-
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
   getDataChartMoneyController,
   getTop5ChannelController,
   getTop5UserDepositController,
-  loginController,
-  logoutController,
-  getAllUsersRequestController
+  getAllUsersRequestController,
+  userCountController
 }

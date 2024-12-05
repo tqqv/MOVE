@@ -1,14 +1,14 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, loginController, logoutController, getAllUsersRequestController } = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController } = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
+const { loginAdminController } = require("../controllers/authController");
 const adminRoute = express.Router();
 
-//authentication
-adminRoute.post("/login", loginController);
-adminRoute.get("/logout", verifyAdmin, logoutController);
+adminRoute.post("/login", loginAdminController);
 
+adminRoute.get("/userCount", verifyAdmin, userCountController)
 adminRoute.get("/getStatistic", verifyAdmin, getStatisticController)
 adminRoute.get("/getTop5Channel", verifyAdmin, getTop5ChannelController)
 adminRoute.get("/getTop5UserDeposit", verifyAdmin, getTop5UserDepositController)

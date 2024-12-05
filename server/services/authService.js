@@ -188,6 +188,51 @@ const login = async (userData) => {
   };
 };
 
+const loginAdmin = async (userData) => {
+  const user = await User.findOne({
+    where: { email: userData.email, role: "admin" },
+  });
+
+  if (!user) {
+    return {
+      status: 400,
+      message: "Email does not exist",
+    };
+  }
+
+  const checkCorrectPassword = await bcrypt.compare(
+    userData.password,
+    user.password
+  );
+
+  if (!checkCorrectPassword) {
+    return {
+      status: 400,
+      message: "Incorrect email or password",
+    };
+  }
+
+  token = jwt.sign(
+    { id: user.id, role: user.role },
+    process.env.JWT_SECRET_KEY,
+    { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+  );
+
+  // set token in cookies
+  return {
+    cookie: {
+      cookieName: "accessToken",
+      token: token,
+    },
+    status: 200,
+    message: "Successfully login",
+    data: {
+      token: token,
+      role: user.dataValues.role,
+    },
+  };
+};
+
 // setup mail and generate token - START
 const transporter = nodemailer.createTransport({
   service: "gmail",
@@ -610,6 +655,6 @@ module.exports = {
   verifyAccountFacebook,
   generateUniqueReferralCode,
   sendMailConfirmWithdrawMethod,
-  verifyOtp
-
+  verifyOtp,
+  loginAdmin,
 };

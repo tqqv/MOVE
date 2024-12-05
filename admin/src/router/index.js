@@ -13,17 +13,17 @@ import AdminSetting from '@/components/admin/setting/AdminSetting.vue';
 import Cashout from '@/components/admin/rep/Revenue.vue';
 import DonateItem from '@/components/admin/rep/DonateItem.vue';
 import DiscountItem from '@/components/admin/rep/DiscountItem.vue';
-import Login from '@/pages/Login.vue';
+import LoginAdmin from '@/components/admin/login/LoginAdmin.vue';
 
 const routes = [
   {
-    path: '/login',
-    component: Login,
+    path: '/',
+    component: LoginAdmin,
+    name: LoginAdmin,
   },
   {
     path: '/',
     component: AdminLayout,
-    redirect: '/login',
     children: [
       { path: 'dashboard', component: AdminDashboard },
       { path: 'users', component: UserManagement },
