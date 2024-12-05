@@ -31,6 +31,14 @@ jobs:
           cd client
           npm install
           npm run build
+      - name: Create .env for Admin
+        run: |
+          echo "${{ secrets.ADMIN_ENV }}" > admin/.env
+      - name: Install Admin dependencies and build
+        run: |
+          cd admin
+          npm install
+          npm run build
       - name: Reload Nginx
         run: |
           sudo service nginx reload
