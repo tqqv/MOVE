@@ -96,6 +96,7 @@
   };
   const handleYearChange = (year) => {
     selectedYear.value = year;
+
     fetchDataChartMoney(year);
   };
 
@@ -133,18 +134,20 @@
     <!-- CHART -->
     <div class="grid grid-cols-12 gap-4 mt-5">
       <div class="col-span-7 bg-white p-5 rounded shadow">
-        <Skeleton v-if="isLoadingDashboard" width="100%" height="450px" />
-
-        <ChartIncome v-else :chartMoneyData="chartMoneyData" @yearSelected="handleYearChange" />
+        <ChartIncome
+          :isLoadingDashboard="isLoadingDashboard"
+          :chartMoneyData="chartMoneyData"
+          @yearSelected="handleYearChange"
+        />
 
         <!-- Skeleton loader for chart -->
       </div>
       <div class="col-span-5 bg-white p-5 rounded shadow items-center">
-        <div v-if="isLoadingDashboard" class="flex justify-center py-8">
-          <Skeleton width="400px" height="400px" shape="circle" />
-        </div>
-
-        <ChartUser v-else class="flex justify-center" :userTypeData="userTypeData" />
+        <ChartUser
+          class="flex justify-center"
+          :userTypeData="userTypeData"
+          :isLoadingDashboard="isLoadingDashboard"
+        />
 
         <!-- Skeleton loader for user type chart -->
       </div>

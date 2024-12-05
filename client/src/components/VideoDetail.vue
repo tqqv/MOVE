@@ -47,6 +47,10 @@
     liveStreamData: Object,
     listDonation: Array,
     isCommentable: Boolean,
+    isStreamPage: {
+      type: Boolean,
+      default: false,
+    },
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -225,7 +229,13 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="isGiftVisible && username !== props.usernameDetails"
+          v-if="
+            (isGiftVisible &&
+              username !== props.usernameDetails &&
+              props.liveStreamData?.channel?.isLive === true &&
+              isStreamPage) ||
+            !isStreamPage
+          "
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
