@@ -431,11 +431,9 @@ const getAllVideosService = async (page, pageSize) => {
   };
 };
 
-const getLatestReupStreamService = async (channelName) => {
+const getLatestReupStreamService = async (channelId) => {
   try {
-
-
-    const video = await Video.findOne({
+  const video = await Video.findOne({
       where: {
         livestreamId: {
           [Op.ne]: null // Use Op.ne instead of Op.not
@@ -446,7 +444,7 @@ const getLatestReupStreamService = async (channelName) => {
         {
           model: Channel,
           where: {
-            channelName: channelName,
+            id: channelId,
           },
           attributes: [
             'channelName', 'bio', 'avatar', 'isLive', 'popularCheck',

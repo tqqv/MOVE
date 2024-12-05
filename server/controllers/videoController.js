@@ -275,11 +275,11 @@ const reupStreamController = async (req, res, next) => {
 };
 
 const getLatestReupStreamController = async (req, res, next) => {
-  const { channelName } = req.body;
+  const channelId  = req.query.channelId
+  console.log(channelId);
+  
   try {
-    console.log("haivl");
-
-    const result = await getLatestReupStreamService(channelName);
+    const result = await getLatestReupStreamService(channelId);
     responseHandler(result.status, result.data, result.message)(req, res, next);
   } catch (error) {
     responseHandler(error.status, error.data, error.message)(req, res, next);

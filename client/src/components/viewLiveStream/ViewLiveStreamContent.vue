@@ -9,8 +9,6 @@
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
   import NoneLiveStream from './NoneLiveStream.vue';
-  import { onMounted, watch } from 'vue';
-  import ViewReupLive from './ViewReupLive.vue';
 
   const props = defineProps({
     username: String,
@@ -53,6 +51,7 @@
       :liveStreamData="props.liveStreamData"
       :listDonation="props.listDonation"
       :isGiftVisible="true"
+      :isStreamPage="true"
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">
