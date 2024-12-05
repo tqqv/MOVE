@@ -6,7 +6,7 @@
   import { toast } from 'vue3-toastify';
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { useLiveStreamStore } from '@/stores';
-  import { reUploadLive } from '@/services/payment';
+  import { reUploadLive } from '@/services/liveStream';
 
   const liveStreamStore = useLiveStreamStore();
 
