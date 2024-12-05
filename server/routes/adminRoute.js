@@ -3,7 +3,7 @@ const { verifyAdmin } = require("../middlewares/verifyToken");
 const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController } = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
-const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController } = require("../controllers/reportController");
+const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
 const { loginAdminController } = require("../controllers/authController");
 const adminRoute = express.Router();
 
@@ -34,6 +34,7 @@ adminRoute.get("/getListReportComment", verifyAdmin, getListReportCommentControl
 adminRoute.get("/getListReportLivestream", verifyAdmin, getListReportLivestreamController)
 adminRoute.get("/getListReportAccount", verifyAdmin, getListReportAccountController)
 adminRoute.get("/getListReportChannel", verifyAdmin, getListReportChannelController)
+adminRoute.get("/getReportDetail", verifyAdmin, getReportDetailController)
 adminRoute.post("/actionReport", verifyAdmin, actionReportController)
 
 

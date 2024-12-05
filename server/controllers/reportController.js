@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { reportVideo, reportLivestream, reportComment, reportChatMessages, getListReportByType, reportChannel, getListReportVideo, getListReportComment, getListReportLivestream, getListReportAccount, getListReportChannel, actionReport } = require("../services/reportService");
+const { reportVideo, reportLivestream, reportComment, reportChatMessages, getListReportByType, reportChannel, getListReportVideo, getListReportComment, getListReportLivestream, getListReportAccount, getListReportChannel, actionReport, getReportDetail, reportAccount } = require("../services/reportService");
 
 const reportVideoController = async(req, res, next) => {
   const userId  = req.user.id;
@@ -54,6 +54,15 @@ const reportChannelController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const reportAccountController = async(req, res, next) => {
+  const userId  = req.user.id;
+  const accountId = req.body.accountId;
+  const reportTypeId = req.body.reportTypeId;
+  const result = await reportAccount(userId, accountId, reportTypeId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 const getListReportVideoController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
@@ -95,8 +104,19 @@ const getListReportChannelController = async(req, res, next) => {
 }
 
 const actionReportController = async(req, res, next) => {
-  const action = req.query.action;
-  const result = await actionReport(action);
+  const action = req.body.action;
+  const reportId = req.body.reportId;
+  const banned = req.body.banned;
+  const type = req.body.type;
+  const result = await actionReport(reportId, action, banned, type);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getReportDetailController = async(req, res, next) => {
+  const targetReportId = req.query.targetReportId;
+  const type = req.query.type;
+  const result = await getReportDetail(targetReportId, type);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -108,10 +128,12 @@ module.exports = {
   reportChatMessagesController,
   getListReportByTypeController,
   reportChannelController,
+  reportAccountController,
   getListReportVideoController,
   getListReportCommentController,
   getListReportLivestreamController,
   getListReportChannelController,
   getListReportAccountController,
   actionReportController,
+  getReportDetailController,
 }

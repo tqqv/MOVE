@@ -1,6 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
-const { Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, Sequelize } = db;
+const { messages } = require("../utils/redis/key/chatKey.js");
+const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, Sequelize } = db;
 
 const reportVideo = async(userId, videoId, reportTypeId) => {
   try {
@@ -344,6 +345,79 @@ const reportChannel = async(userId, channelId, reportTypeId) => {
     const newReport = await Report.create({
       reporterId: userId,
       targetChannelId: channelId,
+      reportTypeId: reportTypeId
+    })
+
+    return {
+      status: 200,
+      data: newReport,
+      message: "Report has been created successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error
+    }
+  }
+}
+
+const reportAccount = async(userId, accountId, reportTypeId) => {
+  try {
+    if (!userId || !accountId || !reportTypeId) {
+      return {
+        status: 400,
+        data: null,
+        message: "Not null"
+      }
+    }
+
+    const checkUser = await User.findOne({
+      where: {
+        id: userId
+      }
+    })
+
+    if(!checkUser) {
+      return {
+        status: 404,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    const checkAccount = await User.findOne({
+      where: {
+        id: accountId
+      }
+    })
+
+    if(!checkAccount) {
+      return {
+        status: 404,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    const checkReport = await Report.findOne({
+      where: {
+        targetAccountId: accountId,
+        reporterId: userId
+      }
+    })
+
+    if(checkReport){
+      return {
+        status: 200,
+        data: null,
+        message: "You reported this account"
+      }
+    }
+
+    const newReport = await Report.create({
+      reporterId: userId,
+      targetAccountId: accountId,
       reportTypeId: reportTypeId
     })
 
@@ -802,8 +876,259 @@ const actionReport = async(reportId, action, banned, type) => {
   }
 };
 
+const getReportDetail = async(targetReportId, type) => {
+  try {
+    let whereCondition = {};
+    if (!type) {
+      return {
+        status: 400,
+        message: "Type cannot be empty.",
+      };
+    }
+    switch (type) {
+      case 'video':
+        whereCondition.targetVideoId = targetReportId;
+        const reportVideoDetail = await Report.findOne({
+          where: whereCondition,
+          include: [
+            {
+              model: Video,
+              include: [
+                {
+                  model: Channel,
+                  as: 'channel',
+                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+                },
+                {
+                  model: LevelWorkout,
+                  attributes: ['levelWorkout'],
+                  as: "levelWorkout",
+                },
+                {
+                  model: Category,
+                  attributes: ['title'],
+                  as: 'category',
+                }
+              ]
+            },
+            {
+              model: User,
+              as: 'reporter',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            },
+          ]
+        })
 
+        const videoReporters = await Report.findAll({
+          where: {targetVideoId: targetReportId},
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              as: 'reporter',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            },
+            {
+              model: ReportType,
+              attributes: ['description']
+            }
+          ]
+        })
+        return {
+          status: 200,
+          data: {reportVideoDetail , videoReporters},
+          message: 'Get report video detail successful.'
+        }
+      case 'livestream':
+        whereCondition.targetLivestreamId = targetReportId;
+        const reportLivestreamDetail = await Report.findOne({
+          where: whereCondition,
+          include: [
+            {
+              model: Livestream,
+              include: [
+                {
+                  model: Category,
+                  attributes: ["title"],
+                  as: 'category'
+                },
+                {
+                  model: LevelWorkout,
+                  attributes: ["levelWorkout"],
+                  as: 'livestreamLevelWorkout'
+                },
+              ]
+            }
+          ]
+        })
+        const streamReporters = await Report.findAll({
+          where: {targetLivestreamId: targetReportId},
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              as: 'reporter',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            },
+            {
+              model: ReportType,
+              attributes: ['description']
+            }
+          ]
+        })
+        return {
+          status: 200,
+          data: {reportLivestreamDetail, streamReporters},
+          message: 'Get report stream detail successful.'
+        }
 
+      case 'comment':
+        whereCondition.targetCommentId = targetReportId;
+        const reportCommentDetail = await Report.findOne({
+          where: whereCondition,
+          include: [
+            {
+              model: Comment,
+              include: [
+                {
+                  model: Video,
+                  include: [
+                    {
+                      model: Channel,
+                      as: 'channel',
+                      attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+                    },
+                    {
+                      model: LevelWorkout,
+                      attributes: ['levelWorkout'],
+                      as: "levelWorkout",
+                    },
+                    {
+                      model: Category,
+                      attributes: ['title'],
+                      as: 'category',
+                    }
+                  ]
+                },
+                {
+                  model: User,
+                  as: 'userComments',
+                  attributes: ['avatar', 'username', 'email', 'isVerified']
+                },
+                {
+                  model: Channel,
+                  as: 'channelComments',
+                  attributes: ['avatar','channelName', 'popularCheck']
+                },
+                {
+                  model: DonationItem,
+                  as: 'commentDonationItem',
+                  attributes: ['name', 'image']
+                },
+              ]
+            }
+          ]
+        })
+
+        const commentReporters = await Report.findAll({
+          where: {targetCommentId: targetReportId},
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              as: 'reporter',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            },
+            {
+              model: ReportType,
+              attributes: ['description']
+            }
+          ]
+        })
+        return {
+          status: 200,
+          data: {reportCommentDetail, commentReporters},
+          message: 'Get report comment detail successful.'
+        }
+      case 'account':
+        whereCondition.targetAccountId = targetReportId;
+        const reportAccountDetail = await Report.findOne({
+          where: whereCondition,
+          include: [
+            {
+              model: User,
+              as: 'targetUser',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            }
+          ]
+        })
+
+        const accountReporters = await Report.findAll({
+          where: {targetAccountId: targetReportId},
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              as: 'reporter',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            },
+            {
+              model: ReportType,
+              attributes: ['description']
+            }
+          ]
+        })
+
+        return {
+          status: 200,
+          data: {reportAccountDetail, accountReporters},
+          message: 'Get report account detail successful.'
+        }
+      case 'channel':
+        whereCondition.targetChannelId = targetReportId;
+        const reportChannelDetail = await Report.findOne({
+          where: whereCondition,
+          include: [
+            {
+              model: Channel,
+              attributes: ['avatar','channelName', 'popularCheck']
+            }
+          ]
+        })
+
+        const channelReporters = await Report.findAll({
+          where: {targetChannelId: targetReportId},
+          attributes: ['id'],
+          include: [
+            {
+              model: User,
+              as: 'reporter',
+              attributes: ['username', 'avatar', 'role', 'email', 'id']
+            },
+            {
+              model: ReportType,
+              attributes: ['description']
+            }
+          ]
+        })
+        return {
+          status: 200,
+          data: {reportChannelDetail, channelReporters},
+          message: 'Get report channel detail successful.'
+        }
+      default:
+        return {
+          status: 400,
+          message: `Type "${type}" is invalid.`,
+        };
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: `An error occurred: ${error.message}`,
+    };
+  }
+}
 
 module.exports = {
   reportVideo,
@@ -812,10 +1137,12 @@ module.exports = {
   reportChatMessages,
   getListReportByType,
   reportChannel,
+  reportAccount,
   getListReportVideo,
   getListReportComment,
   getListReportLivestream,
   getListReportAccount,
   getListReportChannel,
-  actionReport
+  actionReport,
+  getReportDetail
 }
