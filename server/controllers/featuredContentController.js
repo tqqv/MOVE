@@ -31,7 +31,7 @@ const createBookingFeatureContentController = async(req, res, next) => {
 const getBookingFeatureContentController = async(req, res, next) => {
 
     const channelId = req.user.channelId
-    const { startDate, endDate } = req.body
+    const { startDate, endDate } = req.query
     const result = await getBookingFeatureContentService(startDate, endDate, channelId);
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
