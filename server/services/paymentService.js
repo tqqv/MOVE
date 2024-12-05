@@ -46,11 +46,6 @@ const createCardInfor = async(userId, cardName, paymentMethodId, country) => {
       }
     })
 
-    if (!user.stripeCustomerId) {
-      user.stripeCustomerId  = await createStripeCustomerId(user.username, user.email);
-      await user.save();
-    }
-
     const paymentMethod = await retrievePaymentMethod(paymentMethodId)
 
     if(paymentMethod.customer === user.stripeCustomerId){
@@ -133,6 +128,11 @@ const createPayment = async(userId, paymentMethodId, repPackageId) => {
         id: repPackageId
       }
     })
+
+    if (!user.stripeCustomerId) {
+      user.stripeCustomerId  = await createStripeCustomerId(user.username, user.email);
+      await user.save();
+    }
 
     const totalAmount = repPackage.amount-(repPackage.amount*repPackage.discount)
 
