@@ -1,14 +1,18 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import Column from 'primevue/column';
   import DataTable from 'primevue/datatable';
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import InputText from 'primevue/inputtext';
   import Textarea from 'primevue/textarea';
+  import { toast } from 'vue3-toastify';
   import VideoUpload from '@/components/icons/videoUpload.vue';
+  import { getAllCategories } from '@/services/categories';
+  import { formatDateData } from '@/utils';
 
   const cateDialog = ref(false);
+  const categories = ref([]);
 
   const openCateDialog = () => {
     cateDialog.value = true;
@@ -18,49 +22,23 @@
     cateDialog.value = false;
   };
 
-  const categories = ref([
-    {
-      id: '1000',
-      title: 'MMA',
-      description:
-        'Lorem ipsum dolor sit amet consectetur adipiscing elit, mauris vestibulum sociosqu pellentesque odio euismod etiam magnis, cursus consequat himenaeos urna ridiculus tristique. Ut vivamus praesent convallis conubia, massa libero pharetra.',
-      imgUrl:
-        'https://images.pexels.com/photos/6295779/pexels-photo-6295779.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-    {
-      id: '1000',
-      title: 'Boxing',
-      description: '0999999999',
-      imgUrl:
-        'https://images.pexels.com/photos/9944859/pexels-photo-9944859.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-    {
-      id: '1000',
-      title: 'vietzz771@gmail.com',
-      description: '0999999999',
-      imgUrl:
-        'https://images.pexels.com/photos/6203516/pexels-photo-6203516.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-    {
-      id: '1000',
-      title: 'vietzz771@gmail.com',
-      description: '0999999999',
-      imgUrl:
-        'https://images.pexels.com/photos/260352/pexels-photo-260352.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-  ]);
+  const fetchCategories = async () => {
+    try {
+      const response = await getAllCategories();
+      if (response.status === 200) {
+        categories.value = response.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+  onMounted(() => {
+    fetchCategories();
+  });
 </script>
 
 <template>
-  <section class="bg-[#FAFAFB]">
+  <section class="bg-[#FAFAFB] mb-[100px]">
     <div class="container">
       <div class="card bg-white p-4 shadow rounded-lg">
         <DataTable :value="categories" stripedRows showGridlines>
@@ -71,7 +49,7 @@
             </div>
           </template>
           <Column field="id" header="ID"></Column>
-          <Column header="Name" style="width: 150px">
+          <Column header="Image" style="width: 150px">
             <template #body="{ data }">
               <div class="flex items-center gap-2">
                 <img :alt="data.imgUrl" :src="data.imgUrl" class="w-[200px] rounded" />
@@ -80,8 +58,16 @@
           </Column>
           <Column field="title" header="Title"></Column>
           <Column field="description" header="Description" style="width: 30rem"></Column>
-          <Column field="createAt" header="Create at"></Column>
-          <Column field="updatedAt" header="Updated at"></Column>
+          <Column header="Created at">
+            <template #body="{ data }">
+              {{ formatDateData(data.createdAt) }}
+            </template>
+          </Column>
+          <Column header="Updated at">
+            <template #body="{ data }">
+              {{ formatDateData(data.updatedAt) }}
+            </template>
+          </Column>
           <Column style="width: 7rem">
             <template #body="{ data }">
               <div class="flex justify-center gap-x-5">

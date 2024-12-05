@@ -1,14 +1,16 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import Column from 'primevue/column';
   import DataTable from 'primevue/datatable';
   import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import InputText from 'primevue/inputtext';
-  import Textarea from 'primevue/textarea';
-  import VideoUpload from '@/components/icons/videoUpload.vue';
+  import { toast } from 'vue3-toastify';
+  import { getAllLevelWorkout } from '@/services/levelWorkout';
+  import { formatDateData } from '@/utils';
 
   const levelDialog = ref(false);
+  const levelWorkouts = ref([]);
 
   const openlevelDialog = () => {
     levelDialog.value = true;
@@ -18,32 +20,20 @@
     levelDialog.value = false;
   };
 
-  const levelWorkouts = ref([
-    {
-      id: '1000',
-      levelWorkout: 'Beginner',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-    {
-      id: '1000',
-      levelWorkout: 'MMA',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-    {
-      id: '1000',
-      levelWorkout: 'MMA',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-    {
-      id: '1000',
-      levelWorkout: 'MMA',
-      createAt: '09/11/2024',
-      updatedAt: '09/11/2024',
-    },
-  ]);
+  const fetchLevelWorkouts = async () => {
+    try {
+      const response = await getAllLevelWorkout();
+      if (response.status === 200) {
+        levelWorkouts.value = response.data.data;
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  onMounted(() => {
+    fetchLevelWorkouts();
+  });
 </script>
 
 <template>
@@ -59,8 +49,16 @@
           </template>
           <Column field="id" header="ID"></Column>
           <Column field="levelWorkout" header="Level Workout"></Column>
-          <Column field="createAt" header="Create at"></Column>
-          <Column field="updatedAt" header="Updated at"></Column>
+          <Column header="Created at">
+            <template #body="{ data }">
+              {{ formatDateData(data.createdAt) }}
+            </template>
+          </Column>
+          <Column header="Updated at">
+            <template #body="{ data }">
+              {{ formatDateData(data.updatedAt) }}
+            </template>
+          </Column>
           <Column style="width: 7rem">
             <template #body="{ data }">
               <div class="flex justify-center gap-x-5">
