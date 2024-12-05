@@ -11,7 +11,7 @@ const postLogin = async (data) => {
 };
 
 const getLogout = () => {
-  return axios.get('/admin/logout');
+  return axios.get('/auth/logout');
 };
 
 //Forgot
