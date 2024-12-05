@@ -21,6 +21,8 @@ const { getUploadLink,
   getTopVideoController,
   getStateByCountryAndVideoIdFromIpController,
   getVideoYouMayLikeController,
+  reupStreamController,
+  getLatestReupStreamController
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
@@ -42,11 +44,13 @@ router.post('/save-video', verifyStreamer, saveVideo);
 router.post('/get-video', getVideo);
 router.post('/check-video-status', checkVideoStatus);
 router.patch('/update-video', verifyStreamer, updateVideo);
+router.get('/latestReup', getLatestReupStreamController);
 router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
 router.get('/channel/:channelId', getVideoByUserId);
 router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
 router.delete('/delete-videos', verifyStreamer, deleteMultipleVideos);
+router.post('/reup', verifyStreamer, reupStreamController);
 
 // Tăng View ở đây
 router.post('/increaseView', increaseViewController);
