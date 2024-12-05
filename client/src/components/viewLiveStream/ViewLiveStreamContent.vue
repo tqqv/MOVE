@@ -9,7 +9,6 @@
   import TabPanels from 'primevue/tabpanels';
   import TabPanel from 'primevue/tabpanel';
   import NoneLiveStream from './NoneLiveStream.vue';
-  import { onMounted, watch } from 'vue';
 
   const props = defineProps({
     username: String,
@@ -25,6 +24,8 @@
     v-if="props.connectOBS === 'streamPublished' || (props.liveStatus && props.connectOBS == null)"
     :username="username"
   />
+
+  <!-- <ViewReupLive  /> -->
   <NoneLiveStream
     v-if="
       props.connectOBS === 'streamEnded' ||
@@ -50,6 +51,7 @@
       :liveStreamData="props.liveStreamData"
       :listDonation="props.listDonation"
       :isGiftVisible="true"
+      :isStreamPage="true"
     />
     <Tabs value="about" class="p-0">
       <TabList class="!p-0">
