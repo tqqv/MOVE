@@ -1599,5 +1599,6 @@ module.exports = {
   deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
   renewTopVideos,
-  getVideoYouMayLikeService
+  getVideoYouMayLikeService,
+  fetchGeoData
 };
