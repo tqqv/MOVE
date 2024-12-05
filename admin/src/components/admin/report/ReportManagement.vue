@@ -5,6 +5,7 @@
   import DataTable from 'primevue/datatable';
   import Tag from 'primevue/tag';
   import Button from 'primevue/button';
+  import Filter from '@/components/Filter.vue';
 
   const router = useRouter();
   const reports = ref([
@@ -21,6 +22,7 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'comment',
         description: 'Nudity or sexual activity',
@@ -42,6 +44,7 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'video',
         description: 'Nudity or sexual activity',
@@ -63,6 +66,7 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'account',
         description: 'Nudity or sexual activity',
@@ -84,6 +88,7 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'videos',
         description: 'Nudity or sexual activity',
@@ -105,34 +110,17 @@
 </script>
 
 <template>
-  <section class="bg-[#FAFAFB]">
+  <section class="px-8">
     <div class="container">
-      <div class="card bg-white p-4 shadow rounded-lg">
-        <DataTable :value="reports" stripedRows showGridlines @row-click="handleRowClick">
-          <template #header>
-            <div class="flex flex-wrap gap-2 items-center justify-between">
-              <h1 class="font-bold text-[20px]">Manage Report</h1>
-            </div>
-          </template>
+      <div class="flex justify-between items-start mb-7">
+        <h1 class="text-2xl font-semibold">Report management</h1>
+        <div class="flex flex-col gap-y-2">
+          <Filter />
+        </div>
+      </div>
+      <div class="bg-white p-4 shadow rounded-lg">
+        <DataTable :value="reports" @row-click="handleRowClick">
           <Column field="id" header="ID"></Column>
-          <Column header="Reporter">
-            <template #body="{ data }">
-              <div class="flex items-center gap-4">
-                <img
-                  :alt="data.reporter.imgUrl"
-                  :src="data.reporter.imgUrl"
-                  style="width: 40px"
-                  class="rounded-full"
-                />
-                <div>
-                  <p class="font-semibold">{{ data.reporter.username }}</p>
-                  <p>{{ data.reporter.email }}</p>
-                </div>
-              </div>
-            </template>
-          </Column>
-          <Column field="reportType.type" header="Type" class="capitalize"></Column>
-          <Column field="reportType.description" header="Description"></Column>
           <Column header="Target">
             <template #body="{ data }">
               <div class="flex items-center gap-4">
@@ -149,16 +137,38 @@
               </div>
             </template>
           </Column>
+          <Column field="reportType.type" header="Type" class="capitalize"></Column>
+          <!-- <Column field="reportType.description" header="Description"></Column> -->
+          <!-- <Column header="Target">
+            <template #body="{ data }">
+              <div class="flex items-center gap-4">
+                <img
+                  :alt="data.targetAccount.imgUrl"
+                  :src="data.targetAccount.imgUrl"
+                  style="width: 40px"
+                  class="rounded-full"
+                />
+                <div>
+                  <p class="font-semibold">{{ data.targetAccount.username }}</p>
+                  <p>{{ data.targetAccount.email }}</p>
+                </div>
+              </div>
+            </template>
+          </Column> -->
+          <Column field="qualityReport" header="Number of reports"></Column>
           <Column field="status" header="Status" dataType="boolean">
             <template #body="{ data }">
-              <Tag v-if="data.status" :value="data.status" severity="info" class="capitalize" />
+              <div class="flex items-center gap-x-2">
+                <div class="size-2 mt-0.5 bg-blue rounded-full"></div>
+                <span class="capitalize text-blue font-semibold">{{ data.status }}</span>
+              </div>
             </template>
           </Column>
-          <Column>
+          <Column header="Action" class="max-w-48">
             <template #body="{ data }">
-              <div class="flex justify-between">
-                <Button label="Accept" severity="warn" @click.stop="handleAccept" />
-                <Button label="Reject" severity="secondary" />
+              <div class="flex items-center gap-x-3">
+                <button class="btn-success" @click.stop="handleAccept">Accept</button>
+                <button class="btn-reject">Reject</button>
               </div>
             </template>
           </Column>

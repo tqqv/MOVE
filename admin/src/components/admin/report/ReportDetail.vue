@@ -8,6 +8,7 @@
   import Gift from '@/components/icons/gift.vue';
   import VideoCard from '@/components/VideoCard.vue';
   import Tag from 'primevue/tag';
+  import ButtonBack from '@/components/ButtonBack.vue';
 
   dayjs.extend(relativeTime);
   const route = useRoute();
@@ -63,9 +64,13 @@
   ];
 </script>
 <template>
-  <section class="bg-[#FAFAFB]">
+  <section class="px-8">
     <div class="container">
-      <div class="card bg-white p-4 shadow rounded-lg">
+      <div class="flex items-center gap-x-2 mb-4 cursor-pointer">
+        <i class="pi pi-arrow-left text-sm mt-0.5"></i>
+        <p class="font-semibold">Go back</p>
+      </div>
+      <div class="card">
         <div class="flex justify-between items-center">
           <h1 class="text-[24px] font-bold">
             Report Detail <span class="opacity-50 text-[20px]">#112312313</span>
