@@ -1702,6 +1702,7 @@ module.exports = {
   getStateByCountryAndVideoIdFromIp,
   renewTopVideos,
   getVideoYouMayLikeService,
+  fetchGeoData,
   reupStreamService,
   getLatestReupStreamService
 };
