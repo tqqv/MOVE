@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, userCount } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount } = require("../services/adminService");
 
 const setStatusRequestChannelController = async (req, res, next) => {
   const data = req.body;
@@ -34,6 +34,19 @@ const getTop5UserDepositController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getAllUsersRequestController = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 10;
+  const sortCondition = {
+    sortBy: req.query.sortBy || 'createdAt',
+    order: req.query.order || 'desc'
+  };
+
+  const result = await getAllUsersRequest(page, pageSize, sortCondition);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+};
+
 const userCountController = async (req, res, next) => {
   const result = await userCount()
 
@@ -45,5 +58,6 @@ module.exports = {
   getDataChartMoneyController,
   getTop5ChannelController,
   getTop5UserDepositController,
+  getAllUsersRequestController,
   userCountController
 }
