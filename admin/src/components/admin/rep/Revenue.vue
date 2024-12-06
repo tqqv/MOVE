@@ -117,7 +117,7 @@
   });
 </script>
 <template>
-  <section class="px-8 mb-10">
+  <section>
     <div class="container">
       <div class="flex justify-between items-start">
         <h1 class="text-2xl font-semibold">Revenue management</h1>
