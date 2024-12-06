@@ -78,6 +78,43 @@ const saveVideoService = async (videoId, userId, title, description, thumbnailUr
   }
 };
 
+const reupStreamService = async (livestreamId, videoId, userId, title, description, thumbnailUrl, videoUrl, duration, status, categoryId, levelWorkoutsId) => {
+  try {
+    const video = await Video.create({
+        id: videoId,
+        channelId: userId,
+        title: title,
+        description: description,
+        thumbnailUrl: thumbnailUrl,
+        videoUrl: videoUrl,
+        duration: duration,
+        status: status,
+        livestreamId,
+        categoryId, 
+        levelWorkoutsId,
+        isCommentAble: true,
+    });
+    if (!video) {
+      return {
+        status: 404,
+        message: 'Video created failed',
+        data: null
+      };
+    }
+    return {
+      status: 200,
+      message: 'Reup video saved successfully',
+      data: video
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message,
+      data: null
+    };
+  }
+};
+
 const updateVideoService = async (videoId, updateData) => {
   const handleKeywords = async (keywords) => {
     const keywordArray = keywords.split(',').map(k => k.trim());
@@ -392,6 +429,71 @@ const getAllVideosService = async (page, pageSize) => {
     message: 'Videos fetched successfully',
     data: videos
   };
+};
+
+const getLatestReupStreamService = async (channelId) => {
+  try {
+  const video = await Video.findOne({
+      where: {
+        livestreamId: {
+          [Op.ne]: null // Use Op.ne instead of Op.not
+        },
+        status: "public"
+      },
+      include: [
+        {
+          model: Channel,
+          where: {
+            id: channelId,
+          },
+          attributes: [
+            'channelName', 'bio', 'avatar', 'isLive', 'popularCheck',
+            'facebookUrl', 'instaUrl', 'youtubeUrl',
+            [
+              sequelize.literal(`(
+                SELECT COUNT(*)
+                FROM subscribes
+                WHERE subscribes.channelId = channel.id
+                )`),
+                'followCount',
+              ],
+            ],
+            as: 'channel',
+          },
+          {
+            model: Category,
+            as: 'category',
+          },
+          {
+            model: LevelWorkout,
+            as: "levelWorkout",
+          },
+        ],
+        order: [['createdAt', 'DESC']], // Sắp xếp theo createdAt mới nhất
+      });
+
+  if (!video) {
+    return {
+      status: 404,
+      message: 'Reup stream not found',
+      data: null,
+    };
+  }
+
+  return {
+    status: 200,
+    message: 'Get reup stream successfully',
+    data: video,
+  };
+} catch (error) {
+  console.log(error);
+
+  return {
+    status: 500,
+    message: 'Cannot Get reup stream ',
+    data: null,
+  };
+}
 };
 
 const getVideoByUserIdService = async (channelId, page, pageSize, level, category, sortCondition) => {
@@ -1506,8 +1608,8 @@ const renewTopVideos = async () => {
     };
   }
 };
-const
-getVideoYouMayLikeService = async (userId, page = 1, pageSize = 10, sortCondition = null) => {
+
+const getVideoYouMayLikeService = async (userId, page = 1, pageSize = 10, sortCondition = null) => {
   try {
     // 1. Embedding video
     const videoEmbeddings = await generateVideoEmbeddings();
@@ -1599,5 +1701,8 @@ module.exports = {
   deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
   renewTopVideos,
-  getVideoYouMayLikeService
+  getVideoYouMayLikeService,
+  fetchGeoData,
+  reupStreamService,
+  getLatestReupStreamService
 };

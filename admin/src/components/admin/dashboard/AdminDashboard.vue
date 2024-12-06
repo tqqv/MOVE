@@ -96,6 +96,7 @@
   };
   const handleYearChange = (year) => {
     selectedYear.value = year;
+
     fetchDataChartMoney(year);
   };
 
@@ -109,56 +110,60 @@
 </script>
 
 <template>
-  <section class="container">
-    <!-- INFOR -->
-    <div v-if="isLoadingDashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <div v-for="(stat, index) in statistics.slice(0, 6)" :key="index">
-        <Skeleton width="100%" height="100px" />
-      </div>
-    </div>
-
-    <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      <StatisticCard
-        v-for="(stat, index) in statistics"
-        :key="index"
-        :value="stat.value"
-        :label="stat.label"
-      >
-        <template #icon>
-          <component :is="stat.icon" width="22" height="22" />
-        </template>
-      </StatisticCard>
-    </div>
-
-    <!-- CHART -->
-    <div class="grid grid-cols-12 gap-4 mt-5">
-      <div class="col-span-7 bg-white p-5 rounded shadow">
-        <Skeleton v-if="isLoadingDashboard" width="100%" height="450px" />
-
-        <ChartIncome v-else :chartMoneyData="chartMoneyData" @yearSelected="handleYearChange" />
-
-        <!-- Skeleton loader for chart -->
-      </div>
-      <div class="col-span-5 bg-white p-5 rounded shadow items-center">
-        <div v-if="isLoadingDashboard" class="flex justify-center py-8">
-          <Skeleton width="400px" height="400px" shape="circle" />
+  <section>
+    <div class="container">
+      <!-- INFOR -->
+      <div v-if="isLoadingDashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="(stat, index) in statistics.slice(0, 6)" :key="index">
+          <Skeleton width="100%" height="100px" />
         </div>
-
-        <ChartUser v-else class="flex justify-center" :userTypeData="userTypeData" />
-
-        <!-- Skeleton loader for user type chart -->
       </div>
-    </div>
 
-    <!-- TOP USER -->
-    <div class="grid grid-cols-12 gap-4 mt-5 pb-20">
-      <TopChannel
-        :isLoadingDashboard="isLoadingDashboard"
-        :topUserDepositData="topUserDepositData"
-        :topChannelData="topChannelData"
-      />
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatisticCard
+          v-for="(stat, index) in statistics"
+          :key="index"
+          :value="stat.value"
+          :label="stat.label"
+        >
+          <template #icon>
+            <component :is="stat.icon" width="22" height="22" />
+          </template>
+        </StatisticCard>
+      </div>
 
-      <!-- Skeleton loader for top user/channel -->
+      <!-- CHART -->
+      <div class="grid grid-cols-12 gap-4 mt-5">
+        <div class="col-span-7 bg-white p-5 rounded shadow">
+          <ChartIncome
+            :isLoadingDashboard="isLoadingDashboard"
+            :chartMoneyData="chartMoneyData"
+            @yearSelected="handleYearChange"
+          />
+
+          <!-- Skeleton loader for chart -->
+        </div>
+        <div class="col-span-5 bg-white p-5 rounded shadow items-center">
+          <ChartUser
+            class="flex justify-center"
+            :userTypeData="userTypeData"
+            :isLoadingDashboard="isLoadingDashboard"
+          />
+
+          <!-- Skeleton loader for user type chart -->
+        </div>
+      </div>
+
+      <!-- TOP USER -->
+      <div class="grid grid-cols-12 gap-4 mt-5">
+        <TopChannel
+          :isLoadingDashboard="isLoadingDashboard"
+          :topUserDepositData="topUserDepositData"
+          :topChannelData="topChannelData"
+        />
+
+        <!-- Skeleton loader for top user/channel -->
+      </div>
     </div>
   </section>
 </template>

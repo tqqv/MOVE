@@ -1,6 +1,6 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, UnbanAccountController, UnbanChannelController } = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, UnbanAccountController, UnbanChannelController } = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
@@ -41,6 +41,8 @@ adminRoute.post("/actionReport", verifyAdmin, actionReportController)
 adminRoute.post("/unbanUser/:userId", verifyAdmin, UnbanAccountController)
 adminRoute.post("/unbanChannel/:channelId", verifyAdmin, UnbanChannelController)
 
+// request channel
+adminRoute.get("/requestChannel", verifyAdmin, getAllUsersRequestController);
 
 
 module.exports = adminRoute;

@@ -6,6 +6,7 @@ const { getNumOfConnectInRoom } = require("./socketService.js");
 const StreamKeys = require("../utils/redis/key/streamKey.js");
 const _redis = require("../utils/redis/config.js");
 const { getTopDonatorsWithDetails, clearStreamStats } = require("../utils/redis/stream/redisStreamService.js");
+const { fetchGeoData } = require("./videoService.js");
 const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize, ViewVideo } = db;
 
 const createLivestream = async(data) => {
@@ -746,6 +747,50 @@ const countNewFollowersDuringStream = async (channelId, createdAt, duration) => 
   }
 };
 
+const saveDataViewer = async(userId, livestreamId, ip, viewTime) => {
+  try {
+    const livestream = await Livestream.findOne({where: {id: livestreamId}})
+    if(!livestream) {
+      return {
+        status: 404,
+        message: "Livestream not found."
+      }
+    }
+
+    const user = await User.findOne({where: {id: userId}})
+    const checkView = await ViewVideo.findOne({where: {viewerId: userId, livestreamId: livestreamId}})
+    if(user && checkView){
+      checkView.viewTime += viewTime;
+      await checkView.save()
+      return {
+        status: 200,
+        message: "Update successful."
+      }
+    }
+
+    if(user && !checkView){
+      const url = `https://api.ipregistry.co/${ip}?key=${process.env.FIND_IP_API_KEY}`;
+      const res = await fetchGeoData(url)
+
+      const viewData = await ViewVideo.create({viewerId: userId, livestreamId: livestreamId, ip: ip, country: res.country, city: res.city, viewTime: viewTime})
+
+      if(viewData) {
+        return {
+          status: 200,
+          message: "Add viewer data successfully."
+        }
+      }
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 
 module.exports = {
   getLivestreamService,
@@ -757,5 +802,6 @@ module.exports = {
   getAllLivestreamService,
   getAllLivestreamSessionService,
   getLivestreamSessionDetailsService,
-  getStateByCountryAndStreamIdFromIp
+  getStateByCountryAndStreamIdFromIp,
+  saveDataViewer,
 }

@@ -59,7 +59,7 @@
       v-model="selectedOption"
       :options="props.options"
       :optionLabel="optionLabel"
-      class="w-[150px] border-primary custom-dropdown text-xs"
+      class="w-[150px] border-primary custom-dropdown text-xs capitalize"
       :class="class"
     ></Dropdown>
   </div>

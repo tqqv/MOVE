@@ -1,6 +1,6 @@
 const express = require('express');
-const { verifyStreamer } = require('../middlewares/verifyToken');
-const { createLivestreamController, getLivestreamStatisticController, endLivestreamController, updateLivestreamController, getLivestreamController, getLivestreamByUserController, getAllLivestreamController, getAllLivestreamSessionController, getLivestreamSessionDetailController, getStateByCountryAndStreamIdFromIpController} = require('../controllers/livestreamController');
+const { verifyStreamer, verifyUser } = require('../middlewares/verifyToken');
+const { createLivestreamController, getLivestreamStatisticController, endLivestreamController, updateLivestreamController, getLivestreamController, getLivestreamByUserController, getAllLivestreamController, getAllLivestreamSessionController, getLivestreamSessionDetailController, getStateByCountryAndStreamIdFromIpController, saveDataViewerController} = require('../controllers/livestreamController');
 const { getStreamStats, clearStreamStats } = require('../utils/redis/stream/redisStreamService');
 const _redis = require('../utils/redis/config');
 const { set } = require('../utils/redis/base/redisBaseService');
@@ -90,5 +90,6 @@ livestreamRouter.post('/', verifyStreamer, createLivestreamController)
 livestreamRouter.post('/endStream/:livestreamId', verifyStreamer, endLivestreamController)
 // livestreamRouter.get('/stats', getLivestreamStatisticController)
 livestreamRouter.patch('/update', updateLivestreamController)
+livestreamRouter.post("/saveDateViewer", verifyUser, saveDataViewerController)
 
 module.exports = livestreamRouter;

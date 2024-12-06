@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService, getAllLivestreamService, getAllLivestreamSessionService, getLivestreamSessionDetailsService, getStateByCountryAndStreamIdFromIp } = require("../services/livestreamService.js");
+const { createLivestream, getLivestreamStatistics, endLivestream, updateLivestream, getLivestreamService, getLivestreamByUserNameService, getTopLivestreamService, getAllLivestreamService, getAllLivestreamSessionService, getLivestreamSessionDetailsService, getStateByCountryAndStreamIdFromIp, saveDataViewer } = require("../services/livestreamService.js");
 
 
 const createLivestreamController = async (req, res, next) => {
@@ -72,7 +72,7 @@ const getAllLivestreamSessionController = async (req, res, next) => {
 const getLivestreamSessionDetailController = async (req, res, next) => {
   const livestreamId = req.params.livestreamId;
   console.log("..................");
-  
+
   const result = await getLivestreamSessionDetailsService(livestreamId);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
@@ -87,6 +87,16 @@ const getStateByCountryAndStreamIdFromIpController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const saveDataViewerController = async(req, res, next) => {
+  const userId = req.body.userId;
+  const livestreamId = req.body.livestreamId;
+  const ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+  const viewTime = req.body.viewTime;
+  const result = await saveDataViewer(userId, livestreamId, ip, viewTime)
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+}
+
 module.exports = {
   createLivestreamController,
   getLivestreamStatisticController,
@@ -97,5 +107,6 @@ module.exports = {
   getAllLivestreamController,
   getAllLivestreamSessionController,
   getLivestreamSessionDetailController,
-  getStateByCountryAndStreamIdFromIpController
+  getStateByCountryAndStreamIdFromIpController,
+  saveDataViewerController
 }
