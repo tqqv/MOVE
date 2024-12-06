@@ -3,7 +3,6 @@ html {
 }
 
 section {
-  min-height: 100vh;
 }
 
 .shadow {
@@ -295,4 +294,12 @@ body.p-overflow-hidden {
   background: rgba(19, 208, 180, 0.8);
 }
 
-
+/* BG-CUSTOM */
+.bg-custom {
+  background: rgb(57, 215, 192);
+  background: radial-gradient(
+    circle,
+    rgba(57, 215, 192, 0.5943627450980392) 9%,
+    rgba(255, 255, 255, 0.48792016806722693) 92%
+  );
+}

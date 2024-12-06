@@ -211,10 +211,10 @@
     </div>
     <!-- User Action -->
 
-    <div v-if="channelDetails" class="flex gap-x-9 items-center pt-2">
+    <div v-if="channelDetails" class="flex items-center pt-2">
       <div
         v-if="username !== props.usernameDetails"
-        class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase"
+        class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase mr-9"
         @click="toggleFollow"
       >
         <heart :fill="isChannelFollowed ? 'fill-primary' : 'fill-white'" stroke="stroke-primary" />
@@ -222,7 +222,7 @@
       </div>
       <div
         v-if="isUserAction"
-        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase"
+        class="text-primary text-[13px] font-bold flex items-center cursor-pointer uppercase mr-9"
       >
         <share class="mr-1" /> Share
       </div>
@@ -230,11 +230,10 @@
         <div
           @click="toggleButtonGiftVisible"
           v-if="
-            (isGiftVisible &&
-              username !== props.usernameDetails &&
+            (username !== props.usernameDetails &&
               props.liveStreamData?.channel?.isLive === true &&
               isStreamPage) ||
-            !isStreamPage
+            (!isStreamPage && isGiftVisible)
           "
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
