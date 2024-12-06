@@ -345,7 +345,7 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
           model: User,
           attributes: ['id', 'username', 'avatar', 'phoneNumber', 'email', 'REPs', 'createdAt'],
           where: {
-            isBanned: { [Op.ne]: true } 
+            isBanned: { [Op.ne]: true }
           },
         }
       ],
@@ -367,7 +367,102 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
         message: error.message || "Internal Server Error"
       };
     }
-  };
+};
+
+const getAllUser = async(page, pageSize, sortCondition) => {
+  try {
+    const listUser = await User.findAndCountAll({
+      attributes: [
+        'id', 'fullName', 'referralCode', 'REPs', 'username', 'role', 'email', 'createdAt', 'isBanned', 'isVerified', 'avatar'
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+
+    return {
+      status: 200,
+      data: {
+        data: listUser,
+        totalPages: Math.ceil(listUser.count/pageSize)
+      },
+      message: "Fetched all request channels with user info and total report count successfully."
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const editProfileUser = async (id, data) => {
+  try {
+    const user = await User.findByPk(id);
+    if(!user){
+      return {
+        status: 400,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    if(user.email && user.isVerified && data.email) {
+      return {
+        status: 400,
+        data: null,
+        message: "You can't change verified email"
+      }
+    }
+
+    if(data.username){
+      if (data.username.length < 3 || data.username.length > 32 ||  /[A-Z]/.test(data.username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Must be between 3 and 32 in length and cannot contain uppercase letters."
+        }
+      } else if (!validateUsername(data.username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Please only use numbers, letters, underscores or periods."
+        }
+      }
+
+      const user = await User.findOne({where: {username: data.username}})
+      if(user) {
+        return {
+          status: 400,
+          data: null,
+          message: "Username already exists."
+        }
+      }
+    }
+
+    const updateUser = await user.update(data)
+    if(!updateUser) {
+      return {
+        status: 400,
+        data: null,
+        message: "Update failed."
+      }
+    }
+
+    return {
+      status: 200,
+      data: updateUser,
+      message: "Update successfully."
+    }
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   setStatusRequestChannel,
   getStatistic,
@@ -376,4 +471,6 @@ module.exports = {
   getTop5UserDeposit,
   getAllUsersRequest,
   userCount,
+  getAllUser,
+  editProfileUser,
 }
