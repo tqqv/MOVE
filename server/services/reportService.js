@@ -751,7 +751,7 @@ const hanleBanAllVideoAndStream = async(channelId) => {
 }
 
 const hanleBanCommentByUserId = async(userId) => {
-  await User.update({ isBanned: true }, { where: { userId: userId } })
+  await Comment.update({ isBanned: true }, { where: { userId: userId } })
 }
 
 const hanleBanSingleComment = async(commentId) => {
