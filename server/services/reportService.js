@@ -435,19 +435,36 @@ const reportAccount = async(userId, accountId, reportTypeId) => {
   }
 }
 
-const getListReportVideo = async(page, pageSize) => {
+const getListReportVideo = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetVideoId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportVideo = await Report.findAll({
       attributes: [
         'targetVideoId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetVideoId')), 'reportCount'],
       ],
-      where: {
-        targetVideoId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetVideoId', 'status'],
       include: [
         {
@@ -455,17 +472,13 @@ const getListReportVideo = async(page, pageSize) => {
           attributes: ['title', 'thumbnailUrl']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetVideoId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetVideoId',
@@ -492,19 +505,35 @@ const getListReportVideo = async(page, pageSize) => {
   }
 }
 
-const getListReportComment = async(page, pageSize) => {
+const getListReportComment = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetCommentId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
     const listReportComment = await Report.findAll({
       attributes: [
         'targetCommentId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetCommentId')), 'reportCount'],
       ],
-      where: {
-        targetCommentId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetCommentId', 'status'],
       include: [
         {
@@ -512,17 +541,13 @@ const getListReportComment = async(page, pageSize) => {
           attributes: ['content', 'rep']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetCommentId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetCommentId',
@@ -549,19 +574,36 @@ const getListReportComment = async(page, pageSize) => {
   }
 }
 
-const getListReportLivestream = async(page, pageSize) => {
+const getListReportLivestream = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetLivestreamId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportLivestream = await Report.findAll({
       attributes: [
         'targetLivestreamId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetLivestreamId')), 'reportCount'],
       ],
-      where: {
-        targetLivestreamId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetLivestreamId', 'status'],
       include: [
         {
@@ -569,17 +611,13 @@ const getListReportLivestream = async(page, pageSize) => {
           attributes: ['content', 'rep']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetLivestreamId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetLivestreamId',
@@ -606,19 +644,37 @@ const getListReportLivestream = async(page, pageSize) => {
   }
 }
 
-const getListReportAccount = async(page, pageSize) => {
+const getListReportAccount = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetAccountId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportAccount = await Report.findAll({
       attributes: [
         'targetAccountId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetAccountId')), 'reportCount'],
       ],
-      where: {
-        targetAccountId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetAccountId', 'status'],
       include: [
         {
@@ -626,17 +682,13 @@ const getListReportAccount = async(page, pageSize) => {
           attributes: ['username', 'avatar', 'id']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetAccountId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetAccountId',
@@ -663,19 +715,37 @@ const getListReportAccount = async(page, pageSize) => {
   }
 }
 
-const getListReportChannel = async(page, pageSize) => {
+const getListReportChannel = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetChannelId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportChannel = await Report.findAll({
       attributes: [
         'targetChannelId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetChannelId')), 'reportCount'],
       ],
-      where: {
-        targetChannelId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetChannelId', 'status'],
       include: [
         {
@@ -683,17 +753,13 @@ const getListReportChannel = async(page, pageSize) => {
           attributes: ['channelName', 'avatar', 'id']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetChannelId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetChannelId',
@@ -746,7 +812,7 @@ const handleBan = async(banned, isPermanent = false) => {
 };
 
 const hanleBanAllVideoAndStream = async(channelId) => {
-  await Video.update({ isBanned: true }, { where: { channelId: channelId } })
+  await Video.update({ status: "private" }, { where: { channelId: channelId } })
   await Livestream.update({ isBanned: true }, { where: { streamerId: channelId } })
 }
 

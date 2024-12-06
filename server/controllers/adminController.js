@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, userCount } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, userCount, UnbanAccount, UnbanChannel } = require("../services/adminService");
 
 const setStatusRequestChannelController = async (req, res, next) => {
   const data = req.body;
@@ -39,11 +39,28 @@ const userCountController = async (req, res, next) => {
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
+
+const UnbanAccountController = async (req, res, next) => {
+  const userId = req.params.userId
+  const result = await UnbanAccount(userId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const UnbanChannelController = async (req, res, next) => {
+  const channelId = req.params.channelId
+  const result = await UnbanChannel(channelId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
   getDataChartMoneyController,
   getTop5ChannelController,
   getTop5UserDepositController,
-  userCountController
+  userCountController,
+  UnbanAccountController,
+  UnbanChannelController
 }
