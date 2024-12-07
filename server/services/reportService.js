@@ -720,10 +720,26 @@ const getListReportChannel = async(page, pageSize) => {
   }
 }
 
-const updateReportStatus = async(reportId, status) => {
+const updateReportStatus = async(targetReportId, status, type) => {
+  const whereCondition = {}
+
+  if(type === 'account'){
+    whereCondition.targetAccountId = targetReportId
+  } else if (type === 'video') {
+    whereCondition.targetVideoId = targetReportId
+  } else if (type === 'livestream') {
+    whereCondition.targetLivestreamId = targetReportId
+  } else if (type === 'comment') {
+    whereCondition.targetCommentId = targetReportId
+  } else if (type === 'channel') {
+    whereCondition.targetChannelId = targetReportId
+  } else {
+    throw Error('Type not exist')
+  }
+
   await Report.update(
     { status },
-    { where: { id: reportId } }
+    { where: whereCondition }
   );
 };
 
@@ -770,12 +786,12 @@ const hanleBanSingleLivestream = async(livestreamId) => {
 //   await Video.update({ isBanned: true }, { where: { channelId: channelId } })
 // }
 
-const actionReport = async(reportId, action, banned, type) => {
+const actionReport = async(targetReportId, action, banned, type) => {
   try {
-    if (!action) {
+    if (!action || !type) {
       return {
         status: 400,
-        message: "Action cannot be empty.",
+        message: "Action and type cannot be empty.",
       };
     }
 
@@ -789,14 +805,14 @@ const actionReport = async(reportId, action, banned, type) => {
         }
 
         await handleBan(banned, true);
-        await updateReportStatus(reportId, 'banned');
+        await updateReportStatus(targetReportId, 'banned', type);
         return {
           status: 200,
           message: `User associated resources have been permanently banned.`,
         };
 
       case 'rejected':
-        await updateReportStatus(reportId, 'rejected');
+        await updateReportStatus(targetReportId, 'rejected', type);
         return {
           status: 200,
           message: "The report has been rejected.",
@@ -810,7 +826,7 @@ const actionReport = async(reportId, action, banned, type) => {
           }
         }
         await handleBan(banned, false);
-        await updateReportStatus(reportId, 'suspended');
+        await updateReportStatus(targetReportId, 'suspended', type);
         return {
           status: 200,
           message: ` User has been suspended until ${banned.expiresAt}.`,
@@ -824,27 +840,25 @@ const actionReport = async(reportId, action, banned, type) => {
           }
         }
 
-        const report = await Report.findByPk(reportId)
-
         switch (type) {
           case 'video':
-            await updateReportStatus(reportId, 'approved');
-            await hanleBanSingleVideo(report.targetVideoId)
+            await updateReportStatus(targetReportId, 'approved', type);
+            await hanleBanSingleVideo(targetReportId)
             return {
               status: 200,
               message: "The report has been approved.",
             };
           case 'livestream':
-            await updateReportStatus(reportId, 'approved');
-            await hanleBanSingleLivestream(report.targetLivestreamId)
+            await updateReportStatus(targetReportId, 'approved', type);
+            await hanleBanSingleLivestream(targetReportId)
 
             return {
               status: 200,
               message: "The report has been approved.",
             };
           case 'comment':
-            await updateReportStatus(reportId, 'approved');
-            await hanleBanSingleComment(report.targetCommentId)
+            await updateReportStatus(targetReportId, 'approved', type);
+            await hanleBanSingleComment(targetReportId)
             return {
               status: 200,
               message: "The report has been approved.",
@@ -856,7 +870,7 @@ const actionReport = async(reportId, action, banned, type) => {
             };
         }
       case 'closed':
-        await updateReportStatus(reportId, 'closed');
+        await updateReportStatus(targetReportId, 'closed', type);
         return {
           status: 200,
           message: "The report has been closed.",
