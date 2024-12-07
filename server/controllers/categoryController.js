@@ -52,7 +52,7 @@ const getCateByTitleController = async(req, res, next) => {
 
 const getAllCategoryAdminController = async(req, res, next) => {
   const page = req.query.page || 1;
-  const pageSize = req.query.pageSize || 10;
+  const pageSize = req.query.pageSize || 100;
   const result = await getAllCategoryAdmin(page, pageSize)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
