@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { LevelWorkout } = db;
+const { LevelWorkout, Livestream, Video, sequelize } = db;
 
 const createLevelWorkout = async(data) => {
   try {
@@ -109,8 +109,9 @@ const editLevelWorkout = async(lvWorkoutId, data) => {
 
 const deleteLevelWorkout = async (lvWorkoutId) => {
   try {
-    const LevelWorkout = await LevelWorkout.findByPk(lvWorkoutId);
-    if (!LevelWorkout) {
+    const levelWorkout = await LevelWorkout.findByPk(lvWorkoutId);
+
+    if (!levelWorkout) {
       return {
         status: 404,
         data: null,
@@ -118,7 +119,17 @@ const deleteLevelWorkout = async (lvWorkoutId) => {
       };
     }
 
-    await LevelWorkout.destroy();
+    const video = await Video.findOne({where: {levelWorkoutsId: lvWorkoutId}})
+    const livestream = await Livestream.findOne({where: {levelWorkoutsId: lvWorkoutId}})
+
+    if(video || livestream){
+      return {
+        status: 400,
+        message: "This level workout is in use by a video or livestream."
+      }
+    }
+
+    await levelWorkout.destroy();
 
     return {
       status: 200,
@@ -135,10 +146,49 @@ const deleteLevelWorkout = async (lvWorkoutId) => {
   }
 };
 
+const getAllLevelWorkoutAdmin = async() => {
+  try {
+    const listLvWorkout = await LevelWorkout.findAll({
+      attributes: {
+        include: [
+          [sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM videos
+            WHERE videos.levelWorkoutsId = LevelWorkout.id
+          )`), 'videoCount'],
+          [sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM livestreams
+            WHERE livestreams.levelWorkoutsId = LevelWorkout.id
+          )`), 'livestreamCount'],
+          [sequelize.literal(`(
+            SELECT SUM(viewCount)
+            FROM videos
+            WHERE videos.levelWorkoutsId = LevelWorkout.id
+          )`), 'totalViews'],
+        ]
+      }
+    })
+
+    return {
+      status: 200,
+      data: listLvWorkout,
+      message: "Get list successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createLevelWorkout,
   getAllLevelWorkout,
   getLvWorkoutById,
   editLevelWorkout,
-  deleteLevelWorkout
+  deleteLevelWorkout,
+  getAllLevelWorkoutAdmin,
 }
