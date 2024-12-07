@@ -4,10 +4,10 @@ const getProfile = () => {
   return axios.get('/user/getProfile');
 };
 
-const getAllUsersRequest = async (page, pageSize) => {
+const getAllUsersRequest = async (page, pageSize, status) => {
   try {
     const response = await axios.get(`/admin/requestChannel`, {
-      params: { page, pageSize },
+      params: { page, pageSize, status },
     });
     return response;
   } catch (error) {

@@ -161,7 +161,7 @@ html {
   }
 
   .btn-success {
-    @apply bg-primary w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+    @apply bg-green w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
   }
 
   .btn-reject {
@@ -178,6 +178,9 @@ html {
 
   .btn-cancel {
     @apply bg-footer w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+  }
+  .error_toast {
+    @apply text-red italic font-semibold;
   }
 }
 

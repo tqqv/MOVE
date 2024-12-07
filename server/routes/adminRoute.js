@@ -1,6 +1,6 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, UnbanAccountController, UnbanChannelController } = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, UnbanAccountController, UnbanChannelController } = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
@@ -15,6 +15,15 @@ adminRoute.get("/getTop5Channel", verifyAdmin, getTop5ChannelController)
 adminRoute.get("/getTop5UserDeposit", verifyAdmin, getTop5UserDepositController)
 adminRoute.get("/getDataChartMoney", verifyAdmin, getDataChartMoneyController)
 adminRoute.put("/setStatusRequestChannel", verifyAdmin, setStatusRequestChannelController)
+
+////////////////////////// User Management //////////
+adminRoute.get("/getAllUser", verifyAdmin, getAllUserController)
+adminRoute.get("/getUserById/:userId", verifyAdmin, getUserByIdController)
+adminRoute.patch("/editProfileUser/:userId", verifyAdmin, editProfileUserController)
+adminRoute.get("/getListVideoByUser/:channelId", verifyAdmin, getListVideoByChannelIdController)
+adminRoute.patch('/editVideoById', verifyAdmin, EditVideoByIdController);
+adminRoute.delete('/deleteVideoById/:videoId', verifyAdmin, deleteVideoByIdController);
+adminRoute.get("/getListPaymentByUserId/:userId", verifyAdmin, getListPaymentByUserIdController)
 
 ////////////////////////// REP PACKAGE ////////////
 adminRoute.post("/createRepPackage", verifyAdmin, createRepPackageController)

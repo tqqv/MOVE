@@ -145,10 +145,10 @@
 </script>
 
 <template>
-  <section class="px-8">
+  <section>
     <div class="container">
       <div class="flex justify-between items-start mb-7">
-        <h1 class="text-2xl font-semibold">Report management</h1>
+        <h1 class="text-2xl font-bold">Report management</h1>
         <div class="flex gap-x-6">
           <Filter title="Type report" :options="sortByType" @change="handleSortType" />
           <Filter title="Status" :options="sortByStatus" @change="handleSortChange" />
