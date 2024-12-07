@@ -8,7 +8,7 @@ cateRouter.post('/', verifyAdmin, createCategoryController);
 cateRouter.get('/', getAllCategoryController);
 cateRouter.get('/getAllView', getAllCategoryWithViewController);
 cateRouter.get('/getCateById/:cateId', getCateByIdController);
-cateRouter.patch('/', verifyAdmin, editCategoryController);
+cateRouter.patch('/:cateId', verifyAdmin, editCategoryController);
 cateRouter.delete('/:cateId', verifyAdmin, deleteCategoryController);
 cateRouter.get('/getCateByTitle/:title', getCateByTitleController);
 
