@@ -141,6 +141,10 @@ const getAllCategoryWithView = async() => {
       attributes: [
         'imgUrl',
         'title',
+        'description',
+        'createdAt',
+        'updatedAt',
+        'id',
         [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
       ],
       include: [
