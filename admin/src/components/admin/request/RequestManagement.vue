@@ -9,13 +9,15 @@
   import { useConfirm } from 'primevue/useconfirm';
   import Filter from '@/components/Filter.vue';
   import axiosInstance from '@/services/axios';
-  import { formatDateData } from '@/utils';
+  import Button from 'primevue/button';
+  import { formatDateData, formatNumber } from '@/utils';
 
   const confirm = useConfirm();
   const requests = ref([]);
   const currentPage = ref(1);
   const totalPage = ref(0);
   const totalRequest = ref(0);
+  const filterStatus = ref('');
   const showConfirmDialog = ref(false);
   const showRejectDialog = ref(false);
   const reason = ref('');
@@ -29,7 +31,11 @@
 
   const getAllUsers = async () => {
     try {
-      const response = await getAllUsersRequest(currentPage.value, selectedPageSize.value);
+      const response = await getAllUsersRequest(
+        currentPage.value,
+        selectedPageSize.value,
+        filterStatus.value,
+      );
       if (response.status === 200) {
         requests.value = response.data.data.data.rows;
         totalPage.value = response.data.data.totalPages;
@@ -40,6 +46,12 @@
     } catch (error) {
       toast.error('Login failed');
     }
+  };
+
+  const applyFilter = (status) => {
+    filterStatus.value = status;
+    currentPage.value = 1;
+    getAllUsers();
   };
 
   const openConfirmDialog = (userId) => {
@@ -111,9 +123,11 @@
       accept: async () => {
         await handleApproveRequest(userId);
         showConfirmDialog.value = false;
+        getAllUsers();
       },
       reject: () => {
         showConfirmDialog.value = false;
+        getAllUsers();
       },
     });
   };
@@ -140,11 +154,13 @@
         showError.value = false;
         await handleRejectRequest(userId, reason.value);
         showRejectDialog.value = false;
+        getAllUsers();
       },
       reject: () => {
         showRejectDialog.value = false;
         showError.value = false;
         reason.value = '';
+        getAllUsers();
       },
     });
   };
@@ -167,7 +183,56 @@
           <template #header>
             <div class="flex flex-wrap gap-2 items-center justify-between">
               <h1 class="font-bold text-[20px]">Request to channel</h1>
+              <div class="flex gap-x-5">
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === '',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== '',
+                  }"
+                  @click="applyFilter('')"
+                >
+                  All
+                </button>
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === 'pending',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== 'pending',
+                  }"
+                  @click="applyFilter('pending')"
+                >
+                  Pending
+                </button>
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === 'approved',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== 'approved',
+                  }"
+                  @click="applyFilter('approved')"
+                >
+                  Approved
+                </button>
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === 'rejected',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== 'rejected',
+                  }"
+                  @click="applyFilter('rejected')"
+                >
+                  Rejected
+                </button>
+              </div>
             </div>
+          </template>
+          <template #empty>
+            <p class="text-center">No requests found.</p>
           </template>
           <Column header="User">
             <template #body="{ data }">
@@ -181,11 +246,10 @@
               </div>
             </template>
           </Column>
-          <Column field="User.phoneNumber" header="Phone"></Column>
           <Column field="User.email" header="Email"></Column>
           <Column header="Balance">
             <template #body="{ data }">
-              <span>{{ data.User.REPs }} <strong>REP$</strong></span>
+              <span>{{ formatNumber(data.User.REPs) }} <strong>REP$</strong></span>
             </template>
           </Column>
           <Column field="totalReportCount" header="Being Reported"></Column>
@@ -221,6 +285,7 @@
             </template>
           </Column>
         </DataTable>
+
         <div class="flex justify-end gap-x-12 items-center px-12 pt-3 mb-[20px]">
           <Filter
             :title="'Rows per page'"
