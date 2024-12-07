@@ -1,12 +1,13 @@
 const express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { createLevelWorkoutController, getAllLevelWorkoutController, getLvWorkoutByIdController, editLevelWorkoutController, deleteLevelWorkoutController } = require("../controllers/levelWorkoutController");
+const { createLevelWorkoutController, getAllLevelWorkoutController, getLvWorkoutByIdController, editLevelWorkoutController, deleteLevelWorkoutController, getAllLevelWorkoutAdminController } = require("../controllers/levelWorkoutController");
 const lvWorkoutRouter = express.Router();
 
 
 lvWorkoutRouter.post('/', verifyAdmin, createLevelWorkoutController);
-lvWorkoutRouter.get('/', getAllLevelWorkoutController);
+lvWorkoutRouter.get('/getAllLevelWorkoutAdmin', verifyAdmin, getAllLevelWorkoutAdminController);
 lvWorkoutRouter.get('/getLvWorkoutById/:lvWorkoutId', getLvWorkoutByIdController);
+lvWorkoutRouter.get('/', getAllLevelWorkoutController);
 lvWorkoutRouter.patch('/', verifyAdmin, editLevelWorkoutController);
 lvWorkoutRouter.delete('/:lvWorkoutId', verifyAdmin, deleteLevelWorkoutController);
 
