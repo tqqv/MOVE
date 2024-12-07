@@ -40,12 +40,13 @@ const getTop5UserDepositController = async (req, res, next) => {
 const getAllUsersRequestController = async (req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
+  const status = req.query.status ;
   const sortCondition = {
     sortBy: req.query.sortBy || 'createdAt',
     order: req.query.order || 'desc'
   };
 
-  const result = await getAllUsersRequest(page, pageSize, sortCondition);
+  const result = await getAllUsersRequest(page, pageSize, status, sortCondition);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };

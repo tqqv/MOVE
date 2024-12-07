@@ -325,8 +325,11 @@ const userCount = async() => {
   }
 }
 
-const getAllUsersRequest = async (page, pageSize, sortCondition) => {
+const getAllUsersRequest = async (page, pageSize, status, sortCondition) => {
   try {
+    const whereCondition = {
+      ...(status && { status }),
+    };
     const requestChannels = await RequestChannel.findAndCountAll({
       attributes: [
         'id', 'userId', 'status', 'text', 'createdAt', 'updatedAt',
@@ -343,12 +346,13 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
       include: [
         {
           model: User,
-          attributes: ['id', 'username', 'avatar', 'phoneNumber', 'email', 'REPs', 'createdAt'],
+          attributes: ['id', 'username', 'avatar', 'email', 'REPs', 'createdAt'],
           where: {
             isBanned: { [Op.ne]: true }
           },
         }
       ],
+      where: whereCondition,
       order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
