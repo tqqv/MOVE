@@ -3,10 +3,14 @@
   import { useRouter } from 'vue-router';
   import Column from 'primevue/column';
   import DataTable from 'primevue/datatable';
-  import Tag from 'primevue/tag';
-  import Button from 'primevue/button';
+  import Filter from '@/components/Filter.vue';
+  import Status from '@/components/Status.vue';
+  import { usePopupStore } from '@/stores';
+  import SuspendPopup from './SuspendPopup.vue';
 
   const router = useRouter();
+  const popupStore = usePopupStore();
+
   const reports = ref([
     {
       id: '1',
@@ -21,6 +25,7 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'comment',
         description: 'Nudity or sexual activity',
@@ -42,12 +47,13 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'video',
         description: 'Nudity or sexual activity',
       },
       targetId: '12313123',
-      status: 'pending',
+      status: 'accepted',
       createAt: '09/11/2024',
     },
     {
@@ -63,12 +69,13 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
         type: 'account',
         description: 'Nudity or sexual activity',
       },
       targetId: '12313123',
-      status: 'pending',
+      status: 'rejected',
       createAt: '09/11/2024',
     },
     {
@@ -84,8 +91,9 @@
         username: 'thehoang.17',
         email: 'channel@gmail.com',
       },
+      qualityReport: 3,
       reportType: {
-        type: 'videos',
+        type: 'live stream',
         description: 'Nudity or sexual activity',
       },
       targetId: '12313123',
@@ -102,37 +110,58 @@
   const handleAccept = () => {
     alert('something');
   };
+
+  // HANDLE FILTER
+  const sortByStatus = [
+    { id: 0, name: 'All', value: '' },
+    { id: 1, name: 'Pending', value: 'pending' },
+    { id: 2, name: 'Accept', value: 'accept' },
+    { id: 3, name: 'Reject', value: 'reject' },
+  ];
+
+  const sortByType = [
+    { id: 0, name: 'Comment', value: 'comment' },
+    { id: 1, name: 'Video', value: 'video' },
+    { id: 2, name: 'Live stream', value: 'livestream' },
+    { id: 3, name: 'Account', value: 'account' },
+  ];
+
+  const selectedSortByStatus = ref(sortByStatus[0].value);
+  const selectedSortByType = ref(sortByType[0].value);
+
+  const handleSortChange = (newValue) => {
+    selectedSortByStatus.value = newValue.value || '';
+  };
+  const handleSortType = (newValue) => {
+    selectedSortByType.value = newValue.value || '';
+  };
+
+  // PANGING
+  const pageSizeOptions = [
+    { id: 1, name: 10, value: 10 },
+    { id: 2, name: 20, value: 20 },
+    { id: 3, name: 30, value: 30 },
+  ];
 </script>
 
 <template>
-  <section class="bg-[#FAFAFB]">
+  <section>
     <div class="container">
-      <div class="card bg-white p-4 shadow rounded-lg">
-        <DataTable :value="reports" stripedRows showGridlines @row-click="handleRowClick">
+      <div class="flex justify-between items-start mb-7">
+        <h1 class="text-2xl font-bold">Report management</h1>
+        <div class="flex gap-x-6">
+          <Filter title="Type report" :options="sortByType" @change="handleSortType" />
+          <Filter title="Status" :options="sortByStatus" @change="handleSortChange" />
+        </div>
+      </div>
+      <div class="bg-white p-4 shadow rounded-lg">
+        <DataTable stripedRows :value="reports" @row-click="handleRowClick">
           <template #header>
             <div class="flex flex-wrap gap-2 items-center justify-between">
-              <h1 class="font-bold text-[20px]">Manage Report</h1>
+              <h1 class="font-bold text-[20px] mb-3">Report {{ selectedSortByType }} list</h1>
             </div>
           </template>
           <Column field="id" header="ID"></Column>
-          <Column header="Reporter">
-            <template #body="{ data }">
-              <div class="flex items-center gap-4">
-                <img
-                  :alt="data.reporter.imgUrl"
-                  :src="data.reporter.imgUrl"
-                  style="width: 40px"
-                  class="rounded-full"
-                />
-                <div>
-                  <p class="font-semibold">{{ data.reporter.username }}</p>
-                  <p>{{ data.reporter.email }}</p>
-                </div>
-              </div>
-            </template>
-          </Column>
-          <Column field="reportType.type" header="Type" class="capitalize"></Column>
-          <Column field="reportType.description" header="Description"></Column>
           <Column header="Target">
             <template #body="{ data }">
               <div class="flex items-center gap-4">
@@ -149,30 +178,47 @@
               </div>
             </template>
           </Column>
+          <Column field="qualityReport" header="Number of reports"></Column>
           <Column field="status" header="Status" dataType="boolean">
             <template #body="{ data }">
-              <Tag v-if="data.status" :value="data.status" severity="info" class="capitalize" />
-            </template>
-          </Column>
-          <Column>
-            <template #body="{ data }">
-              <div class="flex justify-between">
-                <Button label="Accept" severity="warn" @click.stop="handleAccept" />
-                <Button label="Reject" severity="secondary" />
-              </div>
+              <Status :status="data.status" />
             </template>
           </Column>
         </DataTable>
+
+        <!-- PANGING -->
+        <div class="flex justify-end gap-x-12 items-center px-12 pt-6 mb-[20px]">
+          <Filter
+            :title="'Rows per page'"
+            :options="pageSizeOptions"
+            @change="selectedPageSize = $event.value"
+          />
+          <div>
+            <span>
+              {{ (currentPage - 1) * selectedPageSize + 1 }}
+            </span>
+            -
+            <span>
+              {{ Math.min(currentPage * selectedPageSize, totalRequest) }}
+            </span>
+            <span> of {{ totalRequest }} results</span>
+          </div>
+          <div class="flex gap-x-4 justify-center">
+            <i
+              @click="goToPreviousPage"
+              class="pi pi-chevron-left cursor-pointer text-md hover:text-primary"
+              :class="{ 'text-gray-dark hover:text-gray-dark cursor-auto': currentPage === 1 }"
+            ></i>
+            <i
+              @click="goToNextPage"
+              class="pi pi-chevron-right cursor-pointer text-md hover:text-primary"
+              :class="{
+                'text-gray-dark hover:text-gray-dark cursor-auto': currentPage === totalPage,
+              }"
+            ></i>
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </template>
-
-<style lang="css" scoped>
-  ::v-deep(.p-row-even:hover) {
-    cursor: pointer;
-  }
-  ::v-deep(.p-row-odd:hover) {
-    cursor: pointer;
-  }
-</style>

@@ -285,8 +285,7 @@
             </template>
           </Column>
         </DataTable>
-
-        <div class="flex justify-end gap-x-12 items-center px-12 pt-3 mb-[20px]">
+        <div class="flex justify-end gap-x-12 items-center px-12 pt-6 mb-[20px]">
           <Filter
             :title="'Rows per page'"
             :options="pageSizeOptions"
