@@ -323,8 +323,8 @@ const createBookingFeatureContentService = async (date, featuredContentBaseId, f
               sequelize.fn('DATE', date)
             )
           ],
-          channelId
-        }
+        },
+        channelId
       }
     });
     if (isBooked) {
