@@ -13,11 +13,13 @@ const updateStreamStats = async (channelId, action, field, amount) => {
                 let newValue;
                 if (field === 'currentViews') {
                     newValue = await increment(key, amount);
-
-                    const highestKey = streamKeys.highestViews(channelId);
-                    const highest = parseInt(await get(highestKey) || '0');
-                    if (newValue > highest) {
-                        await set(highestKey, newValue);
+                    const liveStatus = await get(`channel_${channelId}_live_status`)
+                    if(liveStatus == "streamPublished" ) {
+                        const highestKey = streamKeys.highestViews(channelId);
+                        const highest = parseInt(await get(highestKey) || '0');
+                        if (newValue > highest) {
+                            await set(highestKey, newValue);
+                        }
                     }
                 }
                 else if (field === 'totalLikes' || field === 'totalShares' || field === 'totalViews' || field === 'newFollowers') {
