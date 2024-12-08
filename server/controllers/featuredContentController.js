@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, getBookDateDetailService } = require("../services/featuredContentService");
+const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService } = require("../services/featuredContentService");
 
 const getAllFeatureContentController = async(req, res, next) => {
     const datetime = req.query.datetime;
@@ -23,8 +23,16 @@ const createFeatureContentController = async(req, res, next) => {
 const createBookingFeatureContentController = async(req, res, next) => {
 
     const channelId = req.user.channelId
-    const { date, featuredContentBaseId, featuredContentAbnormalId, videoId } = req.body
-    const result = await createBookingFeatureContentService(date, featuredContentBaseId, featuredContentAbnormalId, channelId, videoId);
+    const pickedDates  = req.body.pickedDates
+    const result = await createBookingFeatureContentService(pickedDates, channelId);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const cancelBookingFeatureContentController = async(req, res, next) => {
+
+    const channelId = req.user.channelId
+    const pickedDates  = req.body.pickedDates
+    const result = await cancelBookingFeaturedContentService(pickedDates, channelId);
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
@@ -47,5 +55,6 @@ module.exports = {
     getAllFeatureContentController,
     createBookingFeatureContentController,
     getBookingFeatureContentController,
-    getBookDateDetailController
+    getBookDateDetailController,
+    cancelBookingFeatureContentController
 }
