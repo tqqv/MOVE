@@ -74,8 +74,8 @@ const getLvWorkoutById = async(lvWorkoutId) => {
 const editLevelWorkout = async(lvWorkoutId, data) => {
   try {
     // Tìm LvWorkout trong DB
-    const LevelWorkout = await LevelWorkout.findByPk(lvWorkoutId)
-    if(!LevelWorkout) {
+    const levelWorkout = await LevelWorkout.findByPk(lvWorkoutId)
+    if(!levelWorkout) {
       return {
         status: 400,
         data: null,
@@ -83,7 +83,7 @@ const editLevelWorkout = async(lvWorkoutId, data) => {
       }
     }
     // update LvWorkout trong db
-    const updateLvWorkout = await user.update(data)
+    const updateLvWorkout = await levelWorkout.update(data)
     if(!updateLvWorkout) {
       return {
         status: 400,

@@ -8,7 +8,7 @@ lvWorkoutRouter.post('/', verifyAdmin, createLevelWorkoutController);
 lvWorkoutRouter.get('/getAllLevelWorkoutAdmin', verifyAdmin, getAllLevelWorkoutAdminController);
 lvWorkoutRouter.get('/getLvWorkoutById/:lvWorkoutId', getLvWorkoutByIdController);
 lvWorkoutRouter.get('/', getAllLevelWorkoutController);
-lvWorkoutRouter.patch('/', verifyAdmin, editLevelWorkoutController);
+lvWorkoutRouter.patch('/:lvWorkoutId', verifyAdmin, editLevelWorkoutController);
 lvWorkoutRouter.delete('/:lvWorkoutId', verifyAdmin, deleteLevelWorkoutController);
 
 module.exports = lvWorkoutRouter;

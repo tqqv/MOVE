@@ -2,7 +2,6 @@
   import { onMounted, ref } from 'vue';
   import Column from 'primevue/column';
   import DataTable from 'primevue/datatable';
-  import Button from 'primevue/button';
   import Dialog from 'primevue/dialog';
   import InputText from 'primevue/inputtext';
   import Textarea from 'primevue/textarea';
@@ -12,12 +11,8 @@
     createCategory,
     deleteCategory,
     editCategory,
-    getAllCategories,
     getAllCategoriesByAdmin,
-    getAllCategoriesWithFollower,
-    getAllFollowCategories,
   } from '@/services/categories';
-  import { formatDateData } from '@/utils';
   import CreateButton from '@/components/CreateButton.vue';
   import { uploadAvatar } from '@/services/cloudinary';
   import SmallLoading from '@/components/icons/smallLoading.vue';
@@ -57,9 +52,9 @@
 
   const openDeleteCateDialog = (category) => {
     selectedCategory.value = { ...category };
-    if (selectedCategory.value?.videoCount > 0) {
+    if (selectedCategory.value?.videoCount > 0 || selectedCategory.value?.livestreamCount > 0) {
       toast.info('Cannot delete category that already has video');
-      return
+      return;
     }
     deleteCateDialog.value = true;
   };
@@ -149,7 +144,14 @@
   };
   // HANDLE EDIT CATE
   const handleEditCate = async () => {
-    if (!selectedCategory.value) return;
+    if (
+      !selectedCategory.value.title ||
+      !selectedCategory.value.description ||
+      !selectedCategory.value.imgUrl
+    ) {
+      toast.error('All fields are required.');
+      return;
+    }
 
     const updatedData = selectedCategory.value;
     const originalData = categories.value.find((cate) => cate.id === updatedData.id);
@@ -207,7 +209,20 @@
         <CreateButton @openDialog="openCateDialog" />
       </div>
       <div class="card bg-white p-4 shadow rounded-lg">
-        <DataTable v-if="isLoading" :value="[1, 2, 3]" stripedRows>
+        <DataTable
+          v-if="isLoading"
+          :value="
+            Array(3).fill({
+              imgUrl: '',
+              title: '',
+              description: '',
+              videoCount: '',
+              livestreamCount: '',
+              totalViews: '',
+            })
+          "
+          stripedRows
+        >
           <Column header="Image" style="width: 150px">
             <template #body>
               <div class="w-[118px] h-[177px]">
@@ -226,6 +241,11 @@
             </template>
           </Column>
           <Column header="Video">
+            <template #body>
+              <Skeleton class="w-[50px] h-[20px]" />
+            </template>
+          </Column>
+          <Column header="Live stream">
             <template #body>
               <Skeleton class="w-[50px] h-[20px]" />
             </template>
@@ -252,7 +272,13 @@
           <Column field="title" header="Title"></Column>
           <Column field="description" header="Description" style="width: 20rem"></Column>
           <Column field="videoCount" header="Video"></Column>
-          <Column field="totalViews" header="Total view"></Column>
+          <Column field="livestreamCount" header="LiveStream"></Column>
+
+          <Column header="Total view">
+            <template #body="{ data }">
+              {{ data.totalViews ?? 0 }}
+            </template>
+          </Column>
 
           <Column style="width: 7rem">
             <template #body="{ data }">
@@ -278,6 +304,7 @@
           :modal="true"
           :draggable="false"
           :dismissableMask="true"
+          @keydown.enter.prevent="saveProduct"
         >
           <div class="flex flex-col gap-6">
             <div class="relative">
@@ -363,6 +390,7 @@
           :modal="true"
           :draggable="false"
           :dismissableMask="true"
+          @keydown.enter.prevent="handleEditCate"
         >
           <div class="flex flex-col gap-6">
             <div class="flex flex-col">
@@ -446,6 +474,7 @@
           :modal="true"
           :draggable="false"
           :dismissableMask="true"
+          @keydown.enter.prevent="handleDeleteCate"
         >
           <p class="text-[11px] md:text-[14px] italic">
             Do you want to remove category "
