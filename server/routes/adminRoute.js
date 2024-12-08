@@ -1,6 +1,6 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController } = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, revenueController, getListUserPayInController, getListUserPayOutController } = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
@@ -9,6 +9,9 @@ const adminRoute = express.Router();
 
 adminRoute.post("/login", loginAdminController);
 
+adminRoute.get("/getListUserPayIn", verifyAdmin, getListUserPayInController)
+adminRoute.get("/getListUserPayOut", verifyAdmin, getListUserPayOutController)
+adminRoute.get("/revenue", verifyAdmin, revenueController)
 adminRoute.get("/userCount", verifyAdmin, userCountController)
 adminRoute.get("/getStatistic", verifyAdmin, getStatisticController)
 adminRoute.get("/getTop5Channel", verifyAdmin, getTop5ChannelController)
