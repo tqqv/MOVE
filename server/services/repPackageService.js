@@ -3,7 +3,9 @@ const { RepPackage } = db;
 
 const getListRepPackage = async() => {
   try {
-    const list = await RepPackage.findAll();
+    const list = await RepPackage.findAll({
+      order: [['rep', 'asc']]
+    });
 
     return {
       status: 200,

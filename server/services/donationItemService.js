@@ -29,7 +29,9 @@ const createDonationItem = async(data) => {
 
 const getAllDonationItem = async() => {
   try {
-    const listCate = await DonationItem.findAll()
+    const listCate = await DonationItem.findAll({
+      order: [['REPs', 'asc']]
+    })
 
     return {
       status: 200,
