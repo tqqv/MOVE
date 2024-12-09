@@ -5,6 +5,7 @@ const db = require("../models/index.js");
 const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
 const moment = require('moment');
+const { messages } = require("../utils/redis/key/chatKey.js");
 
 const setStatusRequestChannel = async(userId, status, text) => {
   console.log(status);
@@ -325,6 +326,54 @@ const userCount = async() => {
   }
 }
 
+const unbanAccount = async(userId) => {
+  try {
+    const user = await User.fineOne({where: {id: userId, isBanned: true}})
+    if(!user) {
+      return {
+        status: 404,
+        message: "User not found or user is not banned"
+      }
+    }
+    user.isBanned = false;
+    await user.save();
+
+    return {
+      status: 200,
+      message: "Unban user successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const unbanChannel = async(channelId) => {
+  try {
+    const channel = await Channel.fineOne({where: {id: channelId, isBanned: true}})
+    if(!channel) {
+      return {
+        status: 404,
+        message: "Channel not found or channel is not banned"
+      }
+    }
+    channel.isBanned = false;
+    await channel.save();
+
+    return {
+      status: 200,
+      message: "Unban channel successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
 const getAllUsersRequest = async (page, pageSize, status, sortCondition) => {
   try {
     const whereCondition = {
@@ -475,6 +524,8 @@ module.exports = {
   getTop5UserDeposit,
   getAllUsersRequest,
   userCount,
+  unbanAccount,
+  unbanChannel,
   getAllUser,
   editProfileUser,
 }

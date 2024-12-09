@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanC, unbanAccounthannel } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
 const { getProfile } = require("../services/userService");
 const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
@@ -57,6 +57,12 @@ const userCountController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const unbanAccountController = async (req, res, next) => {
+  const userId = req.params.userId
+  const result = await unbanAccount(userId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 const getAllUserController = async (req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
@@ -85,6 +91,12 @@ const editProfileUserController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const unbanChannelController = async (req, res, next) => {
+  const channelId = req.params.channelId
+  const result = await unbanChannel(channelId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 const getListVideoByChannelIdController = async (req, res, next) => {
   const channelId = req.params.channelId;
   const page = req.query.page || 1;
@@ -139,7 +151,10 @@ module.exports = {
   getDataChartMoneyController,
   getTop5ChannelController,
   getTop5UserDepositController,
+  userCountController,
   getAllUsersRequestController,
+  unbanAccountController,
+  unbanChannelController,
   userCountController,
   getAllUserController,
   getUserByIdController,
