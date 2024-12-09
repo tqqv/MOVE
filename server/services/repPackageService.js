@@ -40,7 +40,7 @@ const createRepPackage = async(data) => {
     const newRepPackage = await RepPackage.create({
       rep: data.rep,
       amount: data.amount,
-      discount: discount
+      discount: data.discount/100
     })
 
     return {
