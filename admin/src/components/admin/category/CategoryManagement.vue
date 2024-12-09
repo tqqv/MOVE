@@ -272,7 +272,7 @@
           <Column field="title" header="Title"></Column>
           <Column field="description" header="Description" style="width: 20rem"></Column>
           <Column field="videoCount" header="Video"></Column>
-          <Column field="livestreamCount" header="LiveStream"></Column>
+          <Column field="livestreamCount" header="Live stream"></Column>
 
           <Column header="Total view">
             <template #body="{ data }">
