@@ -110,10 +110,10 @@ const getListReportChannelController = async(req, res, next) => {
 
 const actionReportController = async(req, res, next) => {
   const action = req.body.action;
-  const reportId = req.body.reportId;
+  const targetReportId = req.body.targetReportId;
   const banned = req.body.banned;
   const type = req.body.type;
-  const result = await actionReport(reportId, action, banned, type);
+  const result = await actionReport(targetReportId, action, banned, type);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

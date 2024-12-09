@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { RepPackage } = db;
+const { RepPackage, Payment } = db;
 
 const getListRepPackage = async() => {
   try {
@@ -113,12 +113,22 @@ const editRepPackage = async(repPackageId, data) => {
 const deleteRepPackage = async (repPackageId) => {
   try {
     const repPackage = await RepPackage.findByPk(repPackageId);
+
     if (!repPackage) {
       return {
         status: 404,
         data: null,
         message: "Rep Package not found."
       };
+    }
+
+    const payment = await Payment.findOne({where: {repPackageId}})
+
+    if(payment){
+      return {
+        status: 400,
+        message: "This rep package is in use on payment."
+      }
     }
 
     await repPackage.destroy();
