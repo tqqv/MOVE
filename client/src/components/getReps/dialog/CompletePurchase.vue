@@ -11,6 +11,7 @@
   import { checkout, createCardInfo, getClientSecret } from '@/services/payment';
   import { paymentSchema } from '@/utils/vadilation';
   import smallLoading from '@/components/icons/smallLoading.vue';
+  import { toast } from 'vue3-toastify';
 
   const props = defineProps({
     title: String,
@@ -89,7 +90,7 @@
         },
       });
 
-      if (confirm) {
+      if (confirm.setupIntent) {
         const data = {
           cardName,
           paymentMethodId: confirm.setupIntent.payment_method,
@@ -103,6 +104,7 @@
         } else {
         }
       } else {
+        toast.error(confirm.error.message);
         console.error('Error: Confirmation failed');
       }
     } catch (error) {
@@ -162,6 +164,7 @@
         // console.log('Payment failed!');
         emit('toggleOpenOrder'); // Hiện popup "Payment Failed"
         popupStore.isOrderSuccessful = false;
+        toast.error(res.message)
       }
     } catch (error) {
       console.error('Error during checkout:', error.message);
