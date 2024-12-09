@@ -326,7 +326,7 @@ const userCount = async() => {
   }
 }
 
-const UnbanAccount = async(userId) => {
+const unbanAccount = async(userId) => {
   try {
     const user = await User.fineOne({where: {id: userId, isBanned: true}})
     if(!user) {
@@ -350,7 +350,7 @@ const UnbanAccount = async(userId) => {
   }
 }
 
-const UnbanChannel = async(channelId) => {
+const unbanChannel = async(channelId) => {
   try {
     const channel = await Channel.fineOne({where: {id: channelId, isBanned: true}})
     if(!channel) {
@@ -524,8 +524,8 @@ module.exports = {
   getTop5UserDeposit,
   getAllUsersRequest,
   userCount,
-  UnbanAccount,
-  UnbanChannel,
+  unbanAccount,
+  unbanChannel,
   getAllUser,
   editProfileUser,
 }

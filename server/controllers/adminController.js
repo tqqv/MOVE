@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, UnbanAccount, UnbanChannel } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanC, unbanAccounthannel } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
 const { getProfile } = require("../services/userService");
 const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
@@ -57,9 +57,9 @@ const userCountController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const UnbanAccountController = async (req, res, next) => {
+const unbanAccountController = async (req, res, next) => {
   const userId = req.params.userId
-  const result = await UnbanAccount(userId)
+  const result = await unbanAccount(userId)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -91,9 +91,9 @@ const editProfileUserController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const UnbanChannelController = async (req, res, next) => {
+const unbanChannelController = async (req, res, next) => {
   const channelId = req.params.channelId
-  const result = await UnbanChannel(channelId)
+  const result = await unbanChannel(channelId)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -153,8 +153,8 @@ module.exports = {
   getTop5UserDepositController,
   userCountController,
   getAllUsersRequestController,
-  UnbanAccountController,
-  UnbanChannelController,
+  unbanAccountController,
+  unbanChannelController,
   userCountController,
   getAllUserController,
   getUserByIdController,
