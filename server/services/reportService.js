@@ -870,6 +870,15 @@ const actionReport = async(targetReportId, action, banned, type) => {
           }
         }
 
+        const user = await User.findOne({where: {id:banned.userId}})
+
+        if(!user) {
+          return {
+            status: 404,
+            message: "User not found."
+          }
+        }
+
         await handleBan(banned, true);
         await updateReportStatus(targetReportId, 'banned', type);
         return {
@@ -888,9 +897,19 @@ const actionReport = async(targetReportId, action, banned, type) => {
         if(!banned.userId || !banned.reason || !banned.expiresAt) {
           return {
             status: 400,
-            message: "Id user and reason not null"
+            message: "Id user, reason and exprires date not null"
           }
         }
+
+        const userCheck = await User.findOne({where: {id:banned.userId}})
+
+        if(!userCheck) {
+          return {
+            status: 404,
+            message: "User not found."
+          }
+        }
+
         await handleBan(banned, false);
         await updateReportStatus(targetReportId, 'suspended', type);
         return {

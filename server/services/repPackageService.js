@@ -3,7 +3,9 @@ const { RepPackage, Payment } = db;
 
 const getListRepPackage = async() => {
   try {
-    const list = await RepPackage.findAll();
+    const list = await RepPackage.findAll({
+      order: [['rep', 'asc']]
+    });
 
     return {
       status: 200,
@@ -29,16 +31,14 @@ const createRepPackage = async(data) => {
       }
     }
 
-    let discount;
-
     if(!data.discount) {
-      discount = 0
+      data.discount = 0
     }
 
     const newRepPackage = await RepPackage.create({
       rep: data.rep,
       amount: data.amount,
-      discount: discount
+      discount: data.discount/100
     })
 
     return {
@@ -91,6 +91,12 @@ const editRepPackage = async(repPackageId, data) => {
         data: null,
         message: "Rep Package not found"
       }
+    }
+
+    if(data.discount) {
+      data.discount = data.discount/100
+    }else {
+      data.discount = 0
     }
 
     await repPackage.update(data)

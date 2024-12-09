@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanC, unbanAccounthannel } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanChannel, revenue, getListUserPayIn, getListUserPayOut } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
 const { getProfile } = require("../services/userService");
 const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
@@ -145,6 +145,29 @@ const getListPaymentByUserIdController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const revenueController = async (req, res, next) => {
+  const year = req.query.year || null
+  const result = await revenue(year)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListUserPayInController = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const result = await getListUserPayIn(page, pageSize)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListUserPayOutController = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const result = await getListUserPayOut(page, pageSize)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
@@ -163,4 +186,7 @@ module.exports = {
   EditVideoByIdController,
   deleteVideoByIdController,
   getListPaymentByUserIdController,
+  revenueController,
+  getListUserPayInController,
+  getListUserPayOutController,
 }
