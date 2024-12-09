@@ -332,6 +332,54 @@ const userCount = async() => {
   }
 }
 
+const unbanAccount = async(userId) => {
+  try {
+    const user = await User.fineOne({where: {id: userId, isBanned: true}})
+    if(!user) {
+      return {
+        status: 404,
+        message: "User not found or user is not banned"
+      }
+    }
+    user.isBanned = false;
+    await user.save();
+
+    return {
+      status: 200,
+      message: "Unban user successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const unbanChannel = async(channelId) => {
+  try {
+    const channel = await Channel.fineOne({where: {id: channelId, isBanned: true}})
+    if(!channel) {
+      return {
+        status: 404,
+        message: "Channel not found or channel is not banned"
+      }
+    }
+    channel.isBanned = false;
+    await channel.save();
+
+    return {
+      status: 200,
+      message: "Unban channel successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
 const getAllUsersRequest = async (page, pageSize, status, sortCondition) => {
   try {
     const whereCondition = {
@@ -597,6 +645,8 @@ module.exports = {
   getTop5UserDeposit,
   getAllUsersRequest,
   userCount,
+  unbanAccount,
+  unbanChannel,
   getAllUser,
   editProfileUser,
   revenue,
