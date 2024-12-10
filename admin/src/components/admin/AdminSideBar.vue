@@ -38,7 +38,7 @@
     },
     { name: 'Category Management', icon: Category, link: '/category' },
     { name: 'Level Management', icon: Level, link: '/levelworkout' },
-    { name: 'Report Management', icon: Flag, link: '/report' },
+    { name: 'Report Management', icon: Flag, link: '/report/comment' },
     { name: 'Booking management', icon: Booking, link: '/booking-management' },
     { name: 'Request Channel', icon: Request, link: '/request' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },

@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { messages } = require("../utils/redis/key/chatKey.js");
-const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, Sequelize } = db;
+const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, LevelWorkout, Category, Sequelize } = db;
 
 const reportVideo = async(userId, videoId, reportTypeId) => {
   try {
@@ -474,6 +474,10 @@ const getListReportVideo = async(page, pageSize, status) => {
             model: Channel,
             as: 'channel',
             attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+            include: {
+              model: User,
+              attributes: ['username']
+            }
           },
         }
       ],
@@ -622,11 +626,15 @@ const getListReportLivestream = async(page, pageSize, status) => {
       include: [
         {
           model: Livestream,
-          attributes: ['content', 'rep'],
+          attributes: ['thumbnailUrl', 'title'],
           include: {
             model: Channel,
             as: "livestreamChannel",
-            attributes: ["channelName", "avatar", "popularCheck", "isLive"]
+            attributes: ["channelName", "avatar", "popularCheck", "isLive"],
+            include: {
+              model: User,
+              attributes: ["username"]
+            }
           }
         }
       ],
@@ -770,7 +778,11 @@ const getListReportChannel = async(page, pageSize, status) => {
       include: [
         {
           model: Channel,
-          attributes: ['channelName', 'avatar', 'id']
+          attributes: ['channelName', 'avatar', 'id'],
+          include: {
+            model: User,
+            attributes: ['username']
+          }
         }
       ],
       order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
