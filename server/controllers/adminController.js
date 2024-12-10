@@ -1,6 +1,7 @@
 const responseHandler = require("../middlewares/responseHandler");
 const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanChannel, revenue, getListUserPayIn, getListUserPayOut } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
+const { createSystemConfig, getDonationItemByKey, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
 const { getProfile } = require("../services/userService");
 const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
 
@@ -168,6 +169,34 @@ const getListUserPayOutController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const createSystemConfigController = async (req, res, next) => {
+  const data = req.body;
+  const result = await createSystemConfig(data)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getSystemConfigByKeyController = async (req, res, next) => {
+  const key = req.params.key
+  const result = await getDonationItemByKey(key)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getAllSystemConfigController = async (req, res, next) => {
+  const result = await getAllSystemConfig()
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const editSystemConfigController = async (req, res, next) => {
+  const systemConfigId = req.body.systemConfigId
+  const value = req.body.value
+  const result = await editSystemConfig(systemConfigId, value)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
@@ -189,4 +218,8 @@ module.exports = {
   revenueController,
   getListUserPayInController,
   getListUserPayOutController,
+  createSystemConfigController,
+  getSystemConfigByKeyController,
+  getAllSystemConfigController,
+  editSystemConfigController,
 }
