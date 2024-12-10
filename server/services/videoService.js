@@ -438,7 +438,8 @@ const getLatestReupStreamService = async (channelId) => {
         livestreamId: {
           [Op.ne]: null // Use Op.ne instead of Op.not
         },
-        status: "public"
+        status: "public",
+        isBanned: false
       },
       include: [
         {
