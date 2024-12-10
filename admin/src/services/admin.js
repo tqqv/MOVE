@@ -50,4 +50,47 @@ const getDataUserType = async (year) => {
     };
   }
 };
-export { getStatistic, getTop5Channel, getTop5UserDeposit, getDataChartMoney, getDataUserType };
+
+// REVENUE
+const getRevenue = async (year) => {
+  try {
+    const response = await axios.get(`/admin/revenue`, {
+      params: { year },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getListUserPayIn = async (page, pageSize) => {
+  try {
+    const response = await axios.get(`/admin/getListUserPayIn`, {
+      params: { page, pageSize },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getListUserPayOut = async (page, pageSize) => {
+  try {
+    const response = await axios.get(`/admin/getListUserPayOut`, {
+      params: { page, pageSize },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  getStatistic,
+  getTop5Channel,
+  getTop5UserDeposit,
+  getDataChartMoney,
+  getDataUserType,
+  getRevenue,
+  getListUserPayIn,
+  getListUserPayOut,
+};
