@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout, deleteWithdrawMethod, createNewBankAccount } = require("./stripeService.js");
-const { Channel, User, WithdrawInfor, Withdraw, sequelize } = db;
+const { Channel, User, WithdrawInfor, Withdraw, SystemConfig, sequelize } = db;
 
 
 const createMethodWithdraw = async(channelId, bankToken) => {
@@ -179,9 +179,9 @@ console.log(repInput);
       };
     }
 
-    const amount = parseFloat((repInput * 0.015*0.3).toFixed(2));
+    const withdrawRate = await SystemConfig.findOne({where: {key: "withdrawRate"}})
 
-// const amount = (repInput * 0.005).toFixed(2);
+    const amount = parseFloat((repInput * withdrawRate.value * 0.015).toFixed(2));
 
     const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors[0].stripeBankId, amount)
 
@@ -198,7 +198,7 @@ console.log(repInput);
       }
     )
 
-    await Channel.decrement('rep', { 
+    await Channel.decrement('rep', {
       by: repInput,
       where: {
         id: channelId
