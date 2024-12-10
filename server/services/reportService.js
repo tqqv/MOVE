@@ -469,7 +469,12 @@ const getListReportVideo = async(page, pageSize, status) => {
       include: [
         {
           model: Video,
-          attributes: ['title', 'thumbnailUrl']
+          attributes: ['title', 'thumbnailUrl'],
+          include: {
+            model: Channel,
+            as: 'channel',
+            attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          },
         }
       ],
       order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
@@ -538,7 +543,16 @@ const getListReportComment = async(page, pageSize, status) => {
       include: [
         {
           model: Comment,
-          attributes: ['content', 'rep']
+          attributes: ['content', 'rep'],
+          include: {
+            model: User,
+            as: 'userComments',
+            attributes: ['avatar', 'username', 'email'],
+            include: {
+              model: Channel,
+              attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+            }
+          }
         }
       ],
       order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
@@ -608,7 +622,12 @@ const getListReportLivestream = async(page, pageSize, status) => {
       include: [
         {
           model: Livestream,
-          attributes: ['content', 'rep']
+          attributes: ['content', 'rep'],
+          include: {
+            model: Channel,
+            as: "livestreamChannel",
+            attributes: ["channelName", "avatar", "popularCheck", "isLive"]
+          }
         }
       ],
       order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
@@ -679,7 +698,8 @@ const getListReportAccount = async(page, pageSize, status) => {
       include: [
         {
           model: User,
-          attributes: ['username', 'avatar', 'id']
+          as: 'targetUser',
+          attributes: ['username', 'avatar', 'id', 'email']
         }
       ],
       order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
