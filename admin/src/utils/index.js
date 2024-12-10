@@ -1,4 +1,5 @@
 export { formatRating } from './formatRating';
+export { formatTimeDate } from './formatTimeDate';
 export { formatDuration, genreDuration } from './formatDuration';
 export { formatView } from './formatView';
 export { formatDatePosted } from './formatDatePosted';
