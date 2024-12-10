@@ -2,7 +2,7 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
 const { v4: uuidv4 } = require('uuid');
 const WEIGHTS = require('../models/enum/constants.js');
@@ -90,7 +90,7 @@ const reupStreamService = async (livestreamId, videoId, userId, title, descripti
         duration: duration,
         status: status,
         livestreamId,
-        categoryId, 
+        categoryId,
         levelWorkoutsId,
         isCommentAble: true,
     });
@@ -377,7 +377,7 @@ const uploadMetadataService = async (videoUri, title, description) => {
 const getAllVideosService = async (page, pageSize) => {
   const videos = await Video.findAll(
     {
-      where: { status:  "public" },
+      where: { status:  "public", isBanned: false },
       attributes: {
         include: [
           [
@@ -518,7 +518,8 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   const videos = await Video.findAndCountAll({
     where: {
       channelId: channelId,
-      status: "public"
+      status: "public",
+      isBanned: false
     },
     // if no rating => no calculate avg rating
     attributes: attributes,
@@ -564,7 +565,7 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
 
 const getVideoByVideoIdService = async (videoId) => {
   const video = await Video.findOne({
-    where: { id: videoId },
+    where: { id: videoId , isBanned: false},
     attributes: {
       include: [
         [
@@ -704,6 +705,7 @@ const deleteMultipleVideosService = async (videoIds) => {
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
     const listVideo = await Video.findAndCountAll({
+      where: { status: "public", isBanned: false },
       attributes: {
         include: [
           [
@@ -1296,6 +1298,7 @@ const getVideoWatchAlso = async (category, level, videoId) => {
           [Op.not]: videoId,
         },
         status: 'public',
+        isBanned: false
       },
       attributes: {
         include: [
@@ -1347,6 +1350,7 @@ const getVideoWatchAlso = async (category, level, videoId) => {
             [Op.notIn]: [...existingVideoIds, videoId],
           },
           status: 'public',
+          isBanned: false
         },
         attributes: {
           include: [
@@ -1509,6 +1513,7 @@ const renewTopVideos = async () => {
             [Sequelize.Op.gte]: Sequelize.literal(`DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)`),
           },
           status: "public",
+          isBanned: false,
           categoryId: category.id
         },
         attributes: {
