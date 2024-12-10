@@ -134,7 +134,7 @@ const createPayment = async(userId, paymentMethodId, repPackageId) => {
       await user.save();
     }
 
-    const totalAmount = repPackage.amount-(repPackage.amount*repPackage.discount)
+    const totalAmount = (repPackage.amount-(repPackage.amount*repPackage.discount)).toFixed(2)
 
     const paymentIntent = await createStripePaymentIntent(user.stripeCustomerId, paymentMethodId, totalAmount)
 
