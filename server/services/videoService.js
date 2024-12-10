@@ -11,6 +11,7 @@ const { generateVideosYouMayLike } = require('../utils/AI/services/youmaylike/ge
 const { generateVideoEmbeddings } = require('../utils/AI/services/youmaylike/generateEmbeddings.js');
 const { generateUserProfile } = require('../utils/AI/services/youmaylike/generateUserProfile.js');
 const _redis = require('../utils/redis/config.js');
+const { createNotification } = require('./notificationService.js');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -90,7 +91,7 @@ const reupStreamService = async (livestreamId, videoId, userId, title, descripti
         duration: duration,
         status: status,
         livestreamId,
-        categoryId, 
+        categoryId,
         levelWorkoutsId,
         isCommentAble: true,
     });
@@ -174,6 +175,15 @@ const updateVideoService = async (videoId, updateData) => {
         message: 'Video updated failed',
         data: null
       };
+    }
+    if(updateData.status == "public") {
+      await createNotification(
+        "followedChannel",
+        "newVideo",
+        null,
+        video.channelId,
+        video.channelId
+      )
     }
     return {
       status: 200,

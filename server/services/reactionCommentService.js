@@ -1,9 +1,14 @@
 const db = require("../models/index.js");
-const { ReactionComment, Comment, User} = db;
+const { createNotification } = require("./notificationService.js");
+const { ReactionComment, Comment, User, Channel} = db;
 
 const reactionComment = async(userId, commentId, reactionType) => {
   try {
     const user = await User.findByPk(userId);
+    const channel = await Channel.findOne({where: {
+      userId
+    }})
+
     if(!user) {
       return {
         status: 404,
@@ -32,7 +37,12 @@ const reactionComment = async(userId, commentId, reactionType) => {
         commentId: commentId,
         reactionType: reactionType
       })
-
+      await createNotification(
+        "comment",
+        "reaction",
+        (channel ? null: userId),
+        channel.id,
+        comment.channelId || comment.userId)
       return {
         status: 200,
         message: reactionType === 'like' ? "Like comment successfully." : "Dislike comment successfully."
