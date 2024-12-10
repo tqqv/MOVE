@@ -1,5 +1,5 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref, watch } from 'vue';
   import { useRouter } from 'vue-router';
   import Column from 'primevue/column';
   import DataTable from 'primevue/datatable';
@@ -7,10 +7,15 @@
   import Status from '@/components/Status.vue';
   import { usePopupStore } from '@/stores';
   import SuspendPopup from './SuspendPopup.vue';
+  import { getAllReportComment } from '@/services/report';
+  import { list } from 'postcss';
 
   const router = useRouter();
   const popupStore = usePopupStore();
+  const page = ref(1);
+  const pageSize = ref(5);
 
+  const listReport = ref([]);
   const reports = ref([
     {
       id: '1',
@@ -107,10 +112,6 @@
     router.push(`report/${event.data.id}`);
   };
 
-  const handleAccept = () => {
-    alert('something');
-  };
-
   // HANDLE FILTER
   const sortByStatus = [
     { id: 0, name: 'All', value: '' },
@@ -132,6 +133,7 @@
   const handleSortChange = (newValue) => {
     selectedSortByStatus.value = newValue.value || '';
   };
+
   const handleSortType = (newValue) => {
     selectedSortByType.value = newValue.value || '';
   };
@@ -142,6 +144,32 @@
     { id: 2, name: 20, value: 20 },
     { id: 3, name: 30, value: 30 },
   ];
+
+  const fetchReportComment = async () => {
+    try {
+      const params = {
+        page: page.value,
+        pageSize: pageSize.value,
+      };
+      if (selectedSortByStatus.value) {
+        params.status = selectedSortByStatus.value;
+      }
+      const response = await getAllReportComment(params);
+      listReport.value = response.data.data.listReportComment;
+      console.log(listReport.value);
+    } catch (error) {
+      console.log(error);
+    } finally {
+    }
+  };
+
+  watch([selectedSortByStatus, selectedSortByType], () => {
+    fetchReportComment();
+  });
+
+  onMounted(() => {
+    fetchReportComment();
+  });
 </script>
 
 <template>
@@ -155,30 +183,30 @@
         </div>
       </div>
       <div class="bg-white p-4 shadow rounded-lg">
-        <DataTable stripedRows :value="reports" @row-click="handleRowClick">
+        <DataTable stripedRows :value="listReport" @row-click="handleRowClick">
           <template #header>
             <div class="flex flex-wrap gap-2 items-center justify-between">
               <h1 class="font-bold text-[20px] mb-3">Report {{ selectedSortByType }} list</h1>
             </div>
           </template>
-          <Column field="id" header="ID"></Column>
+          <Column header="STT" :body="(rowData, options) => options.rowIndex + 1"></Column>
           <Column header="Target">
             <template #body="{ data }">
               <div class="flex items-center gap-4">
-                <img
+                <!-- <img
                   :alt="data.targetAccount.imgUrl"
                   :src="data.targetAccount.imgUrl"
                   style="width: 40px"
                   class="rounded-full"
-                />
-                <div>
+                /> -->
+                <!-- <div>
                   <p class="font-semibold">{{ data.targetAccount.username }}</p>
                   <p>{{ data.targetAccount.email }}</p>
-                </div>
+                </div> -->
               </div>
             </template>
           </Column>
-          <Column field="qualityReport" header="Number of reports"></Column>
+          <Column field="reportCount" header="Number of reports"></Column>
           <Column field="status" header="Status" dataType="boolean">
             <template #body="{ data }">
               <Status :status="data.status" />

@@ -56,10 +56,32 @@ const reportChatMessage = async (userId, reportTypeId, content, accountId) => {
   }
 };
 
+//  ================= ADMIN ===================
+const getAllReportVideo = async (page, pageSize) => {
+  try {
+    const response = await axios.get('/admin/getListReportVideo', { params: { page, pageSize } });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getAllReportComment = async (params) => {
+  try {
+    const response = await axios.get('/admin/getListReportComment', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   reportChannel,
   getAllReportChannelTypes,
   getAllReportLiveStream,
   reportLiveStream,
   reportChatMessage,
+  getAllReportVideo,
+  getAllReportComment,
 };
