@@ -52,7 +52,6 @@
   );
 </script>
 <template>
-  <h1>{{ chooseDate }}</h1>
   <div class="flex flex-col h-[430px]">
     <div class="flex justify-between items-center mb-6">
       <h2 class="text-xl pl-4 font-bold">Select Alternative Content (Video)</h2>
