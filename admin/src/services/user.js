@@ -4,17 +4,6 @@ const getProfile = () => {
   return axios.get('/user/getProfile');
 };
 
-const getAllUsersRequest = async (page, pageSize, status) => {
-  try {
-    const response = await axios.get(`/admin/requestChannel`, {
-      params: { page, pageSize, status },
-    });
-    return response;
-  } catch (error) {
-    return { error: true, status: error.response.status, message: error.response.data.message };
-  }
-};
-
 const getProfilebyUsername = async (username) => {
   try {
     const response = await axios.get(`/user/getProfileByUsername/${username}`);
@@ -100,6 +89,57 @@ const getCheckFollowCate = async (cateId) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+
+// admin
+const getAllUsersRequest = async (page, pageSize, status) => {
+  try {
+    const response = await axios.get(`/admin/requestChannel`, {
+      params: { page, pageSize, status },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getUserProfile = async (userId) => {
+  try {
+    const response = await axios.get(`/admin/getUserById/${userId}`);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getAllUser = async (page, pageSize) => {
+  try {
+    const response = await axios.get(`/admin/getAllUser`, {
+      params: { page, pageSize },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getProfilebyUserId = async (id) => {
+  try {
+    const response = await axios.get(`/admin/getUserById/${id}`);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const updateUserProfile = async (userId, data) => {
+  try {
+    const response = await axios.patch(`/admin/editProfileUser/${userId}`, data);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
 export {
   getProfile,
   getCheckFollowCate,
@@ -113,4 +153,8 @@ export {
   getProfilebyUsername,
   postFollowCate,
   getAllUsersRequest,
+  getAllUser,
+  getProfilebyUserId,
+  getUserProfile,
+  updateUserProfile,
 };

@@ -41,6 +41,16 @@ const getVideoSetting = async (page, pageSize, sortBy, order, days) => {
     return { error: true, message: error.message };
   }
 };
+const getVideoSettingAdmin = async (page, pageSize, sortBy, order, days) => {
+  try {
+    const response = await axios.get('/admin/getListVideoByUser', {
+      params: { page, pageSize, sortBy, order, days },
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 const getStateByCountry = async (videoId, country) => {
   try {
     const response = await axios.get(`/video/getState/${videoId}`, {
