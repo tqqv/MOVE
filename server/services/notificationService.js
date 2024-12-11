@@ -18,46 +18,65 @@ const createNotification = async( entityName, entityAction, userActorId, channel
 
       const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId});
 
-      const newNotificationWithFullData = await NotificationTranslation.findOne(
-        {
-          where: {
-            notificationEntityId: notificationEntity.id,
-            languageCode: "en"
+      const fullNotification = await Notification.findOne({
+        where: {
+          id: newNotification.dataValues.id
+        },
+        attributes: [
+          "createdAt",
+        ],
+        include: [
+          {
+            model: NotificationEntity,
+            as: "notificationEntity",
+            attributes: ["id", "entityName"],
+            include: [
+              {
+                model: NotificationTranslation,
+                as: "notificationTranslation",
+                attributes: ["translatedContent", "languageCode"]
+              }
+            ]
           },
-          attributes: ["languageCode", "translatedContent"]
-        }
-      );
+          {
+            model: User,
+            as: "userActor",
+            attributes: ["username", "avatar"]
+          },
+          {
+            model: Channel,
+            as: "channelActor",
+            attributes: ["channelName", "avatar"],
+            include: [
+              {
+                model: User,
+                attributes: ['username']
+              }
+            ]
+          },
+          {
+            model: Comment,
+            as: "targetComment",
+            attributes: ["id", "content"]
+          },
+          {
+            model: Video,
+            as: "targetVideo",
+            attributes: ["id", "title", "thumbnailUrl"]
+          }
+        ]
+      })
 
-      let actorInfo = {};
-      if (userActorId) {
-          actorInfo.user = await User.findOne({
-              where: { id: userActorId },
-              attributes: ["avatar", "username"]
-          });
-      }
+      console.log(fullNotification);
 
-      // Lấy thông tin của channelActorId từ bảng Channels (nếu có)
-      if (channelActorId) {
-          actorInfo.channel = await Channel.findOne({
-              where: { id: channelActorId },
-              attributes: ["avatar", "channelName"]
-          });
-      }
-      const fullData = {
-        ...(newNotificationWithFullData?.dataValues || {}),
-        ...(newNotification?.dataValues || {}),
-        ...(actorInfo.user ? { user: actorInfo.user.dataValues } : {}),
-        ...(actorInfo.channel ? { channel: actorInfo.channel.dataValues } : {}),
-      };
-
-      console.log(fullData);
+      console.log(formatNotificationData(fullNotification));
 
       /// Luồng realtime
-      _io.to(roomName).emit('notifications', fullData);
+      _io.to(roomName).emit('notifications', formatNotificationData(fullNotification));
 
       return {
           status: 200,
-          data: newNotification,
+          data: fullNotification,
           message: 'Created notification successfully',
       };
       } catch (error) {
@@ -71,15 +90,54 @@ const createNotification = async( entityName, entityAction, userActorId, channel
   }
 };
 
+const formatNotificationData = (item) => {
+  // console.log("checker2 ",item.notificationEntity?.notificationTranslation);
+  let notificationTranslation = item.notificationEntity?.notificationTranslation.map(translation => {
+    return {
+      translatedContent: translation.dataValues.translatedContent,
+      languageCode: translation.dataValues.languageCode
+    }
+  })
+
+  return ({
+      createdAt: item.createdAt,
+      visitStatus: [],
+      notificationEntity: {
+          id: item.notificationEntity?.dataValues?.id || null,
+          entityName: item.notificationEntity?.dataValues?.entityName || null,
+          notificationTranslation: [...notificationTranslation]
+      },
+      userActor: item.userActor ? null : null, // Assuming no data available for userActor
+      channelActor: item.channelActor ? {
+          channelName: item.channelActor.dataValues.channelName,
+          avatar: item.channelActor.dataValues.avatar,
+          User: {
+              username: item.channelActor.dataValues.User?.dataValues?.username || null
+          }
+      } : null,
+      targetComment: item.targetComment || null,
+      targetVideo: item.targetVideo ? {
+          id: item.targetVideo.dataValues.id,
+          title: item.targetVideo.dataValues.title,
+          thumbnailUrl: item.targetVideo.dataValues.thumbnailUrl
+      } : null
+  });
+}
 
 const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSize) => {
   try {
     // điều kiện
     const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
 
-    const whereClause = channelNotifierId
-  ? `channelNotifierId = ${channelNotifierId}`
-  : `userNotifierId IS NULL`;
+    let whereClause;
+
+    if(channelNotifierId) {
+      whereClause = channelNotifierId
+      ? `channelNotifierId = '${channelNotifierId}'`
+      : `userNotifierId IS NULL`;
+    } else {
+      whereClause = `userNotifierId = '${userNotifierId}'`
+    }
 
   let notifierCondition = {};
 
@@ -90,9 +148,6 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
     // Nếu không có channelNotifierId, tìm theo userNotifierId
     notifierCondition.userNotifierId = userNotifierId;
   }
-
-  console.log("notifierRoom: ", notifierRoom);
-  console.log("notifierCondition: ", notifierCondition);
 
     // 1. Đếm số thông báo chưa được nhận
     const unRecievedCount = await Notification.count({
@@ -109,6 +164,7 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
         },
       },
     });
+
     // 2. Lấy danh sách thông báo
     const notifications = await Notification.findAll({
       where: {

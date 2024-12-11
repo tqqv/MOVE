@@ -21,16 +21,16 @@ const getAllNotificationVisitStatusController = async(req, res, next) => {
 }
 
 const markAllNotiAsRecieviedController = async(req, res, next) => {
-  const userId = req.user.id;
-  const channelId = req.user.channelId;
+  const userId = req.user.id || null;
+  const channelId = req.user.channelId || null;
   const result = await markAllNotiAsRecievied(userId, channelId)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
 const markAllNotiAsReadController = async(req, res, next) => {
-  const userId = req.user.id;
-  const channelId = req.user.channelId;
+  const userId = req.user.id || null;
+  const channelId = req.user.channelId || null;
   const result = await markAllNotiAsRead(userId, channelId)
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
