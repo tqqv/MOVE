@@ -10,7 +10,6 @@ const setCookies = (cookies = []) => {
     }
     cookies.forEach(({ name, value, days, options = {} }) => {
       const finalOptions = {
-        domain: domain,
         path: '/',
         secure: true,
         sameSite: 'None',
@@ -35,7 +34,6 @@ const clearCookies = (cookies = []) => {
 
     cookies.forEach(({ name, options = {} }) => {
       const finalOptions = {
-        domain: domain,
         path: '/',
         secure: true,
         sameSite: 'None',
