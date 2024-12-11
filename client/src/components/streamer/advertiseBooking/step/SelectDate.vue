@@ -2,35 +2,62 @@
   import { ref, watch, onMounted } from 'vue';
   import DatePicker from 'primevue/datepicker';
   import { getBookedByDate, getBookedStatus } from '@/services/bookingFeaturedContent';
+  import { useStreamerStore } from '@/stores/streamer.store';
+  import { toast } from 'vue3-toastify';
+  import DetailDateBooking from './DetailDateBooking.vue';
+  import { formatDateData } from '@/utils';
 
   const props = defineProps({
-    selectedDate: { type: Object, default: null },
+    selectedDate: { type: Object },
   });
 
   const emit = defineEmits(['update:selectedDate', 'sendDetailBooking', 'update:checkDate']);
 
-  const localSelectedDate = ref([props.selectedDate || new Date()]);
-
+  const localSelectedDate = ref(props.selectedDate ? [props.selectedDate] : []);
+  const selectedDate = ref(null);
+  const streamerStore = useStreamerStore();
+  const isDetailVisible = ref(false);
   const bookedDates = ref([]);
-  const databyDate = ref();
+  const databyDate = ref([]);
+  const dataChooseDate = ref();
   const dateHaveBooked = ref([]);
+  const fetchedDates = ref([]);
+  const checkDate = ref(false);
+  const checkFullBookingDate = ref([]);
+  const isBookedByUser = ref(false);
+  const toggleDetailVisible = () => {
+    isDetailVisible.value = !isDetailVisible.value;
 
+    // if (!isDetailVisible.value) {
+    //   dataChooseDate.value = null;
+    //   databyDate.value = [];
+    //   fetchedDates.value = [];
+    //   isBookedByUser.value = false;
+    // }
+  };
   const formatDateToYearMonthDay = (date) => {
     if (!date) return null;
 
-    const year = String(date[0].getFullYear());
-    const month = String(date[0].getMonth() + 1).padStart(2, '0');
-    const day = String(date[0].getDate()).padStart(2, '0');
-
-    return `${year}-${month}-${day}`;
+    if (Array.isArray(date)) {
+      return date.map((singleDate) => {
+        const year = String(singleDate.getFullYear());
+        const month = String(singleDate.getMonth() + 1).padStart(2, '0');
+        const day = String(singleDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+      });
+    } else {
+      const year = String(date.getFullYear());
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
   };
 
   const getStartAndEndOfMonth = (date) => {
     if (!date) return { startOfMonth: null, endOfMonth: null };
-    console.log(date);
 
-    const startOfMonth = new Date(date[0].getFullYear(), date[0].getMonth(), 1);
-    const endOfMonth = new Date(date[0].getFullYear(), date[0].getMonth() + 1, 0);
+    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
     return {
       startOfMonth: startOfMonth,
@@ -41,35 +68,73 @@
   const fetchBookedDates = async (startOfMonth, endOfMonth) => {
     try {
       const response = await getBookedStatus(startOfMonth, endOfMonth);
+      console.log(response.data.data);
 
       bookedDates.value = response.data.data.detailedBookings;
       dateHaveBooked.value = bookedDates.value
         .filter((item) => item.isBookedByChannel === 1)
         .map((item) => item.bookingDate);
+
+      checkFullBookingDate.value = bookedDates.value
+        .filter((item) => {
+          const maxBookings = item.baseMaxBookings ?? item.abnormalMaxBookings;
+          return item.currentBookings === maxBookings;
+        })
+        .map((item) => item.bookingDate);
+
+      console.log(checkFullBookingDate.value);
     } catch (error) {
       console.error('Failed to fetch booked dates:', error);
     }
   };
 
-  const fetchBookedByDate = async (datetime) => {
+  const fetchBookedByDate = async (dates) => {
     try {
-      const response = await getBookedByDate(datetime);
+      // check mảng
+      const newDates = Array.isArray(dates) ? dates : [dates];
+      // lọc các ngày chưa fetch
+      const datesToFetch = newDates.filter((date) => !fetchedDates.value.includes(date));
 
-      if (response.status === 200) {
-        databyDate.value = response.data.data;
+      if (datesToFetch.length > 0) {
+        const responses = await Promise.all(
+          datesToFetch.map(async (date) => {
+            const response = await getBookedByDate(date);
+            dataChooseDate.value = response.data.data;
+            console.log(dataChooseDate.value);
+
+            return { date, data: response.data.data };
+          }),
+        );
+
+        responses.forEach(({ date, data }) => {
+          isBookedByUser.value = data.bookInfor.rows.some((row) => {
+            return row.channelId === streamerStore?.streamerChannel.id;
+          });
+          console.log(isBookedByUser.value);
+
+          // if (isBookedByUser) {
+          //   toast.error('You have booking for today');
+          //   return;
+          // }
+
+          const existingData = databyDate.value.find((item) => item.date === date);
+          if (!existingData) {
+            databyDate.value.push({ date, data });
+          }
+        });
+
+        fetchedDates.value = [...fetchedDates.value, ...datesToFetch];
+        console.log(dataChooseDate.value);
+
         emit('sendDetailBooking', databyDate.value);
-      } else {
-        console.warn('Unexpected response status:', response.status);
       }
     } catch (error) {
       console.error('Failed to fetch booked dates:', error);
     }
   };
+  const featchBookedDated = async () => {
+    const { startOfMonth, endOfMonth } = getStartAndEndOfMonth(new Date());
 
-  onMounted(async () => {
-    const { startOfMonth, endOfMonth } = getStartAndEndOfMonth(localSelectedDate.value);
-    console.log(startOfMonth);
-    console.log(endOfMonth);
     // conver sang iso date utc
     const isoStartOfMonth = new Date(
       startOfMonth.getTime() - startOfMonth.getTimezoneOffset() * 60000,
@@ -77,13 +142,12 @@
     const isoEndOfMonth = new Date(
       endOfMonth.getTime() - endOfMonth.getTimezoneOffset() * 60000,
     ).toISOString();
-    // ---------------------///
     await fetchBookedDates(isoStartOfMonth, isoEndOfMonth);
+  };
+  onMounted(async () => {
+    // ---------------------///
+    featchBookedDated();
     await fetchBookedByDate(formatDateToYearMonthDay(localSelectedDate.value));
-  });
-
-  watch(localSelectedDate, (newValue) => {
-    emit('update:selectedDate', newValue);
   });
 
   const onMonthChange = (event) => {
@@ -96,8 +160,13 @@
     fetchBookedDates(startOfMonth, endOfMonth);
   };
 
-  const onDateChange = async () => {
-    await fetchBookedByDate(formatDateToYearMonthDay(localSelectedDate.value));
+  const onDateChange = async (selectedDate) => {
+    // const formattedDates = localSelectedDate.value.map((date) => formatDateToYearMonthDay(date));
+    selectedDate.value = selectedDate;
+
+    await fetchBookedByDate(formatDateData(selectedDate.value));
+
+    toggleDetailVisible();
     sendCheckChannelBooking();
   };
 
@@ -110,21 +179,68 @@
     return dateHaveBooked.value.includes(formattedDate);
   };
   // ------------------------------------------------------------------------------------//
-
-  const checkIfBooked = () => {
-    const formattedSelectedDate = formatDateToYearMonthDay(localSelectedDate.value);
-    const isDateBooked = dateHaveBooked.value.includes(formattedSelectedDate);
-
-    return isDateBooked;
+  // ----------------checkFullBookingDate---------------//
+  const isFull = (date) => {
+    const formattedDate = `${date.year}-${String(date.month + 1).padStart(2, '0')}-${String(
+      date.day,
+    ).padStart(2, '0')}`;
+    return checkFullBookingDate.value.includes(formattedDate);
   };
+
+  // ------------------------------------------------------------------------------------//
+  const checkIfBooked = () => {
+    if (localSelectedDate.value && Array.isArray(localSelectedDate.value)) {
+      const formattedSelectedDates = localSelectedDate.value.map((date) =>
+        formatDateToYearMonthDay(date),
+      );
+
+      const isDateBooked = formattedSelectedDates.some((date) =>
+        dateHaveBooked.value.includes(date),
+      );
+
+      return isDateBooked;
+    }
+
+    return false;
+  };
+
   const sendCheckChannelBooking = () => {
     const check = checkIfBooked();
+    checkDate.value = check;
+
     emit('update:checkDate', check);
+  };
+
+  watch(
+    localSelectedDate,
+    async (newValue, oldValue) => {
+      console.log('popup', isDetailVisible.value);
+      emit('update:selectedDate', newValue);
+
+      localSelectedDate.value = newValue;
+
+      sendCheckChannelBooking();
+    },
+    { immediate: true },
+  );
+  // watch(localSelectedDate, async (newValue) => {
+  //   console.log(isDetailVisible.value);
+
+  //   if (isDetailVisible.value) {
+  //     emit('update:selectedDate', newValue);
+  //   }
+
+  // });
+  const handleSelectedDateUpdate = (newSelectedDate) => {
+    localSelectedDate.value = newSelectedDate;
+  };
+  const updateSelectDate = () => {
+    emit('update:selectedDate', formatDateToYearMonthDay(localSelectedDate.value));
   };
 </script>
 
 <template>
-  <div class="flex flex-col h-[300px]">
+  <div class="flex flex-col h-[430px]">
     <DatePicker
       selectionMode="multiple"
       v-model="localSelectedDate"
@@ -135,32 +251,63 @@
       @date-select="onDateChange"
     >
       <template #date="slotProps">
-        <strong v-if="isBooked(slotProps.date)" class="special-day">
+        <strong v-if="isFull(slotProps.date)" class="day-full">
+          {{ slotProps.date.day }}
+        </strong>
+        <strong v-else-if="isBooked(slotProps.date)" class="special-day">
           {{ slotProps.date.day }}
         </strong>
         <template v-else>{{ slotProps.date.day }}</template>
       </template>
     </DatePicker>
   </div>
+  <DetailDateBooking
+    :selectedDate="selectedDate"
+    :localSelectedDate="localSelectedDate"
+    :checkFullBookingDate="checkFullBookingDate"
+    :dataChooseDate="dataChooseDate"
+    title="Date Details"
+    :isDetailVisible="isDetailVisible"
+    @toggleDetailVisible="toggleDetailVisible"
+    @updateSelectDate="updateSelectDate"
+    @handleSelectedDateUpdate="handleSelectedDateUpdate"
+    :isBookedByUser="isBookedByUser"
+    @featchBookedDated="featchBookedDated"
+  />
 </template>
 
 <style>
-  /* Sử dụng màu nền tương tự như ngày được chọn trong DatePicker */
-  /* Sử dụng màu nền cho ngày đã được booked */
   .special-day {
-    background-color: #dd9595;
-    color: white;
+    background-color: #e8fdfa;
+    color: #13d0b4;
     border-radius: 50%;
     display: inline-flex;
     justify-content: center;
     align-items: center;
     cursor: pointer;
-    width: var(--p-datepicker-date-width);
-    height: var(--p-datepicker-date-height);
+    width: 2rem;
+    height: 2rem;
     text-align: center;
     line-height: 2rem;
     font-weight: normal;
-    border: none; /* Loại bỏ border */
+    border: 2px solid #13d0b4;
+    box-sizing: border-box;
+  }
+  .day-full {
+    background-color: #ffe6e6;
+    color: #b32d00;
+    border-radius: 50%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    width: 2rem;
+    height: 2rem;
+    text-align: center;
+    line-height: 2rem;
+    font-weight: normal;
+    border: 2px solid #b32d00;
+    box-sizing: border-box;
   }
 
   .p-datepicker-day-selected {

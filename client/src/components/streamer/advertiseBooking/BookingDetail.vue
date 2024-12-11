@@ -1,88 +1,133 @@
 <script setup>
-  import { ref, computed } from 'vue';
-  import {
-    formatDate,
-    formatDuration,
-    formatDateData,
-    formatView,
-    genreDuration,
-    truncateDescripton,
-    formatNumber,
-  } from '@/utils';
+  import { ref, computed, watch } from 'vue';
+  import { formatDateData, truncateDescripton, formatNumber } from '@/utils';
   import Divider from 'primevue/divider';
 
+  const emit = defineEmits(['update:selectedDate', 'getDateSelected']);
   const props = defineProps({
-    selectedDate: Object,
+    selectedDate: Array,
     videos: Array,
-    databyDate: Object,
+    databyDate: Array,
+    currentStep: Number,
+    videosByDate: Array,
+    combinedData: Array,
+  });
+  console.log(props.selectedDate);
+
+  const activeDate = ref(props.selectedDate?.[0] || null);
+
+  watch(
+    () => props.selectedDate,
+    (newSelectedDate) => {
+      if (!activeDate.value && Array.isArray(newSelectedDate) && newSelectedDate.length > 0) {
+        activeDate.value = newSelectedDate[0];
+      }
+    },
+    { immediate: true },
+  );
+
+  const isTextVisible = ref(true);
+  const selectVideoForDate = (date) => {
+    if (props.currentStep === '2') {
+      isTextVisible.value = false;
+      activeDate.value = date;
+
+      emit('getDateSelected', date);
+    }
+  };
+
+  // Lấy video cho ngày hiện tại
+  // Lọc video theo ngày đã chọn (activeDate)
+  const videosForActiveDate = computed(() => {
+    if (!activeDate.value) return [];
+    const formattedActiveDate = formatDateData(activeDate.value);
+    // Lọc các video có ngày trùng với activeDate
+    return props.combinedData.filter((video) => formatDateData(video.date) === formattedActiveDate);
   });
 
-  const selectedVideosTitles = computed(() => {
-    return props.videos.map((video) => video.title);
+  // Tính tổng giá
+  const totalPrice = computed(() => {
+    const formattedSelectedDates = Array.isArray(props.selectedDate)
+      ? props.selectedDate.map((date) => formatDateData(date))
+      : [];
+
+    if (formattedSelectedDates.length === 0) {
+      return 0;
+    }
+
+    return props.databyDate
+      .filter((item) => formattedSelectedDates.includes(formatDateData(item.date)))
+      .reduce((total, item) => {
+        const pricePerDay =
+          item.data?.defaultData?.pricePerDay || item.data?.abnormal?.pricePerDay || 0;
+        return total + pricePerDay;
+      }, 0);
   });
 </script>
 
 <template>
-  <div class="col-span-3 p-6 bg-white border-2 border-[#e5e7eb] rounded-md h-[480px]">
+  <div class="col-span-3 p-6 bg-white border-2 border-[#e5e7eb] rounded-md min-h-[560px]">
     <h3 class="text-2xl font-semibold mb-8">Booking Date Details</h3>
     <div class="space-y-6">
-      <div v-if="databyDate?.bookInfor?.count > 0" class="italic text-red font-bold">
-        You have a booking for today!
-      </div>
-
-      <div v-else class="italic text-primary font-bold">Booking now!</div>
-
       <Divider />
 
       <!-- Selected Date -->
+      <p class="text-lg font-medium"><strong>Selected date:</strong></p>
+      <p v-if="isTextVisible && currentStep === '2'" class="text-sm text-red">
+        Click on each day to select a video for that day.
+      </p>
       <div class="flex items-center justify-between">
-        <p class="text-lg font-medium"><strong>Selected date:</strong></p>
-        <p class="font-medium">
-          {{ formatDateData(selectedDate) || 'Not selected' }}
-        </p>
-      </div>
-      <Divider />
-      <!-- Available for Booking -->
-      <div class="flex items-center justify-between">
-        <p class="text-lg font-medium"><strong>Current bookings:</strong></p>
-        <p class="font-medium">
-          {{ databyDate?.bookInfor.count }} /
-          {{ databyDate?.defaultData?.maxBookings || databyDate?.abnormal?.maxBookings }}
-        </p>
-      </div>
-      <Divider />
-
-      <!-- Price -->
-      <div class="flex items-center justify-between">
-        <p class="text-lg font-medium"><strong>Price for booking:</strong></p>
-        <p class="font-medium">
-          {{
-            formatNumber(databyDate?.defaultData?.pricePerDay || databyDate?.abnormal.pricePerDay)
-          }}
-          REPs
-        </p>
-      </div>
-      <Divider />
-
-      <!-- Selected Videos -->
-      <div class="flex items-center justify-between">
-        <p class="text-lg font-medium whitespace-nowrap"><strong>Selected videos:</strong></p>
-        <div class="font-medium">
-          <p v-if="selectedVideosTitles.length === 0" class="font-medium">None</p>
-          <p
-            v-for="(title, index) in selectedVideosTitles"
+        <div
+          class="grid grid-cols-4 gap-4 mt-2 min-h-[30px] max-h-[135px] overflow-y-auto w-full grid-rows-auto"
+        >
+          <div
+            v-for="(date, index) in selectedDate"
             :key="index"
-            class="font-medium"
-            :title="title"
+            class="px-2 py-1 h-[30px] bg-primary text-white font-bold rounded-lg flex items-center justify-center mr-4 cursor-pointer"
+            :class="{
+              'opacity-50':
+                currentStep === '2' && formatDateData(activeDate) !== formatDateData(date),
+            }"
+            @click="selectVideoForDate(formatDateData(date))"
           >
-            {{ truncateDescripton(title, 30) }}
-          </p>
+            <span>{{ formatDateData(date) }}</span>
+          </div>
         </div>
       </div>
 
       <Divider />
+      <!-- Video cho ngày hiện tại -->
+      <div class="flex justify-between">
+        <div class="text-lg font-medium whitespace-nowrap">
+          <strong
+            >Selected video for
+            <span v-if="currentStep !== '1'">{{ formatDateData(activeDate) }}</span
+            >:</strong
+          >
+        </div>
+        <div class="font-medium">
+          <p v-if="videosForActiveDate.length === 0">None</p>
+          <p
+            v-if="currentStep !== '1'"
+            v-for="(video, index) in videosForActiveDate"
+            :key="index"
+            class="font-medium"
+            :title="video.title"
+          >
+            {{ truncateDescripton(video.title, 30) }}
+          </p>
+        </div>
+      </div>
+      <Divider />
+
+      <!-- Button to add video to the selected date -->
+
+      <!-- Price -->
+      <div class="flex items-center justify-between">
+        <p class="text-lg font-medium"><strong>Total prices for booking:</strong></p>
+        <p class="font-medium">{{ formatNumber(totalPrice) }} REPs</p>
+      </div>
+      <Divider />
     </div>
   </div>
 </template>
-
-<style scoped></style>

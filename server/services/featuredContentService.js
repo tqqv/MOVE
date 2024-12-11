@@ -37,130 +37,8 @@ const createFeatureContentService = async(livestreamId, videoId, startAt, expire
   }
 }
 
-// const getAllFeatureContentService = async (page, pageSize) => {
-//   try {
-//     // Fetch featured contents with related models
-//     const featuredContents = await FeaturedContent.findAndCountAll({
-//       include: [
-//         {
-//           model: Livestream,
-//           attributes: [
-//             'title', 'description', 'thumbnailUrl', 'isLive',
-//             [
-//               sequelize.literal(`(
-//                 SELECT AVG(rating) as ratings
-//                 FROM ratings
-//                 WHERE ratings.livestreamId = livestream.id
-//               )`),
-//               'ratings'
-//             ]
-//           ],
-//           as: 'livestream',
-//           include: [
-//             {
-//               model: Channel,
-//               as: 'livestreamChannel',
-//               attributes: [
-//                 'id', 'channelName', 'avatar', 'isLive', 'popularCheck'
-//               ],
-//               include: [
-//                 {
-//                   model: User,
-//                   attributes: ['username']
-//                 },
-//               ]
-//             },
-//             {
-//               model: LevelWorkout,
-//               as: 'livestreamLevelWorkout',
-//               attributes: ['levelWorkout']
-//             },
-//             {
-//               model: Category,
-//               as: 'category',
-//               attributes: ['title']
-//             },
-
-//           ]
-//         },
-//         {
-//           model: Video,
-//           as: 'video',
-//           attributes: ['title', 'description', 'videoUrl', 'thumbnailUrl', 'viewCount', 'duration',
-//             [
-//               sequelize.literal(`(
-//                 SELECT AVG(rating)
-//                 FROM ratings
-//                 WHERE ratings.videoId = video.id
-//               )`),
-//               'averageRating'
-//             ]
-//           ],
-//           include: [
-//             {
-//               model: Channel,
-//               as: 'channel',
-//               attributes: ['channelName', 'avatar', 'isLive', 'popularCheck' ],
-//             },
-//             {
-//               model: LevelWorkout,
-//               as: 'levelWorkout',
-//               attributes: ['levelWorkout']
-//             },
-//             {
-//               model: Category,
-//               as: 'category',
-//               attributes: ['title']
-//             },
-//           ]
-//         }
-//       ],
-//       offset: (page - 1) * pageSize,
-//       limit: pageSize * 1,
-//     });
-
-//     if (!featuredContents.count) {
-//       return {
-//         status: 200,
-//         message: "No featured contents exist."
-//       };
-//     }
-
-//     // Now, iterate through the livestreams to get current views
-//     const updatedLivestreams = await Promise.all(featuredContents.rows.map(async (content) => {
-//       let currentViews;
-//       if (content.livestream) {
-//         currentViews = await get(`channelStreamId:${content.livestream.livestreamChannel?.dataValues?.id}:currentViews`);
-//         content.livestream.currentViews = currentViews || 0; // Set current views for each livestream
-//       }
-//       return {
-//         ...content.toJSON(),
-//         currentViews,
-//       };
-//     }));
-
-//     return {
-//       status: 200,
-//       data: {
-//         updatedLivestreams,
-//         totalPages: Math.ceil(featuredContents.count / pageSize)
-//       },
-//       message: "Get all featured contents successfully"
-//     };
-
-//   } catch (error) {
-//     return {
-//       status: 500,
-//       data: null,
-//       message: error.message || "An error occurred."
-//     };
-//   }
-// };
-
 const getAllFeatureContentService = async (datetime) => {
   try {
-    // const currentDate = moment().tz('Asia/Ho_Chi_Minh').format('YYYY-MM-DD');
-
     // Fetch featured contents with related models
     const featuredContents = await FeaturedContent.findAll({
       where: {
@@ -289,112 +167,136 @@ const getAllFeatureContentService = async (datetime) => {
   }
 };
 
-const createBookingFeatureContentService = async (date, featuredContentBaseId, featuredContentAbnormalId, channelId, videoId) => {
+const createBookingFeatureContentService = async (pickedDates, channelId) => {
   try {
+    const successBookings = [];
+    const errorBookings = [];
 
-    let video = await Video.findOne({
-      where: {
-        id: videoId
-      }
-    })
+    for (const { date, featuredContentBaseId, featuredContentAbnormalId, videoId } of pickedDates) {
+      // Kiểm tra video có thuộc về channel không
+      const video = await Video.findOne({
+        where: { id: videoId },
+      });
 
-    if(video && video.channelId != channelId) {
-      return {
-        status: 400,
-        data: null,
-        message: "videoId not belong to channel",
+      if (video && video.channelId !== channelId) {
+        results.push({
+          status: 400,
+          data: null,
+          message: `videoId ${videoId} does not belong to the channel`,
+        });
+        continue;
       }
-    }
 
-    // !videoId, thì lấy video mới nhất của kênh đó.
-    if(!date && !featuredContentBaseId && !featuredContentAbnormalId) {
-      return {
-        status: 400,
-        data: null,
-        message: "Does not exist featuredContentBaseId || featuredContentAbnormalId",
+      // Nếu thiếu cả date, featuredContentBaseId và featuredContentAbnormalId
+      if (!date && !featuredContentBaseId && !featuredContentAbnormalId) {
+        results.push({
+          status: 400,
+          data: null,
+          message: "Missing date, featuredContentBaseId, or featuredContentAbnormalId",
+        });
+        continue;
       }
-    }
-    const isBooked = await FeaturedContent.findOne({
-      where: {
-        date: {
-          [Op.and]: [
-            sequelize.where(
-              sequelize.fn('DATE', sequelize.col('date')),
-              sequelize.fn('DATE', date)
-            )
-          ],
+
+      // Kiểm tra nếu đã được đặt lịch trước đó
+      const isBooked = await FeaturedContent.findOne({
+        where: {
+          date: {
+            [Op.and]: [
+              sequelize.where(
+                sequelize.fn("DATE", sequelize.col("date")),
+                sequelize.fn("DATE", date)
+              ),
+            ],
+          },
+          channelId,
         },
-        channelId
+      });
+
+      if (isBooked) {
+        errorBookings.push({
+          message: `Date ${date} is already booked`,
+        });
+        continue;
       }
-    });
-    if (isBooked) {
-      return {
-        status: 400,
-        message: "Already booked",
-      };
-    }
-    const featuredContentBase = await FeaturedContentBase.findOne({where: { id: featuredContentBaseId || null }})
-    const featuredContentAbnormal = await FeaturedContentAbnormal.findOne({where: { id: featuredContentAbnormalId || null }})
-    if(featuredContentAbnormal) {
-      console.log("come ", featuredContentAbnormal.date);
-      date = featuredContentAbnormal.date
-    }
 
-    const channel = await Channel.findOne({where: { id: channelId }})
+      // Lấy thông tin FeaturedContentBase và FeaturedContentAbnormal
+      const featuredContentBase = await FeaturedContentBase.findOne({
+        where: { id: featuredContentBaseId || null },
+      });
 
-    const booker = await User.findOne({where: { id: channel.userId }})
+      const featuredContentAbnormal = await FeaturedContentAbnormal.findOne({
+        where: { id: featuredContentAbnormalId || null },
+      });
 
-    // Đếm số lượng booking hiện tại
-    const currentBookings = await FeaturedContent.count({
-      where: {
-        date,
-      },
-    });
-
-    const maxBookings = featuredContentAbnormal?.maxBookings || featuredContentBase?.maxBookings;
-
-    // So sánh với giới hạn maxBookings
-    if (currentBookings >= maxBookings) {
-      return {
-        status: 400,
-        message: "Booking limit reached for the selected date",
-      };
-    }
-
-    const pricePerDay = featuredContentAbnormal?.pricePerDay || featuredContentBase?.pricePerDay;
-    if( booker.REPs === 0 || booker.REPs < pricePerDay ) {
-      return {
-        status: 400,
-        message: "You don't have enough REP to bookings",
+      let bookingDate = date;
+      if (featuredContentAbnormal) {
+        bookingDate = featuredContentAbnormal.date;
       }
-    }
 
-    const [newFeaturedContent] = await Promise.all([
-      FeaturedContent.create({
-        videoId,
-        channelId,
-        date,
-        featuredContentBaseId,
-        featuredContentAbnormalId
-      }),
-      booker.update({ REPs: booker.REPs - pricePerDay }),
-      // lưu vào bảng payments
-    ]);
+      const channel = await Channel.findOne({ where: { id: channelId } });
+      const booker = await User.findOne({ where: { id: channel.userId } });
+
+      // Kiểm tra giới hạn booking
+      const currentBookings = await FeaturedContent.count({
+        where: {
+          date: bookingDate,
+        },
+      });
+
+      const maxBookings =
+        featuredContentAbnormal?.maxBookings || featuredContentBase?.maxBookings;
+
+      if (currentBookings >= maxBookings) {
+        errorBookings.push({
+          message: `Booking limit reached for date ${bookingDate}`,
+        });
+        continue;
+      }
+
+      // Kiểm tra nếu người dùng không đủ REP
+      const pricePerDay =
+        featuredContentAbnormal?.pricePerDay || featuredContentBase?.pricePerDay;
+
+      if (booker.REPs === 0 || booker.REPs < pricePerDay) {
+        errorBookings.push({
+          message: "You don't have enough REP for this booking",
+        });
+        continue;
+      }
+      console.log("cheasd");
+      
+      // Tạo booking và cập nhật REP
+      const [newFeaturedContent] = await Promise.all([
+        FeaturedContent.create({
+          videoId,
+          channelId,
+          date: bookingDate,
+          featuredContentBaseId,
+          featuredContentAbnormalId,
+        }),
+        booker.update({ REPs: booker.REPs - pricePerDay }),
+        // Lưu vào bảng payments (nếu cần)
+      ]);
+
+      successBookings.push({
+        newFeaturedContent,
+      });
+    }
 
     return {
       status: 200,
-      data: newFeaturedContent,
-      message: "You have successfully booking featured content"
+      data: {successBookings, errorBookings},
+      message: "Processed all booking requests",
     };
   } catch (error) {
-    console.error(error);
-      return {
-        status: 500,
-        data: null,
-        message: "An error occurred while fetching bookings",
-      };
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: "An error occurred while processing bookings",
+    };
   }
-}
+};
 
 const getBookingFeatureContentService = async (startDate, endDate, channelId) => {
   if (!startDate || !endDate || new Date(startDate) > new Date(endDate)) {
@@ -467,6 +369,83 @@ const getBookingFeatureContentService = async (startDate, endDate, channelId) =>
   }
 };
 
+const cancelBookingFeaturedContentService = async (pickedDates, channelId) => {
+  try {
+    const now = new Date();
+    const threeDaysInMilliseconds = 3 * 24 * 60 * 60 * 1000;
+
+    const successCancellations = [];
+    const errorCancellations = [];
+
+    for (const datetime of pickedDates) {
+      const bookingDate = new Date(datetime);
+
+      // Kiểm tra nếu hiện tại không sớm hơn 3 ngày so với thời gian đặt
+      if (bookingDate.getTime() - now.getTime() < threeDaysInMilliseconds) {
+        errorCancellations.push({
+          datetime,
+          message: "Cannot cancel booking within 3 days of the scheduled time.",
+        });
+        continue;
+      }
+
+      // Tìm booking theo ngày và kênh
+      const booking = await FeaturedContent.findOne({
+        where: { date: datetime, channelId },
+      });
+
+      if (booking) {
+        // Lấy thông tin giá và hoàn trả REP
+        let pricePerDay;
+        const channel = await Channel.findOne({ where: { id: channelId } });
+        const booker = await User.findOne({ where: { id: channel.userId } });
+
+        if (booking.featuredContentAbnormalId) {
+          const featuredContentAbnormal = await FeaturedContentAbnormal.findOne({
+            where: { id: booking.featuredContentAbnormalId },
+          });
+          pricePerDay = featuredContentAbnormal.pricePerDay;
+        } else {
+          const featuredContentBase = await FeaturedContentBase.findOne({
+            where: { id: booking.featuredContentBaseId },
+          });
+          pricePerDay = featuredContentBase.pricePerDay;
+        }
+
+        // Xóa booking và hoàn REP
+        await booking.destroy();
+        await booker.update({ REPs: booker.REPs + pricePerDay });
+
+        successCancellations.push({
+          datetime,
+          message: "Booking deleted successfully.",
+        });
+      } else {
+        errorCancellations.push({
+          datetime,
+          message: "No booking found to delete.",
+        });
+      }
+    }
+
+    return {
+      status: 200,
+      data: {
+        successCancellations,
+        errorCancellations,
+      },
+      message: "Processed all cancellation requests.",
+    };
+  } catch (error) {
+    console.error("Error cancelling bookings:", error);
+    return {
+      status: 500,
+      data: null,
+      message: "An error occurred while cancelling bookings.",
+    };
+  }
+};
+
 const getBookDateDetailService = async (datetime) => {
   try {
     const abnormal = await FeaturedContentAbnormal.findOne({
@@ -484,10 +463,28 @@ const getBookDateDetailService = async (datetime) => {
         where: {
           featuredContentAbnormalId: abnormal.id,
         },
+        include:[
+          {
+            model: Video,
+            as:'video',
+
+            attributes:['title','description','thumbnailUrl','duration'],
+            include:[
+              {
+                model: Category,
+                as: 'category',
+              },
+              {
+                model: LevelWorkout,
+                as: "levelWorkout",
+              },
+            ]
+          }
+        ]
       })
       return {
         status: 200,
-        data: {bookInfor, abnormal}
+        data: {bookInfor, abnormal, datetime}
       }
     }
 
@@ -504,10 +501,27 @@ const getBookDateDetailService = async (datetime) => {
           datetime
         )
       },
+      include:[
+        {
+          model: Video,
+          as:'video',
+          attributes:['title','description','thumbnailUrl','duration'],
+          include:[
+            {
+              model: Category,
+              as: 'category',
+            },
+            {
+              model: LevelWorkout,
+              as: "levelWorkout",
+            },
+          ]
+        }
+      ]
     })
     return {
       status: 200,
-      data: {bookInfor, defaultData}
+      data: {bookInfor, defaultData, datetime}
     }
   } catch (error) {
     console.error(error);
@@ -518,10 +532,13 @@ const getBookDateDetailService = async (datetime) => {
   }
 }
 
+
+
 module.exports = {
   createFeatureContentService,
   getAllFeatureContentService,
   createBookingFeatureContentService,
   getBookingFeatureContentService,
+  cancelBookingFeaturedContentService,
   getBookDateDetailService
 }

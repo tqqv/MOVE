@@ -23,18 +23,10 @@ const getBookedByDate = async (datetime) => {
     return { error: true, message: error.message };
   }
 };
-const postBookingContent = async (
-  date,
-  featuredContentBaseId,
-  featuredContentAbnormalId,
-  videoId,
-) => {
+const postBookingContent = async (pickedDates) => {
   try {
     const data = {
-      date,
-      featuredContentBaseId,
-      featuredContentAbnormalId,
-      videoId,
+      pickedDates,
     };
     const response = await axios.post('/featuredContent/booking', data);
     return response;
@@ -42,4 +34,15 @@ const postBookingContent = async (
     return { error: true, message: error.message };
   }
 };
-export { getBookedStatus, getBookedByDate, postBookingContent };
+const postCancelBooking = async (pickedDates) => {
+  try {
+    const data = {
+      pickedDates,
+    };
+    const response = await axios.post('/featuredContent/cancelBooking', data);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+export { getBookedStatus, getBookedByDate, postBookingContent, postCancelBooking };

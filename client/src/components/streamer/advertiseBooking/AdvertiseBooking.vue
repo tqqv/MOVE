@@ -18,15 +18,17 @@
   import { toast } from 'vue3-toastify';
   import { Vue3Lottie } from 'vue3-lottie';
   import AstronautJSON from '@components/animation/success.json';
+  import { formatDateData } from '@/utils';
+  import SmallLoading from '@/components/icons/smallLoading.vue';
   const streamerStore = useStreamerStore();
   const userStore = useUserStore();
 
   const currentStep = ref('1');
-  const selectedDate = ref(new Date());
-
+  const selectedDate = ref(null);
+  const videosByDate = ref(null);
   const searchTerm = ref('');
   const selectedVideo = ref();
-  const databyDate = ref();
+  const databyDate = ref([]);
   const videos = ref([]);
   const totalPages = ref(0);
   const page = ref(1);
@@ -34,66 +36,72 @@
   const selectedVideosCount = ref();
   const checkDate = ref(false);
   const isBookingSuccess = ref(false);
-  const bookingId = ref();
+  const isLoadingPayment = ref(false);
+  const chooseDate = ref();
+
   const handleCheckDate = (isBooked) => {
     checkDate.value = isBooked;
-    console.log(checkDate.value);
   };
+  const toggleBackSelectDate = () => {
+    isBookingSuccess.value = false;
+    currentStep.value = '1';
+    selectedDate.value = '';
+    selectedVideo.value = '';
+  };
+  const allVideos = computed(() => {
+    return Object.values(videosByDate.value || {}).flat();
+  });
+  const pricesByDate = computed(() => {
+    return databyDate.value.map((item) => {
+      return {
+        date: item.date,
+        pricePerDay: item.data?.defaultData?.pricePerDay,
+        featuredContentBaseId: item.data?.defaultData?.id || null,
+        featuredContentAbnormalId: item.data?.abnormal?.id || null,
+      };
+    });
+  });
+  console.log('All Videos:', allVideos.value);
+  console.log(databyDate);
+  const combinedData = computed(() => {
+    return allVideos.value.map((video, index) => {
+      const priceInfo = pricesByDate.value[index] || {};
+      return {
+        ...video,
+        ...priceInfo,
+      };
+    });
+  });
+
   // ------------------post booking thanh toán----------------------//
 
   const handlePayment = async () => {
-    if (!selectedVideo.value || !databyDate.value) {
-      console.error('Missing data for booking:', {
-        selectedVideo: selectedVideo.value,
-        databyDate: databyDate.value,
-      });
-      return;
-    }
-
-    const date = selectedDate.value;
-    const selectedDateUTC = new Date(
-      Date.UTC(
-        date.getFullYear(),
-        date.getMonth(),
-        date.getDate(),
-        date.getHours(),
-        date.getMinutes(),
-        date.getSeconds(),
-      ),
-    );
-
-    const bookingData = {
-      date: selectedDateUTC.toISOString(), // Sử dụng giờ UTC đã được điều chỉnh
-      featuredContentBaseId: databyDate?.value?.defaultData?.id || null,
-      featuredContentAbnormalId: databyDate?.value?.abnormal?.id || null,
-      videoId: selectedVideo.value.id,
-    };
-
-    console.log(bookingData.date);
-
+    const bookingData = combinedData.value.map((item) => ({
+      date: new Date(item.date).toISOString(),
+      featuredContentBaseId: item.featuredContentBaseId,
+      featuredContentAbnormalId: item.featuredContentAbnormalId,
+      videoId: item.id,
+    }));
+    isLoadingPayment.value = true;
     try {
-      const result = await postBookingContent(
-        bookingData.date,
-        bookingData.featuredContentBaseId,
-        bookingData.featuredContentAbnormalId,
-        bookingData.videoId,
-      );
-      console.log(result);
+      const result = await postBookingContent(bookingData);
 
       if (result.status === 200) {
-        console.log('Booking successful:', result.data);
         userStore.fetchUserProfile();
-        bookingId.value = result.data.data.id;
+        // bookingId.value = result.data.data.id;
         isBookingSuccess.value = true;
         currentStep.value = '1';
-        selectedDate.value = new Date();
+        selectedDate.value = '';
         selectedVideo.value = '';
+        videosByDate.value = null;
       } else {
         isBookingSuccess.value = false;
         toast.error('Booking failed:', result.message);
       }
     } catch (error) {
       console.error('Error during booking:', error.message);
+    } finally {
+      isLoadingPayment.value = false;
     }
   };
 
@@ -121,40 +129,32 @@
   // -----------------hàm select video----------------------//
 
   const toggleVideoSelection = (video) => {
-    if (video.selected) {
-      selectedVideo.value = video;
-    } else {
-      if (selectedVideo.value && selectedVideo.value.id === video.id) {
-        selectedVideo.value = null;
-      }
-    }
+    selectedVideo.value = video;
+    console.log(video.title);
   };
+
   // ----------------------------------------------------------//
   const goToNextStep = async () => {
-    console.log(databyDate.value.bookInfor.count);
-    console.log(databyDate.value.abnormal?.maxBookings);
-    console.log(databyDate.value.defaultData?.maxBookings);
-
     // ----------check slot step 1----------------//
-    if (currentStep.value === '1' && !selectedVideo.value) {
-      let maxBookings;
-      if (databyDate.value.defaultData?.maxBookings !== undefined) {
-        maxBookings = databyDate.value.defaultData.maxBookings;
-      } else if (databyDate.value.abnormal?.maxBookings !== undefined) {
-        maxBookings = databyDate.value.abnormal.maxBookings;
-      }
+    console.log(selectedDate.value);
 
-      if (maxBookings !== undefined && databyDate.value.bookInfor.count >= maxBookings) {
-        toast.error('Sorry, all booking slots are full.');
-        return;
-      }
+    if (currentStep.value === '1' && selectedDate.value.length === 0) {
+      toast.error('Sorry, please select a date to continue.');
+      return;
     }
 
     // ----------check select video step 2----------------//
-
-    if (currentStep.value === '2' && !selectedVideo.value) {
+    console.log(videosByDate.value);
+    if (
+      currentStep.value === '2' &&
+      selectedDate.value.some(
+        (date) => !videosByDate.value[date] || videosByDate.value[date].length === 0,
+      )
+    ) {
+      toast.error('Sorry, please select a video for all selected dates to continue.');
       return;
     }
+
     // ----------next step----------------//
 
     if (currentStep.value === '1') {
@@ -168,8 +168,11 @@
   // ----------------------------------------------------------//
 
   const goToPreviousStep = () => {
-    if (currentStep.value === '2') currentStep.value = '1';
-    else if (currentStep.value === '3') currentStep.value = '2';
+    if (currentStep.value === '2') {
+      currentStep.value = '1';
+      selectedVideo.value = '';
+      videosByDate.value = null;
+    } else if (currentStep.value === '3') currentStep.value = '2';
   };
 
   const isBackDisabled = computed(() => currentStep.value === '1');
@@ -192,15 +195,24 @@
     },
     { immediate: true },
   );
-  watch(
-    () => videos.value,
-    (newVideos) => {
-      selectedVideosCount.value = newVideos.filter((video) => video.selected).length;
-    },
-    { deep: true },
-  );
+  // watch(
+  //   () => videosByDate.value,
+  //   (newVideos) => {
+  //     selectedVideosCount.value = newVideos.filter((video) => video.selected).length;
+  //   },
+  //   { deep: true },
+  // );
 
-  onMounted(async () => {});
+  const updateSelectedDate = (newDates) => {
+    selectedDate.value = newDates;
+  };
+  onMounted(async () => {
+    streamerStore.fetchProfileChannel();
+  });
+
+  const getDateSelected = (data) => {
+    chooseDate.value = data;
+  };
 </script>
 
 <template>
@@ -208,40 +220,32 @@
     <div class="flex justify-between pb-4">
       <h1 class="text_title">Advertise Booking</h1>
     </div>
-    <div class="bg-white shadow-lg p-6 rounded-md text-black">
+    <div class="bg-white text-black">
       <!-- Thành công -->
-      <div v-if="isBookingSuccess" class="w-full space-y-4">
+      <div v-if="isBookingSuccess" class="w-full space-y-4 items-center">
         <div class="flex justify-center items-center">
           <Vue3Lottie :animationData="AstronautJSON" :height="200" :width="200" />
         </div>
 
         <div class="text-center space-y-4">
-          <div class="text-2xl text-primary font-semibold">Amazing!</div>
+          <div class="text-2xl text-primary font-semibold">Successful Payment !</div>
           <div class="text-xl mt-2 font-semibold">
             You have successfully booked the advertisement slot
           </div>
         </div>
 
-        <div class="flex gap-x-2 text-center justify-center text-sm mt-6 whitespace-nowrap">
-          <p class="uppercase">Booking Id:</p>
-          <p class="text-gray-800 font-semibold">#{{ bookingId }}</p>
-        </div>
-
-        <div
-          @click="isBookingSuccess = false"
-          class="text-primary flex font-bold text-center justify-center pt-8"
-        >
-          Back to Select Date
+        <div class="flex font-bold text-center justify-center pt-4 cursor-pointer">
+          <Button @click="toggleBackSelectDate" class="btn"> Back to Select Date </Button>
         </div>
       </div>
       <!---------------->
       <div v-else class="grid grid-cols-12 gap-4">
         <!-- Stepper -->
-        <div class="col-span-8">
+        <div class="col-span-7">
           <Stepper :value="currentStep" class="w-full">
             <StepList>
               <Step value="1" :disabled="true">Select Date</Step>
-              <Step value="2" :disabled="true">Select Option</Step>
+              <Step value="2" :disabled="true">Select Videos</Step>
               <Step value="3" :disabled="true">Payment</Step>
             </StepList>
 
@@ -252,6 +256,7 @@
                   v-model:selectedDate="selectedDate"
                   @sendDetailBooking="handleGetDataBookingDetails"
                   @update:checkDate="handleCheckDate"
+                  @update:selectedDate="updateSelectedDate"
                 />
               </StepPanel>
 
@@ -261,6 +266,9 @@
                   :videos="videos"
                   v-model:searchTerm="searchTerm"
                   @toggleVideoSelection="toggleVideoSelection"
+                  :selectedDate="selectedDate"
+                  :chooseDate="chooseDate || selectedDate[0]"
+                  v-model:videosByDate="videosByDate"
                 />
               </StepPanel>
 
@@ -271,13 +279,42 @@
                   :databyDate="databyDate"
                   :selectedDate="selectedDate"
                   :selectedVideosCount="selectedVideosCount"
+                  :combinedData="combinedData"
                 />
               </StepPanel>
             </StepPanels>
           </Stepper>
 
           <!-- Common Buttons -->
-          <div class="flex justify-between mt-16">
+          <div class="flex justify-between mt-4 ml-3">
+            <div v-if="currentStep === '1'" class="flex gap-4">
+              <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2">
+                  <div
+                    class="size-8 rounded-full bg-[#ffe6e6] border-[#b32d00] border-solid border-2 flex items-center justify-center text-[#b32d00]"
+                  >
+                    1
+                  </div>
+                  <span>- Full slot</span>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <div
+                  class="size-8 rounded-full bg-[#e8fdfa] border-[#13d0b4] border-solid border-2 flex items-center justify-center text-[#13d0b4]"
+                >
+                  1
+                </div>
+                <span>- Booked</span>
+              </div>
+              <div class="flex items-center gap-2">
+                <div
+                  class="size-8 rounded-full bg-[#13d0b4] flex items-center justify-center text-white"
+                >
+                  1
+                </div>
+                <span>- Selected</span>
+              </div>
+            </div>
             <div class="flex-1">
               <Button
                 v-if="!isBackDisabled"
@@ -294,23 +331,30 @@
                 label="Next"
                 icon="pi pi-arrow-right"
                 iconPos="right"
+                :disabled="!selectedDate || selectedDate.length === 0"
                 @click="goToNextStep"
-                :disabled="
-                  (currentStep === '2' && !selectedVideo) || (currentStep === '1' && checkDate)
-                "
               />
 
-              <Button v-if="isNextDisabled" class="btn" label="Submit" @click="handlePayment" />
+              <button v-if="isNextDisabled" @click="handlePayment" class="btn">
+                <SmallLoading v-if="isLoadingPayment" fill="white" fill_second="#13d0b4" />
+                <span v-else>Submit</span>
+              </button>
             </div>
           </div>
         </div>
 
         <!-- Booking Details -->
-        <div class="col-span-4">
+        <div class="col-span-5">
           <BookingDetail
-            :selectedDate="selectedDate"
-            :videos="videos.filter((video) => video.selected)"
+            v-model:selectedDate="selectedDate"
+            :videos="videos"
+            :videoSelected="videos.filter((video) => video.selected)"
             :databyDate="databyDate"
+            @update:selectedDate="updateSelectedDate"
+            :currentStep="currentStep"
+            @getDateSelected="getDateSelected"
+            :videosByDate="videosByDate"
+            :combinedData="combinedData"
           />
         </div>
       </div>
