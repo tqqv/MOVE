@@ -14,7 +14,7 @@ const createNotification = async( entityName, entityAction, userActorId, channel
         },
         attributes: ["id", "roomNamePattern"]
       });
-      const roomName = notificationEntity.roomNamePattern.replace("{selfId}", recieverId)
+      const roomName = notificationEntity.roomNamePattern.replace("{selfId}", recieverId).replace("{channelId}", recieverId)
 
       const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId});
 
@@ -90,6 +90,9 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
     // Nếu không có channelNotifierId, tìm theo userNotifierId
     notifierCondition.userNotifierId = userNotifierId;
   }
+
+  console.log("notifierRoom: ", notifierRoom);
+  console.log("notifierCondition: ", notifierCondition);
 
     // 1. Đếm số thông báo chưa được nhận
     const unRecievedCount = await Notification.count({

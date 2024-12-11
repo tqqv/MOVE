@@ -169,6 +169,11 @@ const updateVideoService = async (videoId, updateData) => {
     const video = await Video.update(updateData, {
       where: { id: videoId }
     });
+
+    const videoInfor = await Video.findOne({
+      where: { id: videoId }
+    });
+
     if (!video) {
       return {
         status: 404,
@@ -181,8 +186,8 @@ const updateVideoService = async (videoId, updateData) => {
         "followedChannel",
         "newVideo",
         null,
-        video.channelId,
-        video.channelId,
+        videoInfor.dataValues.channelId,
+        videoInfor.dataValues.channelId,
         null,
         videoId
       )
