@@ -106,7 +106,6 @@ html {
 
   .select_custom_error {
     @apply bg-red/20 flex-1 text-[14px] px-2 py-3 ring-1 rounded-lg outline-none ring-[#ccc] focus:caret-[#ccc] text-sm;
-
   }
 
   .select_custom_error option {
@@ -154,11 +153,35 @@ html {
   }
 
   .paper-custom {
-    @apply bg-white p-5 rounded shadow-md
+    @apply bg-white p-5 rounded shadow-md;
   }
 
   .paper-title {
-    @apply text-primary font-bold uppercase ml-2 mb-2
+    @apply text-primary font-bold uppercase ml-2 mb-2;
+  }
+
+  .btn-success {
+    @apply bg-green w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
+  }
+
+  .btn-reject {
+    @apply bg-red w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
+  }
+
+  .btn-suspend {
+    @apply bg-yellow-dark w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
+  }
+
+  .btn-ban {
+    @apply bg-black w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
+  }
+
+  .btn-cancel {
+    @apply bg-footer w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
+  }
+
+  .error_toast {
+    @apply text-red italic font-semibold;
   }
 }
 

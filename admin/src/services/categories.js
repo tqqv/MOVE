@@ -25,4 +25,58 @@ const getAllFollowCategories = async () => {
     return { error: true, message: error.message };
   }
 };
-export { getAllCategories, getCategoryByTitle, getAllFollowCategories };
+
+const getAllCategoriesWithFollower = async () => {
+  try {
+    const response = await axios.get('/category/getAllView');
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const createCategory = async (data) => {
+  try {
+    const response = await axios.post('/category', data);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const editCategory = async (cateId, data) => {
+  try {
+    const response = await axios.patch(`/category/${cateId}`, data);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const getAllCategoriesByAdmin = async () => {
+  try {
+    const response = await axios.get('/category/getAllCateAdmin');
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const deleteCategory = async (cateId) => {
+  try {
+    const response = await axios.delete(`/category/${cateId}`);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+export {
+  getAllCategories,
+  getCategoryByTitle,
+  getAllFollowCategories,
+  createCategory,
+  getAllCategoriesWithFollower,
+  editCategory,
+  getAllCategoriesByAdmin,
+  deleteCategory,
+};

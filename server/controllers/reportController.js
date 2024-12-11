@@ -66,7 +66,8 @@ const reportAccountController = async(req, res, next) => {
 const getListReportVideoController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const result = await getListReportVideo(page, pageSize);
+  const status = req.query.status || null;
+  const result = await getListReportVideo(page, pageSize, status);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -74,7 +75,8 @@ const getListReportVideoController = async(req, res, next) => {
 const getListReportCommentController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const result = await getListReportComment(page, pageSize);
+  const status = req.query.status || null;
+  const result = await getListReportComment(page, pageSize, status);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -82,7 +84,8 @@ const getListReportCommentController = async(req, res, next) => {
 const getListReportLivestreamController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const result = await getListReportLivestream(page, pageSize);
+  const status = req.query.status || null;
+  const result = await getListReportLivestream(page, pageSize, status);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -90,7 +93,8 @@ const getListReportLivestreamController = async(req, res, next) => {
 const getListReportAccountController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const result = await getListReportAccount(page, pageSize);
+  const status = req.query.status || null;
+  const result = await getListReportAccount(page, pageSize, status);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
@@ -98,17 +102,18 @@ const getListReportAccountController = async(req, res, next) => {
 const getListReportChannelController = async(req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
-  const result = await getListReportChannel(page, pageSize);
+  const status = req.query.status || null;
+  const result = await getListReportChannel(page, pageSize, status);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
 const actionReportController = async(req, res, next) => {
   const action = req.body.action;
-  const reportId = req.body.reportId;
+  const targetReportId = req.body.targetReportId;
   const banned = req.body.banned;
   const type = req.body.type;
-  const result = await actionReport(reportId, action, banned, type);
+  const result = await actionReport(targetReportId, action, banned, type);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

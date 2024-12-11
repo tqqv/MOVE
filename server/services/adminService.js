@@ -4,7 +4,6 @@ var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
-const moment = require('moment');
 
 const setStatusRequestChannel = async(userId, status, text) => {
   console.log(status);
@@ -65,10 +64,16 @@ const setStatusRequestChannel = async(userId, status, text) => {
   } catch (error) {
     return {
       status: 500,
-      message: error.message
-    }
+      message: error.message || "Internal Server Error"
+    };
   }
 }
+
+const getStartAndEndOfYear = (year) => {
+  const startOfYear = new Date(`${year}-01-01T00:00:00.000Z`);
+  const endOfYear = new Date(`${year}-12-31T23:59:59.999Z`);
+  return { startOfYear, endOfYear };
+};
 
 const getTotalMoneyEarnEveryMonth = async(year) => {
   try {
@@ -76,11 +81,12 @@ const getTotalMoneyEarnEveryMonth = async(year) => {
       year = new Date().getFullYear();
     }
 
+    const { startOfYear, endOfYear } = getStartAndEndOfYear(year);
+
     const whereCondition = {
       paymentStatus: "completed",
       createdAt: {
-        [Op.gte]: new Date(`${year}-01-01`),
-        [Op.lte]: new Date(`${year}-12-31`),
+        [Op.between]: [startOfYear, endOfYear],
       }
     };
 
@@ -113,11 +119,12 @@ const getTotalMoneyWithdrawEveryMonth = async(year) => {
       year = new Date().getFullYear();
     }
 
+    const { startOfYear, endOfYear } = getStartAndEndOfYear(year);
+
     const whereCondition = {
       status: "completed",
       createdAt: {
-        [Op.gte]: new Date(`${year}-01-01`),
-        [Op.lte]: new Date(`${year}-12-31`),
+        [Op.between]: [startOfYear, endOfYear],
       }
     };
 
@@ -154,7 +161,7 @@ const getStatistic = async () => {
       Withdraw.sum('amount', { where: { status: 'completed' } })
     ]);
 
-    const revenue = (totalMoneyEarn * 0.7).toFixed(2);
+    const revenue = (totalMoneyEarn * 0.7).toFixed(2); // hiiiii221
 
     return {
       status: 200,
@@ -185,7 +192,7 @@ const getDataChartMoney = async(year) => {
       return {
         year,
         month,
-        totalMoney: (totalMoney * 0.7).toFixed(2)
+        totalMoney: (totalMoney * 0.7).toFixed(2) // hiiiii221
       };
     });
 
@@ -325,8 +332,59 @@ const userCount = async() => {
   }
 }
 
-const getAllUsersRequest = async (page, pageSize, sortCondition) => {
+const unbanAccount = async(userId) => {
   try {
+    const user = await User.fineOne({where: {id: userId, isBanned: true}})
+    if(!user) {
+      return {
+        status: 404,
+        message: "User not found or user is not banned"
+      }
+    }
+    user.isBanned = false;
+    await user.save();
+
+    return {
+      status: 200,
+      message: "Unban user successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const unbanChannel = async(channelId) => {
+  try {
+    const channel = await Channel.fineOne({where: {id: channelId, isBanned: true}})
+    if(!channel) {
+      return {
+        status: 404,
+        message: "Channel not found or channel is not banned"
+      }
+    }
+    channel.isBanned = false;
+    await channel.save();
+
+    return {
+      status: 200,
+      message: "Unban channel successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const getAllUsersRequest = async (page, pageSize, status, sortCondition) => {
+  try {
+    const whereCondition = {
+      ...(status && { status }),
+    };
     const requestChannels = await RequestChannel.findAndCountAll({
       attributes: [
         'id', 'userId', 'status', 'text', 'createdAt', 'updatedAt',
@@ -343,12 +401,13 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
       include: [
         {
           model: User,
-          attributes: ['id', 'username', 'avatar', 'phoneNumber', 'email', 'REPs', 'createdAt'],
+          attributes: ['id', 'username', 'avatar', 'email', 'REPs', 'createdAt'],
           where: {
-            isBanned: { [Op.ne]: true } 
+            isBanned: { [Op.ne]: true }
           },
         }
       ],
+      where: whereCondition,
       order: [[sortCondition.sortBy, sortCondition.order]],
       offset: (page - 1) * pageSize,
       limit: pageSize * 1,
@@ -367,7 +426,217 @@ const getAllUsersRequest = async (page, pageSize, sortCondition) => {
         message: error.message || "Internal Server Error"
       };
     }
-  };
+};
+
+const getAllUser = async(page, pageSize, sortCondition) => {
+  try {
+    const listUser = await User.findAndCountAll({
+      attributes: [
+        'id', 'fullName', 'referralCode', 'REPs', 'username', 'role', 'email', 'createdAt', 'isBanned', 'isVerified', 'avatar'
+      ],
+      order: [[sortCondition.sortBy, sortCondition.order]],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+
+    return {
+      status: 200,
+      data: {
+        data: listUser,
+        totalPages: Math.ceil(listUser.count/pageSize)
+      },
+      message: "Fetched all request channels with user info and total report count successfully."
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const editProfileUser = async (id, data) => {
+  try {
+    const user = await User.findByPk(id);
+    if(!user){
+      return {
+        status: 400,
+        data: null,
+        message: "User not found"
+      }
+    }
+
+    if(user.email && user.isVerified && data.email) {
+      return {
+        status: 400,
+        data: null,
+        message: "You can't change verified email"
+      }
+    }
+
+    if(data.username){
+      if (data.username.length < 3 || data.username.length > 32 ||  /[A-Z]/.test(data.username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Must be between 3 and 32 in length and cannot contain uppercase letters."
+        }
+      } else if (!validateUsername(data.username)) {
+        return {
+          status: 400,
+          data: null,
+          message: "Please only use numbers, letters, underscores or periods."
+        }
+      }
+
+      const user = await User.findOne({where: {username: data.username}})
+      if(user) {
+        return {
+          status: 400,
+          data: null,
+          message: "Username already exists."
+        }
+      }
+    }
+
+    const updateUser = await user.update(data)
+    if(!updateUser) {
+      return {
+        status: 400,
+        data: null,
+        message: "Update failed."
+      }
+    }
+
+    return {
+      status: 200,
+      data: updateUser,
+      message: "Update successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+}
+
+const revenue = async (year) => {
+  try {
+    const { startOfYear, endOfYear } = getStartAndEndOfYear(year);
+
+    const [moneyEarn, moneyWithdraw, totalPayment, totalWithdraw] = await Promise.all([
+      getTotalMoneyEarnEveryMonth(year),
+      getTotalMoneyWithdrawEveryMonth(year),
+      Payment.sum('amount', {
+        where: {
+          paymentStatus: 'completed',
+          createdAt: {
+            [Op.between]: [startOfYear, endOfYear],
+          },
+        },
+      }),
+      Withdraw.sum('amount', {
+        where: {
+          status: 'completed',
+          createdAt: {
+            [Op.between]: [startOfYear, endOfYear],
+          },
+        },
+      }),
+    ]);
+
+    return {
+      status: 200,
+      data: {
+        moneyEarn,
+        moneyWithdraw,
+        totalPayment,
+        totalWithdraw,
+      },
+      message: `Revenue data for the year ${year} retrieved successfully.`,
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error.",
+    };
+  }
+};
+
+const getListUserPayIn = async(page, pageSize) => {
+  try {
+    const list = await Payment.findAndCountAll({
+      attributes: ['rep', 'amount', 'createdAt'],
+      include: [
+        {
+          model: User,
+          attributes: ['username', 'avatar']
+        }
+      ],
+      order: [['createdAt', 'desc']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+
+    return {
+      status: 200,
+      data: {
+        list,
+        totalPages: Math.ceil(list.count/pageSize)
+      },
+      message: `Get list user pay in successfully.`,
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error.",
+    };
+  }
+}
+
+const getListUserPayOut = async(page, pageSize) => {
+  try {
+    const list = await Withdraw.findAndCountAll({
+      attributes: ['rep', 'amount', 'createdAt'],
+      include: [
+        {
+          model: Channel,
+          attributes: [
+            'avatar',
+            [
+              sequelize.literal(`(
+                SELECT username
+                FROM users
+                WHERE users.id = Channel.userId
+              )`),
+              'username'
+            ]
+          ],
+        }
+      ],
+      order: [['createdAt', 'desc']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+
+    return {
+      status: 200,
+      data: {
+        list,
+        totalPages: Math.ceil(list.count/pageSize)
+      },
+      message: `Get list user pay out successfully.`,
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error.",
+    };
+  }
+}
+
+
 module.exports = {
   setStatusRequestChannel,
   getStatistic,
@@ -376,4 +645,11 @@ module.exports = {
   getTop5UserDeposit,
   getAllUsersRequest,
   userCount,
+  unbanAccount,
+  unbanChannel,
+  getAllUser,
+  editProfileUser,
+  revenue,
+  getListUserPayIn,
+  getListUserPayOut,
 }

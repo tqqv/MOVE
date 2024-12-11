@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { DonationItem, sequelize } = db;
+const { DonationItem, Donation, Comment, sequelize } = db;
 
 const createDonationItem = async(data) => {
   try {
@@ -29,7 +29,9 @@ const createDonationItem = async(data) => {
 
 const getAllDonationItem = async() => {
   try {
-    const listCate = await DonationItem.findAll()
+    const listCate = await DonationItem.findAll({
+      order: [['REPs', 'asc']]
+    })
 
     return {
       status: 200,
@@ -109,6 +111,16 @@ const deleteDonationItem = async (donationItemId) => {
         data: null,
         message: "donation item not found."
       };
+    }
+
+    const comment = await Comment.findOne({where: {donationItemId}})
+    const donation = await Donation.findOne({where: {donationItemId}})
+
+    if(comment || donation){
+      return {
+        status: 400,
+        message: "This item is in use on comment or donation livestream."
+      }
     }
 
     await donationItem.destroy();
