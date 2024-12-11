@@ -147,7 +147,13 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
         {
           model: Channel,
           as: "channelActor",
-          attributes: ["channelName", "avatar"]
+          attributes: ["channelName", "avatar"],
+          include: [
+            {
+              model: User,
+              attributes: ['username']
+            }
+          ]
         },
         {
           model: Comment,
