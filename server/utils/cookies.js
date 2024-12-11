@@ -3,6 +3,8 @@ const setCookies = (cookies = []) => {
     let domain = null;
     if (req.hostname === 'localhost') {
       domain = req.hostname
+    } else if (req.hostname.includes('admin')){
+      domain = 'admin.training-move-capstone.madlab.tech'
     } else {
       domain = process.env.DOMAIN
     }
@@ -24,9 +26,11 @@ const clearCookies = (cookies = []) => {
   return (req, res) => {
     let domain = null;
     if (req.hostname === 'localhost') {
-      domain = req.hostname;
+      domain = req.hostname
+    } else if (req.hostname.includes('admin')){
+      domain = 'admin.training-move-capstone.madlab.tech'
     } else {
-      domain = process.env.DOMAIN;
+      domain = process.env.DOMAIN
     }
 
     cookies.forEach(({ name, options = {} }) => {
