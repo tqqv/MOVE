@@ -2,6 +2,7 @@ const { Op } = require("sequelize");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
+const validateUsername = require("../middlewares/validateUsername.js");
 const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
 

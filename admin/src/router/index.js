@@ -35,7 +35,7 @@ const routes = [
       { path: 'reps/Revenue', component: Cashout },
       { path: 'reps/donate', component: DonateItem },
       { path: 'reps/discount', component: DiscountItem },
-      { path: 'users/:username', component: UserDetail },
+      { path: 'users/:id', component: UserDetail },
       { path: 'report/:reportId', component: ReportDetail },
     ],
   },

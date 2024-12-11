@@ -85,7 +85,7 @@ const getUserByIdController = async (req, res, next) => {
 };
 
 const editProfileUserController = async (req, res, next) => {
-  const userId = req.params.id;
+  const userId = req.params.userId;
   const data = req.body;
   const result = await editProfileUser(userId, data);
 

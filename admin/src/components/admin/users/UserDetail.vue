@@ -1,7 +1,7 @@
 <script setup>
   import { ref, onMounted, watch, markRaw } from 'vue';
   import { useRoute, useRouter } from 'vue-router';
-  import { getProfilebyUsername } from '@/services/user';
+  import { getProfilebyUserId } from '@/services/user';
   import Informations from './tabs/Informations.vue';
   import Tabs from 'primevue/tabs';
   import TabList from 'primevue/tablist';
@@ -16,9 +16,9 @@
   const route = useRoute();
   const router = useRouter();
   const activeTab = ref('0');
-  const username = ref(route.params.username);
+  const id = ref(route.params.id);
   const tabs = ref([
-    { title: 'Informations', component: markRaw(Informations), value: '0' },
+    { title: 'Informations', component: markRaw(Informations), value: '0', props: { userId: id } },
     { title: 'Videos', component: markRaw(Videos), value: '1' },
     { title: 'Transaction History', component: markRaw(TransactionHistory), value: '2' },
   ]);
@@ -28,7 +28,7 @@
   };
 
   const fetchChannelData = async () => {
-    const result = await getProfilebyUsername(username.value);
+    const result = await getProfilebyUserId(id.value);
 
     if (result.status === 404) {
       router.push('/404');
@@ -40,12 +40,11 @@
   });
 
   watch(
-    () => route.params.username,
-    async (newUsername) => {
-      username.value = newUsername;
+    () => route.params.id,
+    async (newId) => {
+      id.value = newId;
       activeTab.value = '0';
       fetchChannelData();
-      console.log(newUsername);
     },
   );
 </script>
@@ -56,7 +55,7 @@
         <div class="flex justify-between items-center">
           <div>
             <h1 class="text-[24px] font-bold">
-              User Detail <span class="opacity-50 text-[20px]">#112312313</span>
+              User Detail <span class="opacity-50 text-[20px]">#{{ id }}</span>
             </h1>
             <div class="flex gap-x-4 items-center mt-4">
               <h2 class="font-semibold">Status:</h2>
@@ -74,7 +73,7 @@
           </TabList>
           <TabPanels>
             <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
-              <component :is="tab.component" />
+              <component :is="tab.component" v-bind="tab.props" />
             </TabPanel>
           </TabPanels>
         </Tabs>
