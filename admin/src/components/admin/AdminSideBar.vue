@@ -38,7 +38,7 @@
     },
     { name: 'Category Management', icon: Category, link: '/category' },
     { name: 'Level Management', icon: Level, link: '/levelworkout' },
-    { name: 'Report Management', icon: Flag, link: '/report/comment' },
+    { name: 'Report Management', icon: Flag, link: '/report' },
     { name: 'Booking management', icon: Booking, link: '/booking-management' },
     { name: 'Request Channel', icon: Request, link: '/request' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
@@ -93,7 +93,7 @@
         </li>
       </ul>
       <div
-        class="flex items-center gap-x-4 mx-2 p-4 mb-3 text-white rounded-md cursor-pointer hover:bg-[#333a48]"
+        class="flex items-center gap-x-4 mx-2 mt-24 p-4 mb-3 text-white rounded-md cursor-pointer hover:bg-[#333a48]"
       >
         <Logout fill="#fff" />
         <span class="text-sm font-semibold">Logout</span>

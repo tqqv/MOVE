@@ -30,15 +30,37 @@
   // ROUTE
   const handleRowClick = (rowData) => {
     selectedReport.value = rowData;
-    router.push(
-      `report/${
-        selectedReport.value.data.targetCommentId ||
-        selectedReport.value.data.targetVideoId ||
-        selectedReport.value.data.targetLivestreamId ||
-        selectedReport.value.data.targetChannelId ||
-        selectedReport.value.data.targetAccountId
-      }`,
-    );
+
+    // Lấy giá trị loại báo cáo và ID từ selectedReport
+    const { targetCommentId, targetVideoId, targetLivestreamId, targetChannelId, targetAccountId } =
+      selectedReport.value.data;
+
+    let reportType = '';
+    let reportId = '';
+
+    if (targetCommentId) {
+      reportType = 'comment';
+      reportId = targetCommentId;
+    } else if (targetVideoId) {
+      reportType = 'video';
+      reportId = targetVideoId;
+    } else if (targetLivestreamId) {
+      reportType = 'livestream';
+      reportId = targetLivestreamId;
+    } else if (targetChannelId) {
+      reportType = 'channel';
+      reportId = targetChannelId;
+    } else if (targetAccountId) {
+      reportType = 'account';
+      reportId = targetAccountId;
+    } else {
+      console.error('No valid report type or ID found in rowData');
+      return;
+    }
+
+    router.push(`/report/${reportType}/${reportId}`).catch((error) => {
+      console.error('Navigation error:', error);
+    });
   };
 
   // HANDLE FILTER

@@ -30,21 +30,13 @@ const routes = [
       { path: 'request', component: RequestManagement },
       { path: 'category', component: CategoryManagement },
       { path: 'levelworkout', component: LevelworkoutManagement },
+      { path: 'report', component: ReportManagement },
       { path: 'setting', component: AdminSetting },
       { path: 'reps/Revenue', component: Cashout },
       { path: 'reps/donate', component: DonateItem },
       { path: 'reps/discount', component: DiscountItem },
       { path: 'users/:username', component: UserDetail },
-      {
-        path: '/report/:reportType',
-        component: ReportManagement,
-        children: [
-          {
-            path: ':reportId',
-            component: ReportDetail,
-          },
-        ],
-      },
+      { path: 'report/:reportType/:reportId', component: ReportDetail },
     ],
   },
   {
