@@ -23,8 +23,9 @@ const getCateByIdController = async(req, res, next) => {
 }
 
 const editCategoryController = async (req, res, next) => {
+  const { cateId } = req.params; 
   const data = req.body;
-  const result = await editCategory(data);
+  const result = await editCategory(cateId, data);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }

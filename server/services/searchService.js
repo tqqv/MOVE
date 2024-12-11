@@ -12,9 +12,9 @@ const searchCategories = async (data, page, pageSize) => {
           message: "Data cannot be empty"
         };
       }
- 
+
       const normalData = data.trim().toLowerCase();
-      
+
       const categories = await Category.findAndCountAll({
         where: {
           title: { [Op.like]: `%${normalData}%` }
@@ -39,7 +39,7 @@ const searchCategories = async (data, page, pageSize) => {
         offset: (page - 1) * pageSize,
         limit: pageSize * 1,
       });
- 
+
       return {
         status: 200,
         data: {
@@ -48,7 +48,7 @@ const searchCategories = async (data, page, pageSize) => {
         },
         message: "Categories fetched successfully"
       };
- 
+
     } catch (error) {
       return {
         status: 400,
@@ -67,7 +67,7 @@ const searchUser = async (data, page, pageSize) => {
           message: "Data cannot be empty"
         };
       }
-  
+
       const normalData = data.trim().toLowerCase();
       const users = await User.findAndCountAll({
         include: [
@@ -106,7 +106,7 @@ const searchUser = async (data, page, pageSize) => {
         offset: (page - 1) * pageSize,
         limit: pageSize * 1,
       });
-  
+
       return {
         status: 200,
         data: {
@@ -115,7 +115,7 @@ const searchUser = async (data, page, pageSize) => {
         },
         message: "Users fetched successfully"
       };
-  
+
     } catch (error) {
       return {
         status: 400,
@@ -124,7 +124,7 @@ const searchUser = async (data, page, pageSize) => {
       };
     }
 };
-  
+
 const searchVideo = async (data, page, pageSize) => {
     try {
       if (!data) {
@@ -134,12 +134,13 @@ const searchVideo = async (data, page, pageSize) => {
           message: "Data cannot be empty"
         };
       }
-  
+
       const normalData = data.trim().toLowerCase();
       const videos = await Video.findAndCountAll({
         where: {
           title: { [Op.like]: `%${normalData}%` },
-          status: 'public'
+          status: 'public',
+          isBanned: false
         },
         include: [
           {
@@ -174,7 +175,7 @@ const searchVideo = async (data, page, pageSize) => {
         offset: (page - 1) * pageSize,
         limit: pageSize * 1,
       });
-  
+
       return {
         status: 200,
         data: {
@@ -191,7 +192,7 @@ const searchVideo = async (data, page, pageSize) => {
       };
     }
   };
-  
+
 module.exports = {
     searchCategories,
     searchUser, searchVideo
