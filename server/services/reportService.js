@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { messages } = require("../utils/redis/key/chatKey.js");
-const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, Sequelize } = db;
+const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, LevelWorkout, Category, Sequelize } = db;
 
 const reportVideo = async(userId, videoId, reportTypeId) => {
   try {
@@ -459,13 +459,12 @@ const getListReportVideo = async(page, pageSize, status) => {
     }
 
     const listReportVideo = await Report.findAll({
+      where: whereCondition,
       attributes: [
         'targetVideoId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetVideoId')), 'reportCount'],
       ],
-      where: whereCondition,
-      group: ['targetVideoId', 'status'],
       include: [
         {
           model: Video,
@@ -474,10 +473,26 @@ const getListReportVideo = async(page, pageSize, status) => {
             model: Channel,
             as: 'channel',
             attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+            include: {
+              model: User,
+              attributes: ['username']
+            }
           },
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
+      group: ['targetVideoId', 'status'],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN Report.status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
@@ -555,7 +570,18 @@ const getListReportComment = async(page, pageSize, status) => {
           }
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
@@ -622,15 +648,30 @@ const getListReportLivestream = async(page, pageSize, status) => {
       include: [
         {
           model: Livestream,
-          attributes: ['content', 'rep'],
+          attributes: ['thumbnailUrl', 'title'],
           include: {
             model: Channel,
             as: "livestreamChannel",
-            attributes: ["channelName", "avatar", "popularCheck", "isLive"]
+            attributes: ["channelName", "avatar", "popularCheck", "isLive"],
+            include: {
+              model: User,
+              attributes: ["username"]
+            }
           }
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
@@ -702,7 +743,18 @@ const getListReportAccount = async(page, pageSize, status) => {
           attributes: ['username', 'avatar', 'id', 'email']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
@@ -770,10 +822,25 @@ const getListReportChannel = async(page, pageSize, status) => {
       include: [
         {
           model: Channel,
-          attributes: ['channelName', 'avatar', 'id']
+          attributes: ['channelName', 'avatar', 'id'],
+          include: {
+            model: User,
+            attributes: ['username']
+          }
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC'], ['status']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
@@ -1016,7 +1083,11 @@ const getReportDetail = async(targetReportId, type) => {
                 {
                   model: Channel,
                   as: 'channel',
-                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+                  include: {
+                    model: User,
+                    attributes: ['username', 'id', 'role']
+                  }
                 },
                 {
                   model: LevelWorkout,
@@ -1029,11 +1100,6 @@ const getReportDetail = async(targetReportId, type) => {
                   as: 'category',
                 }
               ]
-            },
-            {
-              model: User,
-              as: 'reporter',
-              attributes: ['username', 'avatar', 'role', 'email', 'id']
             },
           ]
         })
@@ -1066,6 +1132,15 @@ const getReportDetail = async(targetReportId, type) => {
             {
               model: Livestream,
               include: [
+                {
+                  model: Channel,
+                  as: 'livestreamChannel',
+                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+                  include: {
+                    model: User,
+                    attributes: ['username', 'id', 'role']
+                  }
+                },
                 {
                   model: Category,
                   attributes: ["title"],
@@ -1115,7 +1190,11 @@ const getReportDetail = async(targetReportId, type) => {
                     {
                       model: Channel,
                       as: 'channel',
-                      attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+                      attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+                      include: {
+                        model: User,
+                        attributes: ['username', 'id'] 
+                      }
                     },
                     {
                       model: LevelWorkout,
@@ -1132,7 +1211,7 @@ const getReportDetail = async(targetReportId, type) => {
                 {
                   model: User,
                   as: 'userComments',
-                  attributes: ['avatar', 'username', 'email', 'isVerified']
+                  attributes: ['avatar', 'username', 'email', 'isVerified', 'role']
                 },
                 {
                   model: Channel,
@@ -1146,7 +1225,7 @@ const getReportDetail = async(targetReportId, type) => {
                 },
               ]
             }
-          ]
+          ],
         })
 
         const commentReporters = await Report.findAll({
@@ -1177,7 +1256,7 @@ const getReportDetail = async(targetReportId, type) => {
             {
               model: User,
               as: 'targetUser',
-              attributes: ['username', 'avatar', 'role', 'email', 'id']
+              attributes:  ['username', 'avatar','fullName', 'dob','gender', 'email', 'country', 'city', 'state', 'id', 'role'],
             }
           ]
         })
@@ -1210,7 +1289,11 @@ const getReportDetail = async(targetReportId, type) => {
           include: [
             {
               model: Channel,
-              attributes: ['avatar','channelName', 'popularCheck']
+              attributes: ['avatar','channelName','bio','facebookUrl' ,'youtubeUrl','instaUrl'],
+              include: {
+                model: User,
+                attributes: ['username', 'avatar','fullName', 'dob','gender', 'email', 'country', 'city', 'state', 'id', 'role'],
+              }
             }
           ]
         })
