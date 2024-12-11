@@ -1,6 +1,7 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 const db = require("../models/index.js");
-const { NotificationVisitStatus } = db;
+const { getAllNotificationRoomSetting } = require("./notificationRoomSettingService.js");
+const { NotificationVisitStatus, Notification } = db;
 
 
 const createNotificationVisitStatus = async(userNotifierId, notifications) => {
@@ -59,8 +60,124 @@ const getAllNotificationVisitStatus = async(page, pageSize) => {
   }
 }
 
+const markAllNotiAsRecievied = async(userNotifierId, channelNotifierId) => {
+  try {
+
+    const notifierRoom = (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data;
+
+    if (notifierRoom.length == 0 ) {
+      return {
+        status: 200,
+        data: [],
+        message: 'This account unmuted all notification'
+      }
+    }
+
+    // Lấy createdAt mới nhất từ NotificationVisitStatus
+    const latestVisit = await NotificationVisitStatus.findOne({
+      where: { userNotifierId: (channelNotifierId ?  null: userNotifierId), channelNotifierId },
+      order: [['createdAt', 'DESC']],
+    });
+
+    const lastClickedAt = latestVisit ? latestVisit.createdAt : null;
+    // Lấy danh sách notification thỏa mãn điều kiện
+    const notificationsToMark = await Notification.findAll({
+      where: {
+        roomName: { [Op.in]: notifierRoom }, // Lọc roomName dựa trên notifierRooms
+        ...(lastClickedAt && { createdAt: { [Op.gt]: lastClickedAt } }), // Nếu có lastClickedAt
+      },
+    });
+
+    if (notificationsToMark.length === 0) {
+      return {
+        status: 200,
+        data: [],
+        message: 'No new notifications to mark as received.',
+      };
+    }
+
+    // Tạo bản ghi mới trong NotificationVisitStatus
+    const visitStatusData = notificationsToMark.map((notification) => ({
+      notificationId: notification.id,
+      userNotifierId: (channelNotifierId ?  null: userNotifierId),
+      channelNotifierId,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+    await NotificationVisitStatus.bulkCreate(visitStatusData);
+
+    return {
+      status: 200,
+      message: 'Mark notificaiton VisitStatus successfully'
+    }
+  } catch (error) {
+    console.log(error);
+
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const markAllNotiAsRead = async (userNotifierId, channelNotifierId) => {
+  try {
+    // Cập nhật trạng thái thành 'read' trong NotificationVisitStatus
+    await NotificationVisitStatus.update(
+      { status: 'visited' }, // Trạng thái mới
+      {
+        where: {
+          userNotifierId: channelNotifierId ? null : userNotifierId,
+          channelNotifierId,
+        },
+      }
+    );
+
+    return {
+      status: 200,
+      message: "Marked notifications as read successfully."
+      };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message,
+    };
+  }
+};
+
+const markOneNotiAsRead = async (notificationId) => {
+   try {
+    // Cập nhật trạng thái thành 'read' trong NotificationVisitStatus
+    await NotificationVisitStatus.update(
+      { status: 'visited' }, // Trạng thái mới
+      {
+        where: {
+          notificationId,
+        },
+      }
+    );
+
+    return {
+      status: 200,
+      message: "Marked notifications as read successfully."
+      };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message,
+    };
+  }
+}
 
 module.exports = {
   createNotificationVisitStatus,
-  getAllNotificationVisitStatus
+  getAllNotificationVisitStatus,
+  markAllNotiAsRecievied,
+  markAllNotiAsRead,
+  markOneNotiAsRead
 }

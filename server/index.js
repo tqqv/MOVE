@@ -30,6 +30,7 @@ const notificationEntityRouter = require("./routes/notificationEntityRoute.js");
 const notificationTranslationRouter = require("./routes/notificationTranslationRoute.js");
 const notificationRouter = require("./routes/notificationRoute.js");
 const notificationRoomSettingRouter = require("./routes/notificationRoomSettingRoute.js");
+const notificationVisitStatusRouter = require("./routes/notificationVisitStatusRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;

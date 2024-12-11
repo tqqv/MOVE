@@ -77,8 +77,6 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
         const followedChannel = (await listSubscribeOfChannel(channelId)).data || (await listSubscribeOfUser(userId)).data;
         const channelIds = followedChannel.map(item => item.channelId);
 
-
-
         const roomNameSet = new Set(); // Dùng Set để loại bỏ trùng lặp
         filteredRooms.forEach((room) => {
             let roomName = room.roomNamePattern;
@@ -93,7 +91,7 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
                 });
             } else {
                 // Nếu roomNamePattern không chứa {channelId}, chỉ thay thế {selfId}
-                let updatedRoomName = roomName.replace("{selfId}", userId || "");
+                let updatedRoomName = roomName.replace("{selfId}", channelId || userId || "");
                 roomNameSet.add(updatedRoomName); // Thêm vào Set
             }
         });

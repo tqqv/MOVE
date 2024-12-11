@@ -41,8 +41,11 @@ const reactionComment = async(userId, commentId, reactionType) => {
         "comment",
         "reaction",
         (channel ? null: userId),
-        channel.id,
-        comment.channelId || comment.userId)
+        (channel ? channel.id : null),
+        comment.channelId || comment.userId,
+        comment.id,
+        comment.videoId
+      )
       return {
         status: 200,
         message: reactionType === 'like' ? "Like comment successfully." : "Dislike comment successfully."

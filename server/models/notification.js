@@ -4,7 +4,36 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class Notification extends Model {
   static associate(models) {
-    this.belongsTo(models.Channel, { foreignKey: "channelId" });
+    this.hasMany(models.NotificationVisitStatus, {
+      foreignKey: 'notificationId',
+      as: 'visitStatus', // Alias cho mối quan hệ này
+    });
+
+    this.belongsTo(models.NotificationEntity, {
+      foreignKey: 'notificationEntityId',
+      as: 'notificationEntity',
+  });
+
+  this.belongsTo(models.User, {
+    foreignKey: 'userActorId',
+    as: 'userActor',
+  });
+
+  this.belongsTo(models.Channel, {
+    foreignKey: 'channelActorId',
+    as: 'channelActor',
+  });
+
+  this.belongsTo(models.Comment, {
+    foreignKey: 'targetCommentId',
+    as: 'targetComment',
+  });
+
+  this.belongsTo(models.Video, {
+    foreignKey: 'targetVideoId',
+    as: 'targetVideo',
+  });
+
   }
   }
   Notification.init(
@@ -44,6 +73,24 @@ module.exports = (sequelize, DataTypes) => {
       },
       roomName: {
         type: DataTypes.STRING,
+      },
+      targetCommentId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'comments',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+      },
+      targetVideoId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'videos',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
       },
     },
     {

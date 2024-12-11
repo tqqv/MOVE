@@ -4,7 +4,9 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class NotificationVisitStatus extends Model {
   static associate(models) {
-    this.belongsTo(models.Channel, { foreignKey: "channelId" });
+    this.belongsTo(models.Notification, {
+      foreignKey: 'notificationId',
+    });
   }
   }
   NotificationVisitStatus.init(

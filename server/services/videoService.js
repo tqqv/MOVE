@@ -182,7 +182,9 @@ const updateVideoService = async (videoId, updateData) => {
         "newVideo",
         null,
         video.channelId,
-        video.channelId
+        video.channelId,
+        null,
+        videoId
       )
     }
     return {

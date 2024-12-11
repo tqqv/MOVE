@@ -122,7 +122,9 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
         "mention",
         (channelId ? null: userId),
         channelId,
-        (parentCommentChecker.channelId || parentCommentChecker.userId)
+        (parentCommentChecker.channelId || parentCommentChecker.userId),
+        comment.dataValues.id,
+        comment.dataValues.videoId
       )
     }
     // Fetch comment with the associated DonationItem

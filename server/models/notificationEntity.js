@@ -3,7 +3,12 @@ const { Model } = require("sequelize");
 
 module.exports = (sequelize, DataTypes) => {
   class NotificationEntity extends Model {
-
+    static associate(models) {
+      this.hasMany(models.NotificationTranslation, {
+        foreignKey: 'notificationEntityId',
+        as: 'notificationTranslation', // Alias cho mối quan hệ này
+      });
+    }
   }
   NotificationEntity.init(
     {
