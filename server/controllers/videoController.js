@@ -123,11 +123,11 @@ const getVideoByUserId = async (req, res, next) => {
 
 const getVideoByChannelAndTitleController = async (req, res, next) => {
   const data = req.query.data
-  const limit = req.query.limit || 5
-  const offset = req.query.offset || 0
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
   const channelId = req.params.channelId;
 
-  const result = await getVideoByChannelAndTitleService(data, limit, offset, channelId);
+  const result = await getVideoByChannelAndTitleService(data, page, pageSize, channelId);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 

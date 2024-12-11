@@ -90,7 +90,7 @@ const reupStreamService = async (livestreamId, videoId, userId, title, descripti
         duration: duration,
         status: status,
         livestreamId,
-        categoryId, 
+        categoryId,
         levelWorkoutsId,
         isCommentAble: true,
     });
@@ -562,43 +562,40 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   };
 };
 
-const getVideoByChannelAndTitleService = async(data, limit, offset, channelId) => {
+const getVideoByChannelAndTitleService = async (data, page, pageSize, channelId) => {
   try {
-    if(!data) {
-      return {
-        status: 400,
-        data: null,
-        message: "Data cannot be empty"
-      }
+    // Chuyển đổi dữ liệu đầu vào
+    const normalData = data ? data.trim().toLowerCase() : null;
+    // Điều kiện lọc video
+    const whereCondition = {
+      status: 'public',
+      channelId,
+      isBanned: false,
+    };
+
+    // Thêm điều kiện tìm kiếm theo tiêu đề nếu có
+    if (normalData) {
+      whereCondition.title = { [Op.like]: `%${normalData}%` };
     }
 
-    const normalData = data.trim().toLowerCase();
-    const limitInt = parseInt(limit)
-    const offsetInt = parseInt(offset)
-
     const videos = await Video.findAll({
-      where: {
-        title: { [Op.like]: `%${normalData}%` },
-        status: 'public',
-        channelId,
-        isBanned: false
-      },
+      where: whereCondition,
       include: [
         {
           model: Channel,
           as: 'channel',
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
         },
         {
           model: Category,
           as: 'category',
-          attributes: ['title']
+          attributes: ['title'],
         },
         {
           model: LevelWorkout,
           as: 'levelWorkout',
-          attributes: ['levelWorkout']
-        }
+          attributes: ['levelWorkout'],
+        },
       ],
       attributes: {
         include: [
@@ -608,27 +605,26 @@ const getVideoByChannelAndTitleService = async(data, limit, offset, channelId) =
               FROM ratings
               WHERE ratings.videoId = Video.id
             )`),
-            'averageRating'
-          ]
-        ]
+            'averageRating',
+          ],
+        ],
       },
       order: [['createdAt', 'DESC']],
-      limit: limitInt,
-      offset: offsetInt
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
     });
 
     return {
       status: 200,
       data: videos,
-      message: "Successfully"
+      message: 'Successfully',
     };
-
   } catch (error) {
     return {
       status: 400,
       data: null,
-      message: error.message
-    }
+      message: error.message,
+    };
   }
 };
 
