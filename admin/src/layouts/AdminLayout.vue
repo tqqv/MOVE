@@ -11,7 +11,7 @@
 </script>
 
 <template>
-  <div class="flex h-screen">
+  <div class="flex">
     <AdminSideBar />
     <div class="flex-grow flex flex-col h-screen">
       <AdminNavbar />
