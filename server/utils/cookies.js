@@ -1,12 +1,10 @@
 const setCookies = (cookies = []) => {
   return (req, res) => {
-    const origin = req.get('origin') || req.get('referer') || '';
-    let domain = '';
-
-    if (origin.includes('admin.training-move-capstone.madlab.tech')) {
-      domain = 'admin.training-move-capstone.madlab.tech'; 
-    } else if (origin.includes('training-move-capstone.madlab.tech')) {
-      domain = 'training-move-capstone.madlab.tech'; 
+    let domain = null;
+    if (req.hostname === 'localhost') {
+      domain = req.hostname
+    } else {
+      domain = process.env.DOMAIN
     }
 
     cookies.forEach(({ name, value, days, options = {} }) => {
@@ -25,13 +23,11 @@ const setCookies = (cookies = []) => {
 
 const clearCookies = (cookies = []) => {
   return (req, res) => {
-    const origin = req.get('origin') || req.get('referer') || '';
-    let domain = '';
-
-    if (origin.includes('admin.training-move-capstone.madlab.tech')) {
-      domain = 'admin.training-move-capstone.madlab.tech'; 
-    } else if (origin.includes('training-move-capstone.madlab.tech')) {
-      domain = 'training-move-capstone.madlab.tech'; 
+    let domain = null;
+    if (req.hostname === 'localhost') {
+      domain = req.hostname
+    } else {
+      domain = process.env.DOMAIN
     }
 
     cookies.forEach(({ name, options = {} }) => {
