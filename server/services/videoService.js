@@ -562,6 +562,76 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   };
 };
 
+const getVideoByChannelAndTitleService = async(data, limit, offset, channelId) => {
+  try {
+    if(!data) {
+      return {
+        status: 400,
+        data: null,
+        message: "Data cannot be empty"
+      }
+    }
+
+    const normalData = data.trim().toLowerCase();
+    const limitInt = parseInt(limit)
+    const offsetInt = parseInt(offset)
+
+    const videos = await Video.findAll({
+      where: {
+        title: { [Op.like]: `%${normalData}%` },
+        status: 'public',
+        channelId,
+        isBanned: false
+      },
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['title']
+        },
+        {
+          model: LevelWorkout,
+          as: 'levelWorkout',
+          attributes: ['levelWorkout']
+        }
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating'
+          ]
+        ]
+      },
+      order: [['createdAt', 'DESC']],
+      limit: limitInt,
+      offset: offsetInt
+    });
+
+    return {
+      status: 200,
+      data: videos,
+      message: "Successfully"
+    };
+
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message
+    }
+  }
+};
+
 const getVideoByVideoIdService = async (videoId) => {
   const video = await Video.findOne({
     where: { id: videoId },
@@ -1704,5 +1774,6 @@ module.exports = {
   getVideoYouMayLikeService,
   fetchGeoData,
   reupStreamService,
-  getLatestReupStreamService
+  getLatestReupStreamService,
+  getVideoByChannelAndTitleService
 };
