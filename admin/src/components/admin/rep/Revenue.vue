@@ -8,7 +8,6 @@
   import Column from 'primevue/column';
   import Skeleton from 'primevue/skeleton';
   import { getListUserPayIn, getListUserPayOut, getRevenue } from '@/services/admin';
-  import { data } from 'autoprefixer';
   import { formatTimeDate } from '@/utils';
 
   const barChart = ref(null);

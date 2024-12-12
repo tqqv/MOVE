@@ -1,6 +1,6 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, unbanAccountController, unbanChannelController, revenueController, getListUserPayInController, getListUserPayOutController, createSystemConfigController, getSystemConfigByKeyController, getAllSystemConfigController, editSystemConfigController } = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, unbanAccountController, unbanChannelController, revenueController, getListUserPayInController, getListUserPayOutController, createSystemConfigController, getSystemConfigByKeyController, getAllSystemConfigController, editSystemConfigController, deleteMultipleVideosController} = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
@@ -26,7 +26,8 @@ adminRoute.patch("/editProfileUser/:userId", verifyAdmin, editProfileUserControl
 adminRoute.get("/getListVideoByUser/:channelId", verifyAdmin, getListVideoByChannelIdController)
 adminRoute.patch('/editVideoById', verifyAdmin, EditVideoByIdController);
 adminRoute.delete('/deleteVideoById/:videoId', verifyAdmin, deleteVideoByIdController);
-adminRoute.get("/getListPaymentByUserId/:userId", verifyAdmin, getListPaymentByUserIdController)
+adminRoute.delete('/deleteVideos', verifyAdmin, deleteMultipleVideosController);
+adminRoute.get("/getListPaymentByUserId/:userId", verifyAdmin, getListPaymentByUserIdController);
 
 ////////////////////////// REP PACKAGE ////////////
 adminRoute.post("/createRepPackage", verifyAdmin, createRepPackageController)

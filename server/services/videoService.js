@@ -673,7 +673,17 @@ const deleteMultipleVideosService = async (videoIds) => {
       await VideoKeyword.destroy({ where: { videoId } });
 
       if (keywordIds.length > 0) {
-        await Keyword.destroy({ where: { id: keywordIds } });
+        const linkedKeywords = await VideoKeyword.findAll({
+          where: { keywordId: keywordIds }
+        });
+
+        const unlinkKeywordIds = keywordIds.filter(id =>
+          !linkedKeywords.some(vk => vk.keywordId === id)
+        );
+
+        if (unlinkKeywordIds.length > 0) {
+          await Keyword.destroy({ where: { id: unlinkKeywordIds } });
+        }
       }
 
       await video.destroy();
