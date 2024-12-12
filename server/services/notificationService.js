@@ -241,7 +241,9 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
       whereClause = `userNotifierId = '${userNotifierId}'`
     }
 
-    const unReadNoti = await Notification.findAndCountAll({
+    const unReadNoti = await Notification.
+    findAndCountAll({
+      distinct: true,
       where: {
         roomName: { [Op.in]: notifierRoom },
       },
