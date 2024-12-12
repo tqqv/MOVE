@@ -1,6 +1,6 @@
 const express = require("express");
 const { verifyAdmin, verifyStreamer } = require("../middlewares/verifyToken");
-const { createFeatureContentController, getAllFeatureContentController, createBookingFeatureContentController, getBookingFeatureContentController, cancelBookingFeatureContentController, getBookDateDetailController, getBookingHistoryController, getBookingStatsController } = require("../controllers/featuredContentController");
+const { createFeatureContentController, getAllFeatureContentController, createBookingFeatureContentController, getBookingFeatureContentController, cancelBookingFeatureContentController, increaseClickFeaturedController, getBookDateDetailController, getBookingHistoryController, getBookingStatsController } = require("../controllers/featuredContentController");
 const featuredContentRouter = express.Router();
 
 
@@ -12,5 +12,6 @@ featuredContentRouter.get('/bookedStatus', verifyStreamer, getBookingFeatureCont
 featuredContentRouter.get('/getBookedByDate', verifyStreamer, getBookDateDetailController);
 featuredContentRouter.get('/getBookingHistory', verifyStreamer, getBookingHistoryController);
 featuredContentRouter.get('/getBookingStats', verifyStreamer, getBookingStatsController);
+featuredContentRouter.post('/clickIncrease/:featuredContentId', increaseClickFeaturedController);
 
 module.exports = featuredContentRouter;

@@ -19,6 +19,7 @@ module.exports = (sequelize, DataTypes) => {
             });
 
             this.hasMany(models.ChannelMute, { foreignKey: 'channelId', as: 'channelChannelMute' });
+            this.hasMany(models.Subscribe, { foreignKey: 'channelId' , as: "channelSubscriber"});
 
             this.hasMany(models.Report, { foreignKey: 'targetChannelId', as: 'channelReport' });
 

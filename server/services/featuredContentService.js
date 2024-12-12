@@ -2,7 +2,8 @@ const { Op, fn, col, literal, where } = require("sequelize");
 const { get } = require("../utils/redis/base/redisBaseService.js");
 const db = require("../models/index.js");
 const moment = require('moment-timezone');
-const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, Comment, Donation, sequelize } = db;
+const featuredContent = require("../models/featuredContent.js");
+const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, Comment, Donation, Subscribe, sequelize } = db;
 
 
 const createFeatureContentService = async(livestreamId, videoId, startAt, expireAt) => {
@@ -609,6 +610,7 @@ const getBookingStatsService = async (channelId, datetime) => {
         channelId,
       },
       attributes: [
+        "clickCount",
         [
           sequelize.literal(`(
             SELECT SUM(rep)
@@ -617,6 +619,14 @@ const getBookingStatsService = async (channelId, datetime) => {
               AND DATE(commentReplies.createdAt) = date
           )`),
           'totalRepFromVideo',
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM subscribes AS newSubscribers
+            WHERE DATE(newSubscribers.createdAt) = date
+          )`),
+          'newSubscriptionsToday',
         ]
       ],
       include: [
@@ -640,6 +650,18 @@ const getBookingStatsService = async (channelId, datetime) => {
               attributes: [],
             },
           ],
+        },
+        {
+          model: Channel,
+          as: "channelBooking",
+          attribute: [],
+          include: [
+            {
+              model: Subscribe,
+              as: "channelSubscriber",
+              attributes: ["id"],
+            },
+          ]
         }
       ],
     });
@@ -699,6 +721,41 @@ const getBookingStatsService = async (channelId, datetime) => {
   }
 }
 
+
+const increaseClickFeaturedService = async (featuredContentId) => {
+  try {
+    // Tìm đối tượng FeaturedContent dựa trên id
+    const featuredContent = await FeaturedContent.findOne({
+      where: {
+        id: featuredContentId
+      }
+    });
+
+    if (!featuredContent) {
+      return {
+        status: 404,
+        message: "FeaturedContent not found"
+      };
+    }
+
+    // Tăng giá trị clickCount lên 1
+    await featuredContent.increment('clickCount');
+
+    return {
+      status: 200,
+      message: "Click count increased successfully"
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
+
 module.exports = {
   createFeatureContentService,
   getAllFeatureContentService,
@@ -708,5 +765,5 @@ module.exports = {
   getBookingHistoryService,
   getBookingStatsService,
   getBookDateDetailService,
-
+  increaseClickFeaturedService
 }

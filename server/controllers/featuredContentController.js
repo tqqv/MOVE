@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService, getBookingHistoryService, getBookingStatsService } = require("../services/featuredContentService");
+const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService, getBookingHistoryService, getBookingStatsService, increaseClickFeaturedService } = require("../services/featuredContentService");
 
 const getAllFeatureContentController = async(req, res, next) => {
     const datetime = req.query.datetime;
@@ -66,6 +66,12 @@ const getBookingStatsController = async(req, res, next) => {
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const increaseClickFeaturedController = async(req, res, next) => {
+    const featuredContentId = req.params.featuredContentId;
+    const result = await increaseClickFeaturedService(featuredContentId);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 
 module.exports = {
     createFeatureContentController,
@@ -75,5 +81,6 @@ module.exports = {
     getBookDateDetailController,
     cancelBookingFeatureContentController,
     getBookingHistoryController,
-    getBookingStatsController
+    getBookingStatsController,
+    increaseClickFeaturedController
 }
