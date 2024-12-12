@@ -3,13 +3,18 @@ import axios from './axios';
 const getProfile = () => {
   return axios.get('/user/getProfile');
 };
-// const checkAccount = async (username) => {
-//   try {
-//     const response = await axios.get(`/user/${username}`);
 
-//     return { success: response.data.success };
-//   } catch (error) {}
-// };
+const getAllUsersRequest = async (page, pageSize, status) => {
+  try {
+    const response = await axios.get(`/admin/requestChannel`, {
+      params: { page, pageSize, status },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
 const getProfilebyUsername = async (username) => {
   try {
     const response = await axios.get(`/user/getProfileByUsername/${username}`);
@@ -107,4 +112,5 @@ export {
   getListFollowOfUser,
   getProfilebyUsername,
   postFollowCate,
+  getAllUsersRequest,
 };

@@ -19,6 +19,129 @@ const getListRepPackage = async() => {
   }
 }
 
+const createRepPackage = async(data) => {
+  try {
+    if(!data.rep || !data.amount){
+      return {
+        status: 400,
+        data: null,
+        message: 'Cannot be empty'
+      }
+    }
+
+    let discount;
+
+    if(!data.discount) {
+      discount = 0
+    }
+
+    const newRepPackage = await RepPackage.create({
+      rep: data.rep,
+      amount: data.amount,
+      discount: discount
+    })
+
+    return {
+      status: 200,
+      data: newRepPackage,
+      message: 'Created successfully'
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const getRepPackageById = async(repPackageId) => {
+  try {
+    const repPackage = await RepPackage.findByPk(repPackageId)
+
+    if(!repPackage) {
+      return {
+        status: 400,
+        data: null,
+        message: "Rep Package not found"
+      }
+    }
+
+    return {
+      status: 200,
+      data: repPackage,
+      message: "Get Rep Package by id successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const editRepPackage = async(repPackageId, data) => {
+  try {
+    // Tìm RepPackage trong DB
+    const repPackage = await RepPackage.findByPk(repPackageId)
+    if(!repPackage) {
+      return {
+        status: 400,
+        data: null,
+        message: "Rep Package not found"
+      }
+    }
+
+    await repPackage.update(data)
+
+    return {
+      status: 200,
+      data: repPackage,
+      message: "Rep Package edit successfully."
+    }
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+const deleteRepPackage = async (repPackageId) => {
+  try {
+    const repPackage = await RepPackage.findByPk(repPackageId);
+    if (!repPackage) {
+      return {
+        status: 404,
+        data: null,
+        message: "Rep Package not found."
+      };
+    }
+
+    await repPackage.destroy();
+
+    return {
+      status: 200,
+      data: null,
+      message: "Rep Package deleted successfully."
+    };
+
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
 module.exports = {
   getListRepPackage,
+  createRepPackage,
+  getRepPackageById,
+  editRepPackage,
+  deleteRepPackage
 }

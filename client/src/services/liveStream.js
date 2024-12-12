@@ -1,3 +1,4 @@
+import axiosInstance from './axios';
 import axios from './axios';
 
 const createLiveStream = async (data) => {
@@ -94,6 +95,26 @@ const getStateFromIP = async (livestreamId, country) => {
     return { error: true, message: error.message };
   }
 };
+
+const reUploadLive = async (data) => {
+  try {
+    const response = await axiosInstance.post('video/reup', data);
+    return response;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const lastLiveStream = async (channelId) => {
+  try {
+    const response = await axiosInstance.get('video/latestReup', {
+      params: { channelId },
+    });
+    return response;
+  } catch (error) {
+    console.error(error);
+  }
+};
 export {
   createLiveStream,
   endLiveStream,
@@ -104,4 +125,6 @@ export {
   getAllLivestreamSession,
   getLiveStreamAnalytics,
   getStateFromIP,
+  reUploadLive,
+  lastLiveStream,
 };

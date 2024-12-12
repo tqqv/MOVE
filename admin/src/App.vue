@@ -34,8 +34,6 @@
 
     if (isLogin === 'true') {
       userStore.fetchUserProfile();
-      userStore.loadFollowers();
-      userStore.loadFollowCategories();
     }
   });
   onMounted(() => {

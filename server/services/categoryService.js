@@ -83,7 +83,7 @@ const editCategory = async(cateId, data) => {
       }
     }
     // update cate trong db
-    const updateCate = await user.update(data)
+    const updateCate = await category.update(data)
     if(!updateCate) {
       return {
         status: 400,
@@ -141,6 +141,10 @@ const getAllCategoryWithView = async() => {
       attributes: [
         'imgUrl',
         'title',
+        'description',
+        'createdAt',
+        'updatedAt',
+        'id',
         [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
       ],
       include: [

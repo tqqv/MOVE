@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookingHistoryService, getBookingStatsService } = require("../services/featuredContentService");
+const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService, getBookingHistoryService, getBookingStatsService } = require("../services/featuredContentService");
 
 const getAllFeatureContentController = async(req, res, next) => {
     const datetime = req.query.datetime;

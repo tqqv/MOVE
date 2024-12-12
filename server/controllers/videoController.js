@@ -20,6 +20,9 @@ const {
   deleteMultipleVideosService,
   getStateByCountryAndVideoIdFromIp,
   getVideoYouMayLikeService,
+  reupStreamService,
+  getLatestReupStreamService,
+  getVideoByChannelAndTitleService,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 const { createHashmapFromDBData, getFilteredSortedTopVideos } = require('../utils/redis/cache/videoCache');
@@ -115,6 +118,16 @@ const getVideoByUserId = async (req, res, next) => {
     order: req.query.order || 'desc'
   };
   const result = await getVideoByUserIdService(channelId, page, pageSize, level, category, sortCondition);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+};
+
+const getVideoByChannelAndTitleController = async (req, res, next) => {
+  const data = req.query.data
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const channelId = req.params.channelId;
+
+  const result = await getVideoByChannelAndTitleService(data, page, pageSize, channelId);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
@@ -261,6 +274,29 @@ const getVideoYouMayLikeController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const reupStreamController = async (req, res, next) => {
+  const channelId = req.user.channelId;
+  const { livestreamId, videoId, title, description, thumbnailUrl, videoUrl, duration, status, categoryId, levelWorkoutsId } = req.body;
+  try {
+    const result = await reupStreamService(livestreamId, videoId, channelId, title, description, thumbnailUrl, videoUrl, duration, status, categoryId, levelWorkoutsId);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res, next);
+  }
+};
+
+const getLatestReupStreamController = async (req, res, next) => {
+  const channelId  = req.query.channelId
+  console.log(channelId);
+
+  try {
+    const result = await getLatestReupStreamService(channelId);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+  } catch (error) {
+    responseHandler(error.status, error.data, error.message)(req, res, next);
+  }
+};
+
 module.exports = {
   getUploadLink,
   uploadThumbnail,
@@ -284,4 +320,7 @@ module.exports = {
   getStateByCountryAndVideoIdFromIpController,
   getTopVideoController,
   getVideoYouMayLikeController,
+  reupStreamController,
+  getLatestReupStreamController,
+  getVideoByChannelAndTitleController
 };

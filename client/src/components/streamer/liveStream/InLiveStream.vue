@@ -52,14 +52,19 @@
         </div>
       </div>
       <!-- CHAT -->
-      <LiveChat :liveStreamData="liveStreamData" :isStreamer="true" :listDonation="listDonation" />
+      <LiveChat
+        :liveStreamData="liveStreamData"
+        :isStreamer="true"
+        :listDonation="listDonation"
+        :topDonators="props.metricsData?.topDonators"
+      />
     </div>
     <div class="w-full flex gap-x-8 justify-center">
       <!-- Information -->
-      <div class="flex max-w-[700px] w-[580px] flex-col basis-2/5">
+      <div class="flex w-full flex-col">
         <div class="bg-white rounded-lg shadow-md p-4 overflow-hidden">
           <h1 class="font-semibold mb-4">Insights</h1>
-          <div class="grid grid-cols-2 gap-y-8 gap-x-16 mb-4 items-start ml-3">
+          <div class="flex justify-between px-6 gap-y-8 gap-x-2 mb-4 items-start ml-3">
             <InformationLiveStream
               :elapsedTime="elapsedTime"
               :metricsData="metricsData"
@@ -69,12 +74,11 @@
         </div>
       </div>
       <!-- Chart -->
-      <div class="flex max-w-[896px] w-[700px] max-h-[500px] flex-col basis-3/5">
+      <!-- <div class="flex max-w-[896px] w-[700px] max-h-[500px] flex-col basis-3/5">
         <div class="bg-white rounded-lg shadow-md p-4 overflow-hidden">
           <h1 class="font-semibold mb-4">Chart</h1>
-          <!-- <ChartLive /> -->
         </div>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>

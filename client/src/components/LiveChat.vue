@@ -25,6 +25,7 @@
     isStreamer: Boolean,
     liveStreamData: String,
     listDonation: Array,
+    topDonators: Array,
   });
 
   const userStore = useUserStore();
@@ -183,8 +184,8 @@
 <template>
   <div
     v-show="openLiveChat"
-    class="max-w-[333px] min-w-[323px] bg-white hidden justify-between flex-col text-black md:flex"
-    :class="isStreamer ? 'rounded-md sticky' : 'sticky  top-[64px] h-[calc(100vh-64px)]'"
+    class="max-w-[333px] min-w-[333px] bg-white hidden justify-between flex-col text-black md:flex"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky top-[64px] h-[calc(100vh-64px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -204,7 +205,11 @@
         <i class="pi pi-user text-[0.8rem] cursor-pointer"></i>
       </div>
     </div>
-    <DonationUser :isStreamer="isStreamer" />
+    <DonationUser
+      v-show="(props.topDonators || []).length > 0"
+      :topDonators="props.topDonators"
+      :isStreamer="isStreamer"
+    />
     <div
       class="flex flex-col flex-grow justify-between border-l-2 border-gray-dark"
       :class="{ 'border-none shadow-md rounded-md border-l-0': isStreamer }"

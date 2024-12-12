@@ -10,11 +10,15 @@
       type: String,
       required: true,
     },
+    isSmall: Boolean,
   });
 </script>
 
 <template>
-  <div class="flex flex-col justify-center items-center w-full h-[382px]">
+  <div
+    class="flex flex-col justify-center items-center w-full h-[382px]"
+    :class="{ 'h-[270px] ': isSmall }"
+  >
     <NotFound />
     <div class="flex items-center flex-col text-center gap-y-3">
       <h1 class="font-semibold text-2xl my-4 text-body">{{ title }}</h1>

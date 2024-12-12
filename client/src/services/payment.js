@@ -1,3 +1,4 @@
+import axiosInstance from './axios';
 import axios from './axios';
 
 const createCardInfo = async (data) => {
@@ -68,6 +69,7 @@ const getPaymentHistory = async (page, pageSize, startDate, endDate) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+
 export {
   createCardInfo,
   getPaymentHistory,

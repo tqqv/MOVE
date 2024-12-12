@@ -69,7 +69,7 @@
   <div class="bg-white rounded-lg p-4 flex items-center space-x-4 border border-gray-dark">
     <div class="flex-grow">
       <div class="flex items-baseline space-x-2">
-        <p class="font-bold text-xl text-black">{{ purchaseOptions.rep }} REP$</p>
+        <p class="font-bold text-xl text-black">{{ purchaseOptions.rep }} REPs</p>
         <p v-if="purchaseOptions.discount !== 0" class="text-sm text-red px-1 py-1 rounded-full">
           {{ formatPercentage(purchaseOptions.discount * 100) }}% OFF
         </p>
@@ -80,7 +80,7 @@
     </div>
     <button
       @click="toggleBuyREPs(purchaseOptions)"
-      class="w-1/3 bg-primary text-white px-4 py-2 rounded-lg text-base font-bold hover:bg-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary whitespace-nowrap"
+      class="w-1/3 bg-primary text-white px-4 py-2 rounded-lg text-base font-bold hover:bg-primary transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-primary whitespace-nowrap flex justify-center items-center"
     >
       SGD$
       {{

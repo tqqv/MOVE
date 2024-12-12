@@ -1,7 +1,8 @@
 <script setup>
+  import { ref, onMounted } from 'vue';
+
   import Earning from '@/components/icons/earning.vue';
-  import GoLive from '@/components/icons/goLive.vue';
-  import Live from '@/components/icons/live.vue';
+
   import Sales from '@/components/icons/sales.vue';
   import Stream from '@/components/icons/Stream.vue';
   import User from '@/components/icons/user.vue';
@@ -10,117 +11,158 @@
   import ChartIncome from './ChartIncome.vue';
   import ChartUser from './ChartUser.vue';
   import TopChannel from './TopChannel.vue';
-  import TopVideo from './TopVideo.vue';
+  import StatisticCard from './StatisticCard.vue';
+  import Skeleton from 'primevue/skeleton';
+  import {
+    getStatistic,
+    getDataChartMoney,
+    getTop5Channel,
+    getTop5UserDeposit,
+    getDataUserType,
+  } from '@/services/admin';
+
+  const selectedYear = ref();
+
+  const statistics = ref([
+    { label: 'Total User', icon: User, value: 0 },
+    { label: 'Total Video', icon: Videos, value: 0 },
+    { label: 'Total live stream', icon: Stream, value: 0 },
+    { label: 'Earnings', icon: Wallet, value: 0 },
+    { label: 'Withdraw', icon: Sales, value: 0 },
+    { label: 'Revenue', icon: Earning, value: 0 },
+  ]);
+  const topUserDepositData = ref();
+  const topChannelData = ref();
+  const chartMoneyData = ref();
+  const userTypeData = ref();
+  const isLoadingDashboard = ref(false);
+  const fetchStatistic = async () => {
+    isLoadingDashboard.value = true;
+    try {
+      const response = await getStatistic();
+      if (response.status === 200) {
+        statistics.value[0].value = response.data.data.totalUser;
+        statistics.value[1].value = response.data.data.totalVideo;
+        statistics.value[2].value = response.data.data.totalStream;
+        statistics.value[3].value = response.data.data.totalMoneyEarn;
+        statistics.value[4].value = response.data.data.totalMoneyWithdraw;
+        statistics.value[5].value = response.data.data.revenue;
+      }
+    } catch (error) {
+      console.error(error.message);
+    } finally {
+      isLoadingDashboard.value = false;
+    }
+  };
+  const fetchTop5UserDeposit = async () => {
+    try {
+      const response = await getTop5UserDeposit();
+      if (response.status === 200) {
+        topUserDepositData.value = response.data.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const fetchTop5Channel = async () => {
+    try {
+      const response = await getTop5Channel();
+      if (response.status === 200) {
+        topChannelData.value = response.data.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const fetchDataChartMoney = async (year) => {
+    try {
+      const response = await getDataChartMoney(year);
+      if (response.status === 200) {
+        chartMoneyData.value = response.data.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const fetchDataUserType = async (year) => {
+    try {
+      const response = await getDataUserType(year);
+      if (response.status === 200) {
+        userTypeData.value = response.data.data;
+      }
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
+  const handleYearChange = (year) => {
+    selectedYear.value = year;
+
+    fetchDataChartMoney(year);
+  };
+
+  onMounted(() => {
+    fetchStatistic();
+    fetchTop5UserDeposit();
+    fetchTop5Channel();
+    fetchDataChartMoney(selectedYear.value);
+    fetchDataUserType();
+  });
 </script>
 
 <template>
-  <section class="lg:px-14">
+  <section>
     <div class="container">
       <!-- INFOR -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <!-- USER -->
-        <div class="bg-white flex flex-col shadow p-5 rounded-lg py-7">
-          <div class="flex items-center gap-x-5">
-            <div
-              class="rounded-full bg-primary size-[50px] flex justify-center items-center flex-shrink-0"
-            >
-              <User width="22" height="22" />
-            </div>
-            <div>
-              <h1 class="font-bold text-[20px]">320</h1>
-              <h1 class="text-footer text-sm font-medium">Total User</h1>
-            </div>
-          </div>
-        </div>
-        <!-- VIDEO -->
-        <div class="bg-white flex flex-col shadow p-5 rounded-lg py-7">
-          <div class="flex items-center gap-x-5">
-            <div
-              class="rounded-full bg-primary size-[50px] flex justify-center items-center flex-shrink-0"
-            >
-              <Videos />
-            </div>
-            <div>
-              <h1 class="font-bold text-[20px]">20</h1>
-              <h1 class="text-footer text-sm font-medium">Total Video</h1>
-            </div>
-          </div>
-        </div>
-        <!-- LIVE STREAM -->
-        <div class="bg-white flex flex-col shadow p-5 rounded-lg py-7 h-full">
-          <div class="flex items-center gap-x-5">
-            <div
-              class="rounded-full bg-primary size-[50px] flex justify-center items-center flex-shrink-0"
-            >
-              <Stream width="42" height="42" />
-            </div>
-            <div>
-              <h1 class="font-bold text-[20px]">10</h1>
-              <h1 class="text-footer text-sm font-medium">Total live stream</h1>
-            </div>
-          </div>
-        </div>
-        <!-- Earnings  -->
-        <div class="bg-white flex flex-col shadow p-5 rounded-lg py-7">
-          <div class="flex items-center gap-x-5">
-            <div
-              class="rounded-full bg-primary size-[50px] flex justify-center items-center flex-shrink-0"
-            >
-              <Wallet fill="#ffffff" />
-            </div>
-            <div class="truncate">
-              <h1 class="font-bold text-[20px] truncate">$10,000</h1>
-              <h1 class="text-footer text-sm font-medium">Earnings</h1>
-            </div>
-          </div>
-        </div>
-        <!-- Withdraw  -->
-        <div class="bg-white flex flex-col shadow p-5 rounded-lg py-7">
-          <div class="flex items-center gap-x-5">
-            <div
-              class="rounded-full bg-primary size-[50px] flex justify-center items-center flex-shrink-0"
-            >
-              <Sales />
-            </div>
-            <div class="truncate">
-              <h1 class="font-bold text-[20px] truncate">$12,200</h1>
-              <h1 class="text-footer text-sm font-medium">Withdraw</h1>
-            </div>
-          </div>
-        </div>
-        <!-- Sales  -->
-        <div class="bg-white flex justify-between shadow p-5 rounded-lg gap-x-3 py-7">
-          <div class="flex items-center gap-x-5">
-            <div
-              class="rounded-full bg-primary size-[50px] flex justify-center items-center flex-shrink-0"
-            >
-              <Earning />
-            </div>
-            <div class="truncate">
-              <h1 class="font-bold text-[20px]">$574.34</h1>
-              <h1 class="text-footer text-sm font-medium">Revenue</h1>
-            </div>
-          </div>
-          <div class="flex gap-x-1 text-sm font-medium truncate mt-1.5">
-            <span class="text-green font-bold">+23%</span>
-            <span class="text-footer truncate">since last month</span>
-          </div>
+      <div v-if="isLoadingDashboard" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div v-for="(stat, index) in statistics.slice(0, 6)" :key="index">
+          <Skeleton width="100%" height="100px" />
         </div>
       </div>
+
+      <div v-else class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <StatisticCard
+          v-for="(stat, index) in statistics"
+          :key="index"
+          :value="stat.value"
+          :label="stat.label"
+        >
+          <template #icon>
+            <component :is="stat.icon" width="22" height="22" />
+          </template>
+        </StatisticCard>
+      </div>
+
       <!-- CHART -->
       <div class="grid grid-cols-12 gap-4 mt-5">
         <div class="col-span-7 bg-white p-5 rounded shadow">
-          <ChartIncome />
+          <ChartIncome
+            :isLoadingDashboard="isLoadingDashboard"
+            :chartMoneyData="chartMoneyData"
+            @yearSelected="handleYearChange"
+          />
+
+          <!-- Skeleton loader for chart -->
         </div>
-        <div class="col-span-5 bg-white p-5 rounded shadow"><ChartUser /></div>
+        <div class="col-span-5 bg-white p-5 rounded shadow items-center">
+          <ChartUser
+            class="flex justify-center"
+            :userTypeData="userTypeData"
+            :isLoadingDashboard="isLoadingDashboard"
+          />
+
+          <!-- Skeleton loader for user type chart -->
+        </div>
       </div>
+
       <!-- TOP USER -->
       <div class="grid grid-cols-12 gap-4 mt-5">
-        <TopChannel />
-      </div>
-      <!-- TOP VIDEO/ LIVE -->
-      <div class="flex my-4 flex-col gap-y-5">
-        <TopVideo />
+        <TopChannel
+          :isLoadingDashboard="isLoadingDashboard"
+          :topUserDepositData="topUserDepositData"
+          :topChannelData="topChannelData"
+        />
+
+        <!-- Skeleton loader for top user/channel -->
       </div>
     </div>
   </section>

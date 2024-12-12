@@ -30,9 +30,10 @@ const featuredContentAbnormalRouter = require("./routes/featuredContentAbnormalR
 const app = express();
 const port = process.env.PORT || 8000;
 const corsOptions = {
-  origin: process.env.CLIENT_HOST,
+  origin: [process.env.CLIENT_HOST, process.env.CLIENT_HOST_ADMIN],
   credentials: true,
 };
+
 app.use(cors(corsOptions));
 let server = app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);

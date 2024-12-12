@@ -23,6 +23,10 @@ export const usePopupStore = defineStore('popup', () => {
   const isCompletePurchaseVisible = ref(false);
   const showInstructionLive = ref(false);
   const showInstructionDonate = ref(false);
+  const showSuspend = ref(false);
+  const showBan = ref(false);
+  const showAccept = ref(false);
+  const showReject = ref(false);
 
   const isHaveCard = ref(false);
   const isOrderSuccessful = ref(true);
@@ -137,6 +141,36 @@ export const usePopupStore = defineStore('popup', () => {
     showInstructionDonate.value = false;
   };
 
+  const openShowSuspend = () => {
+    showSuspend.value = true;
+  };
+
+  const closeShowSuspend = () => {
+    showSuspend.value = false;
+  };
+
+  const openShowBan = () => {
+    showBan.value = true;
+  };
+
+  const closeShowBan = () => {
+    showBan.value = false;
+  };
+  const openShowAccept = () => {
+    showAccept.value = true;
+  };
+
+  const closeShowAccept = () => {
+    showAccept.value = false;
+  };
+  const openShowReject = () => {
+    showReject.value = true;
+  };
+
+  const closeShowReject = () => {
+    showReject.value = false;
+  };
+
   return {
     showOpenBuyREPs,
     showLoginPopup,
@@ -148,6 +182,10 @@ export const usePopupStore = defineStore('popup', () => {
     showConfirmDialog,
     showReportChannel,
     showReportSuccess,
+    showSuspend,
+    showBan,
+    showAccept,
+    showReject,
     openLoginPopup,
     openSignupPopup,
     closeLoginPopup,
@@ -188,5 +226,13 @@ export const usePopupStore = defineStore('popup', () => {
     showInstructionDonate,
     openInstructionDonate,
     closeInstructionDonate,
+    openShowSuspend,
+    closeShowSuspend,
+    openShowBan,
+    closeShowBan,
+    openShowAccept,
+    closeShowAccept,
+    openShowReject,
+    closeShowReject,
   };
 });
