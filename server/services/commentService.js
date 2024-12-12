@@ -157,6 +157,7 @@ const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
     where: {
       parentId: null,
       videoId: videoId,
+      isBanned: false
     },
     attributes: {
       include: [
@@ -239,7 +240,8 @@ const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
 
 const getCommentsByChannelId = async (userId, channelId, page, pageSize, responseCondition, sortCondition) => {
     let whereCondition = {
-      parentId: null
+      parentId: null,
+      isBanned: false
     };
     if (responseCondition.isResponsed == "true") {
       whereCondition = {
@@ -361,6 +363,7 @@ const getChildCommentsByParentId = async (parentId, page, pageSize, userId) => {
   const comments = await Comment.findAndCountAll({
     where: {
       parentId: parentId,
+      isBanned: false
     },
     attributes: {
       include: [

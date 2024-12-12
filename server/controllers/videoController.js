@@ -277,7 +277,7 @@ const reupStreamController = async (req, res, next) => {
 const getLatestReupStreamController = async (req, res, next) => {
   const channelId  = req.query.channelId
   console.log(channelId);
-  
+
   try {
     const result = await getLatestReupStreamService(channelId);
     responseHandler(result.status, result.data, result.message)(req, res, next);

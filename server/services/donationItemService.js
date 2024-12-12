@@ -3,11 +3,19 @@ const { DonationItem, Donation, Comment, sequelize } = db;
 
 const createDonationItem = async(data) => {
   try {
-    if(!data.name || !data.image){
+    if(!data.name || !data.image || !data.REPs){
       return {
         status: 400,
         data: null,
         message: 'Cannot be empty'
+      }
+    }
+
+    if(data.REPs < 1) {
+      return {
+        status: 400,
+        data: null,
+        message: 'Invalid REPs. The REPs must be > 0.'
       }
     }
 
@@ -76,12 +84,28 @@ const getDonationItemById = async(donationItemId) => {
 const editDonationItem = async(donationItemId, data) => {
   try {
     // Tìm DonationItem trong DB
+    if(!donationItemId || !data){
+      return {
+        status: 400,
+        data: null,
+        message: "Cannot be empty."
+      }
+    }
+
     const donationItem = await DonationItem.findByPk(donationItemId)
     if(!donationItem) {
       return {
         status: 400,
         data: null,
         message: "donation item not found"
+      }
+    }
+
+    if(data.REPs && data.REPs < 1) {
+      return {
+        status: 400,
+        data: null,
+        message: 'Invalid REPs. The REPs must be > 0.'
       }
     }
 
