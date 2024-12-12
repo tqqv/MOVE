@@ -5,7 +5,6 @@ const db = require("../models/index.js");
 const validateUsername = require("../middlewares/validateUsername.js");
 const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
-const validateUsername = require("../middlewares/validateUsername.js");
 
 const setStatusRequestChannel = async(userId, status, text) => {
   console.log(status);
