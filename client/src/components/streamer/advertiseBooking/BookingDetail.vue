@@ -12,7 +12,6 @@
     videosByDate: Array,
     combinedData: Array,
   });
-  console.log(props.selectedDate);
 
   const activeDate = ref(props.selectedDate?.[0] || null);
 

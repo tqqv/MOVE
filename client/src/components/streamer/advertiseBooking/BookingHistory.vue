@@ -47,7 +47,6 @@
     try {
       const response = await getDateDetailAnalytics(datetime);
       dateDetails.value = response.data.data;
-      console.log(response.data.data);
     } catch (error) {
       console.error(error.message);
     }

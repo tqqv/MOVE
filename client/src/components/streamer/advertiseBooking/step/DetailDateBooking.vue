@@ -62,8 +62,6 @@
       const result = await postCancelBooking(pickedDate);
 
       if (result.status === 200) {
-        console.log(result.data.data);
-
         userStore.fetchUserProfile();
         // bookingId.value = result.data.data.id;
         // isBookingSuccess.value = true;

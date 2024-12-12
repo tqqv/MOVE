@@ -19,7 +19,6 @@
   const toggleDateDetailVisible = () => {
     emit('toggleDateDetailVisible');
   };
-  console.log(props.dateDetails);
 </script>
 
 <template>

@@ -70,8 +70,6 @@
       };
     });
   });
-  console.log('All Videos:', allVideos.value);
-  console.log(databyDate);
   const combinedData = computed(() => {
     return allVideos.value.map((video, index) => {
       const priceInfo = pricesByDate.value[index] || {};
@@ -186,13 +184,11 @@
 
   const toggleVideoSelection = (video) => {
     selectedVideo.value = video;
-    console.log(video.title);
   };
 
   // ----------------------------------------------------------//
   const goToNextStep = async () => {
     // ----------check slot step 1----------------//
-    console.log(selectedDate.value);
 
     if (currentStep.value === '1' && selectedDate.value.length === 0) {
       toast.error('Sorry, please select a date to continue.');
@@ -200,7 +196,6 @@
     }
 
     // ----------check select video step 2----------------//
-    console.log(videosByDate.value);
     if (
       currentStep.value === '2' &&
       selectedDate.value.some(
