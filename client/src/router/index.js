@@ -33,17 +33,6 @@ import SearchTotal from '@/components/search/SearchTotal.vue';
 import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
 import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
 import VerifyEmail from '@/components/VerifyEmail.vue';
-import AdminDashboard from '@/components/admin/dashboard/AdminDashboard.vue';
-import AdminLayout from '@/layouts/AdminLayout.vue';
-import UserManagement from '@/components/admin/users/UserManagement.vue';
-import RequestManagement from '@/components/admin/request/RequestManagement.vue';
-import CategoryManagement from '@/components/admin/category/CategoryManagement.vue';
-import LevelworkoutManagement from '@/components/admin/levelworkout/LevelworkoutManagement.vue';
-import UserDetail from '@/components/admin/users/UserDetail.vue';
-import ReportManagement from '@/components/admin/report/ReportManagement.vue';
-import ReportDetail from '@/components/admin/report/ReportDetail.vue';
-import AdminSetting from '@/components/admin/setting/AdminSetting.vue';
-import RepSystem from '@/components/admin/rep/RepSystem.vue';
 import ScreenChat from '@/components/screenObs/ScreenChat.vue';
 import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
@@ -51,6 +40,10 @@ import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHisto
 import AboutUs from '@/components/showMore/AboutUs.vue';
 import FAQ from '@/components/showMore/FAQ.vue';
 import CommunityGuidelines from '@/components/showMore/CommunityGuidelines.vue';
+import { createPinia, setActivePinia } from 'pinia';
+const pinia = createPinia();
+setActivePinia(pinia);
+import { useUserStore } from '@/stores';
 
 const routes = [
   // User router
@@ -59,9 +52,12 @@ const routes = [
     component: UserLayout,
     children: [
       { path: '', component: HomePage },
-      { path: 'personal-profile', component: ProfileContent },
+      {
+        path: 'personal-profile',
+        component: ProfileContent,
+        meta: { roles: ['user', 'streamer'] },
+      },
       { path: 'user/:username', component: ViewChannelsContent },
-
       {
         path: 'browse',
         component: BrowseContent,
@@ -78,13 +74,18 @@ const routes = [
       {
         path: 'wallet',
         component: WalletContent,
+        meta: { roles: ['user', 'streamer'] },
         children: [
           { path: 'payment-method', component: TabPaymentMethod },
           { path: 'payment-history', component: TabPaymentHistory },
         ],
       },
       { path: 'search', component: SearchContent },
-      { path: 'following', component: Following },
+      {
+        path: 'following',
+        component: Following,
+        meta: { roles: ['user', 'streamer'] },
+      },
       {
         path: 'total-search',
         component: SearchTotal,
@@ -116,6 +117,7 @@ const routes = [
   {
     path: '/dashboard-streamer',
     component: StreamerLayout,
+    meta: { roles: ['streamer'] },
     children: [
       { path: '', component: DashboardStreamer },
       { path: 'comments', component: CommentStreamer },
@@ -140,26 +142,10 @@ const routes = [
   {
     path: '/streaming',
     component: LiveStreamPageByStreamer,
+    meta: { roles: ['streamer'] },
     children: [
       { path: 'stream-setup', component: SetUpLive },
       { path: 'dashboard-live', component: DashboardLive },
-    ],
-  },
-  // Admin
-  {
-    path: '/admin',
-    component: AdminLayout,
-    children: [
-      { path: '', component: AdminDashboard },
-      { path: 'users', component: UserManagement },
-      { path: 'request', component: RequestManagement },
-      { path: 'category', component: CategoryManagement },
-      { path: 'levelworkout', component: LevelworkoutManagement },
-      { path: 'report', component: ReportManagement },
-      { path: 'setting', component: AdminSetting },
-      { path: 'reps', component: RepSystem },
-      { path: 'users/:username', component: UserDetail },
-      { path: 'report/:reportId', component: ReportDetail },
     ],
   },
   {
@@ -172,6 +158,21 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+  if (!userStore.user) {
+    await userStore.fetchUserProfile();
+  }
+
+  const userRole = userStore?.user?.role || 'guest';
+
+  if (to.meta.roles && !to.meta.roles.includes(userRole)) {
+    return next('/404');
+  }
+
+  next();
 });
 
 export default router;
