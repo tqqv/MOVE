@@ -302,5 +302,6 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
 
 module.exports = {
   createNotification,
-  getAllNotification
+  getAllNotification,
+  getUnReadNotification
 }
