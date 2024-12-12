@@ -611,6 +611,7 @@ const getBookingStatsService = async (channelId, datetime) => {
       },
       attributes: [
         "clickCount",
+        "viewIncrease",
         [
           sequelize.literal(`(
             SELECT SUM(rep)
@@ -720,7 +721,6 @@ const getBookingStatsService = async (channelId, datetime) => {
     }
   }
 }
-
 
 const increaseClickFeaturedService = async (featuredContentId) => {
   try {

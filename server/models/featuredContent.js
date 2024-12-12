@@ -82,6 +82,10 @@ module.exports = (sequelize, DataTypes) => {
       clickCount: {
         type: DataTypes.INTEGER,
         defaultValue: 0
+      },
+      viewIncrease: {
+        type: DataTypes.INTEGER,
+        defaultValue: 0
       }
     },
     {
