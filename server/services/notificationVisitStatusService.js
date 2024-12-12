@@ -62,6 +62,7 @@ const getAllNotificationVisitStatus = async(page, pageSize) => {
 
 const markAllNotiAsRecievied = async(userNotifierId, channelNotifierId) => {
   try {
+    console.log(userNotifierId, channelNotifierId);
 
     const notifierRoom = (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data;
 
