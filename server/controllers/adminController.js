@@ -1,7 +1,7 @@
 const responseHandler = require("../middlewares/responseHandler");
 const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanChannel, revenue, getListUserPayIn, getListUserPayOut } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
-const { createSystemConfig, getDonationItemByKey, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
+const { createSystemConfig, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
 const { getProfile } = require("../services/userService");
 const { getListVideoByChannel, deleteVideoService, deleteMultipleVideosService, updateVideoService } = require("../services/videoService");
 
@@ -177,13 +177,6 @@ const createSystemConfigController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const getSystemConfigByKeyController = async (req, res, next) => {
-  const key = req.params.key
-  const result = await getDonationItemByKey(key)
-
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
 const getAllSystemConfigController = async (req, res, next) => {
   const result = await getAllSystemConfig()
 
@@ -231,7 +224,6 @@ module.exports = {
   getListUserPayInController,
   getListUserPayOutController,
   createSystemConfigController,
-  getSystemConfigByKeyController,
   getAllSystemConfigController,
   editSystemConfigController,
   deleteMultipleVideosController,
