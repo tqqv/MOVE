@@ -1,8 +1,9 @@
-const { Op, fn, col, literal } = require("sequelize");
+const { Op, fn, col, literal, where } = require("sequelize");
 const { get } = require("../utils/redis/base/redisBaseService.js");
 const db = require("../models/index.js");
 const moment = require('moment-timezone');
-const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, sequelize } = db;
+const featuredContent = require("../models/featuredContent.js");
+const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, Comment, Donation, Subscribe, sequelize } = db;
 
 
 const createFeatureContentService = async(livestreamId, videoId, startAt, expireAt) => {
@@ -100,12 +101,12 @@ const getAllFeatureContentService = async (datetime) => {
               attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
 
                 [
-                                sequelize.literal(`(
-                                  SELECT AVG(rating)
-                                  FROM ratings
-                                  WHERE ratings.videoId = video.id
-                                )`),
-                                'averageRating'
+                  sequelize.literal(`(
+                    SELECT AVG(rating)
+                    FROM ratings
+                    WHERE ratings.videoId = video.id
+                  )`),
+                  'averageRating'
                 ]
               ],
               include: [
@@ -264,7 +265,7 @@ const createBookingFeatureContentService = async (pickedDates, channelId) => {
         continue;
       }
       console.log("cheasd");
-      
+
       // Tạo booking và cập nhật REP
       const [newFeaturedContent] = await Promise.all([
         FeaturedContent.create({
@@ -532,9 +533,9 @@ const getBookDateDetailService = async (datetime) => {
     }
   }
 }
-const getBookingHistory = async (channelId, page, pageSize, startDate, endDate) => {
-  try {
 
+const getBookingHistoryService = async (channelId, page, pageSize, startDate, endDate) => {
+  try {
     const whereCondition = { channelId };
 
     if (startDate && endDate) {
@@ -607,12 +608,172 @@ const getBookingHistory = async (channelId, page, pageSize, startDate, endDate) 
   }
 }
 
+const getBookingStatsService = async (channelId, datetime) => {
+  try {
+    const featuredContent = await FeaturedContent.findAll({
+      where: {
+        date: sequelize.where(
+          sequelize.fn('DATE', sequelize.col('date')),
+          '=',
+          datetime
+        ),
+        channelId,
+      },
+      attributes: [
+        "clickCount",
+        [
+          sequelize.literal(`(
+            SELECT SUM(rep)
+            FROM comments AS commentReplies
+            WHERE commentReplies.videoId = video.id
+              AND DATE(commentReplies.createdAt) = date
+          )`),
+          'totalRepFromVideo',
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM subscribes AS newSubscribers
+            WHERE DATE(newSubscribers.createdAt) = date
+          )`),
+          'newSubscriptionsToday',
+        ]
+      ],
+      include: [
+        {
+          model: Video,
+          as: "video",
+          include: [
+            {
+              model: Category,
+              as: "category",
+              attributes: ["title"],
+            },
+            {
+              model: LevelWorkout,
+              as: "levelWorkout",
+              attributes: ["levelWorkout"],
+            },
+            {
+              model: Comment,
+              as: "videoComment",
+              attributes: [],
+            },
+          ],
+        },
+        {
+          model: Channel,
+          as: "channelBooking",
+          attribute: [],
+          include: [
+            {
+              model: Subscribe,
+              as: "channelSubscriber",
+              attributes: ["id"],
+            },
+          ]
+        }
+      ],
+    });
+
+    const liveInfor = await Livestream.findOne({
+      where: {
+        streamerId: channelId,
+        createdAt: sequelize.where(
+          sequelize.fn('DATE', sequelize.col('createdAt')),
+          '=',
+          datetime
+        ),
+      },
+      attributes: [
+        "highestViewAtSameTime", "totalView", "totalShare", "duration",
+        [
+          sequelize.literal(`(
+            SELECT SUM(reps)
+            FROM donations AS streamDonator
+            WHERE streamDonator.livestreamId = Livestream.id
+              AND DATE(streamDonator.createdAt) = '${datetime}'
+          )`),
+          'totalRepFromLivestream',
+        ],
+      ],
+      include: [
+        {
+          model: Donation,
+          attributes: [],
+          as: "streamDonator",
+        },
+        {
+          model: Category,
+          attributes: ["title"],
+          as: 'category'
+        },
+        {
+          model: LevelWorkout,
+          attributes: ["levelWorkout"],
+          as: 'livestreamLevelWorkout'
+        },
+      ],
+    })
+
+    return {
+      status: 200,
+      data: {featuredContent, liveInfor},
+      message: "Get booking stats successfully"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
+
+const increaseClickFeaturedService = async (featuredContentId) => {
+  try {
+    // Tìm đối tượng FeaturedContent dựa trên id
+    const featuredContent = await FeaturedContent.findOne({
+      where: {
+        id: featuredContentId
+      }
+    });
+
+    if (!featuredContent) {
+      return {
+        status: 404,
+        message: "FeaturedContent not found"
+      };
+    }
+
+    // Tăng giá trị clickCount lên 1
+    await featuredContent.increment('clickCount');
+
+    return {
+      status: 200,
+      message: "Click count increased successfully"
+    };
+  } catch (error) {
+    console.error(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+};
+
+
 module.exports = {
   createFeatureContentService,
   getAllFeatureContentService,
   createBookingFeatureContentService,
   getBookingFeatureContentService,
   cancelBookingFeaturedContentService,
+  getBookingHistoryService,
+  getBookingStatsService,
   getBookDateDetailService,
-  getBookingHistory
+  increaseClickFeaturedService
 }

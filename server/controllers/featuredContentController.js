@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService, getBookingHistory } = require("../services/featuredContentService");
+const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService, getBookingHistoryService, getBookingStatsService, increaseClickFeaturedService } = require("../services/featuredContentService");
 
 const getAllFeatureContentController = async(req, res, next) => {
     const datetime = req.query.datetime;
@@ -56,7 +56,19 @@ const getBookingHistoryController = async(req, res, next) => {
     const pageSize = req.query.pageSize || 10;
     const startDate = req.query.startDate || null;
     const endDate = req.query.endDate || null;
-    const result = await getBookingHistory(channelId, page, pageSize, startDate, endDate);
+    const result = await getBookingHistoryService(channelId, page, pageSize, startDate, endDate);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+const getBookingStatsController = async(req, res, next) => {
+    const channelId = req.user.channelId
+    const datetime  = req.query.datetime
+    const result = await getBookingStatsService(channelId, datetime);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const increaseClickFeaturedController = async(req, res, next) => {
+    const featuredContentId = req.params.featuredContentId;
+    const result = await increaseClickFeaturedService(featuredContentId);
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
@@ -68,5 +80,7 @@ module.exports = {
     getBookingFeatureContentController,
     getBookDateDetailController,
     cancelBookingFeatureContentController,
-    getBookingHistoryController
+    getBookingHistoryController,
+    getBookingStatsController,
+    increaseClickFeaturedController
 }
