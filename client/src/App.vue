@@ -4,7 +4,6 @@
   import GlobalLoading from './components/GlobalLoading.vue';
   import { useLoadingStore, useNotificationStore } from './stores';
   import { joinAllRooms } from './services/socketService';
-  import { useLoadingStore } from './stores';
   import { getLogout } from './services/auth';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
@@ -33,7 +32,7 @@
   });
   //Load data navbar when F5
 
-  onMounted(async() => {
+  onMounted(async () => {
     const isLogin = localStorage.getItem('isLogin');
 
     if (isLogin === 'true') {
@@ -42,13 +41,11 @@
       await userStore.loadFollowCategories();
       notificationStore.fetchQuantifyNotifications();
       joinAllRooms();
-      const role = localStorage.getItem('role')
+      const role = localStorage.getItem('role');
 
-      if(role !== userStore.user.role) {
+      if (role !== userStore.user.role) {
         const res = await getLogout();
-        console.log("vcc lun a cho");
-
-        if(res && res.status === 200) {
+        if (res && res.status === 200) {
           userStore.clearUserData();
           localStorage.removeItem('isLogin');
           localStorage.removeItem('role');

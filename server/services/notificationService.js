@@ -24,7 +24,7 @@ const createNotification = async( entityName, entityAction, userActorId, channel
           id: newNotification.dataValues.id
         },
         attributes: [
-          "createdAt",
+          "createdAt", "id"
         ],
         include: [
           {
@@ -101,6 +101,7 @@ const formatNotificationData = (item) => {
   })
 
   return ({
+      id: item.id,
       createdAt: item.createdAt,
       visitStatus: [],
       notificationEntity: {
