@@ -30,6 +30,7 @@ export const useNotificationStore = defineStore('notification', () => {
     notifications.value.push(notification);
     newNotification.value = notification;
     quantityNotifications.value.unRecievedCount += 1;
+    console.log(newNotification.value);
   };
   return {
     loading,

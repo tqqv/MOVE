@@ -83,7 +83,6 @@ const joinAllRooms = async () => {
 
     // Lắng nghe sự kiện `notifications`
     livestreamSocket.on('notifications', (notification) => {
-      console.log('Received notification:', notification);
       notificationStore.addNotification(notification);
     });
   } catch (error) {
