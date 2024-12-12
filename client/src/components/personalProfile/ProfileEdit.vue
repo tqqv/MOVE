@@ -120,7 +120,6 @@
   const loadNational = async () => {
     try {
       nationality.value = await fetchNational(profileData.value.country);
-      console.log(nationality.value[0].demonyms.eng.f);
       if (nationality.value && nationality.value[0]) {
         profileData.value.nationality = nationality.value[0].demonyms.eng.f;
       }
@@ -203,8 +202,6 @@
   onMounted(async () => {
     await userStore.fetchUserProfile();
     loadCountries();
-    console.log(emailVerified.value);
-
     if (userStore.user) {
       updateProfileData(userStore.user);
     }

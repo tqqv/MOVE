@@ -2,10 +2,11 @@
   import { useUserStore } from '@/stores/user.store';
   import { onBeforeMount, onMounted } from 'vue';
   import GlobalLoading from './components/GlobalLoading.vue';
-  import { useLoadingStore } from './stores';
+  import { useLoadingStore, useNotificationStore } from './stores';
+  import { joinAllRooms } from './services/socketService';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
-
+  const notificationStore = useNotificationStore();
   const getCookie = (cname) => {
     let name = cname + '=';
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -36,6 +37,8 @@
       userStore.fetchUserProfile();
       userStore.loadFollowers();
       userStore.loadFollowCategories();
+      notificationStore.fetchQuantifyNotifications();
+      joinAllRooms();
     }
   });
   onMounted(() => {

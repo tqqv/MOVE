@@ -9,6 +9,15 @@ const getAllNotifications = async (params) => {
   }
 };
 
+const getAllNotificationsUnRead = async (params) => {
+  try {
+    const response = await axios.get('/notification/unRead', { params });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
 const getQuantity = async () => {
   try {
     const response = await axios.get('notificationVisitStatus/getUnReceiveNoti');
@@ -44,4 +53,21 @@ const makeAsReadOne = async (notificationId) => {
   }
 };
 
-export { getAllNotifications, getQuantity, receivedNoti, makeAllAsRead, makeAsReadOne };
+const getAllRoomNotifications = async () => {
+  try {
+    const response = await axios.get('notificationRoomSetting');
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+export {
+  getAllNotifications,
+  getQuantity,
+  receivedNoti,
+  makeAllAsRead,
+  makeAsReadOne,
+  getAllNotificationsUnRead,
+  getAllRoomNotifications,
+};
