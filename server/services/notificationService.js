@@ -248,6 +248,57 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
   }
 }
 
+const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pageSize) => {
+  try {
+
+    // điều kiện
+    const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
+
+    let whereClause;
+
+    if(channelNotifierId) {
+      whereClause = channelNotifierId
+      ? `channelNotifierId = '${channelNotifierId}'`
+      : `userNotifierId IS NULL`;
+    } else {
+      whereClause = `userNotifierId = '${userNotifierId}'`
+    }
+
+    const unReadNoti = await Notification.findAndCountAll({
+      where: {
+        roomName: { [Op.in]: notifierRoom },
+      },
+      include: [
+        {
+          model: NotificationVisitStatus,
+          as: "visitStatus",
+          where: {
+            status: "recieved"
+          }
+        }
+      ],
+      order: [['createdAt', 'DESC']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    })
+    return {
+      status: 200,
+      data: unReadNoti,
+      totalPages: Math.ceil(unReadNoti.count / pageSize),
+      page,
+      pageSize,
+      message: "Get unread notification succeesfully!"
+    }
+  } catch (error) {
+      console.log(error);
+      return {
+        status: 500,
+        data: null,
+        message: error.message
+      }
+  }
+}
+
 
 module.exports = {
   createNotification,
