@@ -2,8 +2,10 @@ const { Op } = require("sequelize");
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
+const validateUsername = require("../middlewares/validateUsername.js");
 const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
+const validateUsername = require("../middlewares/validateUsername.js");
 
 const setStatusRequestChannel = async(userId, status, text) => {
   console.log(status);
@@ -161,7 +163,7 @@ const getStatistic = async () => {
       Withdraw.sum('amount', { where: { status: 'completed' } })
     ]);
 
-    const revenue = (totalMoneyEarn * 0.7).toFixed(2); // hiiiii221
+    const revenue = (totalMoneyEarn - totalMoneyWithdraw).toFixed(0); // hiiiii221
 
     return {
       status: 200,
@@ -187,12 +189,20 @@ const getDataChartMoney = async(year) => {
   try {
     const moneyEarn = await getTotalMoneyEarnEveryMonth(year)
     const moneyWithdraw = await getTotalMoneyWithdrawEveryMonth(year)
+    const withdrawMap = new Map();
+    moneyWithdraw.forEach(item => {
+      const { year, month, totalMoney } = item.dataValues;
+      withdrawMap.set(`${year}-${month}`, totalMoney);
+    });
+
+    // Tính toán totalMoney
     const revenue = moneyEarn.map(item => {
       const { year, month, totalMoney } = item.dataValues;
+      const totalWithdrawn = withdrawMap.get(`${year}-${month}`) || 0; // Nếu không có trong moneyWithdraw, dùng 0
       return {
         year,
         month,
-        totalMoney: (totalMoney * 0.7).toFixed(2) // hiiiii221
+        totalMoney: totalMoney - totalWithdrawn // Trừ tiền đã rút
       };
     });
 
@@ -332,29 +342,35 @@ const userCount = async() => {
   }
 }
 
-const unbanAccount = async(userId) => {
+const unbanAccount = async (userId) => {
   try {
-    const user = await User.fineOne({where: {id: userId, isBanned: true}})
-    if(!user) {
+    const user = await User.findOne({
+      where: { id: userId, isBanned: true },
+    });
+
+    if (!user) {
       return {
         status: 404,
-        message: "User not found or user is not banned"
-      }
+        message: "User not found or user is not banned",
+      };
     }
-    user.isBanned = false;
-    await user.save();
+
+    await Promise.all([
+      user.update({ isBanned: false }),
+      Ban.destroy({ where: { userId } }),
+    ]);
 
     return {
       status: 200,
-      message: "Unban user successful."
-    }
+      message: "Unban user successful.",
+    };
   } catch (error) {
     return {
       status: 500,
-      message: error.message || "Internal Server Error"
+      message: error.message || "Internal Server Error",
     };
   }
-}
+};
 
 const unbanChannel = async(channelId) => {
   try {

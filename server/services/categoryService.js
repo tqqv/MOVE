@@ -74,10 +74,18 @@ const getCateById = async(cateId) => {
 const editCategory = async(cateId, data) => {
   try {
     // Tìm cate trong DB
+    if(!cateId || !data) {
+      return {
+        status: 400,
+        data: null,
+        message: "Cannot be empty."
+      }
+    }
+
     const category = await Category.findByPk(cateId)
     if(!category) {
       return {
-        status: 400,
+        status: 404,
         data: null,
         message: "Category not found"
       }

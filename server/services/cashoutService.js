@@ -161,7 +161,6 @@ const cashout = async(channelId, repInput) => {
         message: 'Insert your bank account',
       };
     }
-console.log(repInput);
 
     if (repInput < 2500) {
       return {
@@ -392,6 +391,58 @@ const deleteWithdrawInfor = async(channelId, stripeBankId) => {
   }
 }
 
+const exchangeReps = async (channelId, rep) => {
+  try {
+    const channel = await Channel.findByPk(channelId);
+    if (!channel) {
+      return {
+        status: 404,
+        message: "Channel not found."
+      };
+    }
+
+    if (channel.rep < rep) {
+      return {
+        status: 400,
+        message: "Insufficient reps in the channel."
+      };
+    }
+
+    const withdrawRate = await SystemConfig.findOne({ where: { key: "withdrawRate" } });
+    if (!withdrawRate || !withdrawRate.value) {
+      return {
+        status: 500,
+        message: "Withdraw rate configuration is missing."
+      };
+    }
+
+    await Channel.decrement('rep', {
+      by: rep,
+      where: {
+        id: channelId
+      }
+    });
+
+    const repExchange = Math.round(rep * withdrawRate.value);
+
+    await User.increment(
+      { REPs: repExchange },
+      { where: { id: channel.userId } }
+    );
+
+    return {
+      status: 200,
+      message: "Reps successfully exchanged.",
+    };
+
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+};
+
 module.exports = {
   createMethodWithdraw,
   updateVerifyAccountStripe,
@@ -399,5 +450,6 @@ module.exports = {
   cashout,
   getListCashoutHistory,
   getWithdrawInfor,
-  deleteWithdrawInfor
+  deleteWithdrawInfor,
+  exchangeReps,
 }

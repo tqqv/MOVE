@@ -1,6 +1,6 @@
 const responseHandler = require("../middlewares/responseHandler");
 const { sendMailConfirmWithdrawMethod, verifyOtp } = require("../services/authService");
-const { createMethodWithdraw, updateVerifyAccountStripe, getLinkStripeVerify, cashout, getWithdrawInfor, getListCashoutHistory, deleteWithdrawInfor } = require("../services/cashoutService");
+const { createMethodWithdraw, updateVerifyAccountStripe, getLinkStripeVerify, cashout, getWithdrawInfor, getListCashoutHistory, deleteWithdrawInfor, exchangeReps } = require("../services/cashoutService");
 const { createStripeAccountId, createPayout, attachBankAccountToConnectedAccount, createBankToken, deleteStripeAccountId } = require("../services/stripeService");
 
 const createMethodWithdrawController = async (req, res, next) => {
@@ -85,6 +85,15 @@ const deleteWithdrawInforController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const exchangeRepsController = async (req, res, next) => {
+  const channelId = req.user.channelId
+  const rep = req.body.rep
+
+  const result = await exchangeReps(channelId, rep);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 
 module.exports = {
   createMethodWithdrawController,
@@ -97,4 +106,5 @@ module.exports = {
   sendMailConfirmWithdrawMethodController,
   checkOtpCodeController,
   deleteWithdrawInforController,
+  exchangeRepsController,
 }

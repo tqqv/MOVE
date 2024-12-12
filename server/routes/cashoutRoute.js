@@ -1,6 +1,6 @@
 const express = require("express");
 const { verifyStreamer } = require("../middlewares/verifyToken");
-const { createMethodWithdrawController, createLinkStripeVerifyController, updateVerifyAccountStripeController, cashoutController, deleleStripeAccountId, getWithdrawInforController, getListCashoutHistoryController, sendMailConfirmWithdrawMethodController, checkOtpCodeController, deleteWithdrawInforController } = require("../controllers/cashoutController");
+const { createMethodWithdrawController, createLinkStripeVerifyController, updateVerifyAccountStripeController, cashoutController, deleleStripeAccountId, getWithdrawInforController, getListCashoutHistoryController, sendMailConfirmWithdrawMethodController, checkOtpCodeController, deleteWithdrawInforController, exchangeRepsController } = require("../controllers/cashoutController");
 const cashoutRoute = express.Router();
 
 cashoutRoute.get('/verifyOtp/:otp', verifyStreamer, checkOtpCodeController);
@@ -11,8 +11,8 @@ cashoutRoute.post('/createWithdrawInfor', verifyStreamer, createMethodWithdrawCo
 cashoutRoute.get('/createLinkStripeVerify', verifyStreamer, createLinkStripeVerifyController)
 cashoutRoute.post('/updateStripeVerify', verifyStreamer, updateVerifyAccountStripeController)
 cashoutRoute.post('/createPayout', verifyStreamer, cashoutController);
+cashoutRoute.post('/exchange', verifyStreamer, exchangeRepsController);
 
-// cashoutRoute.post('/createBankToken', test4);
 cashoutRoute.delete('/delete/:accountId', deleleStripeAccountId);
 cashoutRoute.delete('/deleteWithdrawInfor/:stripeBankId', verifyStreamer, deleteWithdrawInforController);
 

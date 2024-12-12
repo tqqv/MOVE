@@ -12,6 +12,8 @@
   import Level from '../icons/level.vue';
   import Flag from '../icons/flag.vue';
   import Request from '../icons/request.vue';
+  import Logout from '../icons/logout.vue';
+  import Booking from '../icons/booking.vue';
 
   const route = useRoute();
   const isDropdownOpen = ref(false);
@@ -37,6 +39,7 @@
     { name: 'Category Management', icon: Category, link: '/category' },
     { name: 'Level Management', icon: Level, link: '/levelworkout' },
     { name: 'Report Management', icon: Flag, link: '/report' },
+    { name: 'Booking management', icon: Booking, link: '/booking-management' },
     { name: 'Request Channel', icon: Request, link: '/request' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
   ];
@@ -47,7 +50,9 @@
     <div class="flex justify-center items-center py-8 mr-2">
       <RouterLink to="/dashboard"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
     </div>
-    <div class="flex flex-col">
+    <div
+      class="flex flex-col justify-between h-[calc(100vh-100px)] overflow-y-scroll scrollbar-custom"
+    >
       <ul>
         <li v-for="item in menuItems" :key="item.name" class="block mx-2 mb-1">
           <router-link :to="item.link" class="block">
@@ -87,7 +92,37 @@
           </ul>
         </li>
       </ul>
-      <div></div>
+      <div
+        class="flex items-center gap-x-4 mx-2 mt-24 p-4 mb-3 text-white rounded-md cursor-pointer hover:bg-[#333a48]"
+      >
+        <Logout fill="#fff" />
+        <span class="text-sm font-semibold">Logout</span>
+      </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    background-color: transparent;
+  }
+
+  .scrollbar-custom:hover::-webkit-scrollbar {
+    background-color: #1c2434;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: #1c2434;
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background-color: #1c2434;
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(19, 208, 180, 0.8);
+  }
+</style>

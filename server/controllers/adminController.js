@@ -3,7 +3,7 @@ const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel
 const { getPaymentHistory } = require("../services/paymentService");
 const { createSystemConfig, getDonationItemByKey, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
 const { getProfile } = require("../services/userService");
-const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
+const { getListVideoByChannel, deleteVideoService, deleteMultipleVideosService, updateVideoService } = require("../services/videoService");
 
 const setStatusRequestChannelController = async (req, res, next) => {
   const data = req.body;
@@ -85,7 +85,7 @@ const getUserByIdController = async (req, res, next) => {
 };
 
 const editProfileUserController = async (req, res, next) => {
-  const userId = req.params.id;
+  const userId = req.params.userId;
   const data = req.body;
   const result = await editProfileUser(userId, data);
 
@@ -197,6 +197,17 @@ const editSystemConfigController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const deleteMultipleVideosController = async (req, res, next) => {
+  const { videoIds } = req.query;
+  try {
+    const results = await deleteMultipleVideosService(videoIds);
+    responseHandler(200, results, 'Videos processed')(req, res, next);
+  } catch (error) {
+    console.log(error);
+    responseHandler(error.status || 500, error.data, error.message)(req, res, next);
+  }
+};
+
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
@@ -222,4 +233,5 @@ module.exports = {
   getSystemConfigByKeyController,
   getAllSystemConfigController,
   editSystemConfigController,
+  deleteMultipleVideosController,
 }
