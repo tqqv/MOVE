@@ -6,6 +6,7 @@
   import { toast } from 'vue3-toastify';
   import DetailDateBooking from './DetailDateBooking.vue';
   import { formatDateData } from '@/utils';
+  import Skeleton from 'primevue/skeleton';
 
   const props = defineProps({
     selectedDate: { type: Object },
@@ -25,6 +26,7 @@
   const checkDate = ref(false);
   const checkFullBookingDate = ref([]);
   const isBookedByUser = ref(false);
+  const isLoadingDate = ref(false);
   const toggleDetailVisible = () => {
     isDetailVisible.value = !isDetailVisible.value;
 
@@ -68,7 +70,6 @@
   const fetchBookedDates = async (startOfMonth, endOfMonth) => {
     try {
       const response = await getBookedStatus(startOfMonth, endOfMonth);
-      console.log(response.data.data);
 
       bookedDates.value = response.data.data.detailedBookings;
       dateHaveBooked.value = bookedDates.value
@@ -81,8 +82,6 @@
           return item.currentBookings === maxBookings;
         })
         .map((item) => item.bookingDate);
-
-      console.log(checkFullBookingDate.value);
     } catch (error) {
       console.error('Failed to fetch booked dates:', error);
     }
@@ -100,7 +99,6 @@
           datesToFetch.map(async (date) => {
             const response = await getBookedByDate(date);
             dataChooseDate.value = response.data.data;
-            console.log(dataChooseDate.value);
 
             return { date, data: response.data.data };
           }),
@@ -110,7 +108,6 @@
           isBookedByUser.value = data.bookInfor.rows.some((row) => {
             return row.channelId === streamerStore?.streamerChannel.id;
           });
-          console.log(isBookedByUser.value);
 
           // if (isBookedByUser) {
           //   toast.error('You have booking for today');
@@ -124,7 +121,6 @@
         });
 
         fetchedDates.value = [...fetchedDates.value, ...datesToFetch];
-        console.log(dataChooseDate.value);
 
         emit('sendDetailBooking', databyDate.value);
       }
@@ -214,7 +210,6 @@
   watch(
     localSelectedDate,
     async (newValue, oldValue) => {
-      console.log('popup', isDetailVisible.value);
       emit('update:selectedDate', newValue);
 
       localSelectedDate.value = newValue;

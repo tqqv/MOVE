@@ -1,19 +1,25 @@
 <script setup>
-  import { ref, watch, computed } from 'vue';
+  import { ref, watch, computed, onMounted, onUnmounted } from 'vue';
   import { genreDuration, truncateDescripton } from '@/utils';
   import CheckMarkCustom from '@/components/CheckMarkCustom.vue';
   import EmptyPage from '@/pages/EmptyPage.vue';
-
+  import moment from 'moment';
   const props = defineProps({
     videos: Object,
     searchTerm: { type: String, default: '' },
     chooseDate: String,
   });
-  const emit = defineEmits(['update:searchTerm', 'update:videosByDate']);
+  const emit = defineEmits([
+    'update:searchTerm',
+    'update:videosByDate',
+    'loadMoreData',
+    'debouncedSearch',
+    'fetchVideosByChannel',
+  ]);
+  const scrollContainer = ref(null);
+  const searchData = ref('');
 
-  // Lưu video theo ngày
   const videosByDate = ref({});
-  console.log(videosByDate.value);
 
   // Lưu danh sách video cho ngày hiện tại
   const selectedVideos = computed(() => {
@@ -32,11 +38,12 @@
       // Bỏ video nếu đã có
       videosByDate.value[props.chooseDate] = currentVideos.filter((v) => v.id !== video.id);
     }
+    console.log(videosByDate.value);
 
     emit('update:videosByDate', videosByDate.value);
   };
   const shouldShowCheckbox = (video) => {
-    const currentVideos = videosByDate.value[props.chooseDate] || [];
+    const currentVideos = videosByDate.value[props.chooseDate];
 
     return !currentVideos.length || currentVideos.some((v) => v.id === video.id);
   };
@@ -50,6 +57,34 @@
     },
     { immediate: true },
   );
+
+  onMounted(() => {
+    if (scrollContainer.value) {
+      scrollContainer.value.addEventListener('scroll', onScroll);
+    }
+  });
+  onUnmounted(() => {
+    if (scrollContainer.value) {
+      scrollContainer.value.removeEventListener('scroll', onScroll);
+    }
+  });
+  const onScroll = (event) => {
+    const container = event.target;
+    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 50) {
+      emit('loadMoreData');
+    }
+  };
+
+  watch(
+    () => searchData.value,
+    (newSearchData) => {
+      if (!newSearchData) {
+        emit('fetchVideosByChannel');
+      } else {
+        emit('debouncedSearch', newSearchData);
+      }
+    },
+  );
 </script>
 <template>
   <div class="flex flex-col h-[430px]">
@@ -57,7 +92,7 @@
       <h2 class="text-xl pl-4 font-bold">Select Alternative Content (Video)</h2>
       <div class="relative max-w-sm w-full">
         <input
-          v-model="localSearchTerm"
+          v-model="searchData"
           type="text"
           placeholder="Search videos..."
           class="w-full py-2 pl-10 pr-4 border border-primary rounded-lg shadow-sm focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary transition duration-300"
@@ -68,7 +103,7 @@
       </div>
     </div>
 
-    <div class="mt-2 min-h-[330px] max-h-[300px] overflow-y-auto">
+    <div ref="scrollContainer" class="mt-2 min-h-[330px] max-h-[300px] overflow-y-auto">
       <EmptyPage
         v-if="!videos.length"
         title="No videos found"
@@ -99,7 +134,7 @@
 
           <div class="flex gap-2 items-center text-[10px] font-bold pt-2 text-black">
             <span class="bg-[#EEEEEE] rounded-full px-3">{{
-              video?.levelWorkout.levelWorkout
+              video?.levelWorkout?.levelWorkout
             }}</span>
             <span v-if="video.duration" class="bg-[#EEEEEE] rounded-full px-3">{{
               genreDuration(video.duration)

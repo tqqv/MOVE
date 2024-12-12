@@ -25,8 +25,7 @@
     { id: 3, name: 30, value: 30 },
   ];
   const sortByStatus = [
-    { id: 0, name: 'All' },
-
+    { id: 0, name: 'All', value: '' },
     { id: 1, name: 'Completed', value: 'completed' },
     { id: 2, name: 'Pending', value: 'pending' },
     { id: 3, name: 'Cancel', value: 'cancel' },
@@ -39,11 +38,13 @@
   const endDate = ref('');
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
-  const isLoadingCashoutHistory = ref(true);
+  const isLoadingCashoutHistory = ref(false);
   const selectedSortBy = ref(sortByStatus[0].value);
 
   const fetchCashoutHistory = async () => {
     try {
+      isLoadingCashoutHistory.value = true;
+
       const response = await getCashoutHistory(
         currentPage.value,
         selectedPageSize.value,
@@ -64,7 +65,6 @@
   const goToPreviousPage = () => {
     if (currentPage.value > 1) {
       currentPage.value--;
-      isLoadingCashoutHistory.value = true;
 
       fetchCashoutHistory();
     }
@@ -72,7 +72,6 @@
   const goToNextPage = () => {
     if (currentPage.value < totalPage.value) {
       currentPage.value++;
-      isLoadingCashoutHistory.value = true;
 
       fetchCashoutHistory();
     }
@@ -89,8 +88,10 @@
   };
   watch([selectedPageSize], () => {
     currentPage.value = 1;
+
     fetchCashoutHistory();
   });
+
   onMounted(() => {
     const today = new Date();
     const sevenDaysAgo = new Date(today);
@@ -122,11 +123,18 @@
       </div>
     </div>
 
-    <Skeleton v-if="isLoadingCashoutHistory" width="100%" height="500px"></Skeleton>
-
-    <div v-else class="card">
+    <div class="card">
+      <div
+        v-if="cashoutHistoryData.length === 0"
+        class="h-full flex justify-center items-center pb-20"
+      >
+        <EmptyPage
+          title="No cashout history found"
+          subTitle="No transactions have been made yet. Please try again later."
+        />
+      </div>
       <DataTable
-        v-if="cashoutHistoryData.length > 0"
+        v-else
         :value="cashoutHistoryData"
         rowGroupMode="subheader"
         dataKey="id"
@@ -134,39 +142,51 @@
       >
         <Column field="createdAt" header="Date">
           <template #body="{ data }">
-            <div class="space-y-4">
+            <Skeleton v-if="isLoadingCashoutHistory" width="80px" height="20px" />
+
+            <div v-else class="space-y-4">
               <div>{{ formatDatePosted(data.createdAt) }}</div>
             </div>
           </template>
         </Column>
         <Column field="rep" header="Bank Holder Name">
           <template #body="{ data }">
-            <span>{{ truncateDescripton(data.bankHolderName, 25) }}</span>
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
+            <span v-else>{{ truncateDescripton(data.bankHolderName, 25) }}</span>
           </template>
         </Column>
         <Column field="rep" header="Bank Name">
           <template #body="{ data }">
-            <span>{{ data.bankName }}</span>
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
+            <span v-else>{{ data.bankName }}</span>
           </template>
         </Column>
         <Column field="count" header="Bank Number">
           <template #body="{ data }">
-            <span class="items-center">****</span>
-            <span>{{ data.bankNumber }}</span>
-          </template> </Column
-        ><Column field="rep" header="REPs">
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
+            <div v-else>
+              <span class="items-center">****</span>
+              <span>{{ data.bankNumber }}</span>
+            </div>
+          </template>
+        </Column>
+        <Column field="rep" header="REPs">
           <template #body="{ data }">
-            <span class="font-bold"> {{ formatNumber(data.rep) }} REPs </span>
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
+            <span v-else class="font-bold"> {{ formatNumber(data.rep) }} REPs </span>
           </template>
         </Column>
         <Column field="amount" header="Amount">
           <template #body="{ data }">
-            <span class="font-bold"> ${{ data.amount }} </span>
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
+            <span v-else class="font-bold"> ${{ data.amount }} </span>
           </template>
         </Column>
         <Column field="status" header="Status">
           <template #body="{ data }">
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
             <span
+              v-else
               :class="{
                 'bg-[#d4edda] text-[#28a745] px-2 py-1 rounded-full font-bold':
                   data.status === 'completed',
@@ -184,19 +204,16 @@
         </Column>
         <Column header="Estimated Arrival Date">
           <template #body="{ data }">
-            <span>
+            <Skeleton v-if="isLoadingCashoutHistory" width="120px" height="20px" />
+
+            <span v-else>
               {{ formatDatePosted(data.arrivalDate) }}
             </span>
           </template>
         </Column>
         <Column field="" header="" style="display: none"></Column>
       </DataTable>
-      <div v-else class="h-full flex justify-center items-center pb-20">
-        <EmptyPage
-          title="No cashout history found"
-          subTitle="No transactions have been made yet. Please try again later."
-        />
-      </div>
+
       <div class="flex justify-end gap-x-12 items-center p-12">
         <Filter
           :title="'Rows per page'"

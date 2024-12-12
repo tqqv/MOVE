@@ -52,6 +52,7 @@ import AdvertiseBooking from '@/components/streamer/advertiseBooking/AdvertiseBo
 import AboutUs from '@/components/showMore/AboutUs.vue';
 import FAQ from '@/components/showMore/FAQ.vue';
 import CommunityGuidelines from '@/components/showMore/CommunityGuidelines.vue';
+import BookingHistory from '@/components/streamer/advertiseBooking/BookingHistory.vue';
 
 const routes = [
   // User router
@@ -132,8 +133,12 @@ const routes = [
         component: Cashout,
       },
       {
-        path: 'advertise-booking',
+        path: 'booking-featured',
         component: AdvertiseBooking,
+      },
+      {
+        path: 'booking-history',
+        component: BookingHistory,
       },
       {
         path: 'cashout-history',

@@ -41,7 +41,16 @@
         { name: 'Cashout History', link: '/dashboard-streamer/cashout-history' },
       ],
     },
-    { name: 'Advertise Booking', icon: Booking, link: '/dashboard-streamer/advertise-booking' },
+    {
+      name: 'Advertise Booking',
+      icon: Booking,
+      link: '/dashboard-streamer/booking-featured',
+      hasDropdown: true,
+      submenu: [
+        { name: 'Featured Booking', link: '/dashboard-streamer/booking-featured' },
+        { name: 'Booking History', link: '/dashboard-streamer/booking-history' },
+      ],
+    },
 
     { name: 'Channel settings', icon: SettingIcon, link: '/dashboard-streamer/channel-setting' },
   ];

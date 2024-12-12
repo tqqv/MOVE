@@ -17,7 +17,7 @@
 <template>
   <div
     class="flex flex-col justify-center items-center w-full h-[382px]"
-    :class="{ 'h-[280px] ': isSmall }"
+    :class="{ 'h-[270px] ': isSmall }"
   >
     <NotFound />
     <div class="flex items-center flex-col text-center gap-y-3">

@@ -66,9 +66,9 @@
 </script>
 
 <template>
-  <div class="col-span-3 p-6 bg-white border-2 border-[#e5e7eb] rounded-md min-h-[560px]">
+  <div class="col-span-3 p-6 bg-white border-2 border-[#e5e7eb] rounded-md h-[560px]">
     <h3 class="text-2xl font-semibold mb-8">Booking Date Details</h3>
-    <div class="space-y-6">
+    <div class="space-y-8">
       <Divider />
 
       <!-- Selected Date -->
@@ -77,9 +77,7 @@
         Click on each day to select a video for that day.
       </p>
       <div class="flex items-center justify-between">
-        <div
-          class="grid grid-cols-4 gap-4 mt-2 min-h-[30px] max-h-[135px] overflow-y-auto w-full grid-rows-auto"
-        >
+        <div class="grid grid-cols-4 gap-4 max-h-[130px] overflow-y-auto w-full grid-rows-auto">
           <div
             v-for="(date, index) in selectedDate"
             :key="index"

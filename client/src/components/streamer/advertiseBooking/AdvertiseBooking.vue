@@ -6,7 +6,7 @@
   import StepPanels from 'primevue/steppanels';
   import StepPanel from 'primevue/steppanel';
   import Button from 'primevue/button';
-  import { getVideobyChannel } from '@/services/video';
+  import { getVideoSearchbyChannel } from '@/services/streamer';
   import { useStreamerStore } from '@/stores/streamer.store';
   import { useUserStore } from '@/stores/user.store';
 
@@ -20,6 +20,9 @@
   import AstronautJSON from '@components/animation/success.json';
   import { formatDateData } from '@/utils';
   import SmallLoading from '@/components/icons/smallLoading.vue';
+  import { debounce } from '@/utils';
+  import { searchVideo } from '@/services/streamer';
+
   const streamerStore = useStreamerStore();
   const userStore = useUserStore();
 
@@ -30,14 +33,20 @@
   const selectedVideo = ref();
   const databyDate = ref([]);
   const videos = ref([]);
+
   const totalPages = ref(0);
-  const page = ref(1);
-  const pageSize = ref(12);
+  const currentPage = ref(1);
+  const pageSize = ref(8);
+  const isFetchingMore = ref(false);
+  const loadingMore = ref(false);
+
   const selectedVideosCount = ref();
   const checkDate = ref(false);
   const isBookingSuccess = ref(false);
   const isLoadingPayment = ref(false);
   const chooseDate = ref();
+
+  const loading = ref(true);
 
   const handleCheckDate = (isBooked) => {
     checkDate.value = isBooked;
@@ -45,8 +54,8 @@
   const toggleBackSelectDate = () => {
     isBookingSuccess.value = false;
     currentStep.value = '1';
-    selectedDate.value = '';
-    selectedVideo.value = '';
+    // selectedDate.value = '';
+    // selectedVideo.value = '';
   };
   const allVideos = computed(() => {
     return Object.values(videosByDate.value || {}).flat();
@@ -108,13 +117,14 @@
   // ------------------get video by channel----------------------//
   const fetchVideosByChannel = async () => {
     try {
-      const result = await getVideobyChannel(
+      const result = await getVideoSearchbyChannel(
         streamerStore?.streamerChannel.id,
-        page.value,
+        1,
         pageSize.value,
       );
       const fetchedVideos = result.data.data.videos.rows;
       videos.value = fetchedVideos;
+
       videos.value = fetchedVideos.map((video) => ({
         ...video,
         selected: false,
@@ -125,7 +135,53 @@
       console.error('Error fetching videos:', error);
     }
   };
-  // ----------------------------------------------------------//
+  // ------------------------LOAD MORE----------------------------------//
+  async function loadMoreData() {
+    if (videos.value.length === 0 || isFetchingMore.value || currentPage.value >= totalPages.value)
+      return;
+    isFetchingMore.value = true;
+    loadingMore.value = true;
+    currentPage.value += 1;
+
+    try {
+      const response = await getVideoSearchbyChannel(
+        streamerStore?.streamerChannel.id,
+        currentPage.value,
+        pageSize.value,
+      );
+      if (response.data?.data?.videos?.rows) {
+        videos.value.push(...response.data.data.videos.rows);
+        totalPages.value = response.data.data.totalPages;
+      } else {
+        console.error('Invalid response structure:', response);
+      }
+    } catch (error) {
+      console.error('Error loading more data:', error);
+    } finally {
+      isFetchingMore.value = false;
+      loadingMore.value = false;
+    }
+  }
+  //------------------Search video------------------------/
+  const debouncedSearch = debounce(async (newSearchData) => {
+    if (newSearchData) {
+      loading.value = true;
+      try {
+        const response = await searchVideo(streamerStore?.streamerChannel.id, newSearchData, 2, 0);
+        const data = response.data.data.videos.rows;
+
+        videos.value = data;
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+      } finally {
+        loading.value = false;
+      }
+    } else {
+      videos.value = [];
+
+      loading.value = false;
+    }
+  }, 500);
   // -----------------hàm select video----------------------//
 
   const toggleVideoSelection = (video) => {
@@ -170,8 +226,6 @@
   const goToPreviousStep = () => {
     if (currentStep.value === '2') {
       currentStep.value = '1';
-      selectedVideo.value = '';
-      videosByDate.value = null;
     } else if (currentStep.value === '3') currentStep.value = '2';
   };
 
@@ -264,11 +318,13 @@
               <StepPanel value="2">
                 <SelectVideo
                   :videos="videos"
-                  v-model:searchTerm="searchTerm"
                   @toggleVideoSelection="toggleVideoSelection"
                   :selectedDate="selectedDate"
                   :chooseDate="chooseDate || selectedDate[0]"
                   v-model:videosByDate="videosByDate"
+                  @loadMoreData="loadMoreData"
+                  @debouncedSearch="debouncedSearch"
+                  @fetchVideosByChannel="fetchVideosByChannel"
                 />
               </StepPanel>
 
@@ -342,7 +398,6 @@
             </div>
           </div>
         </div>
-
         <!-- Booking Details -->
         <div class="col-span-5">
           <BookingDetail

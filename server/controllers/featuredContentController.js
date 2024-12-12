@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService } = require("../services/featuredContentService");
+const { createFeatureContentService, getAllFeatureContentService, createBookingFeatureContentService, getBookingFeatureContentService, cancelBookingFeaturedContentService, getBookDateDetailService, getBookingHistory } = require("../services/featuredContentService");
 
 const getAllFeatureContentController = async(req, res, next) => {
     const datetime = req.query.datetime;
@@ -50,11 +50,23 @@ const getBookDateDetailController = async(req, res, next) => {
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getBookingHistoryController = async(req, res, next) => {
+    const channelId = req.user.channelId
+    const page = req.query.page || 1;
+    const pageSize = req.query.pageSize || 10;
+    const startDate = req.query.startDate || null;
+    const endDate = req.query.endDate || null;
+    const result = await getBookingHistory(channelId, page, pageSize, startDate, endDate);
+    responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+
 module.exports = {
     createFeatureContentController,
     getAllFeatureContentController,
     createBookingFeatureContentController,
     getBookingFeatureContentController,
     getBookDateDetailController,
-    cancelBookingFeatureContentController
+    cancelBookingFeatureContentController,
+    getBookingHistoryController
 }

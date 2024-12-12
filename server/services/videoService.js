@@ -578,7 +578,7 @@ const getVideoByChannelAndTitleService = async (data, page, pageSize, channelId)
       whereCondition.title = { [Op.like]: `%${normalData}%` };
     }
 
-    const videos = await Video.findAll({
+    const videos = await Video.findAndCountAll({
       where: whereCondition,
       include: [
         {
@@ -615,8 +615,10 @@ const getVideoByChannelAndTitleService = async (data, page, pageSize, channelId)
     });
 
     return {
-      status: 200,
-      data: videos,
+      status: 200,   data: {
+        videos,
+        totalPages: Math.ceil(videos.count/pageSize)
+      },
       message: 'Successfully',
     };
   } catch (error) {
