@@ -1,5 +1,6 @@
 export { usePopupStore } from './popup.store';
 import { useLoadingStore } from './globalLoading.store';
+import { useNotificationStore } from './notification';
 export { useTabStore } from './tab.store';
 export { useVideoStore } from './video.store';
 export { useUserStore } from './user.store';
@@ -12,3 +13,4 @@ export { useLiveStreamStore } from './liveStream.store';
 export { useLoadingStore } from './globalLoading.store';
 export { useCardStore } from './card.store';
 export { useAnalyticsStreamerStore } from './analyticsStreamer.store';
+export { useNotificationStore } from './notification';

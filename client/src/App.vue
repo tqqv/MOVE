@@ -2,11 +2,13 @@
   import { useUserStore } from '@/stores/user.store';
   import { onBeforeMount, onMounted } from 'vue';
   import GlobalLoading from './components/GlobalLoading.vue';
+  import { useLoadingStore, useNotificationStore } from './stores';
+  import { joinAllRooms } from './services/socketService';
   import { useLoadingStore } from './stores';
   import { getLogout } from './services/auth';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
-
+  const notificationStore = useNotificationStore();
   const getCookie = (cname) => {
     let name = cname + '=';
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -38,6 +40,8 @@
       await userStore.fetchUserProfile();
       await userStore.loadFollowers();
       await userStore.loadFollowCategories();
+      notificationStore.fetchQuantifyNotifications();
+      joinAllRooms();
       const role = localStorage.getItem('role')
 
       if(role !== userStore.user.role) {

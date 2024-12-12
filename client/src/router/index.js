@@ -40,6 +40,7 @@ import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHisto
 import AboutUs from '@/components/showMore/AboutUs.vue';
 import FAQ from '@/components/showMore/FAQ.vue';
 import CommunityGuidelines from '@/components/showMore/CommunityGuidelines.vue';
+import BanPage from '@/pages/BanPage.vue';
 import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
 setActivePinia(pinia);
@@ -105,6 +106,7 @@ const routes = [
   { path: '/live/:username', component: ViewLiveStreamPage },
   { path: '/reset-password/:token', component: ResetPassword },
   { path: '/verify-email/:token', component: VerifyEmail },
+  { path: '/banned', component: BanPage },
   {
     path: '/overlay',
     component: ScreenSupportLive,

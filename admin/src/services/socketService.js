@@ -59,6 +59,25 @@ const sendMessage = (channelId, messageData) => {
   });
 };
 
+const joinAllRooms = async () => {
+  try {
+    const response = await getAllRoomNotifications();
+    if (response.error) {
+      console.error('Error fetching room notifications:', response.message);
+      return;
+    }
+
+    const rooms = response.data;
+    rooms.forEach((room) => {
+      joinRoom(room);
+    });
+
+    console.log('Joined all rooms:', rooms);
+  } catch (error) {
+    console.error('An unexpected error occurred:', error);
+  }
+};
+
 export {
   joinRoom,
   listenStreamReady,

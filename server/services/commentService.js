@@ -1,5 +1,6 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, ReactionComment, DonationItem, Report } = db;
+const { createNotification } = require("./notificationService.js");
+const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, NotificationEntity, DonationItem, Report } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -115,8 +116,18 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
       ...updateOperations
     ]);
 
-
-        // Fetch comment with the associated DonationItem
+    if (commentInfor.parentId) {
+      await createNotification(
+        "comment",
+        "mention",
+        (channelId ? null: userId),
+        channelId,
+        (parentCommentChecker.channelId || parentCommentChecker.userId),
+        comment.dataValues.id,
+        comment.dataValues.videoId
+      )
+    }
+    // Fetch comment with the associated DonationItem
     const commentWithDonationItem = await Comment.findOne({
       where: { id: comment.id },
       include: [
