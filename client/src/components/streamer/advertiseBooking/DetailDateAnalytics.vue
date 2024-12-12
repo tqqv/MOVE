@@ -1,12 +1,15 @@
 <script setup>
+  import { formatDateData, formatNumber, genreDuration } from '@/utils';
   import Dialog from 'primevue/dialog';
+  import Divider from 'primevue/divider';
   import { ref } from 'vue';
 
   const props = defineProps({
     title: String,
     groupName: String,
     isDateDetailVisible: Boolean,
-    bookingData: Object, // Dữ liệu booking chứa các thông tin cần thiết
+    dateDetails: Object,
+    selectedDate: Object,
   });
 
   const emit = defineEmits(['toggleDateDetailVisible']);
@@ -14,60 +17,86 @@
   const toggleDateDetailVisible = () => {
     emit('toggleDateDetailVisible');
   };
-
-  // Dữ liệu demo nếu chưa có API thực tế
-  const videoData = ref({
-    reps: 120,
-    views: 5000,
-    newFollowers: 300,
-  });
+  console.log(props.dateDetails);
 </script>
 
 <template>
   <Dialog
+    v-if="dateDetails"
     :visible="isDateDetailVisible"
     :modal="true"
     :draggable="false"
     :header="title"
-    :style="{ width: '40rem' }"
+    :style="{ width: '60rem' }"
     @update:visible="toggleDateDetailVisible"
   >
     <div class="space-y-4 mt-4 text-lg">
+      <h1 class="text-[#808080] italic text-lg font-semibold">
+        #{{ formatDateData(selectedDate) }}
+      </h1>
+
+      <div class="flex gap-x-4">
+        <span class="font-bold">Number of people reach by ads:</span
+        ><span class="font-semibold">{{ dateDetails?.featuredContent[0]?.clickCount }}</span>
+      </div>
+      <div class="flex gap-x-4">
+        <span class="font-bold">New followers:</span>
+        <span class="font-semibold">{{
+          dateDetails?.featuredContent[0]?.newSubscriptionsToday ?? 0
+        }}</span>
+      </div>
+      <Divider class="py-4" />
       <div class="grid grid-cols-2 gap-6">
         <!-- Column 1: Video Stats -->
-        <div class="space-y-2 bg-whhite shadow-md rounded-md p-6">
+        <div class="space-y-4 bg-white shadow-md rounded-md p-6">
           <h2 class="text-xl font-bold">Video Details</h2>
-
-          <div class="flex justify-between">
-            <span class="font-semibold">Total REPs Earned:</span>
-            <span>{{ bookingData?.reps || videoData.reps }}</span>
+          <div class="flex justify-between flex-shrink-0">
+            <img
+              v-if="
+                dateDetails?.featuredContent?.length > 0 &&
+                dateDetails?.featuredContent[0]?.video?.thumbnailUrl
+              "
+              :src="dateDetails?.featuredContent[0]?.video?.thumbnailUrl"
+              alt="Thumbnail"
+              class="w-[400px] h-[200px] object-cover"
+            />
+          </div>
+          <div>
+            <h1 class="font-semibold truncate w-[100px]">
+              {{ dateDetails?.featuredContent[0]?.video?.title || 'No title available' }}
+            </h1>
           </div>
           <div class="flex justify-between">
-            <span class="font-semibold">Views Increased:</span>
-            <span>{{ bookingData?.views || videoData.views }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-semibold">New followers:</span>
-            <span>{{ bookingData?.newFollowers || videoData.newFollowers }}</span>
+            <span class="font-bold">Total REPs Earned:</span>
+            <span class="font-semibold"
+              >{{
+                formatNumber(dateDetails?.featuredContent[0]?.totalRepFromVideo || 0)
+              }}
+              REPs</span
+            >
           </div>
         </div>
 
-        <!-- Column 2:  Stream -->
-
-        <div class="space-y-2 bg-whhite shadow-md rounded-md p-6">
+        <!-- Column 2: Stream -->
+        <div class="space-y-4 bg-white shadow-lg rounded-lg p-6" v-if="dateDetails?.liveInfor">
           <h2 class="text-xl font-bold">Live Stream Details</h2>
-
-          <div class="flex justify-between">
-            <span class="font-semibold">Total REPs Earned:</span>
-            <span>{{ bookingData?.reps || videoData.reps }}</span>
+          <div class="flex justify-between flex-shrink-0">
+            <img
+              :src="dateDetails?.liveInfor.thumbnailUrl"
+              alt="Thumbnail"
+              class="w-[400px] h-[200px] object-cover"
+            />
+          </div>
+          <div>
+            <h1 class="font-semibold truncate w-[100px]">
+              {{ dateDetails?.liveInfor.title || 'No title available' }}
+            </h1>
           </div>
           <div class="flex justify-between">
-            <span class="font-semibold">Views Increased:</span>
-            <span>{{ bookingData?.views || videoData.views }}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="font-semibold">New followers:</span>
-            <span>{{ bookingData?.newFollowers || videoData.newFollowers }}</span>
+            <span class="font-bold">Total REPs Earned:</span>
+            <span class="font-semibold"
+              >{{ formatNumber(dateDetails?.totalRepFromLivestream || 0) }} REPs</span
+            >
           </div>
         </div>
       </div>

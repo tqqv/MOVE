@@ -37,16 +37,17 @@
   const isLoadingBookingHistory = ref(false);
   const isDateDetailVisible = ref(false);
   const selectedDate = ref('');
-  const dateDetails = ref();
-  const toggleDateDetailVisible = (date) => {
-    fetchDateDetail(date);
+  const dateDetails = ref([]);
+  const toggleDateDetailVisible = async (date) => {
+    selectedDate.value = date;
+    await fetchDateDetail(date);
     isDateDetailVisible.value = !isDateDetailVisible.value;
   };
   const fetchDateDetail = async (datetime) => {
     try {
       const response = await getDateDetailAnalytics(datetime);
-      dateDetails.value = response.data.data.bookingHistory?.rows;
-      console.log(dateDetails.value);
+      dateDetails.value = response.data.data;
+      console.log(response.data.data);
     } catch (error) {
       console.error(error.message);
     }
@@ -62,7 +63,6 @@
         formatDateData(endDate.value),
       );
       bookingHistoryData.value = response.data.data.bookingHistory?.rows;
-      console.log(bookingHistoryData.value);
 
       totalData.value = response.data.data.bookingHistory.count;
       totalPage.value = response.data.data.totalPages;
@@ -116,12 +116,14 @@
       <h1 class="text_title">Booking History</h1>
       <div class="flex gap-8">
         <FilterDate
+          isValidateDate="true"
           title="Start date"
           :defaultDate="startDate"
           class="flex-1"
           @change="(date) => (startDate = date)"
         />
         <FilterDate
+          isValidateDate="true"
           title="End date"
           :defaultDate="endDate"
           :startDate="startDate"
@@ -152,7 +154,7 @@
             <Skeleton v-if="isLoadingBookingHistory" width="80px" height="20px" />
 
             <div v-else class="space-y-4">
-              <div>{{ formatDatePosted(data.date) }}</div>
+              <div>{{ formatDateData(data.date) }}</div>
             </div>
           </template>
         </Column>
@@ -237,6 +239,8 @@
   <DetailDateAnalytics
     @toggleDateDetailVisible="toggleDateDetailVisible"
     :isDateDetailVisible="isDateDetailVisible"
+    :dateDetails="dateDetails"
     title="Date Detail Analytics"
+    :selectedDate="selectedDate"
   />
 </template>

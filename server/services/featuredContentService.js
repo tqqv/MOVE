@@ -540,9 +540,11 @@ const getBookingHistoryService = async (channelId, page, pageSize, startDate, en
 
     if (startDate && endDate) {
       whereCondition.date = {
-        [Op.between]: [startDate, endDate]
+        [Op.gte]: startDate, 
+        [Op.lte]: endDate    
       };
     }
+    
 
     const bookingHistory = await FeaturedContent.findAndCountAll({
       where: whereCondition,
@@ -585,7 +587,7 @@ const getBookingHistoryService = async (channelId, page, pageSize, startDate, en
           attributes: ["pricePerDay"] // Không cần lặp lại maxBookings trong include
         }
       ],
-      order: [["createdAt", "DESC"]],
+      order: [["date", "DESC"]],
       offset: (page - 1) * pageSize *1,
       limit: pageSize * 1
     })
@@ -686,7 +688,7 @@ const getBookingStatsService = async (channelId, datetime) => {
         ),
       },
       attributes: [
-        "highestViewAtSameTime", "totalView", "totalShare", "duration",
+        "highestViewAtSameTime", "totalView", "totalShare", "duration","thumbnailUrl","title",
         [
           sequelize.literal(`(
             SELECT SUM(reps)
