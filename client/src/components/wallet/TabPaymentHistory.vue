@@ -78,16 +78,18 @@
 
   onMounted(() => {
     const today = new Date();
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 7);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const thirtyDaysLater = new Date(today);
+    thirtyDaysLater.setDate(today.getDate() + 30);
 
-    startDate.value = sevenDaysAgo;
-    endDate.value = today;
+    startDate.value = thirtyDaysAgo;
+    endDate.value = thirtyDaysLater;
   });
 </script>
 <template>
   <div class="container">
-    <div class="flex justify-end pb-6">
+    <div class="flex justify-end pb-4">
       <div class="flex gap-8">
         <FilterDate
           title="Start date"
@@ -104,11 +106,39 @@
         />
       </div>
     </div>
-    <Skeleton v-if="isLoadingPaymentHistory" width="100%" height="500px"></Skeleton>
 
-    <div v-else class="card">
+    <div class="card">
+      <!-- SKELETON -->
       <DataTable
-        v-if="paymentHistoryData.length > 0"
+        v-if="isLoadingPaymentHistory"
+        :value="10"
+        rowGroupMode="subheader"
+        dataKey="id"
+        tableStyle="min-width: 50rem, text-align: center"
+      >
+        <Column field="created_date" header="Date">
+          <template #body="{ data }">
+            <Skeleton width="10rem" class="mb-2"></Skeleton>
+          </template>
+        </Column>
+        <Column field="rep" header="Product name">
+          <template #body="{ data }">
+            <Skeleton width="11rem" class="mb-2"></Skeleton>
+          </template>
+        </Column>
+        <Column field="count" header="Amount Purchased">
+          <template #body="{ data }">
+            <Skeleton width="15rem" class="mb-2"></Skeleton>
+          </template>
+        </Column>
+
+        <Column field="" header="" style="display: none"></Column>
+      </DataTable>
+      <!-- ------------- -->
+      <!-- TABLE -->
+
+      <DataTable
+        v-else-if="!isLoadingPaymentHistory"
         :value="paymentHistoryData"
         rowGroupMode="subheader"
         dataKey="id"
@@ -136,13 +166,18 @@
 
         <Column field="" header="" style="display: none"></Column>
       </DataTable>
-      <div v-else class="h-full flex justify-center items-center pb-20">
+      <!-- ------------- -->
+
+      <div
+        v-else-if="paymentHistoryData.length === 0"
+        class="h-full flex justify-center items-center pb-20"
+      >
         <EmptyPage
           title="No payment history found"
           subTitle="No transactions have been made yet. Please try again later."
         />
       </div>
-      <div class="flex justify-end gap-x-12 items-center p-12">
+      <div class="flex justify-end gap-x-12 items-center pt-4">
         <Filter
           :title="'Rows per page'"
           :options="pageSizeOptions"

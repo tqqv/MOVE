@@ -62,7 +62,7 @@
         formatDateData(startDate.value),
         formatDateData(endDate.value),
       );
-      bookingHistoryData.value = response.data.data.bookingHistory?.rows;
+      bookingHistoryData.value = response.data.data.bookingHistory?.rows2;
 
       totalData.value = response.data.data.bookingHistory.count;
       totalPage.value = response.data.data.totalPages;
@@ -103,11 +103,13 @@
 
   onMounted(() => {
     const today = new Date();
-    const sevenDaysAgo = new Date(today);
-    sevenDaysAgo.setDate(today.getDate() - 7);
+    const thirtyDaysAgo = new Date(today);
+    thirtyDaysAgo.setDate(today.getDate() - 30);
+    const thirtyDaysLater = new Date(today);
+    thirtyDaysLater.setDate(today.getDate() + 30);
 
-    startDate.value = sevenDaysAgo;
-    endDate.value = today;
+    startDate.value = thirtyDaysAgo;
+    endDate.value = thirtyDaysLater;
   });
 </script>
 <template>
@@ -134,16 +136,50 @@
     </div>
 
     <div class="card">
-      <!-- <div
-        v-if="bookingHistoryData.length === 0"
-        class="h-full flex justify-center items-center pb-20"
-      >
-        <EmptyPage
-          title="No booking history found"
-          subTitle="No transactions have been made yet. Please try again later."
-        />
-      </div> -->
+      <!-- SKELETON -->
       <DataTable
+        v-if="isLoadingBookingHistory"
+        :value="5"
+        rowGroupMode="subheader"
+        dataKey="id"
+        tableStyle="min-width: 50rem, text-align: center"
+      >
+        <Column header="Date">
+          <template #body="{ data }">
+            <Skeleton width="6rem" height="15px" />
+          </template>
+        </Column>
+
+        <Column field="image" header="Video">
+          <template #body="{ data }">
+            <Skeleton width="13rem" height="90px" />
+          </template>
+        </Column>
+        <Column field="video" header="Details">
+          <template #body="{ data }"
+            ><div class="space-y-2">
+              <Skeleton width="27rem" height="15px" />
+              <Skeleton width="27rem" height="15px" />
+              <div class="flex gap-x-4">
+                <Skeleton width="3rem" height="15px" class="mb-2 rounded-md"></Skeleton>
+                <Skeleton width="3rem" height="15px" class="mb-2 rounded-md"></Skeleton>
+              </div></div
+          ></template>
+        </Column>
+
+        <Column field="rep" header="Price for the date">
+          <template #body="{ data }"> <Skeleton width="8rem" height="15px" /> </template>
+        </Column>
+        <Column field="View" header="Action">
+          <template #body="{ data }"><Skeleton width="8rem" height="15px" /> </template>
+        </Column>
+
+        <Column field="" header=""></Column>
+      </DataTable>
+      <!------------->
+      <!-- TABLE -->
+      <DataTable
+        v-else-if="!isLoadingBookingHistory"
         :value="bookingHistoryData"
         rowGroupMode="subheader"
         dataKey="id"
@@ -151,10 +187,10 @@
       >
         <Column header="Date">
           <template #body="{ data }">
-            <Skeleton v-if="isLoadingBookingHistory" width="80px" height="20px" />
+            <Skeleton v-if="isLoadingBookingHistory" width="80px" height="15px" />
 
             <div v-else class="space-y-4">
-              <div>{{ formatDateData(data.date) }}</div>
+              <div class="font-bold">{{ formatDateData(data.date) }}</div>
             </div>
           </template>
         </Column>
@@ -184,7 +220,7 @@
           </template>
         </Column>
 
-        <Column field="rep" header="REPs">
+        <Column field="rep" header="Price for the date">
           <template #body="{ data }">
             <span class="font-bold">
               {{
@@ -195,13 +231,31 @@
           </template>
         </Column>
         <Column field="View" header="Action">
-          <template #body="{ data }"
-            ><div @click="toggleDateDetailVisible(data.date)">
-              <i class="pi pi-eye pt-1 cursor-pointer"></i></div></template
-        ></Column>
+          <template #body="{ data }">
+            <div
+              @click="toggleDateDetailVisible(data.date)"
+              class="flex items-center cursor-pointer text-primary"
+            >
+              <span class="pi pi-eye mr-2"></span>
+              <span>View Details</span>
+            </div>
+          </template>
+        </Column>
 
         <Column field="" header=""></Column>
       </DataTable>
+      <!------------->
+      <!-- EMPTY -->
+      <div
+        v-else-if="bookingHistoryData.length === 0"
+        class="h-full flex justify-center items-center pb-20"
+      >
+        <EmptyPage
+          title="No booking history found"
+          subTitle="No transactions have been made yet. Please try again later."
+        />
+      </div>
+      <!------------->
 
       <div class="flex justify-end gap-x-12 items-center p-12">
         <Filter

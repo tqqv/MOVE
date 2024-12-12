@@ -21,14 +21,13 @@
 
   const videosByDate = ref({});
 
-  // Lưu danh sách video cho ngày hiện tại
   const selectedVideos = computed(() => {
-    return videosByDate.value[props.chooseDate];
+    return videosByDate.value[props.chooseDate] || [];
   });
 
   // Xử lý khi chọn video
   const toggleVideoSelection = (video) => {
-    const currentVideos = videosByDate.value[props.chooseDate];
+    const currentVideos = videosByDate.value[props.chooseDate] || [];
     const index = currentVideos.findIndex((v) => v.id === video.id);
 
     if (index === -1) {
@@ -38,7 +37,7 @@
       // Bỏ video nếu đã có
       videosByDate.value[props.chooseDate] = currentVideos.filter((v) => v.id !== video.id);
     }
-    console.log(videosByDate.value);
+    console.log('Dữ liệu videosByDate sau khi thay đổi:', videosByDate.value);
 
     emit('update:videosByDate', videosByDate.value);
   };
@@ -54,6 +53,7 @@
       if (!videosByDate.value[newDate]) {
         videosByDate.value[newDate] = [];
       }
+      console.log('Ngày chọn thay đổi:', newDate);
     },
     { immediate: true },
   );

@@ -623,7 +623,6 @@ const getBookingStatsService = async (channelId, datetime) => {
       },
       attributes: [
         "clickCount",
-        "viewIncrease",
         [
           sequelize.literal(`(
             SELECT SUM(rep)
@@ -640,7 +639,24 @@ const getBookingStatsService = async (channelId, datetime) => {
             WHERE DATE(newSubscribers.createdAt) = date
           )`),
           'newSubscriptionsToday',
-        ]
+          
+        ],
+        [
+          sequelize.literal(`(
+            SELECT SUM(rep)
+            FROM comments AS totalVideoRep
+            WHERE totalVideoRep.videoId = video.id
+          )`),
+          'totalRepOfVideo',
+        ],
+        [
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM subscribes AS allSubscribers
+            WHERE allSubscribers.channelId = channelBooking.id
+          )`),
+          'totalFollowers',
+        ],
       ],
       include: [
         {
@@ -733,6 +749,7 @@ const getBookingStatsService = async (channelId, datetime) => {
     }
   }
 }
+
 
 const increaseClickFeaturedService = async (featuredContentId) => {
   try {

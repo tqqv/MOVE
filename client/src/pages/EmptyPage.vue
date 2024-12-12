@@ -11,13 +11,14 @@
       required: true,
     },
     isSmall: Boolean,
+    isMid: Boolean,
   });
 </script>
 
 <template>
   <div
-    class="flex flex-col justify-center items-center w-full h-[382px]"
-    :class="{ 'h-[270px] ': isSmall }"
+    class="flex flex-col justify-center items-center w-full"
+    :class="{ 'h-[100px]': isSmall, 'h-[270px]': isMid, 'h-[382px]': !isSmall && !isMid }"
   >
     <NotFound />
     <div class="flex items-center flex-col text-center gap-y-3">

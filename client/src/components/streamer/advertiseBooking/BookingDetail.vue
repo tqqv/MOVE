@@ -63,6 +63,10 @@
         return total + pricePerDay;
       }, 0);
   });
+  const isDateSelected = (date) => {
+    const formattedDate = formatDateData(date);
+    return props.videosByDate.some((entry) => formatDateData(entry.date) === formattedDate);
+  };
 </script>
 
 <template>
