@@ -2,39 +2,17 @@
   import Divider from 'primevue/divider';
   import NotificationItem from './NotificationItem.vue';
   import LogoIcon from '../icons/logoIcon.vue';
-  const notis = [
-    {
-      avatar:
-        'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
-      username: 'npmh3102222',
-      contentNoti: 'reacted to your comment',
-      read: true,
-    },
-    {
-      avatar:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDZ8fGF2YXRhcnxlbnwwfHx8fDE2MTU4OTU0MjQ&ixlib=rb-1.2.1&q=80&w=400',
-      username: 'john_doe',
-      contentNoti: 'replied to your comment',
-      read: false,
-    },
-    {
-      avatar:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDZ8fGF2YXRhcnxlbnwwfHx8fDE2MTU4OTU0MjQ&ixlib=rb-1.2.1&q=80&w=400',
-      username: 'jane_doe',
-      contentNoti: 'follow your channel',
+  import { onMounted, ref } from 'vue';
+  import { getAllNotifications } from '@/services/notification';
+  import { useNotificationStore } from '@/stores';
+  import Skeleton from 'primevue/skeleton';
 
-      read: true,
-    },
-    {
-      avatar:
-        'https://images.unsplash.com/photo-1494790108377-be9c29b29330?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwzNjUyOXwwfDF8c2VhcmNofDZ8fGF2YXRhcnxlbnwwfHx8fDE2MTU4OTU0MjQ&ixlib=rb-1.2.1&q=80&w=400',
-      username: 'jane_doe',
-      contentNoti: 'follow your channel',
-
-      read: true,
-    },
-  ];
   const emit = defineEmits(['toggleNotiMenu']);
+  const notificationStore = useNotificationStore();
+
+  onMounted(() => {
+    notificationStore.fetchListNotifications();
+  });
 </script>
 <template>
   <div class="shadow-lg rounded-lg w-[340px] bg-white text-black">
@@ -52,9 +30,22 @@
       </h1>
     </div>
     <Divider class="my-0" />
-    <div class="max-h-full p-2 h-[360px] overflow-y-auto overflow-x-hidden scrollbar-custom">
-      <template v-for="(noti, index) in notis" :key="index">
-        <NotificationItem :noti="noti" />
+    <div v-if="notificationStore.loading" class="max-h-full p-2">
+      <div v-for="n in 4" class="flex items-start gap-x-3 p-3">
+        <Skeleton shape="circle" size="3rem"></Skeleton>
+        <div class="flex flex-col gap-y-2 flex-1">
+          <Skeleton width="100%"></Skeleton>
+          <Skeleton width="60%"></Skeleton>
+          <Skeleton width="30%" height="0.8rem" class="mt-1"></Skeleton>
+        </div>
+      </div>
+    </div>
+    <div v-else class="max-h-full p-2 h-[388px] overflow-y-auto overflow-x-hidden scrollbar-custom">
+      <template
+        v-for="(notification, index) in notificationStore.listNotifications?.notifications"
+        :key="index"
+      >
+        <NotificationItem :notification="notification" />
       </template>
     </div>
     <Divider class="my-0" />

@@ -174,10 +174,59 @@ const markOneNotiAsRead = async (notificationId) => {
   }
 }
 
+
+const getUnReceiveNumOfNotification = async(userNotifierId, channelNotifierId) => {
+  try {
+    const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
+
+    let whereClause;
+
+    if(channelNotifierId) {
+      whereClause = channelNotifierId
+      ? `channelNotifierId = '${channelNotifierId}'`
+      : `userNotifierId IS NULL`;
+    } else {
+      whereClause = `userNotifierId = '${userNotifierId}'`
+    }
+
+    // 1. Đếm số thông báo chưa được nhận
+    const unRecievedCount = await Notification.count({
+      where: {
+        roomName: { [Op.in]: notifierRoom },
+        id: {
+          [Op.notIn]: Sequelize.literal(`
+            (
+              SELECT notificationId
+              FROM notificationVisitStatuses
+              WHERE ${whereClause}
+            )
+          `),
+        },
+      },
+    });
+
+    return {
+      status: 200,
+      data: {
+        unRecievedCount,
+      },
+      message: 'Get unRecievedCount successfully'
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createNotificationVisitStatus,
   getAllNotificationVisitStatus,
   markAllNotiAsRecievied,
   markAllNotiAsRead,
-  markOneNotiAsRead
+  markOneNotiAsRead,
+  getUnReceiveNumOfNotification
 }
