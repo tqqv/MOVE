@@ -449,11 +449,77 @@ const cancelBookingFeaturedContentService = async (pickedDates, channelId) => {
   }
 };
 
+const getBookingHistory = async (channelId, page, pageSize, startDate, endDate) => {
+  try {
+
+    const whereCondition = { channelId };
+
+    if (startDate && endDate) {
+      whereCondition.date = {
+        [Op.between]: [startDate, endDate]
+      };
+    }
+
+    const bookingHistory = await FeaturedContent.findAndCountAll({
+      where: whereCondition,
+      include: [
+        {
+          model: Channel,
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          as: "channelBooking",
+          include: [
+            {
+              model: User,
+              attributes: ["username"]
+            }
+          ]
+        },
+        {
+          model: Video,
+          as:"video",
+          include: [
+            {
+              model: Category,
+              as: 'category',
+              attributes: ['title']
+            },
+            {
+              model: LevelWorkout,
+              as: 'levelWorkout',
+              attributes: ['levelWorkout']
+            },
+          ]
+        }
+      ],
+      order: [["createdAt", "DESC"]],
+      offset: (page - 1) * pageSize *1,
+      limit: pageSize * 1
+    })
+
+    return {
+      status: 200,
+      data: {
+        bookingHistory,
+        totalPages: Math.ceil(bookingHistory.count/pageSize)
+      },
+      message: "Get booking history successfully"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 
 module.exports = {
   createFeatureContentService,
   getAllFeatureContentService,
   createBookingFeatureContentService,
   getBookingFeatureContentService,
-  cancelBookingFeaturedContentService
+  cancelBookingFeaturedContentService,
+  getBookingHistory
 }
