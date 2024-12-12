@@ -19,7 +19,11 @@ export const useVideoStore = defineStore('video', () => {
   const selectLevelWorkoutOptions = ref('1');
   const videoIdDetail = ref(0);
   const isEdit = ref(false);
+  const nextLoading = ref(false);
 
+  const setNextLoading = (value) => {
+    nextLoading.value = value;
+  };
   const setIsEdit = (value) => {
     isEdit.value = value;
   };
@@ -102,8 +106,8 @@ export const useVideoStore = defineStore('video', () => {
     duration.value = 0;
     commentSetting.value = true;
     keywords.value = '';
-    selectCategoryOptions.value = 0;
-    selectLevelWorkoutOptions.value = 1;
+    selectCategoryOptions.value = '0';
+    selectLevelWorkoutOptions.value = '1';
     tab.value = '1';
     videoIdDetail.value = 0;
     isEdit.value = false;
@@ -125,6 +129,7 @@ export const useVideoStore = defineStore('video', () => {
     selectLevelWorkoutOptions,
     videoIdDetail,
     isEdit,
+    nextLoading,
     setUploadProgress,
     setUri,
     setIsNext,
@@ -143,5 +148,6 @@ export const useVideoStore = defineStore('video', () => {
     getVideo,
     setVideoIdDetail,
     setIsEdit,
+    setNextLoading,
   };
 });
