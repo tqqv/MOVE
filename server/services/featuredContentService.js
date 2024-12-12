@@ -572,6 +572,16 @@ const getBookingHistory = async (channelId, page, pageSize, startDate, endDate) 
               attributes: ['levelWorkout']
             },
           ]
+        },
+        {
+          model: FeaturedContentBase,
+          as: "featuredBase",
+          attributes: ["pricePerDay"] // Không cần lặp lại maxBookings trong include
+        },
+        {
+          model: FeaturedContentAbnormal,
+          as: "featuredAbnormal",
+          attributes: ["pricePerDay"] // Không cần lặp lại maxBookings trong include
         }
       ],
       order: [["createdAt", "DESC"]],

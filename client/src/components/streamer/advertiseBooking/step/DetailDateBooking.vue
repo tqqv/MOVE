@@ -7,6 +7,7 @@
   import { useUserStore } from '@/stores/user.store';
   import { toast } from 'vue3-toastify';
   import SmallLoading from '@/components/icons/smallLoading.vue';
+  import Divider from 'primevue/divider';
 
   // Nhận các props để hiển thị thông tin trong Dialog
   const props = defineProps({

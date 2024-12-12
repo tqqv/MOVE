@@ -27,6 +27,8 @@
   const checkFullBookingDate = ref([]);
   const isBookedByUser = ref(false);
   const isLoadingDate = ref(false);
+  const today = ref(new Date());
+
   const toggleDetailVisible = () => {
     isDetailVisible.value = !isDetailVisible.value;
 
@@ -58,7 +60,7 @@
   const getStartAndEndOfMonth = (date) => {
     if (!date) return { startOfMonth: null, endOfMonth: null };
 
-    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
+    const startOfMonth = new Date();
     const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
     return {
@@ -132,9 +134,8 @@
     const { startOfMonth, endOfMonth } = getStartAndEndOfMonth(new Date());
 
     // conver sang iso date utc
-    const isoStartOfMonth = new Date(
-      startOfMonth.getTime() - startOfMonth.getTimezoneOffset() * 60000,
-    ).toISOString();
+    const isoStartOfMonth = new Date();
+
     const isoEndOfMonth = new Date(
       endOfMonth.getTime() - endOfMonth.getTimezoneOffset() * 60000,
     ).toISOString();
@@ -150,7 +151,7 @@
     const month = event.month;
     const year = event.year;
 
-    const startOfMonth = new Date(Date.UTC(year, month - 1, 1));
+    const startOfMonth = new Date();
     const endOfMonth = new Date(Date.UTC(year, month, 0));
 
     fetchBookedDates(startOfMonth, endOfMonth);
@@ -244,6 +245,7 @@
       inline
       @month-change="onMonthChange"
       @date-select="onDateChange"
+      :min-date="today"
     >
       <template #date="slotProps">
         <strong v-if="isFull(slotProps.date)" class="day-full">

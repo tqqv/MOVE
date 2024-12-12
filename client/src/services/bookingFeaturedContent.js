@@ -60,10 +60,23 @@ const getBookingHistory = async (page, pageSize, startDate, endDate) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const getDateDetailAnalytics = async (datetime) => {
+  try {
+    const response = await axios.get('featuredContent/getBookingStats', {
+      params: {
+        datetime,
+      },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   getBookedStatus,
   getBookedByDate,
   postBookingContent,
   postCancelBooking,
   getBookingHistory,
+  getDateDetailAnalytics,
 };

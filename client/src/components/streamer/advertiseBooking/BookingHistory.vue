@@ -13,11 +13,13 @@
 
   import DataTable from 'primevue/datatable';
   import Column from 'primevue/column';
-  import { getBookingHistory } from '@/services/bookingFeaturedContent';
+  import { getBookingHistory, getDateDetailAnalytics } from '@/services/bookingFeaturedContent';
   import { toast } from 'vue3-toastify';
   import FilterDate from '@/components/FilterDate.vue';
   import Filter from '@/components/Filter.vue';
   import Skeleton from 'primevue/skeleton';
+  import DetailDateBooking from './step/DetailDateBooking.vue';
+  import DetailDateAnalytics from './DetailDateAnalytics.vue';
 
   const pageSizeOptions = [
     { id: 1, name: 10, value: 10 },
@@ -33,7 +35,22 @@
   const totalData = ref(0);
   const selectedPageSize = ref(pageSizeOptions[0].value);
   const isLoadingBookingHistory = ref(false);
-
+  const isDateDetailVisible = ref(false);
+  const selectedDate = ref('');
+  const dateDetails = ref();
+  const toggleDateDetailVisible = (date) => {
+    fetchDateDetail(date);
+    isDateDetailVisible.value = !isDateDetailVisible.value;
+  };
+  const fetchDateDetail = async (datetime) => {
+    try {
+      const response = await getDateDetailAnalytics(datetime);
+      dateDetails.value = response.data.data.bookingHistory?.rows;
+      console.log(dateDetails.value);
+    } catch (error) {
+      console.error(error.message);
+    }
+  };
   const fetchBookingHistory = async () => {
     try {
       isLoadingBookingHistory.value = true;
@@ -140,44 +157,45 @@
           </template>
         </Column>
 
-        <!-- <Column field="image" header="Video">
+        <Column field="image" header="Video">
           <template #body="{ data }">
             <RouterLink :to="`/video/${data.video.id}`" :key="data.id">
               <img :src="data.video.thumbnailUrl" class="w-[200px] h-[100px] object-cover"
             /></RouterLink>
           </template>
-        </Column> -->
-        <!-- <Column field="video" header="Details">
+        </Column>
+        <Column field="video" header="Details">
           <template #body="{ data }">
             <h1 class="font-bold truncate w-[400px]">{{ data.video?.title }}</h1>
             <h1 v-if="data.video?.category">{{ data.video?.category?.title }}</h1>
-            <div class="flex gap-3 mt-2">
+            <div class="flex gap-3 mt-2 text-xs">
               <span
-                class="bg-[#EEEEEE] rounded-full text-black py-2 px-4"
+                class="bg-[#EEEEEE] rounded-full text-black p-2"
                 v-if="data.video?.levelWorkout"
               >
                 {{ data.video?.levelWorkout?.levelWorkout }}</span
               >
-              <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
+              <span class="bg-[#EEEEEE] rounded-full text-black p-2">{{
                 genreDuration(data.video?.duration)
               }}</span>
             </div>
           </template>
-        </Column> -->
-        <Column header="Channel Name">
-          <template #body="{ data }">
-            <Skeleton v-if="isLoadingBookingHistory" width="120px" height="20px" />
-            <span v-else>{{ truncateDescripton(data.channelBooking.channelName, 25) }}</span>
-          </template>
         </Column>
+
         <Column field="rep" header="REPs">
           <template #body="{ data }">
-            <span class="font-bold"> {{ formatNumber(data.rep) }} REPs </span>
+            <span class="font-bold">
+              {{
+                formatNumber(data.featuredBase?.pricePerDay || data.featuredAbnormal?.pricePerDay)
+              }}
+              REPs
+            </span>
           </template>
         </Column>
         <Column field="View" header="Action">
           <template #body="{ data }"
-            ><div><i class="pi pi-eye pt-1"></i></div></template
+            ><div @click="toggleDateDetailVisible(data.date)">
+              <i class="pi pi-eye pt-1 cursor-pointer"></i></div></template
         ></Column>
 
         <Column field="" header=""></Column>
@@ -216,4 +234,9 @@
       </div>
     </div>
   </section>
+  <DetailDateAnalytics
+    @toggleDateDetailVisible="toggleDateDetailVisible"
+    :isDateDetailVisible="isDateDetailVisible"
+    title="Date Detail Analytics"
+  />
 </template>
