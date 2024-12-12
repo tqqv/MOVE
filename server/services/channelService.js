@@ -5,6 +5,7 @@ const { Channel, Subscribe, User, Video, Category, CategoryFollow, LevelWorkout,
 const { v4: uuidv4 } = require('uuid');
 const { remove, get, set } = require("../utils/redis/base/redisBaseService.js");
 const {  takeFinalSnapshot, getTopDonatorsWithDetails } = require("../utils/redis/stream/redisStreamService.js");
+const validateUsername = require("../middlewares/validateUsername.js");
 
 // Function này để lúc admin accept request live sẽ gọi
 const createChannel = async (userId, username, avatar) => {
@@ -558,7 +559,7 @@ const endStream = async(data) => {
     }
   } catch (error) {
     console.log(error);
-    
+
     return {
       status: 500,
       message: error.message

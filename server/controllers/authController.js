@@ -1,6 +1,6 @@
 const responseHandler = require("../middlewares/responseHandler");
 const { setCookies, clearCookies } = require("../utils/cookies.js");
-var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, loginAdmin } = require("../services/authService");
+var { login, register, sendMailVerifyFacebook, verifyAccountFacebook, loginAdmin, getBanned } = require("../services/authService");
 var { loginByGoogle } = require("../services/googleService.js");
 var { loginByFacebook } = require("../services/facebookService.js");
 var jwt = require("jsonwebtoken");
@@ -196,6 +196,13 @@ const verifyAccountFacebookController = async (req, res, next) => {
   responseHandler(result.status, null, result.message)(req, res, next);
 };
 
+const getBannedController = async (req, res, next) => {
+  const userId = req.user.id;
+  const result = await getBanned(userId);
+
+  responseHandler(result.status, null, result.message)(req, res, next);
+};
+
 
 module.exports = {
   loginController,
@@ -213,4 +220,5 @@ module.exports = {
   sendMailVerifyFacebookController,
   verifyAccountFacebookController,
   loginAdminController,
+  getBannedController
 };

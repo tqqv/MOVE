@@ -1291,6 +1291,14 @@ const updateViewtime = async(userId, videoId, viewTime) => {
   }
 }
 
+const shuffleVideos = (videos) => {
+  for (let i = videos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [videos[i], videos[j]] = [videos[j], videos[i]]; // Hoán đổi vị trí
+  }
+  return videos;
+};
+
 const getVideoWatchAlso = async (category, level, videoId) => {
   try {
     const videos = await Video.findAll({
@@ -1394,9 +1402,11 @@ const getVideoWatchAlso = async (category, level, videoId) => {
       videos.push(...additionalVideos);
     }
 
+    const listVideo = shuffleVideos(videos)
+
     return {
       status: 200,
-      data: videos,
+      data: listVideo,
       message: 'Get video what also successfully.'
     };
   } catch (error) {

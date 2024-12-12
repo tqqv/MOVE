@@ -81,7 +81,7 @@
           pointBorderColor: '#fff',
         },
         {
-          label: 'Spend',
+          label: 'Withdraw',
           data: spend,
           borderColor: 'rgb(254, 176, 25, 1)',
           backgroundColor: 'rgb(254, 176, 25, 0.2)',
@@ -116,17 +116,7 @@
           display: true,
         },
       },
-      scales: {
-        y: {
-          beginAtZero: true,
-          min: 0,
-          ticks: {
-            callback: function (value) {
-              return '$' + value.toLocaleString();
-            },
-          },
-        },
-      },
+//
     };
 
     if (chartInstance) {
