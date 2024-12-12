@@ -6,9 +6,10 @@ const setCookies = (cookies = []) => {
     } else {
       domain = process.env.DOMAIN
     }
+
     cookies.forEach(({ name, value, days, options = {} }) => {
       const finalOptions = {
-        domain: domain,
+        domain,
         path: '/',
         secure: true,
         sameSite: 'None',
@@ -24,14 +25,14 @@ const clearCookies = (cookies = []) => {
   return (req, res) => {
     let domain = null;
     if (req.hostname === 'localhost') {
-      domain = req.hostname;
+      domain = req.hostname
     } else {
-      domain = process.env.DOMAIN;
+      domain = process.env.DOMAIN
     }
 
     cookies.forEach(({ name, options = {} }) => {
       const finalOptions = {
-        domain: domain,
+        domain,
         path: '/',
         secure: true,
         sameSite: 'None',

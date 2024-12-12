@@ -1,6 +1,7 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser } = require("../services/adminService");
+const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanChannel, revenue, getListUserPayIn, getListUserPayOut } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
+const { createSystemConfig, getDonationItemByKey, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
 const { getProfile } = require("../services/userService");
 const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
 
@@ -57,6 +58,12 @@ const userCountController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const unbanAccountController = async (req, res, next) => {
+  const userId = req.params.userId
+  const result = await unbanAccount(userId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 const getAllUserController = async (req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
@@ -85,6 +92,12 @@ const editProfileUserController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const unbanChannelController = async (req, res, next) => {
+  const channelId = req.params.channelId
+  const result = await unbanChannel(channelId)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
 const getListVideoByChannelIdController = async (req, res, next) => {
   const channelId = req.params.channelId;
   const page = req.query.page || 1;
@@ -133,13 +146,67 @@ const getListPaymentByUserIdController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const revenueController = async (req, res, next) => {
+  const year = req.query.year || null
+  const result = await revenue(year)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListUserPayInController = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const result = await getListUserPayIn(page, pageSize)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getListUserPayOutController = async (req, res, next) => {
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const result = await getListUserPayOut(page, pageSize)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const createSystemConfigController = async (req, res, next) => {
+  const data = req.body;
+  const result = await createSystemConfig(data)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getSystemConfigByKeyController = async (req, res, next) => {
+  const key = req.params.key
+  const result = await getDonationItemByKey(key)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const getAllSystemConfigController = async (req, res, next) => {
+  const result = await getAllSystemConfig()
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const editSystemConfigController = async (req, res, next) => {
+  const systemConfigId = req.body.systemConfigId
+  const value = req.body.value
+  const result = await editSystemConfig(systemConfigId, value)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 module.exports = {
   setStatusRequestChannelController,
   getStatisticController,
   getDataChartMoneyController,
   getTop5ChannelController,
   getTop5UserDepositController,
+  userCountController,
   getAllUsersRequestController,
+  unbanAccountController,
+  unbanChannelController,
   userCountController,
   getAllUserController,
   getUserByIdController,
@@ -148,4 +215,11 @@ module.exports = {
   EditVideoByIdController,
   deleteVideoByIdController,
   getListPaymentByUserIdController,
+  revenueController,
+  getListUserPayInController,
+  getListUserPayOutController,
+  createSystemConfigController,
+  getSystemConfigByKeyController,
+  getAllSystemConfigController,
+  editSystemConfigController,
 }

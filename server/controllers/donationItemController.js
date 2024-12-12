@@ -16,7 +16,7 @@ const getAllDonationItemController = async(req, res, next) => {
 }
 
 const editDonationItemController = async (req, res, next) => {
-  const data = req.body.data
+  const data = req.body
   const donationItemId = req.params.donationItemId
   const result = await editDonationItem(donationItemId, data);
 
@@ -24,7 +24,7 @@ const editDonationItemController = async (req, res, next) => {
 }
 
 const getDonationItemByIdController = async (req, res, next) => {
-  const donationItemId = req.params.data
+  const donationItemId = req.params.donationItemId
   const result = await getDonationItemById(donationItemId);
 
   responseHandler(result.status, result.data, result.message)(req, res, next);

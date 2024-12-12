@@ -161,24 +161,25 @@ html {
   }
 
   .btn-success {
-    @apply bg-green w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+    @apply bg-green w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
   }
 
   .btn-reject {
-    @apply bg-red w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+    @apply bg-red w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
   }
 
   .btn-suspend {
-    @apply bg-yellow-dark w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+    @apply bg-yellow-dark w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
   }
 
   .btn-ban {
-    @apply bg-black w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+    @apply bg-black w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
   }
 
   .btn-cancel {
-    @apply bg-footer w-24 py-3 leading-none text-white font-bold rounded-lg text-sm;
+    @apply bg-footer w-24 h-10 leading-none text-white font-bold rounded-lg text-sm;
   }
+
   .error_toast {
     @apply text-red italic font-semibold;
   }

@@ -52,6 +52,24 @@ const editCategory = async (cateId, data) => {
     return { error: true, message: error.message };
   }
 };
+
+const getAllCategoriesByAdmin = async () => {
+  try {
+    const response = await axios.get('/category/getAllCateAdmin');
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+
+const deleteCategory = async (cateId) => {
+  try {
+    const response = await axios.delete(`/category/${cateId}`);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 export {
   getAllCategories,
   getCategoryByTitle,
@@ -59,4 +77,6 @@ export {
   createCategory,
   getAllCategoriesWithFollower,
   editCategory,
+  getAllCategoriesByAdmin,
+  deleteCategory,
 };

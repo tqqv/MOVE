@@ -56,10 +56,93 @@ const reportChatMessage = async (userId, reportTypeId, content, accountId) => {
   }
 };
 
+//  ================= ADMIN ===================
+const getAllReportVideo = async (params) => {
+  try {
+    const response = await axios.get('/admin/getListReportVideo', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getAllReportComment = async (params) => {
+  try {
+    const response = await axios.get('/admin/getListReportComment', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getAllReportLivestream = async (params) => {
+  try {
+    const response = await axios.get('/admin/getListReportLivestream', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getAllReportChannel = async (params) => {
+  try {
+    const response = await axios.get('/admin/getListReportChannel', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getAllReportAccount = async (params) => {
+  try {
+    const response = await axios.get('/admin/getListReportAccount', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const getReportDetail = async (params) => {
+  try {
+    const response = await axios.get('/admin/getReportDetail', {
+      params,
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const handleReportAction = async (params) => {
+  try {
+    const response = await axios.post('/admin/actionReport', params);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
 export {
   reportChannel,
   getAllReportChannelTypes,
   getAllReportLiveStream,
   reportLiveStream,
   reportChatMessage,
+  getAllReportVideo,
+  getAllReportComment,
+  getAllReportLivestream,
+  getAllReportChannel,
+  getAllReportAccount,
+  getReportDetail,
+  handleReportAction,
 };

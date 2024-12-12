@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { messages } = require("../utils/redis/key/chatKey.js");
-const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, Sequelize } = db;
+const { DonationItem, Report, ReportType, User, Video, Livestream, Comment, Channel, Ban, LevelWorkout, Category, Sequelize } = db;
 
 const reportVideo = async(userId, videoId, reportTypeId) => {
   try {
@@ -435,37 +435,70 @@ const reportAccount = async(userId, accountId, reportTypeId) => {
   }
 }
 
-const getListReportVideo = async(page, pageSize) => {
+const getListReportVideo = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetVideoId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportVideo = await Report.findAll({
+      where: whereCondition,
       attributes: [
         'targetVideoId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetVideoId')), 'reportCount'],
       ],
-      where: {
-        targetVideoId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
-      group: ['targetVideoId', 'status'],
       include: [
         {
           model: Video,
-          attributes: ['title', 'thumbnailUrl']
+          attributes: ['title', 'thumbnailUrl'],
+          include: {
+            model: Channel,
+            as: 'channel',
+            attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+            include: {
+              model: User,
+              attributes: ['username']
+            }
+          },
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      group: ['targetVideoId', 'status'],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN Report.status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetVideoId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetVideoId',
@@ -492,37 +525,69 @@ const getListReportVideo = async(page, pageSize) => {
   }
 }
 
-const getListReportComment = async(page, pageSize) => {
+const getListReportComment = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetCommentId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
     const listReportComment = await Report.findAll({
       attributes: [
         'targetCommentId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetCommentId')), 'reportCount'],
       ],
-      where: {
-        targetCommentId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetCommentId', 'status'],
       include: [
         {
           model: Comment,
-          attributes: ['content', 'rep']
+          attributes: ['content', 'rep'],
+          include: {
+            model: User,
+            as: 'userComments',
+            attributes: ['avatar', 'username', 'email'],
+            include: {
+              model: Channel,
+              attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+            }
+          }
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetCommentId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetCommentId',
@@ -549,37 +614,70 @@ const getListReportComment = async(page, pageSize) => {
   }
 }
 
-const getListReportLivestream = async(page, pageSize) => {
+const getListReportLivestream = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetLivestreamId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportLivestream = await Report.findAll({
       attributes: [
         'targetLivestreamId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetLivestreamId')), 'reportCount'],
       ],
-      where: {
-        targetLivestreamId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetLivestreamId', 'status'],
       include: [
         {
           model: Livestream,
-          attributes: ['content', 'rep']
+          attributes: ['thumbnailUrl', 'title'],
+          include: {
+            model: Channel,
+            as: "livestreamChannel",
+            attributes: ["channelName", "avatar", "popularCheck", "isLive"],
+            include: {
+              model: User,
+              attributes: ["username"]
+            }
+          }
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetLivestreamId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetLivestreamId',
@@ -606,37 +704,63 @@ const getListReportLivestream = async(page, pageSize) => {
   }
 }
 
-const getListReportAccount = async(page, pageSize) => {
+const getListReportAccount = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetAccountId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportAccount = await Report.findAll({
       attributes: [
         'targetAccountId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetAccountId')), 'reportCount'],
       ],
-      where: {
-        targetAccountId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetAccountId', 'status'],
       include: [
         {
           model: User,
-          attributes: ['username', 'avatar', 'id']
+          as: 'targetUser',
+          attributes: ['username', 'avatar', 'id', 'email']
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetAccountId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetAccountId',
@@ -663,37 +787,66 @@ const getListReportAccount = async(page, pageSize) => {
   }
 }
 
-const getListReportChannel = async(page, pageSize) => {
+const getListReportChannel = async(page, pageSize, status) => {
   try {
+    const whereCondition = {
+      targetChannelId: {
+        [Sequelize.Op.ne]: null,
+      }
+    }
+
+    if(status) {
+      if(status === "pending") {
+        whereCondition.status = 'pending'
+      } else if (status === 'banned') {
+        whereCondition.status = 'banned'
+      } else if (status === 'approved') {
+        whereCondition.status = 'approved'
+      } else if (status === 'rejected') {
+        whereCondition.status = 'rejected'
+      } else if (status === 'suspended') {
+        whereCondition.status = 'suspended'
+      } else if (status === 'closed') {
+        whereCondition.status = 'closed'
+      }
+    }
+
     const listReportChannel = await Report.findAll({
       attributes: [
         'targetChannelId',
         'status',
         [Sequelize.fn('COUNT', Sequelize.col('targetChannelId')), 'reportCount'],
       ],
-      where: {
-        targetChannelId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       group: ['targetChannelId', 'status'],
       include: [
         {
           model: Channel,
-          attributes: ['channelName', 'avatar', 'id']
+          attributes: ['channelName', 'avatar', 'id'],
+          include: {
+            model: User,
+            attributes: ['username']
+          }
         }
       ],
-      order: [[Sequelize.literal('reportCount'), 'DESC']],
+      order: [
+        [
+          Sequelize.literal(`
+            CASE 
+              WHEN status = 'pending' THEN 0
+              ELSE 1
+            END
+          `), 
+          'ASC'
+        ],
+        [Sequelize.literal('reportCount'), 'DESC']
+      ],
       offset: (page - 1) * pageSize *1,
       limit: pageSize*1
     });
 
     const count = await Report.count({
-      where: {
-        targetChannelId: {
-          [Sequelize.Op.ne]: null,
-        }
-      },
+      where: whereCondition,
       attributes: [
           'status',
           'targetChannelId',
@@ -720,10 +873,26 @@ const getListReportChannel = async(page, pageSize) => {
   }
 }
 
-const updateReportStatus = async(reportId, status) => {
+const updateReportStatus = async(targetReportId, status, type) => {
+  const whereCondition = {}
+
+  if(type === 'account'){
+    whereCondition.targetAccountId = targetReportId
+  } else if (type === 'video') {
+    whereCondition.targetVideoId = targetReportId
+  } else if (type === 'livestream') {
+    whereCondition.targetLivestreamId = targetReportId
+  } else if (type === 'comment') {
+    whereCondition.targetCommentId = targetReportId
+  } else if (type === 'channel') {
+    whereCondition.targetChannelId = targetReportId
+  } else {
+    throw Error('Type not exist')
+  }
+
   await Report.update(
     { status },
-    { where: { id: reportId } }
+    { where: whereCondition }
   );
 };
 
@@ -746,7 +915,7 @@ const handleBan = async(banned, isPermanent = false) => {
 };
 
 const hanleBanAllVideoAndStream = async(channelId) => {
-  await Video.update({ isBanned: true }, { where: { channelId: channelId } })
+  await Video.update({ status: "private" }, { where: { channelId: channelId } })
   await Livestream.update({ isBanned: true }, { where: { streamerId: channelId } })
 }
 
@@ -770,12 +939,12 @@ const hanleBanSingleLivestream = async(livestreamId) => {
 //   await Video.update({ isBanned: true }, { where: { channelId: channelId } })
 // }
 
-const actionReport = async(reportId, action, banned, type) => {
+const actionReport = async(targetReportId, action, banned, type) => {
   try {
-    if (!action) {
+    if (!action || !type) {
       return {
         status: 400,
-        message: "Action cannot be empty.",
+        message: "Action and type cannot be empty.",
       };
     }
 
@@ -788,15 +957,24 @@ const actionReport = async(reportId, action, banned, type) => {
           }
         }
 
+        const user = await User.findOne({where: {id:banned.userId}})
+
+        if(!user) {
+          return {
+            status: 404,
+            message: "User not found."
+          }
+        }
+
         await handleBan(banned, true);
-        await updateReportStatus(reportId, 'banned');
+        await updateReportStatus(targetReportId, 'banned', type);
         return {
           status: 200,
           message: `User associated resources have been permanently banned.`,
         };
 
       case 'rejected':
-        await updateReportStatus(reportId, 'rejected');
+        await updateReportStatus(targetReportId, 'rejected', type);
         return {
           status: 200,
           message: "The report has been rejected.",
@@ -806,11 +984,21 @@ const actionReport = async(reportId, action, banned, type) => {
         if(!banned.userId || !banned.reason || !banned.expiresAt) {
           return {
             status: 400,
-            message: "Id user and reason not null"
+            message: "Id user, reason and exprires date not null"
           }
         }
+
+        const userCheck = await User.findOne({where: {id:banned.userId}})
+
+        if(!userCheck) {
+          return {
+            status: 404,
+            message: "User not found."
+          }
+        }
+
         await handleBan(banned, false);
-        await updateReportStatus(reportId, 'suspended');
+        await updateReportStatus(targetReportId, 'suspended', type);
         return {
           status: 200,
           message: ` User has been suspended until ${banned.expiresAt}.`,
@@ -824,27 +1012,25 @@ const actionReport = async(reportId, action, banned, type) => {
           }
         }
 
-        const report = await Report.findByPk(reportId)
-
         switch (type) {
           case 'video':
-            await updateReportStatus(reportId, 'approved');
-            await hanleBanSingleVideo(report.targetVideoId)
+            await updateReportStatus(targetReportId, 'approved', type);
+            await hanleBanSingleVideo(targetReportId)
             return {
               status: 200,
               message: "The report has been approved.",
             };
           case 'livestream':
-            await updateReportStatus(reportId, 'approved');
-            await hanleBanSingleLivestream(report.targetLivestreamId)
+            await updateReportStatus(targetReportId, 'approved', type);
+            await hanleBanSingleLivestream(targetReportId)
 
             return {
               status: 200,
               message: "The report has been approved.",
             };
           case 'comment':
-            await updateReportStatus(reportId, 'approved');
-            await hanleBanSingleComment(report.targetCommentId)
+            await updateReportStatus(targetReportId, 'approved', type);
+            await hanleBanSingleComment(targetReportId)
             return {
               status: 200,
               message: "The report has been approved.",
@@ -856,7 +1042,7 @@ const actionReport = async(reportId, action, banned, type) => {
             };
         }
       case 'closed':
-        await updateReportStatus(reportId, 'closed');
+        await updateReportStatus(targetReportId, 'closed', type);
         return {
           status: 200,
           message: "The report has been closed.",
@@ -897,7 +1083,11 @@ const getReportDetail = async(targetReportId, type) => {
                 {
                   model: Channel,
                   as: 'channel',
-                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+                  include: {
+                    model: User,
+                    attributes: ['username', 'id', 'role']
+                  }
                 },
                 {
                   model: LevelWorkout,
@@ -910,11 +1100,6 @@ const getReportDetail = async(targetReportId, type) => {
                   as: 'category',
                 }
               ]
-            },
-            {
-              model: User,
-              as: 'reporter',
-              attributes: ['username', 'avatar', 'role', 'email', 'id']
             },
           ]
         })
@@ -947,6 +1132,15 @@ const getReportDetail = async(targetReportId, type) => {
             {
               model: Livestream,
               include: [
+                {
+                  model: Channel,
+                  as: 'livestreamChannel',
+                  attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+                  include: {
+                    model: User,
+                    attributes: ['username', 'id', 'role']
+                  }
+                },
                 {
                   model: Category,
                   attributes: ["title"],
@@ -996,7 +1190,11 @@ const getReportDetail = async(targetReportId, type) => {
                     {
                       model: Channel,
                       as: 'channel',
-                      attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+                      attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+                      include: {
+                        model: User,
+                        attributes: ['username', 'id'] 
+                      }
                     },
                     {
                       model: LevelWorkout,
@@ -1013,7 +1211,7 @@ const getReportDetail = async(targetReportId, type) => {
                 {
                   model: User,
                   as: 'userComments',
-                  attributes: ['avatar', 'username', 'email', 'isVerified']
+                  attributes: ['avatar', 'username', 'email', 'isVerified', 'role']
                 },
                 {
                   model: Channel,
@@ -1027,7 +1225,7 @@ const getReportDetail = async(targetReportId, type) => {
                 },
               ]
             }
-          ]
+          ],
         })
 
         const commentReporters = await Report.findAll({
@@ -1058,7 +1256,7 @@ const getReportDetail = async(targetReportId, type) => {
             {
               model: User,
               as: 'targetUser',
-              attributes: ['username', 'avatar', 'role', 'email', 'id']
+              attributes:  ['username', 'avatar','fullName', 'dob','gender', 'email', 'country', 'city', 'state', 'id', 'role'],
             }
           ]
         })
@@ -1091,7 +1289,11 @@ const getReportDetail = async(targetReportId, type) => {
           include: [
             {
               model: Channel,
-              attributes: ['avatar','channelName', 'popularCheck']
+              attributes: ['avatar','channelName','bio','facebookUrl' ,'youtubeUrl','instaUrl'],
+              include: {
+                model: User,
+                attributes: ['username', 'avatar','fullName', 'dob','gender', 'email', 'country', 'city', 'state', 'id', 'role'],
+              }
             }
           ]
         })
