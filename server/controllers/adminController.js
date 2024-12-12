@@ -64,6 +64,7 @@ const unbanAccountController = async (req, res, next) => {
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
+
 const getAllUserController = async (req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;

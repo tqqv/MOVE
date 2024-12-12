@@ -13,7 +13,8 @@
   const handleLogout = async () => {
     try {
       const response = await getLogout();
-      localStorage.removeItem('isLogin');
+      localStorage.removeItem('isLoginAdmin');
+      localStorage.removeItem('role');
       userStore.clearUserData();
 
       toast.success(response?.data.message || 'Logout successful!');

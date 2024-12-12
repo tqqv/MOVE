@@ -4,7 +4,8 @@ const { setStatusRequestChannelController, getStatisticController, getDataChartM
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
-const { loginAdminController } = require("../controllers/authController");
+const { loginAdminController, logoutController } = require("../controllers/authController");
+const { getProfileController } = require("../controllers/userController");
 const adminRoute = express.Router();
 
 adminRoute.post("/login", loginAdminController);
@@ -62,5 +63,8 @@ adminRoute.post("/createSystemConfig", verifyAdmin, createSystemConfigController
 adminRoute.get("/getSystemConfigByKey/:key", verifyAdmin, getSystemConfigByKeyController)
 adminRoute.get("/getAllSystemConfig", verifyAdmin, getAllSystemConfigController)
 adminRoute.patch("/editSystemConfig", verifyAdmin, editSystemConfigController)
+
+adminRoute.get("/getProfileAdmin", verifyAdmin, getProfileController)
+adminRoute.get("/logout", verifyAdmin, logoutController)
 
 module.exports = adminRoute;
