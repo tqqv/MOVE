@@ -18,7 +18,7 @@
 
       toast.success(response?.data.message || 'Logout successful!');
       emit('closeAllPopups');
-      router.push('/');
+      router.push('/login');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
     }

@@ -3,8 +3,6 @@
   import { useRoute } from 'vue-router';
   import logo from '@assets/logo.svg';
   import HomeIcon from '@icons/home.vue';
-  import VideoIcon from '@icons/videos.vue';
-  import CommentIcon from '@icons/comment.vue';
   import CashoutIcon from '@icons/cashout.vue';
   import SettingIcon from '@icons/setting.vue';
   import User from '../icons/user.vue';
@@ -14,16 +12,35 @@
   import Request from '../icons/request.vue';
   import Logout from '../icons/logout.vue';
   import Booking from '../icons/booking.vue';
+  import { useUserStore } from '@/stores';
+  import { toast } from 'vue3-toastify';
+  import { getLogout } from '@/services/auth';
+  import { useRouter } from 'vue-router';
 
   const route = useRoute();
+  const userStore = useUserStore();
+  const router = useRouter();
   const isDropdownOpen = ref(false);
 
   const toggleDropdown = () => {
     isDropdownOpen.value = !isDropdownOpen.value;
   };
 
+  const handleLogout = async () => {
+    try {
+      const response = await getLogout();
+      localStorage.removeItem('isLogin');
+      userStore.clearUserData();
+
+      toast.success(response?.data.message || 'Logout successful!');
+      router.push('/login');
+    } catch (error) {
+      toast.error(error.response?.data.message || 'Logout failed');
+    }
+  };
+
   const menuItems = [
-    { name: 'Dashboard', icon: HomeIcon, link: '/dashboard' },
+    { name: 'Dashboard', icon: HomeIcon, link: '/' },
     { name: 'User Management', icon: User, link: '/users' },
     {
       name: 'REP$ System',
@@ -48,7 +65,7 @@
 <template>
   <div class="sticky h-[100vh] w-[281px] bg-dark shadow-xl flex-shrink-0">
     <div class="flex justify-center items-center py-8 mr-2">
-      <RouterLink to="/dashboard"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
+      <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
     </div>
     <div
       class="flex flex-col justify-between h-[calc(100vh-100px)] overflow-y-scroll scrollbar-custom"
@@ -60,8 +77,8 @@
               class="p-4 cursor-pointer group hover:bg-[#333a48] flex gap-x-4 font-semibold items-center rounded-md text-white"
               :class="{
                 'bg-primary/85 font-bold hover:bg-primary/85':
-                  route.path === item.link ||
-                  (item.link !== '/reps' && route.path.startsWith(item.link)),
+                  (route.path === item.link && item.link === '/') ||
+                  (item.link !== '/' && route.path.startsWith(item.link) && route.path !== '/'),
               }"
               @click="item.hasDropdown && toggleDropdown()"
             >
@@ -96,7 +113,7 @@
         class="flex items-center gap-x-4 mx-2 mt-24 p-4 mb-3 text-white rounded-md cursor-pointer hover:bg-[#333a48]"
       >
         <Logout fill="#fff" />
-        <span class="text-sm font-semibold">Logout</span>
+        <span class="text-sm font-semibold" @click="handleLogout()">Logout</span>
       </div>
     </div>
   </div>

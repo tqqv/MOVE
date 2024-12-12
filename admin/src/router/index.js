@@ -14,10 +14,14 @@ import Cashout from '@/components/admin/rep/Revenue.vue';
 import DonateItem from '@/components/admin/rep/DonateItem.vue';
 import DiscountItem from '@/components/admin/rep/DiscountItem.vue';
 import LoginAdmin from '@/components/admin/login/LoginAdmin.vue';
+import { createPinia, setActivePinia } from 'pinia';
+const pinia = createPinia();
+setActivePinia(pinia);
+import { useUserStore } from '@/stores';
 
 const routes = [
   {
-    path: '/',
+    path: '/login',
     component: LoginAdmin,
     name: LoginAdmin,
   },
@@ -25,7 +29,7 @@ const routes = [
     path: '/',
     component: AdminLayout,
     children: [
-      { path: 'dashboard', component: AdminDashboard },
+      { path: '/', component: AdminDashboard },
       { path: 'users', component: UserManagement },
       { path: 'request', component: RequestManagement },
       { path: 'category', component: CategoryManagement },
@@ -49,6 +53,28 @@ const routes = [
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes,
+});
+
+router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore();
+
+  if (!userStore.user) {
+    try {
+      await userStore.fetchUserProfile();
+    } catch (error) {
+      return next('/login');
+    }
+  }
+
+  const loggedInUser = userStore.user;
+
+  if (!loggedInUser && to.path !== '/login') {
+    return next('/login');
+  } else if (loggedInUser && to.path === '/login') {
+    return next('/');
+  }
+
+  next();
 });
 
 export default router;
