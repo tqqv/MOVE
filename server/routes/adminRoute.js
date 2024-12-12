@@ -60,7 +60,7 @@ adminRoute.get("/requestChannel", verifyAdmin, getAllUsersRequestController);
 
 //////////// system config ///////////
 adminRoute.post("/createSystemConfig", verifyAdmin, createSystemConfigController)
-adminRoute.get("/getSystemConfigByKey/:key", verifyAdmin, getSystemConfigByKeyController)
+adminRoute.get("/getSystemConfigByKey/:key", getSystemConfigByKeyController)
 adminRoute.get("/getAllSystemConfig", verifyAdmin, getAllSystemConfigController)
 adminRoute.patch("/editSystemConfig", verifyAdmin, editSystemConfigController)
 
