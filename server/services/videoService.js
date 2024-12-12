@@ -3,7 +3,7 @@ let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SEC
 const fs = require('fs');
 const db = require("../models/index.js");
 const { Op } = require('sequelize');
-const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword, FeaturedContent } = db;
 const { v4: uuidv4 } = require('uuid');
 const WEIGHTS = require('../models/enum/constants.js');
 const axios = require('axios');
@@ -1296,6 +1296,21 @@ const increaseView = async(userId, videoId, ip, viewTime) => {
     if(!user || (user && checkView)){
       video.viewCount += 1;
       await video.save()
+      // Lấy current date và chuyển sang UTC
+      const currentDate = new Date();
+      const startOfDayUTC = new Date(currentDate.toISOString().split('T')[0] + 'T00:00:00.000Z');
+
+      const featuredContent = await FeaturedContent.findOne({
+        where: { videoId: videoId, date: startOfDayUTC },
+      });
+
+      // Nếu tồn tại, tăng viewIncrease
+      if (featuredContent) {
+        console.log("come");
+
+        featuredContent.viewIncrease += 1;
+        await featuredContent.save();
+      }
       return {
         status: 200,
         message: "+1 view"
@@ -1310,6 +1325,20 @@ const increaseView = async(userId, videoId, ip, viewTime) => {
       video.viewCount += 1;
       await video.save()
       if(viewData) {
+        // Lấy current date và chuyển sang UTC
+        const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD định dạng UTC
+
+        // Kiểm tra trong FeaturedContents
+        const featuredContent = await FeaturedContent.findOne({
+          where: { videoId: videoId, date: currentDate },
+        });
+
+        // Nếu tồn tại, tăng viewIncrease
+        if (featuredContent) {
+          featuredContent.viewIncrease += 1;
+          await featuredContent.save();
+        }
+
         return {
           status: 200,
           message: "Add viewer data successfully."
