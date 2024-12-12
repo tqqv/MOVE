@@ -1,14 +1,16 @@
 <script setup>
   import { onBeforeUnmount, onMounted, ref } from 'vue';
   import { getAllNotifications, makeAllAsRead } from '@/services/notification';
-  import { useNotificationStore } from '@/stores';
+  import { useNotificationStore, useTabStore } from '@/stores';
   import Skeleton from 'primevue/skeleton';
   import Divider from 'primevue/divider';
   import NotificationItem from './NotificationItem.vue';
   import LogoIcon from '../icons/logoIcon.vue';
+  import { useRouter } from 'vue-router';
 
   const emit = defineEmits(['toggleNotiMenu']);
   const notificationStore = useNotificationStore();
+  const tabStore = useTabStore();
 
   const listNotifications = ref([]);
   const loading = ref(false);
@@ -81,7 +83,21 @@
           }
         });
       });
+      optionSection.value = false;
     }
+  };
+
+  // HANDLE OPEN SECTION
+  const optionSection = ref(false);
+  const handleOpenSection = () => {
+    optionSection.value = !optionSection.value;
+  };
+
+  const router = useRouter();
+  const routeSetting = () => {
+    router.push('/personal-profile');
+    tabStore.setActiveTab('1');
+    emit('toggleNotiMenu');
   };
 
   onMounted(() => {
@@ -95,7 +111,7 @@
 </script>
 <template>
   <div class="shadow-lg rounded-lg w-[340px] bg-white text-black">
-    <div class="py-5 text-center relative">
+    <div class="pt-5 text-center relative">
       <h1 class="text_subTitle relative">
         Notifications
         <div class="absolute right-[16px] top-[14%]">
@@ -108,6 +124,7 @@
         </div>
       </h1>
       <div
+        v-if="optionSection"
         class="bg-white absolute w-[80%] ml-9 z-10 rounded-md shadow-xl border border-gray-light p-2"
       >
         <div class="flex flex-col gap-y-1">
@@ -120,11 +137,16 @@
           </div>
           <div
             class="flex items-center gap-x-3 p-2 hover:bg-gray-light rounded-md text-sm font-semibold cursor-pointer"
+            @click="routeSetting"
           >
             <i class="pi pi-cog"></i>
             <span>Notification settings</span>
           </div>
         </div>
+      </div>
+      <div class="flex justify-center mt-4 text-sm">
+        <div class="w-1/2 border-b-[3px] border-primary mx-2 py-1 cursor-pointer">All</div>
+        <div class="w-1/2 border-b-[3px] border-primary mx-2 py-1 cursor-pointer">Unread</div>
       </div>
     </div>
     <Divider class="my-0" />
@@ -164,3 +186,27 @@
     </div>
   </div>
 </template>
+<style scoped>
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    background-color: transparent;
+  }
+
+  .scrollbar-custom:hover::-webkit-scrollbar {
+    background-color: #fff;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: #fff;
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background-color: #fff;
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(19, 208, 180, 0.8);
+  }
+</style>

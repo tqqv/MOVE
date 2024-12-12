@@ -20,7 +20,7 @@
   });
 
   const closePopup = () => {
-    emit('toggleNotiMenu'); // Sử dụng emit đúng cách
+    emit('toggleNotiMenu');
   };
 
   const handleMakeRead = async (notificationId) => {
