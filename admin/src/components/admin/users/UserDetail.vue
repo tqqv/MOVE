@@ -12,19 +12,112 @@
   import TransactionHistory from './tabs/TransactionHistory.vue';
   import Button from 'primevue/button';
   import Tag from 'primevue/tag';
+  import ConfirmDialog from 'primevue/confirmdialog';
+  import { useConfirm } from 'primevue/useconfirm';
+  import { toast } from 'vue3-toastify';
+  import axiosInstance from '@/services/axios';
 
   const route = useRoute();
   const router = useRouter();
   const activeTab = ref('0');
   const id = ref(route.params.id);
   const channel = ref(null);
+  const isBannedUser = ref(null);
+  const isBannedChannel = ref(null);
+  const confirm = useConfirm();
+  const showConfirmDialog = ref(false);
+  const showConfirmDialogChannel = ref(false);
 
   const onTabChange = (event) => {
     activeTab.value = event;
   };
 
+  const unbanUser = async () => {
+    try {
+      const response = await axiosInstance.post(`admin/unbanUser/${id.value}`);
+      console.log(response);
+      if (response.status === 200) {
+        toast.success('Unban user successfully');
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const unbanChannel = async () => {
+    try {
+      const response = await axiosInstance.post(`admin/unbanChannel/${channel.value.id}`);
+      console.log(response);
+      if (response.status === 200) {
+        toast.success('Unban channel successfully');
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
+  const confirmModal = () => {
+    confirm.require({
+      message: 'Are you sure you want to unban this user? This action cannot be undone.',
+      header: 'Confirm User Unban',
+      icon: 'pi pi-info-circle',
+      rejectProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptProps: {
+        label: 'Confirm',
+        severity: 'danger',
+      },
+      accept: async () => {
+        await unbanUser();
+        showConfirmDialog.value = false;
+        fetchChannelData();
+      },
+      reject: () => {
+        showConfirmDialog.value = false;
+      },
+    });
+  };
+  const confirmModalChannel = () => {
+    confirm.require({
+      message: 'Are you sure you want to unban this user? This action cannot be undone.',
+      header: 'Confirm Channel Unban',
+      icon: 'pi pi-info-circle',
+      rejectProps: {
+        label: 'Cancel',
+        severity: 'secondary',
+        outlined: true,
+      },
+      acceptProps: {
+        label: 'Confirm',
+        severity: 'danger',
+      },
+      accept: async () => {
+        await unbanChannel();
+        showConfirmDialogChannel.value = false;
+        fetchChannelData();
+      },
+      reject: () => {
+        showConfirmDialogChannel.value = false;
+      },
+    });
+  };
+
+  const openConfirmDialog = () => {
+    showConfirmDialog.value = true;
+    confirmModal();
+  };
+  const openConfirmDialogChannel = () => {
+    showConfirmDialogChannel.value = true;
+    confirmModalChannel();
+  };
+
   const fetchChannelData = async () => {
     const result = await getProfilebyUserId(id.value);
+    isBannedUser.value = result.data.data.isBanned;
+    isBannedChannel.value = result.data.data.Channel.isBanned;
     channel.value = result.data.data.Channel;
     if (result.status === 404) {
       router.push('/404');
@@ -59,8 +152,15 @@
             </div>
           </div>
           <div class="flex gap-x-5">
-            <Button label="Suspend" severity="danger" />
-            <Button label="Delete" severity="secondary" />
+            <div class="flex gap-x-5" v-if="isBannedUser && isBannedChannel">
+              <Button label="Unban User" severity="help" @click="openConfirmDialog" />
+            </div>
+            <div class="flex gap-x-5" v-if="!isBannedUser && isBannedChannel">
+              <Button label="Unban Channel" severity="help" @click="openConfirmDialogChannel" />
+            </div>
+            <div class="flex gap-x-5" v-if="isBannedUser && !isBannedChannel">
+              <Button label="Unban User" severity="help" @click="openConfirmDialog" />
+            </div>
           </div>
         </div>
         <Tabs :value="activeTab" @update:value="onTabChange" class="mt-2">
@@ -84,4 +184,9 @@
       </div>
     </div>
   </section>
+  <ConfirmDialog v-model:visible="showConfirmDialog" :style="{ width: '604px' }"></ConfirmDialog>
+  <ConfirmDialog
+    v-model:visible="showConfirmDialogChannel"
+    :style="{ width: '604px' }"
+  ></ConfirmDialog>
 </template>

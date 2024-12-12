@@ -7,6 +7,7 @@
   import Button from 'primevue/button';
   import { getAllUser } from '@/services/user';
   import Filter from '@/components/Filter.vue';
+  import Skeleton from 'primevue/skeleton';
   import { toast } from 'vue3-toastify';
   import { formatDateData, formatNumber } from '@/utils';
 
@@ -15,6 +16,7 @@
   const totalPage = ref(0);
   const totalUser = ref(0);
   const users = ref([]);
+  const isLoading = ref(true);
   const pageSizeOptions = [
     { id: 1, name: 10, value: 10 },
     { id: 2, name: 20, value: 20 },
@@ -32,6 +34,8 @@
       }
     } catch (error) {
       toast.error(error.message);
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -61,15 +65,69 @@
 
 <template>
   <section class="">
-    <div class="container">
+    <div class="container text-sm">
+      <div class="flex justify-between items-start mb-7">
+        <h1 class="text-2xl font-bold">Manage Users</h1>
+      </div>
       <div class="card bg-white p-4 shadow rounded-lg">
-        <DataTable :value="users" stripedRows showGridlines @row-click="handleRowClick">
-          <template #header>
-            <div class="flex flex-wrap gap-2 items-center justify-between">
-              <h1 class="font-bold text-[20px]">Manage Users</h1>
-              <Button label="New" icon="pi pi-plus" class="mr-2" />
-            </div>
-          </template>
+        <DataTable
+          v-if="isLoading"
+          :value="
+            Array(4).fill({
+              referralCode: '',
+              role: '',
+              email: '',
+              REPs: '',
+              isBanned: '',
+              username: '',
+              createdAt: '',
+              verified: '',
+              verified: '',
+            })
+          "
+          stripedRows
+        >
+          <Column field="referralCode" header="Code">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column header="Name">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="role" header="Role">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column field="email" header="Email">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column field="REPs" header="Balance (REPs)">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="isBanned" header="Status" dataType="boolean">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="verified" header="Verified" dataType="boolean">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="createdAt" header="Created at">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+        </DataTable>
+        <DataTable
+          v-else-if="!isLoading && users"
+          :value="users"
+          stripedRows
+          @row-click="handleRowClick"
+        >
           <Column field="referralCode" header="Code"></Column>
           <Column header="Name">
             <template #body="{ data }">
@@ -81,11 +139,6 @@
           </Column>
           <Column field="role" header="Role"></Column>
           <Column field="email" header="Email"></Column>
-          <Column field="createdAt" header="Created at">
-            <template #body="{ data }">
-              {{ formatDateData(data.createdAt) }}
-            </template>
-          </Column>
           <Column field="REPs" header="Balance (REPs)">
             <template #body="{ data }">
               {{ formatNumber(data.REPs) }}
@@ -108,11 +161,9 @@
               ></i>
             </template>
           </Column>
-          <Column>
+          <Column field="createdAt" header="Created at">
             <template #body="{ data }">
-              <div class="!text-center">
-                <button class="pi pi-ellipsis-v text-primary hover:text-primary-light"></button>
-              </div>
+              {{ formatDateData(data.createdAt) }}
             </template>
           </Column>
         </DataTable>

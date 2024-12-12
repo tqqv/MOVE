@@ -8,8 +8,8 @@
   import ConfirmDialog from 'primevue/confirmdialog';
   import { useConfirm } from 'primevue/useconfirm';
   import Filter from '@/components/Filter.vue';
+  import Skeleton from 'primevue/skeleton';
   import axiosInstance from '@/services/axios';
-  import Button from 'primevue/button';
   import { formatDateData, formatNumber } from '@/utils';
 
   const confirm = useConfirm();
@@ -22,6 +22,7 @@
   const showRejectDialog = ref(false);
   const reason = ref('');
   const showError = ref(false);
+  const isLoading = ref(true);
   const pageSizeOptions = [
     { id: 1, name: 10, value: 10 },
     { id: 2, name: 20, value: 20 },
@@ -45,6 +46,8 @@
       }
     } catch (error) {
       toast.error('Login failed');
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -179,7 +182,104 @@
   <section class="bg-[#FAFAFB]">
     <div class="container">
       <div class="card bg-white p-4 shadow rounded-lg">
-        <DataTable :value="requests" stripedRows showGridlines>
+        <DataTable
+          v-if="isLoading"
+          :value="
+            Array(4).fill({
+              username: '',
+              email: '',
+              REPs: '',
+              totalReportCount: '',
+              createdAt: '',
+              status: '',
+            })
+          "
+          stripedRows
+        >
+          <template #header>
+            <div class="flex flex-wrap gap-2 items-center justify-between">
+              <h1 class="font-bold text-[20px]">Request to channel</h1>
+              <div class="flex gap-x-5">
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === '',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== '',
+                  }"
+                  @click="applyFilter('')"
+                >
+                  All
+                </button>
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === 'pending',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== 'pending',
+                  }"
+                  @click="applyFilter('pending')"
+                >
+                  Pending
+                </button>
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === 'approved',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== 'approved',
+                  }"
+                  @click="applyFilter('approved')"
+                >
+                  Approved
+                </button>
+                <button
+                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
+                  :class="{
+                    'text-white bg-primary border-primary': filterStatus === 'rejected',
+                    'text-primary border-primary hover:bg-primary hover:text-white':
+                      filterStatus !== 'rejected',
+                  }"
+                  @click="applyFilter('rejected')"
+                >
+                  Rejected
+                </button>
+              </div>
+            </div>
+          </template>
+          <Column header="User">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="User.email" header="Email">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column header="Balance (REPs)">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="totalReportCount" header="Being Reported">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column field="createdAt" header="Create at">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="status" header="Status" dataType="boolean">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column>
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+        </DataTable>
+        <DataTable v-else :value="requests" stripedRows>
           <template #header>
             <div class="flex flex-wrap gap-2 items-center justify-between">
               <h1 class="font-bold text-[20px]">Request to channel</h1>
@@ -247,9 +347,9 @@
             </template>
           </Column>
           <Column field="User.email" header="Email"></Column>
-          <Column header="Balance">
+          <Column header="Balance (REPs)">
             <template #body="{ data }">
-              <span>{{ formatNumber(data.User.REPs) }} <strong>REP$</strong></span>
+              <span>{{ formatNumber(data.User.REPs) }}</span>
             </template>
           </Column>
           <Column field="totalReportCount" header="Being Reported"></Column>
