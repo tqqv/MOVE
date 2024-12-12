@@ -1,8 +1,8 @@
-const { Op, fn, col, literal } = require("sequelize");
+const { Op, fn, col, literal, where } = require("sequelize");
 const { get } = require("../utils/redis/base/redisBaseService.js");
 const db = require("../models/index.js");
 const moment = require('moment-timezone');
-const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, sequelize } = db;
+const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, Comment, Donation, sequelize } = db;
 
 
 const createFeatureContentService = async(livestreamId, videoId, startAt, expireAt) => {
@@ -100,12 +100,12 @@ const getAllFeatureContentService = async (datetime) => {
               attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
 
                 [
-                                sequelize.literal(`(
-                                  SELECT AVG(rating)
-                                  FROM ratings
-                                  WHERE ratings.videoId = video.id
-                                )`),
-                                'averageRating'
+                  sequelize.literal(`(
+                    SELECT AVG(rating)
+                    FROM ratings
+                    WHERE ratings.videoId = video.id
+                  )`),
+                  'averageRating'
                 ]
               ],
               include: [
@@ -449,7 +449,7 @@ const cancelBookingFeaturedContentService = async (pickedDates, channelId) => {
   }
 };
 
-const getBookingHistory = async (channelId, page, pageSize, startDate, endDate) => {
+const getBookingHistoryService = async (channelId, page, pageSize, startDate, endDate) => {
   try {
 
     const whereCondition = { channelId };
@@ -514,6 +514,107 @@ const getBookingHistory = async (channelId, page, pageSize, startDate, endDate) 
   }
 }
 
+const getBookingStatsService = async (channelId, datetime) => {
+  try {
+    const featuredContent = await FeaturedContent.findAll({
+      where: {
+        date: sequelize.where(
+          sequelize.fn('DATE', sequelize.col('date')),
+          '=',
+          datetime
+        ),
+        channelId,
+      },
+      attributes: [
+        [
+          sequelize.literal(`(
+            SELECT SUM(rep)
+            FROM comments AS commentReplies
+            WHERE commentReplies.videoId = video.id
+              AND DATE(commentReplies.createdAt) = date
+          )`),
+          'totalRepFromVideo',
+        ]
+      ],
+      include: [
+        {
+          model: Video,
+          as: "video",
+          include: [
+            {
+              model: Category,
+              as: "category",
+              attributes: ["title"],
+            },
+            {
+              model: LevelWorkout,
+              as: "levelWorkout",
+              attributes: ["levelWorkout"],
+            },
+            {
+              model: Comment,
+              as: "videoComment",
+              attributes: [],
+            },
+          ],
+        }
+      ],
+    });
+
+    const liveInfor = await Livestream.findOne({
+      where: {
+        streamerId: channelId,
+        createdAt: sequelize.where(
+          sequelize.fn('DATE', sequelize.col('createdAt')),
+          '=',
+          datetime
+        ),
+      },
+      attributes: [
+        "highestViewAtSameTime", "totalView", "totalShare", "duration",
+        [
+          sequelize.literal(`(
+            SELECT SUM(reps)
+            FROM donations AS streamDonator
+            WHERE streamDonator.livestreamId = Livestream.id
+              AND DATE(streamDonator.createdAt) = '${datetime}'
+          )`),
+          'totalRepFromLivestream',
+        ],
+      ],
+      include: [
+        {
+          model: Donation,
+          attributes: [],
+          as: "streamDonator",
+        },
+        {
+          model: Category,
+          attributes: ["title"],
+          as: 'category'
+        },
+        {
+          model: LevelWorkout,
+          attributes: ["levelWorkout"],
+          as: 'livestreamLevelWorkout'
+        },
+      ],
+    })
+
+    return {
+      status: 200,
+      data: {featuredContent, liveInfor},
+      message: "Get booking stats successfully"
+    }
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
 
 module.exports = {
   createFeatureContentService,
@@ -521,5 +622,6 @@ module.exports = {
   createBookingFeatureContentService,
   getBookingFeatureContentService,
   cancelBookingFeaturedContentService,
-  getBookingHistory
+  getBookingHistoryService,
+  getBookingStatsService
 }
