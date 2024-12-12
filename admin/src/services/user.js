@@ -1,7 +1,7 @@
 import axios from './axios';
 
 const getProfile = () => {
-  return axios.get('/user/getProfile');
+  return axios.get('/admin/getProfileAdmin');
 };
 
 const getProfilebyUsername = async (username) => {

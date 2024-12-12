@@ -3,6 +3,7 @@
   import { onBeforeMount, onMounted } from 'vue';
   import GlobalLoading from './components/GlobalLoading.vue';
   import { useLoadingStore } from './stores';
+  import { getLogout } from './services/auth';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
 
@@ -25,19 +26,33 @@
   onBeforeMount(() => {
     if (getCookie('isLogin')) {
       localStorage.setItem('isLogin', 'true');
+      localStorage.setItem('role', getCookie('role'));
     }
   });
   //Load data navbar when F5
 
-  onMounted(() => {
+  onMounted(async() => {
     const isLogin = localStorage.getItem('isLogin');
 
     if (isLogin === 'true') {
-      userStore.fetchUserProfile();
-      userStore.loadFollowers();
-      userStore.loadFollowCategories();
+      await userStore.fetchUserProfile();
+      await userStore.loadFollowers();
+      await userStore.loadFollowCategories();
+      const role = localStorage.getItem('role')
+
+      if(role !== userStore.user.role) {
+        const res = await getLogout();
+        console.log("vcc lun a cho");
+
+        if(res && res.status === 200) {
+          userStore.clearUserData();
+          localStorage.removeItem('isLogin');
+          localStorage.removeItem('role');
+        }
+      }
     }
   });
+
   onMounted(() => {
     loadingStore.showLoading();
     setTimeout(() => {

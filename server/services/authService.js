@@ -236,7 +236,7 @@ const loginAdmin = async (userData) => {
   // set token in cookies
   return {
     cookie: {
-      cookieName: "accessToken",
+      cookieName: "accessTokenAdmin",
       token: token,
     },
     status: 200,

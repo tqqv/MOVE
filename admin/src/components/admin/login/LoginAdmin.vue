@@ -25,6 +25,7 @@
         toast.error(response.message || 'Login failed');
       } else {
         userStore.fetchUserProfile();
+        localStorage.setItem('role', response.data.role);
         toast.success(response.message || 'Login successful!');
         router.push('/dashboard');
       }
