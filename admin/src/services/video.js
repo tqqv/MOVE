@@ -41,16 +41,7 @@ const getVideoSetting = async (page, pageSize, sortBy, order, days) => {
     return { error: true, message: error.message };
   }
 };
-const getVideoSettingAdmin = async (page, pageSize, sortBy, order, days) => {
-  try {
-    const response = await axios.get('/admin/getListVideoByUser', {
-      params: { page, pageSize, sortBy, order, days },
-    });
-    return response.data;
-  } catch (error) {
-    return { error: true, message: error.message };
-  }
-};
+
 const getStateByCountry = async (videoId, country) => {
   try {
     const response = await axios.get(`/video/getState/${videoId}`, {
@@ -132,6 +123,26 @@ const getVideoYouMayLike = async (currentPage, pageSize, userId) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+
+// admin
+const getVideoSettingAdmin = async (channelId, page, pageSize, sortBy, order, days) => {
+  try {
+    const response = await axios.get(`/admin/getListVideoByUser/${channelId}`, {
+      params: { page, pageSize, sortBy, order, days },
+    });
+    return response.data;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
+const deleteVideoByIdAdmin = async (videoId) => {
+  try {
+    const response = await axios.delete(`admin/deleteVideoById/${videoId}`);
+    return response;
+  } catch (error) {
+    return { error: true, message: error.message };
+  }
+};
 export {
   getVideobyChannel,
   getVideoYouMayLike,
@@ -146,4 +157,6 @@ export {
   getVideoAnalyticsById,
   getStateByCountry,
   getStateFromIP,
+  getVideoSettingAdmin,
+  deleteVideoByIdAdmin,
 };

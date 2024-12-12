@@ -17,11 +17,7 @@
   const router = useRouter();
   const activeTab = ref('0');
   const id = ref(route.params.id);
-  const tabs = ref([
-    { title: 'Informations', component: markRaw(Informations), value: '0', props: { userId: id } },
-    { title: 'Videos', component: markRaw(Videos), value: '1' },
-    { title: 'Transaction History', component: markRaw(TransactionHistory), value: '2' },
-  ]);
+  const channel = ref(null);
 
   const onTabChange = (event) => {
     activeTab.value = event;
@@ -29,7 +25,7 @@
 
   const fetchChannelData = async () => {
     const result = await getProfilebyUserId(id.value);
-
+    channel.value = result.data.data.Channel;
     if (result.status === 404) {
       router.push('/404');
     }
@@ -69,11 +65,19 @@
         </div>
         <Tabs :value="activeTab" @update:value="onTabChange" class="mt-2">
           <TabList class="!p-0">
-            <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
+            <Tab value="0">Informations</Tab>
+            <Tab value="1" v-if="channel">Videos</Tab>
+            <Tab value="2">Transaction History</Tab>
           </TabList>
           <TabPanels>
-            <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
-              <component :is="tab.component" v-bind="tab.props" />
+            <TabPanel value="0">
+              <Informations :userId="id" />
+            </TabPanel>
+            <TabPanel value="1" v-if="channel">
+              <Videos :channel="channel" />
+            </TabPanel>
+            <TabPanel value="2">
+              <TransactionHistory />
             </TabPanel>
           </TabPanels>
         </Tabs>

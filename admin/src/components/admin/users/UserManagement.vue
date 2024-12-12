@@ -67,7 +67,7 @@
           <template #header>
             <div class="flex flex-wrap gap-2 items-center justify-between">
               <h1 class="font-bold text-[20px]">Manage Users</h1>
-              <Button label="New" icon="pi pi-plus" class="mr-2" @click="openCateDialog" />
+              <Button label="New" icon="pi pi-plus" class="mr-2" />
             </div>
           </template>
           <Column field="referralCode" header="Code"></Column>

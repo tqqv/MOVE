@@ -272,14 +272,7 @@
             class="relative text-[14px] rounded-lg"
             :class="errors.email ? 'error_password' : 'normal_password'"
           >
-            <input
-              v-model="profileData.email"
-              type="email"
-              :disabled="emailVerified"
-              class="password_custom"
-              :class="[!emailVerified ? ' ' : 'italic text-body bg-gray-light']"
-              required
-            />
+            <input v-model="profileData.email" type="email" class="password_custom" required />
           </div>
         </div>
         <!-- FULLNAME -->

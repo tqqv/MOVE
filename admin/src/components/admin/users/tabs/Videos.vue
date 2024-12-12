@@ -7,11 +7,19 @@
   import Filter from '@/components/Filter.vue';
   import ConfirmDialog from 'primevue/confirmdialog';
   import { useConfirm } from 'primevue/useconfirm';
-  import { getVideoSetting, deleteVideoById } from '@services/video';
+  import { getVideoSettingAdmin, deleteVideoByIdAdmin } from '@services/video';
   import { genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
   import { usePopupStore, useVideoStore } from '@/stores';
   import axiosInstance from '@/services/axios';
+  import VideoDetail from '@/components/uploadVideo/VideoDetail.vue';
+
+  const props = defineProps({
+    channel: {
+      type: Object,
+      required: true,
+    },
+  });
 
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
@@ -92,7 +100,11 @@
 
   const fetchVideos = async () => {
     try {
-      const response = await getVideoSetting(currentPage.value, selectedPageSize.value);
+      const response = await getVideoSettingAdmin(
+        props.channel.id,
+        currentPage.value,
+        selectedPageSize.value,
+      );
       videos.value = response.data.listVideo.rows;
       totalVideo.value = response.data.listVideo.count;
       totalPage.value = response.data.totalPages;
@@ -110,7 +122,7 @@
   };
   const handleDeleteVideo = async (videoId) => {
     try {
-      const response = await deleteVideoById(videoId);
+      const response = await deleteVideoByIdAdmin(videoId);
       if (response.status === 200) {
         toast.success('Video deleted successfully');
         fetchVideos();
@@ -122,7 +134,7 @@
   const handleDeleteMultipleVideo = async () => {
     const videoIds = selectedProduct.value.map((video) => video.id);
     try {
-      const response = await axiosInstance.delete('/video/delete-videos', {
+      const response = await axiosInstance.delete('/admin/deleteVideos', {
         params: { videoIds: videoIds },
       });
       if (response.status === 200) {
@@ -333,12 +345,6 @@
                     <button class="pi pi-trash"></button>
                     <span class="text-nowrap">Delete video</span>
                   </button>
-                  <!-- <button
-                    class="flex gap-3 mt-3 items-center text-primary cursor-pointer hover:text-primary-light"
-                  >
-                    <button class="pi pi-download"></button>
-                    <span class="text-nowrap">Download video</span>
-                  </button> -->
                 </div>
               </div>
             </div>
@@ -401,4 +407,5 @@
     v-model:visible="showConfirmDialogMulti"
     :style="{ width: '604px' }"
   ></ConfirmDialog>
+  <VideoDetail />
 </template>
