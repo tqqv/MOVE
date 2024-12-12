@@ -14,6 +14,7 @@ import Cashout from '@/components/admin/rep/Revenue.vue';
 import DonateItem from '@/components/admin/rep/DonateItem.vue';
 import DiscountItem from '@/components/admin/rep/DiscountItem.vue';
 import LoginAdmin from '@/components/admin/login/LoginAdmin.vue';
+import SystemConfig from '@/components/admin/rep/SystemConfig.vue';
 import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
 setActivePinia(pinia);
@@ -39,6 +40,7 @@ const routes = [
       { path: 'reps/Revenue', component: Cashout },
       { path: 'reps/donate', component: DonateItem },
       { path: 'reps/discount', component: DiscountItem },
+      { path: 'system-config', component: SystemConfig },
       { path: 'users/:id', component: UserDetail },
       { path: 'report/:reportType/:reportId', component: ReportDetail },
     ],

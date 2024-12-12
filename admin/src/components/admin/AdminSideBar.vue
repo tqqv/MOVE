@@ -12,6 +12,7 @@
   import Request from '../icons/request.vue';
   import Logout from '../icons/logout.vue';
   import Booking from '../icons/booking.vue';
+  import Percent from '../icons/percent.vue';
   import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
@@ -41,7 +42,6 @@
 
   const menuItems = [
     { name: 'Dashboard', icon: HomeIcon, link: '/' },
-    { name: 'User Management', icon: User, link: '/users' },
     {
       name: 'REP$ System',
       icon: CashoutIcon,
@@ -53,6 +53,8 @@
         { name: 'Discount Item', link: '/reps/discount' },
       ],
     },
+    { name: 'System Config', icon: Percent, link: '/system-config' },
+    { name: 'User Management', icon: User, link: '/users' },
     { name: 'Category Management', icon: Category, link: '/category' },
     { name: 'Level Management', icon: Level, link: '/levelworkout' },
     { name: 'Report Management', icon: Flag, link: '/report' },
