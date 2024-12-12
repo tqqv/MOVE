@@ -1,6 +1,7 @@
 <script setup>
+  import { makeAsReadOne } from '@/services/notification';
   import { formatDate } from '@/utils';
-  import { computed, onMounted } from 'vue';
+  import { computed, onMounted, ref } from 'vue';
 
   const props = defineProps({
     notification: {
@@ -8,6 +9,7 @@
       required: true,
     },
   });
+  const emit = defineEmits(['toggleNotiMenu']);
 
   const translatedContentEn = computed(() => {
     return (
@@ -17,17 +19,31 @@
     );
   });
 
-  onMounted(() => {
-    console.log(props.notification);
-  });
+  const closePopup = () => {
+    emit('toggleNotiMenu'); // Sử dụng emit đúng cách
+  };
+
+  const handleMakeRead = async (notificationId) => {
+    try {
+      const response = await makeAsReadOne(notificationId);
+      return response;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      console.log('123');
+      closePopup();
+    }
+  };
 </script>
 <template>
-  <div
-    class="flex gap-x-3 items-start pb-3 p-3 mb-1 min-h-20 rounded-md hover:bg-gray-light relative"
+  <RouterLink
+    :to="`/video/${notification?.targetVideo?.id}`"
+    class="flex gap-x-3 items-start pb-3 p-3 mb-1 min-h-20 rounded-md hover:bg-gray-light relative cursor-pointer"
     :class="{
       'bg-primary/15 hover:bg-primary/15':
         notification?.visitStatus[0]?.status === 'recieved' || !notification?.visitStatus.length,
     }"
+    @click="handleMakeRead(notification?.id)"
   >
     <img
       :src="notification?.channelActor?.avatar || notification?.userActor?.avatar"
@@ -51,5 +67,5 @@
     >
       <div class="p-1 rounded-full bg-primary-light"></div>
     </div>
-  </div>
+  </RouterLink>
 </template>

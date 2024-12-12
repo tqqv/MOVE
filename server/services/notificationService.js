@@ -129,17 +129,7 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
     // điều kiện
     const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
 
-    let whereClause;
-
-    if(channelNotifierId) {
-      whereClause = channelNotifierId
-      ? `channelNotifierId = '${channelNotifierId}'`
-      : `userNotifierId IS NULL`;
-    } else {
-      whereClause = `userNotifierId = '${userNotifierId}'`
-    }
-
-  let notifierCondition = {};
+    let notifierCondition = {};
 
   if (channelNotifierId) {
     // Nếu có channelNotifierId, chỉ tìm theo channelNotifierId
@@ -149,28 +139,15 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
     notifierCondition.userNotifierId = userNotifierId;
   }
 
-    // 1. Đếm số thông báo chưa được nhận
-    const unRecievedCount = await Notification.count({
+    // Lấy danh sách thông báo
+    const notifications = await Notification.findAndCountAll({
+      distinct: true,
       where: {
         roomName: { [Op.in]: notifierRoom },
-        id: {
-          [Op.notIn]: Sequelize.literal(`
-            (
-              SELECT notificationId
-              FROM notificationVisitStatuses
-              WHERE ${whereClause}
-            )
-          `),
-        },
-      },
-    });
-
-    // 2. Lấy danh sách thông báo
-    const notifications = await Notification.findAll({
-      where: {
-        roomName: { [Op.in]: notifierRoom },
+        
       },
       attributes: [
+        "id",
         "createdAt",
       ],
       include: [
@@ -231,7 +208,7 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
       status: 200,
       data: {
         notifications,
-        unRecievedCount,
+        totalPages: Math.ceil(notifications.count/pageSize),
         pageSize,
         page,
       },

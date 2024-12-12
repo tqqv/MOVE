@@ -3,20 +3,8 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 export const useNotificationStore = defineStore('notification', () => {
-  const listNotifications = ref([]);
-  const quantityNotifications = ref();
   const loading = ref(false);
-  const fetchListNotifications = async () => {
-    try {
-      loading.value = true;
-      const response = await getAllNotifications();
-      listNotifications.value = response.data.data;
-    } catch (error) {
-      console.log(error);
-    } finally {
-      loading.value = false;
-    }
-  };
+  const quantityNotifications = ref();
 
   const fetchQuantifyNotifications = async () => {
     try {
@@ -38,9 +26,7 @@ export const useNotificationStore = defineStore('notification', () => {
 
   return {
     loading,
-    listNotifications,
     quantityNotifications,
-    fetchListNotifications,
     fetchQuantifyNotifications,
     markReceivedQuantity,
   };
