@@ -77,7 +77,7 @@
               <Videos :channel="channel" />
             </TabPanel>
             <TabPanel value="2">
-              <TransactionHistory />
+              <TransactionHistory :userId="id" />
             </TabPanel>
           </TabPanels>
         </Tabs>
