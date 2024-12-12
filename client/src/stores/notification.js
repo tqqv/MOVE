@@ -6,6 +6,8 @@ export const useNotificationStore = defineStore('notification', () => {
   const loading = ref(false);
   const quantityNotifications = ref();
 
+  const notifications = ref([]);
+  const newNotification = ref(null);
   const fetchQuantifyNotifications = async () => {
     try {
       const response = await getQuantity();
@@ -24,10 +26,17 @@ export const useNotificationStore = defineStore('notification', () => {
     }
   };
 
+  const addNotification = (notification) => {
+    notifications.value.push(notification);
+    newNotification.value = notification;
+    quantityNotifications.value.unRecievedCount += 1;
+  };
   return {
     loading,
     quantityNotifications,
     fetchQuantifyNotifications,
     markReceivedQuantity,
+    newNotification,
+    addNotification,
   };
 });

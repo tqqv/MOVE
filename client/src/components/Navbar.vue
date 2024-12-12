@@ -59,6 +59,7 @@
   const videos = ref([]);
   const users = ref([]);
   const loading = ref(true);
+  
   const quantityNotifications = computed(() => {
     return notificationStore?.quantityNotifications?.unRecievedCount || 0;
   });
@@ -82,6 +83,9 @@
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
     if (quantityNotifications.value > 0) {
       notificationStore.markReceivedQuantity();
+    }
+    if (quantityNotifications.value == 0) {
+      return;
     }
     quantityNotifications.value = 0;
   };
@@ -251,7 +255,6 @@
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
     document.addEventListener('click', handleClickOutside);
-    notificationStore.fetchQuantifyNotifications();
   });
 
   onBeforeUnmount(() => {

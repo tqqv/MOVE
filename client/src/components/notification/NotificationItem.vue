@@ -20,7 +20,7 @@
   });
 
   const closePopup = () => {
-    emit('toggleNotiMenu'); // Sử dụng emit đúng cách
+    emit('toggleNotiMenu');
   };
 
   const handleMakeRead = async (notificationId) => {
@@ -62,7 +62,7 @@
       </p>
     </div>
     <div
-      v-if="notification?.visitStatus[0]?.status === 'recieved'"
+      v-if=" notification?.visitStatus[0]?.status === 'recieved' || !notification?.visitStatus.length"
       class="absolute top-1/2 right-3 transform -translate-y-1/2"
     >
       <div class="p-1 rounded-full bg-primary-light"></div>

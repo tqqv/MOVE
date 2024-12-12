@@ -245,13 +245,56 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
       where: {
         roomName: { [Op.in]: notifierRoom },
       },
+      attributes: [
+        "id",
+        "createdAt",
+      ],
       include: [
         {
           model: NotificationVisitStatus,
           as: "visitStatus",
+          attributes: ["status"],
           where: {
             status: "recieved"
           }
+        },
+        {
+          model: NotificationEntity,
+          as: "notificationEntity",
+          attributes: ["id", "entityName"],
+          include: [
+            {
+              model: NotificationTranslation,
+              as: "notificationTranslation",
+              attributes: ["translatedContent", "languageCode"]
+            }
+          ]
+        },
+        {
+          model: User,
+          as: "userActor",
+          attributes: ["username", "avatar"]
+        },
+        {
+          model: Channel,
+          as: "channelActor",
+          attributes: ["channelName", "avatar"],
+          include: [
+            {
+              model: User,
+              attributes: ['username']
+            }
+          ]
+        },
+        {
+          model: Comment,
+          as: "targetComment",
+          attributes: ["id", "content"]
+        },
+        {
+          model: Video,
+          as: "targetVideo",
+          attributes: ["id", "title", "thumbnailUrl"]
         }
       ],
       order: [['createdAt', 'DESC']],
@@ -260,7 +303,7 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
     })
     return {
       status: 200,
-      data: unReadNoti,
+      data: {notifications: unReadNoti},
       totalPages: Math.ceil(unReadNoti.count / pageSize),
       page,
       pageSize,
