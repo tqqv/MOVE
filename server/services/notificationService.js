@@ -15,6 +15,7 @@ const createNotification = async( entityName, entityAction, userActorId, channel
         attributes: ["id", "roomNamePattern"]
       });
       const roomName = notificationEntity.roomNamePattern.replace("{selfId}", recieverId).replace("{channelId}", recieverId)
+      console.log("Tao test: ", userActorId);
 
       const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId});
 
@@ -23,7 +24,7 @@ const createNotification = async( entityName, entityAction, userActorId, channel
           id: newNotification.dataValues.id
         },
         attributes: [
-          "createdAt",
+          "createdAt", "id"
         ],
         include: [
           {
@@ -100,6 +101,7 @@ const formatNotificationData = (item) => {
   })
 
   return ({
+      id: item.id,
       createdAt: item.createdAt,
       visitStatus: [],
       notificationEntity: {
@@ -107,7 +109,11 @@ const formatNotificationData = (item) => {
           entityName: item.notificationEntity?.dataValues?.entityName || null,
           notificationTranslation: [...notificationTranslation]
       },
-      userActor: item.userActor ? null : null, // Assuming no data available for userActor
+      userActor: item.userActor ? {
+        username: item.userActor.dataValues.username,
+        avatar: item.userActor.dataValues.avatar
+      } : null, // Assuming no data available for userActor
+
       channelActor: item.channelActor ? {
           channelName: item.channelActor.dataValues.channelName,
           avatar: item.channelActor.dataValues.avatar,
@@ -144,7 +150,7 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
       distinct: true,
       where: {
         roomName: { [Op.in]: notifierRoom },
-        
+
       },
       attributes: [
         "id",

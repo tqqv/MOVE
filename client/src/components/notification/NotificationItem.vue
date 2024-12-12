@@ -30,7 +30,6 @@
     } catch (error) {
       console.log(error);
     } finally {
-      console.log('123');
       closePopup();
     }
   };
@@ -62,7 +61,9 @@
       </p>
     </div>
     <div
-      v-if=" notification?.visitStatus[0]?.status === 'recieved' || !notification?.visitStatus.length"
+      v-if="
+        notification?.visitStatus[0]?.status === 'recieved' || !notification?.visitStatus.length
+      "
       class="absolute top-1/2 right-3 transform -translate-y-1/2"
     >
       <div class="p-1 rounded-full bg-primary-light"></div>

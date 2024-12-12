@@ -1,5 +1,7 @@
 <script setup>
+  import { makeAsReadOne } from '@/services/notification';
   import { useNotificationStore } from '@/stores';
+  import { formatDate } from '@/utils';
   import { computed, onMounted, ref, watch } from 'vue';
 
   const showNotification = ref(false);
@@ -8,11 +10,23 @@
   const newNotification = computed(() => {
     return notificationStore.newNotification;
   });
+
   const closeNotification = () => {
     isClosing.value = true;
     setTimeout(() => {
       showNotification.value = false;
     }, 400);
+  };
+
+  const handleMakeRead = async (notificationId) => {
+    try {
+      const response = await makeAsReadOne(notificationId);
+      return response;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      closeNotification();
+    }
   };
 
   watch(newNotification, (newValue) => {
@@ -38,30 +52,37 @@
       <div class="flex flex-col">
         <div class="flex justify-between items-center">
           <h1 class="font-semibold">New notification</h1>
-          <div
-            class="flex p-1 justify-center items-center hover:bg-gray-light rounded-full"
-            @click="closeNotification"
-          >
+          <div class="flex p-1 justify-center items-center hover:bg-gray-light rounded-full">
             <i class="pi pi-times text-sm"></i>
           </div>
         </div>
-        <div class="flex gap-x-3 pt-3 pb-1">
+        <RouterLink
+          :to="`/video/${newNotification?.targetVideo?.id}`"
+          class="flex gap-x-3 pt-3 pb-1 hover:bg-gray-light px-2 rounded-md"
+          @click="handleMakeRead(newNotification?.id)"
+        >
           <img
-            src="https://images.pexels.com/photos/9944859/pexels-photo-9944859.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+            :src="newNotification?.channelActor?.avatar || newNotification?.userActor?.avatar"
             alt=""
             class="size-14 object-cover flex-shrink-0 rounded-full"
           />
           <div class="flex flex-col gap-y-1 mr-6">
             <h1 class="text_para">
-              <span class="text_para font-semibold mr-1">npmh310</span>
-              <span>hello may hello mayhello may</span>
+              <span class="text_para font-semibold mr-1">{{
+                newNotification?.channelActor?.channelName || newNotification?.userActor?.username
+              }}</span>
+              <span>{{
+                newNotification?.notificationEntity?.notificationTranslation[1].translatedContent
+              }}</span>
             </h1>
-            <p class="text_secondary text-[12px] text-[#ACACAC]">3 time ago</p>
+            <p class="text_secondary text-[12px] text-[#ACACAC]">
+              {{ formatDate(newNotification?.createdAt) }}o
+            </p>
           </div>
           <div class="flex items-center">
             <div class="p-1 rounded-full bg-primary-light"></div>
           </div>
-        </div>
+        </RouterLink>
       </div>
     </div>
   </div>

@@ -59,7 +59,7 @@
   const videos = ref([]);
   const users = ref([]);
   const loading = ref(true);
-  
+
   const quantityNotifications = computed(() => {
     return notificationStore?.quantityNotifications?.unRecievedCount || 0;
   });
@@ -84,12 +84,10 @@
     if (quantityNotifications.value > 0) {
       notificationStore.markReceivedQuantity();
     }
-    if (quantityNotifications.value == 0) {
+    if (quantityNotifications.value === 0) {
       return;
     }
-    quantityNotifications.value = 0;
   };
-
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
 
