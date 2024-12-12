@@ -1,9 +1,9 @@
 const responseHandler = require("../middlewares/responseHandler");
 const { setStatusRequestChannel, getStatistic, getDataChartMoney, getTop5Channel, getTop5UserDeposit, getAllUsersRequest, userCount, getAllUser, editProfileUser, unbanAccount, unbanChannel, revenue, getListUserPayIn, getListUserPayOut } = require("../services/adminService");
 const { getPaymentHistory } = require("../services/paymentService");
-const { createSystemConfig, getDonationItemByKey, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
+const { createSystemConfig, getAllSystemConfig, editSystemConfig } = require("../services/systemConfigService");
 const { getProfile } = require("../services/userService");
-const { getListVideoByChannel, updateVideoService, deleteVideoService } = require("../services/videoService");
+const { getListVideoByChannel, deleteVideoService, deleteMultipleVideosService, updateVideoService } = require("../services/videoService");
 
 const setStatusRequestChannelController = async (req, res, next) => {
   const data = req.body;
@@ -64,6 +64,7 @@ const unbanAccountController = async (req, res, next) => {
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
+
 const getAllUserController = async (req, res, next) => {
   const page = req.query.page || 1;
   const pageSize = req.query.pageSize || 10;
@@ -85,7 +86,7 @@ const getUserByIdController = async (req, res, next) => {
 };
 
 const editProfileUserController = async (req, res, next) => {
-  const userId = req.params.id;
+  const userId = req.params.userId;
   const data = req.body;
   const result = await editProfileUser(userId, data);
 
@@ -176,13 +177,6 @@ const createSystemConfigController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
-const getSystemConfigByKeyController = async (req, res, next) => {
-  const key = req.params.key
-  const result = await getDonationItemByKey(key)
-
-  responseHandler(result.status, result.data, result.message)(req, res, next);
-}
-
 const getAllSystemConfigController = async (req, res, next) => {
   const result = await getAllSystemConfig()
 
@@ -196,6 +190,17 @@ const editSystemConfigController = async (req, res, next) => {
 
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
+
+const deleteMultipleVideosController = async (req, res, next) => {
+  const { videoIds } = req.query;
+  try {
+    const results = await deleteMultipleVideosService(videoIds);
+    responseHandler(200, results, 'Videos processed')(req, res, next);
+  } catch (error) {
+    console.log(error);
+    responseHandler(error.status || 500, error.data, error.message)(req, res, next);
+  }
+};
 
 module.exports = {
   setStatusRequestChannelController,
@@ -219,7 +224,7 @@ module.exports = {
   getListUserPayInController,
   getListUserPayOutController,
   createSystemConfigController,
-  getSystemConfigByKeyController,
   getAllSystemConfigController,
   editSystemConfigController,
+  deleteMultipleVideosController,
 }

@@ -11,6 +11,15 @@ const createSystemConfig = async(data) => {
       }
     }
 
+    const check = await SystemConfig.findOne({where: {key: data.key}})
+
+    if(check) {
+      return{
+        status: 400,
+        message: 'The key already exists.'
+      }
+    }
+
     const systemConfig = await SystemConfig.create(data)
 
     return {
@@ -45,6 +54,12 @@ const getAllSystemConfig = async() => {
 
 const getSystemConfigByKey = async(key) => {
   try {
+    if(!key) {
+      return {
+        status: 400,
+        message: 'Cannot be empty.'
+      }
+    }
     const systemConfig = await SystemConfig.findOne({where: {key}})
 
     if(!systemConfig) {
@@ -69,18 +84,26 @@ const getSystemConfigByKey = async(key) => {
 }
 
 const editSystemConfig = async(systemConfigId, value) => {
+  console.log(systemConfigId, value);
   try {
     // Tìm DonationItem trong DB
+    if(!value){
+      return {
+        status: 400,
+        data: null,
+        message: 'Cannot be empty'
+      }
+    }
     const systemConfig = await SystemConfig.findByPk(systemConfigId)
     if(!systemConfig) {
       return {
-        status: 400,
+        status: 404,
         data: null,
         message: "System Config not found"
       }
     }
 
-    await systemConfig.update(value)
+    await systemConfig.update({value: value})
 
     return {
       status: 200,

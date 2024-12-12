@@ -17,7 +17,6 @@
   import EmptyImage from '@/components/icons/emptyImage.vue';
   import EmptyPage from '@/pages/EmptyPage.vue';
   import Skeleton from 'primevue/skeleton';
-  import { list } from 'postcss';
 
   const router = useRouter();
   const popupStore = usePopupStore();

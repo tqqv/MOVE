@@ -31,6 +31,20 @@ const createRepPackage = async(data) => {
       }
     }
 
+    if (data.rep < 1 || data.amount < 1) {
+      return {
+          status: 400,
+          message: 'Invalid rep or amount value. Rep or amount must be > 0.'
+      };
+    }
+
+    if (data.discount < 0 || data.discount > 100) {
+      return {
+          status: 400,
+          message: 'Invalid discount value. The discount must be between 0 and 100 (<=> 0-100%).'
+      };
+    }
+
     if(!data.discount) {
       data.discount = 0
     }
@@ -91,6 +105,20 @@ const editRepPackage = async(repPackageId, data) => {
         data: null,
         message: "Rep Package not found"
       }
+    }
+
+    if (data.rep && data.rep < 1 || data.amount && data.amount < 1) {
+      return {
+          status: 400,
+          message: 'Invalid rep or amount value. Rep or amount must be > 0.'
+      };
+    }
+
+    if (data.discount && (data.discount < 0 || data.discount > 100)) {
+      return {
+          status: 400,
+          message: 'Invalid discount value. The discount must be between 0 and 100 (<=> 0-100%).'
+      };
     }
 
     if(data.discount) {

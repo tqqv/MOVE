@@ -17,7 +17,29 @@ const verifyToken = (req, res, next) => {
         {name: 'accessToken', options: { httpOnly: true }},
         {name: 'isLogin'}
       ])(req, res, next);
-      return responseHandler(400, null, "Tokent is invalid")(req, res, next);
+      return responseHandler(400, null, "Token is invalid")(req, res, next);
+    }
+    req.user = user;
+    next();
+  });
+};
+
+const verifyTokenAdmin = (req, res, next) => {
+  const token = req.cookies.accessTokenAdmin;
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: "You're not authenticated",
+    });
+  }
+  jwt.verify(token, process.env.JWT_SECRET_KEY, (err, user) => {
+    if (err) {
+      clearCookies([
+        {name: 'accessTokenAdmin', options: { httpOnly: true }},
+        {name: 'isLoginAdmin'}
+      ])(req, res, next);
+      return responseHandler(400, null, "Token is invalid")(req, res, next);
     }
     req.user = user;
     next();
@@ -46,7 +68,7 @@ const verifyStreamer = (req, res, next) => {
 
 
 const verifyAdmin = (req, res, next) => {
-  verifyToken(req, res, () => {
+  verifyTokenAdmin(req, res, () => {
     if (req.user.role === "admin") {
       next();
     } else {

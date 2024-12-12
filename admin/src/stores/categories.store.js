@@ -16,7 +16,7 @@ export const useCategoriesStore = defineStore('categories', () => {
       if (!response.error) {
         categories.value = response.data;
 
-        const formattedData = response.data.map((item) => ({
+        const formattedData = response.data.data.map((item) => ({
           id: item.id,
           name: item.title,
           title: item.title,

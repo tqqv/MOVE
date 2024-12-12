@@ -73,11 +73,19 @@ const getLvWorkoutById = async(lvWorkoutId) => {
 
 const editLevelWorkout = async(lvWorkoutId, data) => {
   try {
+
+    if(!lvWorkoutId || !data) {
+      return {
+        status: 400,
+        data: null,
+        message: "Cannot be empty."
+      }
+    }
     // Tìm LvWorkout trong DB
     const levelWorkout = await LevelWorkout.findByPk(lvWorkoutId)
     if(!levelWorkout) {
       return {
-        status: 400,
+        status: 404,
         data: null,
         message: "Level Workout not found"
       }

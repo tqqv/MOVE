@@ -2,7 +2,7 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
-const { Op } = require('sequelize');
+const { Op, where } = require('sequelize');
 const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
 const { v4: uuidv4 } = require('uuid');
 const WEIGHTS = require('../models/enum/constants.js');
@@ -394,7 +394,7 @@ const uploadMetadataService = async (videoUri, title, description) => {
 const getAllVideosService = async (page, pageSize) => {
   const videos = await Video.findAll(
     {
-      where: { status:  "public" },
+      where: { status:  "public", isBanned: false },
       attributes: {
         include: [
           [
@@ -455,7 +455,8 @@ const getLatestReupStreamService = async (channelId) => {
         livestreamId: {
           [Op.ne]: null // Use Op.ne instead of Op.not
         },
-        status: "public"
+        status: "public",
+        isBanned: false
       },
       include: [
         {
@@ -535,7 +536,8 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
   const videos = await Video.findAndCountAll({
     where: {
       channelId: channelId,
-      status: "public"
+      status: "public",
+      isBanned: false
     },
     // if no rating => no calculate avg rating
     attributes: attributes,
@@ -581,7 +583,7 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
 
 const getVideoByVideoIdService = async (videoId) => {
   const video = await Video.findOne({
-    where: { id: videoId },
+    where: { id: videoId , isBanned: false},
     attributes: {
       include: [
         [
@@ -690,7 +692,17 @@ const deleteMultipleVideosService = async (videoIds) => {
       await VideoKeyword.destroy({ where: { videoId } });
 
       if (keywordIds.length > 0) {
-        await Keyword.destroy({ where: { id: keywordIds } });
+        const linkedKeywords = await VideoKeyword.findAll({
+          where: { keywordId: keywordIds }
+        });
+
+        const unlinkKeywordIds = keywordIds.filter(id =>
+          !linkedKeywords.some(vk => vk.keywordId === id)
+        );
+
+        if (unlinkKeywordIds.length > 0) {
+          await Keyword.destroy({ where: { id: unlinkKeywordIds } });
+        }
       }
 
       await video.destroy();
@@ -721,6 +733,7 @@ const deleteMultipleVideosService = async (videoIds) => {
 const getListVideoByFilter = async(page, pageSize, level, category, sortCondition) => {
   try {
     const listVideo = await Video.findAndCountAll({
+      where: { status: "public", isBanned: false },
       attributes: {
         include: [
           [
@@ -1305,6 +1318,14 @@ const updateViewtime = async(userId, videoId, viewTime) => {
   }
 }
 
+const shuffleVideos = (videos) => {
+  for (let i = videos.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [videos[i], videos[j]] = [videos[j], videos[i]]; // Hoán đổi vị trí
+  }
+  return videos;
+};
+
 const getVideoWatchAlso = async (category, level, videoId) => {
   try {
     const videos = await Video.findAll({
@@ -1313,6 +1334,7 @@ const getVideoWatchAlso = async (category, level, videoId) => {
           [Op.not]: videoId,
         },
         status: 'public',
+        isBanned: false
       },
       attributes: {
         include: [
@@ -1364,6 +1386,7 @@ const getVideoWatchAlso = async (category, level, videoId) => {
             [Op.notIn]: [...existingVideoIds, videoId],
           },
           status: 'public',
+          isBanned: false
         },
         attributes: {
           include: [
@@ -1406,9 +1429,11 @@ const getVideoWatchAlso = async (category, level, videoId) => {
       videos.push(...additionalVideos);
     }
 
+    const listVideo = shuffleVideos(videos)
+
     return {
       status: 200,
-      data: videos,
+      data: listVideo,
       message: 'Get video what also successfully.'
     };
   } catch (error) {
@@ -1526,6 +1551,7 @@ const renewTopVideos = async () => {
             [Sequelize.Op.gte]: Sequelize.literal(`DATE_SUB(NOW(), INTERVAL ${WEIGHTS.LATEST_VIDEO_DATE} DAY)`),
           },
           status: "public",
+          isBanned: false,
           categoryId: category.id
         },
         attributes: {

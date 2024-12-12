@@ -16,7 +16,6 @@
   import { useConfirm } from 'primevue/useconfirm';
   import { toast } from 'vue3-toastify';
   import ConfirmDialog from 'primevue/confirmdialog';
-  import smallLoading from '../icons/smallLoading.vue';
 
   const popupStore = usePopupStore();
   const videoStore = useVideoStore();
@@ -33,12 +32,11 @@
     selectCategoryOptions,
     selectLevelWorkoutOptions,
     videoIdDetail,
-    nextLoading,
   } = storeToRefs(videoStore);
   const { showVideoDetailPopup, showConfirmDialog } = storeToRefs(popupStore);
   const { openVideoDetailPopup, closeVideoDetailPopup, openConfirmDialog, closeConfirmDialog } =
     popupStore;
-  const { clear, setTab, getVideo, setNextLoading } = videoStore;
+  const { clear, setTab, getVideo } = videoStore;
   const confirm = useConfirm();
   const publish = ref(false);
 
@@ -72,7 +70,6 @@
   const handleNextClick = async () => {
     const videoId = uri.value.split('/').pop();
     if (tab.value === '1') {
-      setNextLoading(true);
       try {
         const response = await axios.post('video/upload-metadata', {
           videoUri: uri.value,
@@ -84,11 +81,8 @@
         }
       } catch (error) {
         toast.error('Error uploading metadata');
-      } finally {
-        setNextLoading(false);
       }
     } else if (tab.value === '2') {
-      setNextLoading(true);
       try {
         const response = await axios.patch('video/update-video', {
           videoId,
@@ -103,8 +97,6 @@
         }
       } catch (error) {
         toast.error('Error updating video data');
-      } finally {
-        setNextLoading(false);
       }
     }
   };
@@ -253,17 +245,16 @@
         </button>
         <button
           :class="[
-            isNext && uploadProgress === 100 && thumbnailPreview && !nextLoading
+            isNext && uploadProgress === 100 && thumbnailPreview
               ? 'btn'
               : 'btnDisable cursor-not-allowed',
             'px-14 leading-none',
           ]"
-          :disabled="!(isNext && uploadProgress === 100 && thumbnailPreview) || nextLoading"
+          :disabled="!(isNext && uploadProgress === 100 && thumbnailPreview)"
           v-if="tab !== '3'"
           @click="handleNextClick"
         >
-          <smallLoading v-if="nextLoading" />
-          <span v-else> Next </span>
+          Next
         </button>
         <button class="btn px-14 leading-none" v-if="tab === '3'" @click="handlePublishClick">
           Pushlish

@@ -1,10 +1,11 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, unbanAccountController, unbanChannelController, revenueController, getListUserPayInController, getListUserPayOutController, createSystemConfigController, getSystemConfigByKeyController, getAllSystemConfigController, editSystemConfigController } = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, unbanAccountController, unbanChannelController, revenueController, getListUserPayInController, getListUserPayOutController, createSystemConfigController, getAllSystemConfigController, editSystemConfigController, deleteMultipleVideosController} = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
-const { loginAdminController } = require("../controllers/authController");
+const { loginAdminController, logoutController } = require("../controllers/authController");
+const { getProfileController } = require("../controllers/userController");
 const adminRoute = express.Router();
 
 adminRoute.post("/login", loginAdminController);
@@ -26,7 +27,8 @@ adminRoute.patch("/editProfileUser/:userId", verifyAdmin, editProfileUserControl
 adminRoute.get("/getListVideoByUser/:channelId", verifyAdmin, getListVideoByChannelIdController)
 adminRoute.patch('/editVideoById', verifyAdmin, EditVideoByIdController);
 adminRoute.delete('/deleteVideoById/:videoId', verifyAdmin, deleteVideoByIdController);
-adminRoute.get("/getListPaymentByUserId/:userId", verifyAdmin, getListPaymentByUserIdController)
+adminRoute.delete('/deleteVideos', verifyAdmin, deleteMultipleVideosController);
+adminRoute.get("/getListPaymentByUserId/:userId", verifyAdmin, getListPaymentByUserIdController);
 
 ////////////////////////// REP PACKAGE ////////////
 adminRoute.post("/createRepPackage", verifyAdmin, createRepPackageController)
@@ -58,8 +60,10 @@ adminRoute.get("/requestChannel", verifyAdmin, getAllUsersRequestController);
 
 //////////// system config ///////////
 adminRoute.post("/createSystemConfig", verifyAdmin, createSystemConfigController)
-adminRoute.get("/getSystemConfigByKey/:key", verifyAdmin, getSystemConfigByKeyController)
 adminRoute.get("/getAllSystemConfig", verifyAdmin, getAllSystemConfigController)
 adminRoute.patch("/editSystemConfig", verifyAdmin, editSystemConfigController)
+
+adminRoute.get("/getProfileAdmin", verifyAdmin, getProfileController)
+adminRoute.get("/logout", verifyAdmin, logoutController)
 
 module.exports = adminRoute;
