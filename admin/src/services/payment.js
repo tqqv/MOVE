@@ -68,6 +68,23 @@ const getPaymentHistory = async (page, pageSize, startDate, endDate) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+
+//admin
+const getPaymentHistoryAdmin = async (userId, page, pageSize, startDate, endDate) => {
+  try {
+    const response = await axios.get(`admin/getListPaymentByUserId/${userId}`, {
+      params: {
+        page,
+        pageSize,
+        startDate,
+        endDate,
+      },
+    });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createCardInfo,
   getPaymentHistory,
@@ -76,4 +93,5 @@ export {
   deleteCardInfo,
   getListRepPackage,
   checkout,
+  getPaymentHistoryAdmin,
 };
