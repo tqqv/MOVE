@@ -66,7 +66,6 @@
   };
   onMounted(async () => {
     fetchAllCategoriesHaveView();
-    console.log(currentDate.value);
 
     await fetchDataSlider(currentDate.value);
     fetchVideoYouMayLike();
