@@ -26,12 +26,16 @@
 
   const startTimer = () => {
     const createdAt = dayjs(liveStreamStore.liveStreamData.createdAt).utc();
-    if (createdAt.isValid()) {
-      timer = setInterval(() => {
-        const currentTime = dayjs().utc();
-        elapsedTime.value = Math.floor(currentTime.diff(createdAt, 'second'));
-      }, 1000);
-    }
+    if (!createdAt.isValid()) return;
+
+    timer = setInterval(() => {
+      const currentTime = dayjs().utc();
+      const diffInSeconds = Math.floor(currentTime.diff(createdAt, 'second'));
+
+      if (diffInSeconds > 0) {
+        elapsedTime.value = diffInSeconds;
+      }
+    }, 1000);
   };
   const stopTimer = () => {
     if (timer) {

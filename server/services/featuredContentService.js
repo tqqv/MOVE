@@ -172,8 +172,8 @@ const getAllFeatureContentService = async (datetime) => {
         }
       ]
     });
-    if (!featuredContents.length) {
-      const topVideos = (await getFilteredSortedTopVideos( {level: null, category: null}, "score", 1, 10, "desc")).data.listVideo.rows.map(video => ({
+    if (featuredContents.length < 10) {
+      const topVideos = (await getFilteredSortedTopVideos( {level: null, category: null}, "score", 1, (10 - featuredContents.length), "desc")).data.listVideo.rows.map(video => ({
         channelBooking: null,
         video: {
           id: video.id,
