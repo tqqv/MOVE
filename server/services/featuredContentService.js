@@ -3,6 +3,7 @@ const { get } = require("../utils/redis/base/redisBaseService.js");
 const db = require("../models/index.js");
 const moment = require('moment-timezone');
 const featuredContent = require("../models/featuredContent.js");
+const { getFilteredSortedTopVideos } = require("../utils/redis/cache/videoCache.js");
 const { Video, Livestream, FeaturedContent, FeaturedContentBase, FeaturedContentAbnormal, Channel, LevelWorkout, Category, User, Comment, Donation, Subscribe, sequelize } = db;
 
 
@@ -36,6 +37,47 @@ const createFeatureContentService = async(livestreamId, videoId, startAt, expire
       message: error
     }
   }
+}
+
+const formatResponse = (input) => {
+  const videos = input.data.video.data.listVideo.rows.map(video => ({
+      video: {
+          id: video.id,
+          channelId: video.channelId,
+          categoryId: video.categoryId,
+          title: video.title,
+          description: video.description,
+          videoUrl: video.videoUrl,
+          thumbnailUrl: video.thumbnailUrl,
+          isCommentable: video.isCommentable,
+          viewCount: video.viewCount + 1, // Incrementing view count as an example
+          totalShare: video.totalShare,
+          duration: video.duration,
+          levelWorkoutsId: video.levelWorkout ? "1" : null, // Assuming levelWorkout maps to id "1"
+          livestreamId: null, // As specified
+          status: video.status,
+          isBanned: video.isBanned,
+          createdAt: video.createdAt,
+          updatedAt: new Date().toISOString(), // Setting updatedAt to current time
+          channel: {
+              channelName: video.channel.channelName,
+              avatar: video.channel.avatar,
+              isLive: video.channel.isLive,
+              popularCheck: video.channel.popularCheck,
+              averageRating: video.ratings || null, // Assuming `ratings` field exists
+              User: {
+                  username: video.channel.User.username
+              }
+          },
+          category: {
+              title: video.category.title
+          },
+          levelWorkout: {
+              levelWorkout: video.levelWorkout ? video.levelWorkout.levelWorkout : null
+          }
+      }
+  }));
+  return videos
 }
 
 const getAllFeatureContentService = async (datetime) => {
@@ -130,11 +172,48 @@ const getAllFeatureContentService = async (datetime) => {
         }
       ]
     });
-
-    if (!featuredContents) {
+    if (!featuredContents.length) {
+      const topVideos = (await getFilteredSortedTopVideos( {level: null, category: null}, "score", 1, 10, "desc")).data.listVideo.rows.map(video => ({
+        channelBooking: null,
+        video: {
+          id: video.id,
+          channelId: video.channelId,
+          categoryId: video.categoryId,
+          title: video.title,
+          description: video.description,
+          videoUrl: video.videoUrl,
+          thumbnailUrl: video.thumbnailUrl,
+          isCommentable: video.isCommentable,
+          viewCount: video.viewCount,
+          totalShare: video.totalShare,
+          duration: video.duration,
+          livestreamId: null,
+          status: video.status,
+          isBanned: video.isBanned,
+          createdAt: video.createdAt,
+          updatedAt: video.updatedAt,
+          channel: {
+            channelName: video.channel.channelName,
+            avatar: video.channel.avatar,
+            isLive: video.channel.isLive,
+            popularCheck: video.channel.popularCheck,
+            averageRating: null,
+            User: {
+              username: video.channel.User.username
+            }
+          },
+          category: {
+            title: video.category.title
+          },
+          levelWorkout: {
+            levelWorkout: video.levelWorkout.levelWorkout
+          }
+        }
+      }));
       return {
         status: 200,
-        message: "No featured contents exist."
+        data:  topVideos,
+        message: "Get featured contents top video."
       };
     }
 
@@ -154,8 +233,7 @@ const getAllFeatureContentService = async (datetime) => {
 
     return {
       status: 200,
-      data:
-        updatedLivestreams,
+      data: updatedLivestreams,
       message: "Get all featured contents successfully"
     };
 
@@ -540,11 +618,11 @@ const getBookingHistoryService = async (channelId, page, pageSize, startDate, en
 
     if (startDate && endDate) {
       whereCondition.date = {
-        [Op.gte]: startDate, 
-        [Op.lte]: endDate    
+        [Op.gte]: startDate,
+        [Op.lte]: endDate
       };
     }
-    
+
 
     const bookingHistory = await FeaturedContent.findAndCountAll({
       where: whereCondition,
@@ -639,7 +717,7 @@ const getBookingStatsService = async (channelId, datetime) => {
             WHERE DATE(newSubscribers.createdAt) = date
           )`),
           'newSubscriptionsToday',
-          
+
         ],
         [
           sequelize.literal(`(
