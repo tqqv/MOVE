@@ -277,7 +277,8 @@ const searchVideoChannel = async(data, limit, offset) => {
     const videos = await Video.findAll({
       where: {
         title: { [Op.like]: `%${normalData}%` },
-        status: 'public'
+        status: 'public',
+        isBanned: false,
       },
       include: [
         {
@@ -319,6 +320,7 @@ const searchVideoChannel = async(data, limit, offset) => {
       include: [
         {
           model: Channel,
+          where: {isBanned: false},
           attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
             [
               sequelize.literal(`(
@@ -332,6 +334,7 @@ const searchVideoChannel = async(data, limit, offset) => {
       ],
       attributes: ['username', 'avatar'],
       where: {
+        isBanned: false,
         [Op.or]: [
           { username: { [Op.like]: `%${normalData}%` } }, // Truy vấn LIKE trên username
           { '$Channel.channelName$': { [Op.like]: `%${normalData}%` } } // Truy vấn LIKE trên channelName của bảng Channel

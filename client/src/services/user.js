@@ -3,6 +3,10 @@ import axios from './axios';
 const getProfile = () => {
   return axios.get('/user/getProfile');
 };
+
+const getBanned = () => {
+  return axios.get('/auth/getBanned');
+};
 // const checkAccount = async (username) => {
 //   try {
 //     const response = await axios.get(`/user/${username}`);
@@ -107,4 +111,5 @@ export {
   getListFollowOfUser,
   getProfilebyUsername,
   postFollowCate,
+  getBanned,
 };

@@ -5,9 +5,11 @@
   import { useLoadingStore, useNotificationStore } from './stores';
   import { joinAllRooms } from './services/socketService';
   import { getLogout } from './services/auth';
+  import { useRouter } from 'vue-router';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
   const notificationStore = useNotificationStore();
+  const router = useRouter();
   const getCookie = (cname) => {
     let name = cname + '=';
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -44,12 +46,18 @@
       const role = localStorage.getItem('role');
 
       if (role !== userStore.user.role) {
+
         const res = await getLogout();
         if (res && res.status === 200) {
           userStore.clearUserData();
           localStorage.removeItem('isLogin');
           localStorage.removeItem('role');
         }
+      }
+
+      if(userStore.user.isBanned) {
+        await userStore.fetchUserBanned();
+        router.push('/banned');
       }
     }
   });
