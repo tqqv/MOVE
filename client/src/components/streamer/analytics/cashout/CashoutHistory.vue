@@ -179,7 +179,7 @@
       <!-- --------------- -->
       <!-- TABLE -->
 
-      <div v-else-if="!isLoadingCashoutHistory">
+      <div v-else="!isLoadingCashoutHistory">
         <DataTable
           :value="cashoutHistoryData"
           rowGroupMode="subheader"
@@ -253,7 +253,7 @@
 
       <!-- EMPTY ------------>
       <div
-        v-else-if="cashoutHistoryData.length === 0"
+        v-if="cashoutHistoryData.length === 0"
         class="h-full flex justify-center items-center pb-20"
       >
         <EmptyPage

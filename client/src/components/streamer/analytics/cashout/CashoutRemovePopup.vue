@@ -45,9 +45,7 @@
   };
   watch(
     () => withdrawInforStore.withdrawInfor,
-    (newBank) => {
-      console.log('Bank updated:', newBank);
-    },
+    (newBank) => {},
   );
 </script>
 <template>
