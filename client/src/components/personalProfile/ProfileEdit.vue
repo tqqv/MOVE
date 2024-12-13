@@ -14,7 +14,6 @@
   import { updateProfileSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
   import DatePicker from 'primevue/datepicker';
-  import { sendMailVerify } from '@/services/auth';
   import Skeleton from 'primevue/skeleton';
   import SmallLoading from '../icons/smallLoading.vue';
 
@@ -121,7 +120,6 @@
   const loadNational = async () => {
     try {
       nationality.value = await fetchNational(profileData.value.country);
-      console.log(nationality.value[0].demonyms.eng.f);
       if (nationality.value && nationality.value[0]) {
         profileData.value.nationality = nationality.value[0].demonyms.eng.f;
       }
@@ -204,8 +202,6 @@
   onMounted(async () => {
     await userStore.fetchUserProfile();
     loadCountries();
-    console.log(emailVerified.value);
-
     if (userStore.user) {
       updateProfileData(userStore.user);
     }

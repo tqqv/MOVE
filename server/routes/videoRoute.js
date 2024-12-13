@@ -22,7 +22,8 @@ const { getUploadLink,
   getStateByCountryAndVideoIdFromIpController,
   getVideoYouMayLikeController,
   reupStreamController,
-  getLatestReupStreamController
+  getLatestReupStreamController,
+  getVideoByChannelAndTitleController
 } = require('../controllers/videoController');
 const { verifyStreamer, verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 const multer = require('multer');
@@ -48,6 +49,7 @@ router.get('/latestReup', getLatestReupStreamController);
 router.get('/', getAllVideos);
 router.get('/:videoId', getVideoByVideoId);
 router.get('/channel/:channelId', getVideoByUserId);
+router.get('/channel/search/:channelId', getVideoByChannelAndTitleController);
 router.delete('/delete-video/:videoId', verifyStreamer, deleteVideo);
 router.delete('/delete-videos', verifyStreamer, deleteMultipleVideos);
 router.post('/reup', verifyStreamer, reupStreamController);

@@ -2,11 +2,12 @@
   import { useUserStore } from '@/stores/user.store';
   import { onBeforeMount, onMounted } from 'vue';
   import GlobalLoading from './components/GlobalLoading.vue';
-  import { useLoadingStore } from './stores';
+  import { useLoadingStore, useNotificationStore } from './stores';
+  import { joinAllRooms } from './services/socketService';
   import { getLogout } from './services/auth';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
-
+  const notificationStore = useNotificationStore();
   const getCookie = (cname) => {
     let name = cname + '=';
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -31,20 +32,20 @@
   });
   //Load data navbar when F5
 
-  onMounted(async() => {
+  onMounted(async () => {
     const isLogin = localStorage.getItem('isLogin');
 
     if (isLogin === 'true') {
       await userStore.fetchUserProfile();
       await userStore.loadFollowers();
       await userStore.loadFollowCategories();
-      const role = localStorage.getItem('role')
+      notificationStore.fetchQuantifyNotifications();
+      joinAllRooms();
+      const role = localStorage.getItem('role');
 
-      if(role !== userStore.user.role) {
+      if (role !== userStore.user.role) {
         const res = await getLogout();
-        console.log("vcc lun a cho");
-
-        if(res && res.status === 200) {
+        if (res && res.status === 200) {
           userStore.clearUserData();
           localStorage.removeItem('isLogin');
           localStorage.removeItem('role');

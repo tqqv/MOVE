@@ -15,12 +15,14 @@ import 'vue3-toastify/dist/index.css';
 import Vue3Toastify, { toast } from 'vue3-toastify';
 import '../node_modules/vue3-emoji-picker/dist/style.css';
 import Tooltip from 'primevue/tooltip';
+import Vue3Lottie from 'vue3-lottie';
 
 const pinia = createPinia();
 const app = createApp(App);
 
 app.directive('tooltip', Tooltip);
 app.use(Carousel3d);
+app.use(Vue3Lottie);
 
 app.use(pinia);
 app.use(router);

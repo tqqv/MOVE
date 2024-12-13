@@ -13,6 +13,10 @@ const createFeatureContentAbnormalService = async (date, pricePerDay, maxBooking
       }
     }
 
+    // check if maxbooking < current bookings => return errors
+
+    //
+
     const newFeaturedContentAbnormal = await FeaturedContentAbnormal.create({
       date,
       pricePerDay,
