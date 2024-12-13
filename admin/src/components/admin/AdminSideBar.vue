@@ -12,7 +12,7 @@
   import Request from '../icons/request.vue';
   import Logout from '../icons/logout.vue';
   import Booking from '../icons/booking.vue';
-  // import Percent from '../icons/percent.vue';
+  import Percent from '../icons/percent.vue';
   import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
@@ -53,7 +53,7 @@
         { name: 'Donate Item', link: '/reps/donate' },
       ],
     },
-    // { name: 'System Config', icon: Percent, link: '/system-config' },
+    { name: 'System Config', icon: Percent, link: '/system-config' },
     { name: 'User Management', icon: User, link: '/users' },
     { name: 'Category Management', icon: Category, link: '/category' },
     { name: 'Level Management', icon: Level, link: '/levelworkout' },
