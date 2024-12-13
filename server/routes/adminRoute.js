@@ -1,6 +1,6 @@
 var express = require("express");
 const { verifyAdmin } = require("../middlewares/verifyToken");
-const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, unbanAccountController, unbanChannelController, revenueController, getListUserPayInController, getListUserPayOutController, createSystemConfigController, getSystemConfigByKeyController, getAllSystemConfigController, editSystemConfigController, deleteMultipleVideosController} = require("../controllers/adminController");
+const { setStatusRequestChannelController, getStatisticController, getDataChartMoneyController, getTop5ChannelController, getTop5UserDepositController, userCountController, getAllUsersRequestController, getAllUserController, getUserByIdController, editProfileUserController, getListVideoByChannelIdController, EditVideoByIdController, deleteVideoByIdController, getListPaymentByUserIdController, unbanAccountController, unbanChannelController, revenueController, getListUserPayInController, getListUserPayOutController, createSystemConfigController, getAllSystemConfigController, editSystemConfigController, deleteMultipleVideosController} = require("../controllers/adminController");
 const { createRepPackageController, editRepPackageController, getRepPackageByIdController, deleteRepPackageController } = require("../controllers/repPackageController");
 const { createDonationItemController, getDonationItemByIdController, editDonationItemController, deleteDonationItemController } = require("../controllers/donationItemController");
 const { getListReportVideoController, getListReportCommentController, getListReportLivestreamController, getListReportAccountController, getListReportChannelController, actionReportController, getReportDetailController } = require("../controllers/reportController");
@@ -60,7 +60,6 @@ adminRoute.get("/requestChannel", verifyAdmin, getAllUsersRequestController);
 
 //////////// system config ///////////
 adminRoute.post("/createSystemConfig", verifyAdmin, createSystemConfigController)
-adminRoute.get("/getSystemConfigByKey/:key", getSystemConfigByKeyController)
 adminRoute.get("/getAllSystemConfig", verifyAdmin, getAllSystemConfigController)
 adminRoute.patch("/editSystemConfig", verifyAdmin, editSystemConfigController)
 

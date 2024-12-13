@@ -2,6 +2,7 @@ const responseHandler = require("../middlewares/responseHandler");
 const { sendMailConfirmWithdrawMethod, verifyOtp } = require("../services/authService");
 const { createMethodWithdraw, updateVerifyAccountStripe, getLinkStripeVerify, cashout, getWithdrawInfor, getListCashoutHistory, deleteWithdrawInfor, exchangeReps } = require("../services/cashoutService");
 const { createStripeAccountId, createPayout, attachBankAccountToConnectedAccount, createBankToken, deleteStripeAccountId } = require("../services/stripeService");
+const { getSystemConfigByKey } = require("../services/systemConfigService");
 
 const createMethodWithdrawController = async (req, res, next) => {
   const channelId = req.user.channelId
@@ -94,6 +95,13 @@ const exchangeRepsController = async (req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getSystemConfigByKeyController = async (req, res, next) => {
+  const key = req.params.key
+  const result = await getSystemConfigByKey(key)
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 
 module.exports = {
   createMethodWithdrawController,
@@ -107,4 +115,5 @@ module.exports = {
   checkOtpCodeController,
   deleteWithdrawInforController,
   exchangeRepsController,
+  getSystemConfigByKeyController
 }

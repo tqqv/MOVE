@@ -14,6 +14,7 @@
   import { toast } from 'vue3-toastify';
   import { sendMailVerify } from '@/services/auth';
   import SmallLoading from '../icons/smallLoading.vue';
+  import { useTabStore } from '@/stores';
 
   const tabs = ref([
     { title: 'Profile', component: markRaw(ProfileEdit), value: '0' },
@@ -21,6 +22,7 @@
   ]);
 
   const userStore = useUserStore();
+  const tabStore = useTabStore();
   const user = computed(() => userStore.user || {});
   const sendRequestToStreamer = ref(false);
   const statusRequest = ref('');
@@ -111,6 +113,13 @@
     }
   };
 
+  const activeTab = computed(() => tabStore.activeTab);
+
+  const onTabChange = (event) => {
+    console.log('Tab changed to:', event);
+    tabStore.setActiveTab(event);
+  };
+
   onMounted(() => {
     fetchStatusRequestToStreamer();
     checkEmailSentStatus();
@@ -194,18 +203,15 @@
           <Divider />
         </div>
         <div class="mt-2">
-          <Tabs value="0">
+          <Tabs :value="activeTab" @update:value="onTabChange">
             <TabList>
-              <Tab v-for="tab in tabs" :key="tab.title" :value="tab.value">{{ tab.title }}</Tab>
+              <Tab v-for="tab in tabs" :key="tab.value" :value="tab.value">
+                {{ tab.title }}
+              </Tab>
             </TabList>
             <TabPanels>
-              <TabPanel v-for="tab in tabs" :key="tab.component" :value="tab.value">
-                <component
-                  :is="tab.component"
-                  :isEmailSent="isEmailSent"
-                  :handleVerifiedEmail="handleVerifiedEmail"
-                  @verifyEmail="handleVerifiedEmail"
-                />
+              <TabPanel v-for="tab in tabs" :key="tab.value" :value="tab.value">
+                <component :is="tab.component" />
               </TabPanel>
             </TabPanels>
           </Tabs>

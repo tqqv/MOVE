@@ -11,6 +11,7 @@ const { generateVideosYouMayLike } = require('../utils/AI/services/youmaylike/ge
 const { generateVideoEmbeddings } = require('../utils/AI/services/youmaylike/generateEmbeddings.js');
 const { generateUserProfile } = require('../utils/AI/services/youmaylike/generateUserProfile.js');
 const _redis = require('../utils/redis/config.js');
+const { createNotification } = require('./notificationService.js');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -168,12 +169,28 @@ const updateVideoService = async (videoId, updateData) => {
     const video = await Video.update(updateData, {
       where: { id: videoId }
     });
+
+    const videoInfor = await Video.findOne({
+      where: { id: videoId }
+    });
+
     if (!video) {
       return {
         status: 404,
         message: 'Video updated failed',
         data: null
       };
+    }
+    if(updateData.status == "public") {
+      await createNotification(
+        "followedChannel",
+        "newVideo",
+        null,
+        videoInfor.dataValues.channelId,
+        videoInfor.dataValues.channelId,
+        null,
+        videoId
+      )
     }
     return {
       status: 200,

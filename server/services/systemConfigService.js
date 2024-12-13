@@ -54,6 +54,12 @@ const getAllSystemConfig = async() => {
 
 const getSystemConfigByKey = async(key) => {
   try {
+    if(!key) {
+      return {
+        status: 400,
+        message: 'Cannot be empty.'
+      }
+    }
     const systemConfig = await SystemConfig.findOne({where: {key}})
 
     if(!systemConfig) {

@@ -26,6 +26,11 @@ const categoryFollowRoute = require("./routes/categoryFollowRoute.js");
 const adminRoute = require("./routes/adminRoute.js");
 const featuredContentBaseRouter = require("./routes/featuredContentBaseRoute.js");
 const featuredContentAbnormalRouter = require("./routes/featuredContentAbnormalRoute.js");
+const notificationEntityRouter = require("./routes/notificationEntityRoute.js");
+const notificationTranslationRouter = require("./routes/notificationTranslationRoute.js");
+const notificationRouter = require("./routes/notificationRoute.js");
+const notificationRoomSettingRouter = require("./routes/notificationRoomSettingRoute.js");
+const notificationVisitStatusRouter = require("./routes/notificationVisitStatusRoute.js");
 
 const app = express();
 const port = process.env.PORT || 8000;
@@ -75,6 +80,11 @@ app.use("/api/featuredContentAbnormal", featuredContentAbnormalRouter);
 app.use('/api/search', searchRouter)
 app.use("/api/donationItem", donationItemRouter);
 app.use("/api/donate", donationRouter);
+app.use("/api/notificationEntity", notificationEntityRouter);
+app.use("/api/notificationTranslation", notificationTranslationRouter);
+app.use("/api/notification", notificationRouter);
+app.use("/api/notificationRoomSetting", notificationRoomSettingRouter);
+app.use("/api/notificationVisitStatus", notificationVisitStatusRouter);
 app.use("/api/admin", adminRoute);
 
 // init socket connection
