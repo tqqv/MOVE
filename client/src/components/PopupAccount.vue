@@ -9,12 +9,14 @@
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
   import { formatNumber } from '@/utils';
+  import { disconnectAllRooms } from '@/services/socketService';
   const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
   const router = useRouter();
   const handleLogout = async () => {
     try {
+      disconnectAllRooms();
       const response = await getLogout();
       localStorage.removeItem('isLogin');
       localStorage.removeItem('role');

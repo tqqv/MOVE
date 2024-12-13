@@ -76,17 +76,41 @@ const joinAllRooms = async () => {
       livestreamSocket.connect();
     }
 
-    // Join từng room
     rooms.forEach((room) => {
       livestreamSocket.emit('joinRoom', room);
     });
 
-    // Lắng nghe sự kiện `notifications`
     livestreamSocket.on('notifications', (notification) => {
       notificationStore.addNotification(notification);
     });
   } catch (error) {
     console.error('Error in joinAllRooms:', error);
+  }
+};
+
+const disconnectAllRooms = async () => {
+  try {
+    const roomsResponse = await getAllRoomNotifications();
+    if (roomsResponse.error) {
+      console.error('Error fetching room notifications for disconnect:', roomsResponse.message);
+      return;
+    }
+
+    const rooms = roomsResponse.data.data;
+
+    // Leave từng room
+    rooms.forEach((room) => {
+      livestreamSocket.emit('leaveRoom', room);
+    });
+
+    // Ngắt kết nối nếu cần
+    if (livestreamSocket.connected) {
+      livestreamSocket.disconnect();
+    }
+
+    console.log('Disconnected from all rooms and socket closed.');
+  } catch (error) {
+    console.error('Error in disconnectAllRooms:', error);
   }
 };
 
@@ -99,4 +123,5 @@ export {
   listenNewMessage,
   sendMessage,
   joinAllRooms,
+  disconnectAllRooms,
 };
