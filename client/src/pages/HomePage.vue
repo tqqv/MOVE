@@ -20,11 +20,10 @@
   const localDate = new Date();
 
   const formatDate = () => {
-    const year = localDate.getFullYear().toString();
-    const month = (localDate.getMonth() + 1).toString().padStart(2, '0');
-    const day = localDate.getDate().toString().padStart(2, '0');
-
-    currentDate.value = `${year}/${month}/${day}`;
+    const date = new Date();
+    date.setHours(0, 0, 0, 0);
+    const localDate = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+    currentDate.value = localDate.toISOString();
   };
 
   formatDate();
@@ -67,6 +66,8 @@
   };
   onMounted(async () => {
     fetchAllCategoriesHaveView();
+    console.log(currentDate.value);
+
     await fetchDataSlider(currentDate.value);
     fetchVideoYouMayLike();
   });
