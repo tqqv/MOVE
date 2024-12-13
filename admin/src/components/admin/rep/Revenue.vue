@@ -8,7 +8,7 @@
   import Column from 'primevue/column';
   import Skeleton from 'primevue/skeleton';
   import { getListUserPayIn, getListUserPayOut, getRevenue } from '@/services/admin';
-  import { formatTimeDate } from '@/utils';
+  import { formatTimeDate, formatNumber } from '@/utils';
 
   const barChart = ref(null);
   let chartInstance = null;
@@ -280,11 +280,13 @@
               </div>
               <div v-if="!isLoadingDashboard" class="flex gap-x-2 items-center">
                 <Sales width="20" fill="#13d0b4" />
-                <span class="font-bold">{{ (moneyEarned ?? 0).toFixed(2) }} USD</span>
+                <span class="font-bold">{{ formatNumber((moneyEarned ?? 0).toFixed(2)) }} USD</span>
               </div>
               <div v-if="!isLoadingDashboard" class="flex gap-x-2 items-center">
                 <Wallet width="20" fill="#13d0b4" />
-                <span class="font-bold">{{ (moneyWithdraw ?? 0).toFixed(2) }} USD</span>
+                <span class="font-bold"
+                  >{{ formatNumber((moneyWithdraw ?? 0).toFixed(2)) }} USD</span
+                >
               </div>
             </div>
           </div>
@@ -326,7 +328,11 @@
                 {{ formatTimeDate(slotProps.data.createdAt) }}
               </template>
             </Column>
-            <Column field="rep" header="REPs"></Column>
+            <Column field="rep" header="REPs">
+              <template #body="slotProps">
+                {{ formatNumber(slotProps.data.rep) }}
+              </template>
+            </Column>
             <Column field="amount" header="Amount (SGD)"></Column>
           </DataTable>
           <div class="flex justify-between items-center mt-4 text-sm px-3">
@@ -380,7 +386,11 @@
                 {{ formatTimeDate(slotProps.data.createdAt) }}
               </template>
             </Column>
-            <Column field="rep" header="REPs"></Column>
+            <Column header="REPs">
+              <template #body="slotProps">
+                {{ formatNumber(slotProps.data.rep) }}
+              </template>
+            </Column>
             <Column field="amount" header="Amount (SGD)"></Column>
           </DataTable>
           <div class="flex justify-between items-center mt-4 text-sm px-3">
