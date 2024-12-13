@@ -3,8 +3,8 @@
   import VideoListFilter from './VideoListFilter.vue';
 
   const sortByOptions = [
-    { id: 1, name: 'Decreasing (High to Low)', value: 'viewCount', order: 'desc' },
-    { id: 2, name: 'Ascending (Low to High)', value: 'viewCount', order: 'asc' },
+    { id: 1, name: 'Decreasing (High to Low)', sortBy: 'viewCount', order: 'desc' },
+    { id: 2, name: 'Ascending (Low to High)', sortBy: 'viewCount', order: 'asc' },
   ];
 </script>
 

@@ -5,9 +5,9 @@ export const formatDuration = (durationInSeconds) => {
 };
 
 export const genreDuration = (duration) => {
-  if (duration > 60) {
+  if (duration > 3600) {
     return `> 1 hour`;
-  } else if (duration <= 60 && duration >= 30) {
+  } else if (duration <= 3600 && duration >= 1800) {
     return `< 1 hour`;
-  } else if (duration < 30 && duration > 0) return `< 30 mins`;
+  } else if (duration < 1800 && duration > 0) return `< 30 mins`;
 };
