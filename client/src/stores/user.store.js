@@ -1,10 +1,10 @@
 import { defineStore } from 'pinia';
-import { getProfile, viewFollowChannel } from '@/services/user';
+import { getBanned, getProfile, viewFollowChannel } from '@/services/user';
 import { ref } from 'vue';
 import { getAllFollowCategories } from '@/services/categories';
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref(null);
+  const user = ref({});
   const loading = ref(false);
   const error = ref(null);
   const followers = ref([]);
@@ -15,6 +15,22 @@ export const useUserStore = defineStore('user', () => {
       const response = await getProfile();
       if (response.data.success) {
         user.value = response.data.data;
+      } else {
+        throw new Error('Invalid token');
+      }
+    } catch (err) {
+      error.value = err.message;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  const fetchUserBanned = async () => {
+    loading.value = true;
+    try {
+      const response = await getBanned();
+      if (response.data.success) {
+        user.value.banned = response.data.data;
       } else {
         throw new Error('Invalid token');
       }
@@ -71,5 +87,6 @@ export const useUserStore = defineStore('user', () => {
     fetchUserProfile,
     loadFollowCategories,
     clearUserData,
+    fetchUserBanned,
   };
 });

@@ -50,6 +50,11 @@
           localStorage.removeItem('role');
         }
       }
+
+      if(userStore.user.isBanned) {
+        await userStore.fetchUserBanned();
+        console.log(userStore.user);
+      }
     }
   });
 

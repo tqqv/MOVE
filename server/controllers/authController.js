@@ -206,7 +206,7 @@ const getBannedController = async (req, res, next) => {
   const userId = req.user.id;
   const result = await getBanned(userId);
 
-  responseHandler(result.status, null, result.message)(req, res, next);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
 
