@@ -73,6 +73,7 @@ const searchUser = async (data, page, pageSize) => {
         include: [
           {
             model: Channel,
+            where: {isBanned: false},
             attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
               [
                 sequelize.literal(`(
@@ -86,6 +87,7 @@ const searchUser = async (data, page, pageSize) => {
         ],
         attributes: ['username', 'avatar'],
         where: {
+          isBanned: false,
           [Op.or]: [
             { username: { [Op.like]: `%${normalData}%` } },
             { '$Channel.channelName$': { [Op.like]: `%${normalData}%` } }

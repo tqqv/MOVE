@@ -465,6 +465,7 @@ const listSubscribeOfUser = async(userId) => {
       include: [{
         model: Channel,
         as: "followChannel",
+        where: {isBanned: false},
         attributes: ['channelName', 'avatar', 'isLive', 'popularCheck',
           [
             sequelize.literal(`(
@@ -666,10 +667,12 @@ const getProfileByUserName = async(username) => {
   try {
     const user = await User.findOne({
       where: {
-        username: username
+        username: username,
+        isBanned: false
       },
       include: [{
         model: Channel,
+        where: {isBanned: false},
         attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck','facebookUrl','youtubeUrl','instaUrl','bio',
           [
             sequelize.literal(`(

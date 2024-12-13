@@ -8,8 +8,10 @@
   import { Form, Field } from 'vee-validate';
   import { loginSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
+import { useRouter } from 'vue-router';
 
   const userStore = useUserStore();
+  const router = useRouter()
   // const showLoginWithEmail = ref(false);
   const showPassword = ref(false);
   const popupStore = usePopupStore();
@@ -25,16 +27,23 @@
     try {
       const response = await postLogin(data);
       if (response.error) {
+        console.log("123");
+
         toast.error(response.message || 'Login failed');
       } else {
-        userStore.fetchUserProfile();
+        await userStore.fetchUserProfile();
         userStore.loadFollowers();
         userStore.loadFollowCategories();
+        localStorage.setItem('role', response.data.role);
+        if(userStore.user.isBanned) {
+          await userStore.fetchUserBanned();
+          router.push('/banned');
+        }
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
-        localStorage.setItem('role', response.data.role);
       }
     } catch (error) {
+      console.log(error);
       toast.error(error.response?.data.message || 'Login failed');
     }
   };

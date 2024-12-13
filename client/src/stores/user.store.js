@@ -4,7 +4,7 @@ import { ref } from 'vue';
 import { getAllFollowCategories } from '@/services/categories';
 
 export const useUserStore = defineStore('user', () => {
-  const user = ref({});
+  const user = ref(null);
   const loading = ref(false);
   const error = ref(null);
   const followers = ref([]);
