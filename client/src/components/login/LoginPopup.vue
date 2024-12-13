@@ -4,17 +4,19 @@
   import { usePopupStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { postLogin } from '@/services/auth';
-  import { useUserStore } from '@/stores';
+  import { useUserStore, useNotificationStore } from '@/stores';
   import { Form, Field } from 'vee-validate';
   import { loginSchema } from '@/utils/vadilation';
   import Warning from '../icons/warning.vue';
-import { useRouter } from 'vue-router';
+  import { useRouter } from 'vue-router';
+  import { joinAllRooms } from '@/services/socketService';
 
   const userStore = useUserStore();
-  const router = useRouter()
+  const router = useRouter();
   // const showLoginWithEmail = ref(false);
   const showPassword = ref(false);
   const popupStore = usePopupStore();
+  const notificationStore = useNotificationStore();
 
   // const handleLoginWithEmail = () => {
   //   showLoginWithEmail.value = true;
@@ -27,15 +29,17 @@ import { useRouter } from 'vue-router';
     try {
       const response = await postLogin(data);
       if (response.error) {
-        console.log("123");
+        console.log('123');
 
         toast.error(response.message || 'Login failed');
       } else {
         await userStore.fetchUserProfile();
         userStore.loadFollowers();
         userStore.loadFollowCategories();
+        notificationStore.fetchQuantifyNotifications();
+        joinAllRooms();
         localStorage.setItem('role', response.data.role);
-        if(userStore.user.isBanned) {
+        if (userStore.user.isBanned) {
           await userStore.fetchUserBanned();
           router.push('/banned');
         }
