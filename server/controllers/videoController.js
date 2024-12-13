@@ -22,6 +22,7 @@ const {
   getVideoYouMayLikeService,
   reupStreamService,
   getLatestReupStreamService,
+  getVideoByChannelAndTitleService,
 } = require('../services/videoService');
 const responseHandler = require("../middlewares/responseHandler");
 const { createHashmapFromDBData, getFilteredSortedTopVideos } = require('../utils/redis/cache/videoCache');
@@ -117,6 +118,16 @@ const getVideoByUserId = async (req, res, next) => {
     order: req.query.order || 'desc'
   };
   const result = await getVideoByUserIdService(channelId, page, pageSize, level, category, sortCondition);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+};
+
+const getVideoByChannelAndTitleController = async (req, res, next) => {
+  const data = req.query.data
+  const page = req.query.page || 1;
+  const pageSize = req.query.pageSize || 5;
+  const channelId = req.params.channelId;
+
+  const result = await getVideoByChannelAndTitleService(data, page, pageSize, channelId);
   responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
@@ -310,5 +321,6 @@ module.exports = {
   getTopVideoController,
   getVideoYouMayLikeController,
   reupStreamController,
-  getLatestReupStreamController
+  getLatestReupStreamController,
+  getVideoByChannelAndTitleController
 };

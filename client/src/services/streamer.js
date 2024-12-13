@@ -44,6 +44,23 @@ const getOverviewAnalytic = async () => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const getVideoSearchbyChannel = (channelId, page, pageSize) => {
+  return axios.get(`/video/channel/search/${channelId}`, {
+    params: {
+      page,
+      pageSize,
+    },
+  });
+};
+const searchVideo = async (channelId, searchData, quality, page) => {
+  return axios.get(`/video/channel/search/${channelId}`, {
+    params: {
+      data: searchData,
+      limit: quality,
+      offset: page,
+    },
+  });
+};
 export {
   getProfileChannel,
   updateChannelProfile,
@@ -51,4 +68,6 @@ export {
   getViewChannel,
   changeStreamKey,
   getOverviewAnalytic,
+  getVideoSearchbyChannel,
+  searchVideo,
 };

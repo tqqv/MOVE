@@ -37,9 +37,11 @@ import ScreenChat from '@/components/screenObs/ScreenChat.vue';
 import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
 import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
 import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
+import AdvertiseBooking from '@/components/streamer/advertiseBooking/AdvertiseBooking.vue';
 import AboutUs from '@/components/showMore/AboutUs.vue';
 import FAQ from '@/components/showMore/FAQ.vue';
 import CommunityGuidelines from '@/components/showMore/CommunityGuidelines.vue';
+import BookingHistory from '@/components/streamer/advertiseBooking/BookingHistory.vue';
 import BanPage from '@/pages/BanPage.vue';
 import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
@@ -133,6 +135,14 @@ const routes = [
       {
         path: 'cashout',
         component: Cashout,
+      },
+      {
+        path: 'booking-featured',
+        component: AdvertiseBooking,
+      },
+      {
+        path: 'booking-history',
+        component: BookingHistory,
       },
       {
         path: 'cashout-history',
