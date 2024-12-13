@@ -11,6 +11,14 @@
     return notificationStore.newNotification;
   });
 
+  const translatedContentEn = computed(() => {
+    return (
+      notificationStore.newNotification?.notificationEntity?.notificationTranslation?.find(
+        (translation) => translation.languageCode === 'en',
+      )?.translatedContent || ''
+    );
+  });
+
   const closeNotification = () => {
     isClosing.value = true;
     setTimeout(() => {
@@ -31,8 +39,6 @@
 
   watch(newNotification, (newValue) => {
     if (newValue) {
-      console.log(newValue);
-
       showNotification.value = true;
       isClosing.value = false;
       setTimeout(closeNotification, 4000);
@@ -57,7 +63,11 @@
           </div>
         </div>
         <RouterLink
-          :to="`/video/${newNotification?.targetVideo?.id}`"
+          :to="
+            newNotification?.targetVideo
+              ? `/video/${newNotification.targetVideo.id}`
+              : `/live/${newNotification?.channelActor?.User?.username}`
+          "
           class="flex gap-x-3 pt-3 pb-1 hover:bg-gray-light px-2 rounded-md"
           @click="handleMakeRead(newNotification?.id)"
         >
@@ -71,9 +81,7 @@
               <span class="text_para font-semibold mr-1">{{
                 newNotification?.channelActor?.channelName || newNotification?.userActor?.username
               }}</span>
-              <span>{{
-                newNotification?.notificationEntity?.notificationTranslation[1].translatedContent
-              }}</span>
+              <span>{{ translatedContentEn }}</span>
             </h1>
             <p class="text_secondary text-[12px] text-[#ACACAC]">
               {{ formatDate(newNotification?.createdAt) }}o

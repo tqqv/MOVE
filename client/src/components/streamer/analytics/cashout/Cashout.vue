@@ -7,13 +7,19 @@
   import BankDetails from './BankDetails.vue';
   import VerificationPopup from '@/components/popup/VerificationPopup.vue';
   import { useWithdrawInfor } from '@/stores/withdrawInfor.store';
-  import { getLinkStripeVerify, removeWithdrawInfor, updateStripeVerify } from '@/services/cashout';
+  import {
+    getLinkStripeVerify,
+    removeWithdrawInfor,
+    updateStripeVerify,
+    getSystemConfigByKey,
+  } from '@/services/cashout';
   import { useUserStore } from '@/stores';
   import { formatNumber, formatPercentage, formatView } from '@/utils';
   import Skeleton from 'primevue/skeleton';
   import CashoutRemovePopup from './CashoutRemovePopup.vue';
   import { RouterLink } from 'vue-router';
   import smallLoading from '@/components/icons/smallLoading.vue';
+  import ExchangePopup from './ExchangePopup.vue';
 
   const props = defineProps({
     reps: Number,
@@ -28,13 +34,22 @@
   const isRemoveVisible = ref(false);
   const isUpdateSuccessful = ref(false);
   const isWithdrawVisible = ref(false);
+  const isExchangeVisible = ref(false);
+  const systemConfigByKey = ref();
   const isProcessingPaymentVisible = ref(false);
   const isLoadingVerify = ref(false);
   // const isSelectBankVisible = ref(false);
   const isBankDetailsVisible = ref(false);
   const withdrawValue = ref();
-  const tokenBank = ref();
+  const exchangeValue = ref();
 
+  const tokenBank = ref();
+  const toogleExchangeVisible = () => {
+    isExchangeVisible.value = !isExchangeVisible.value;
+  };
+  const handleDataFromExchange = (data) => {
+    exchangeValue.value = data;
+  };
   const handleDataFromWithdraw = (data) => {
     withdrawValue.value = data;
   };
@@ -62,6 +77,16 @@
   const toogleProcessingPaymentVisible = () => {
     isProcessingPaymentVisible.value = !isProcessingPaymentVisible.value;
   };
+  const fetchSystemConfigByKey = async () => {
+    try {
+      const res = await getSystemConfigByKey();
+      if (res && res.status === 200) {
+        systemConfigByKey.value = res.data.data.value;
+      }
+    } catch (error) {
+      console.error('Error during Stripe verification:', error);
+    }
+  };
 
   const handleStripeVerify = async () => {
     isLoadingVerify.value = false;
@@ -78,6 +103,7 @@
   };
 
   onMounted(async () => {
+    await fetchSystemConfigByKey();
     const urlParams = new URLSearchParams(window.location.search);
 
     await withdrawInforStore.fetchWithdrawInfor();
@@ -119,6 +145,7 @@
 
     <div v-else class="bg-white shadow-lg p-6 rounded-md text-black w-[762px]">
       <span class="text-lg font-bold whitespace-nowrap">Total REPs </span>
+
       <div class="space-y-2">
         <div class="flex gap-x-8 items-center">
           <div class="text-[30px] font-bold">
@@ -126,7 +153,7 @@
           </div>
           <div class="text-base">
             (Estimated value ${{
-              formatNumber((userStore.user?.Channel.rep * exchangeRate).toFixed(2))
+              formatNumber((userStore.user?.Channel.rep * systemConfigByKey * 0.015).toFixed(2))
             }})
           </div>
         </div>
@@ -166,20 +193,24 @@
 
               <div class="text-base">{{ withdrawInforStore.withdrawInfor.bankHolderName }}</div>
             </div>
-            <button
-              v-if="withdrawInforStore.withdrawInfor.status === 'verified'"
-              @click="toogleWithdrawVisible"
-              class="btn"
-              :class="userStore.user?.Channel.rep === 0 ? 'btn bg-[#ccc] ' : ''"
-              :disabled="userStore.user?.Channel.rep === 0"
-            >
-              Withdraw
-            </button>
+            <div class="flex gap-x-4">
+              <button @click="toogleExchangeVisible" class="btn">Exchange</button>
 
-            <button v-else @click="handleStripeVerify" class="btn bg-[#C96868] text-[#ffffff]">
-              <smallLoading v-if="isLoadingVerify" fill="white" fill_second="#C96868" />
-              <span v-else>Verify</span>
-            </button>
+              <button
+                v-if="withdrawInforStore.withdrawInfor.status === 'verified'"
+                @click="toogleWithdrawVisible"
+                class="btn"
+                :class="userStore.user?.Channel.rep === 0 ? 'btn bg-[#ccc] ' : ''"
+                :disabled="userStore.user?.Channel.rep === 0"
+              >
+                Withdraw
+              </button>
+
+              <button v-else @click="handleStripeVerify" class="btn bg-[#C96868] text-[#ffffff]">
+                <smallLoading v-if="isLoadingVerify" fill="white" fill_second="#C96868" />
+                <span v-else>Verify</span>
+              </button>
+            </div>
           </div>
         </div>
         <!-- NO INFO -->
@@ -197,9 +228,22 @@
       </div>
     </div>
   </section>
+  <ExchangePopup
+    v-if="isExchangeVisible"
+    :isExchangeVisible="isExchangeVisible"
+    title="Exchange"
+    @toogleExchangeVisible="toogleExchangeVisible"
+    @toogleProcessingPaymentVisible="toogleProcessingPaymentVisible"
+    @dataFromExchange="handleDataFromExchange"
+    :minWithdraw="minWithdraw"
+    :exchangeRate="exchangeRate"
+    :clearInput="isWithdrawVisible"
+    :systemConfigByKey="systemConfigByKey"
+  />
   <WithdrawPopup
     v-if="isWithdrawVisible"
     :isWithdrawVisible="isWithdrawVisible"
+    :systemConfigByKey="systemConfigByKey"
     title="Withdraw"
     @toogleWithdrawVisible="toogleWithdrawVisible"
     @toogleProcessingPaymentVisible="toogleProcessingPaymentVisible"

@@ -1,6 +1,6 @@
 <script setup>
   import { computed, onMounted, onUnmounted, ref } from 'vue';
-  import { formatRating, formatDuration, formatView } from '@/utils';
+  import { formatRating, formatDuration, formatView, genreDuration } from '@/utils';
   import { toast } from 'vue3-toastify';
   import share from '@icons/share.vue';
   import axiosInstance from '@/services/axios';
@@ -42,12 +42,6 @@
   const reportTypeVideos = ref([]);
 
   const selectedReportVideo = ref(null);
-
-  const duration = computed(() => {
-    if (formatDuration(props.video?.duration) < 30) return '< 30 mins';
-    if (formatDuration(props.video?.duration) < 60) return '< 1 hour';
-    return '> 1 hour';
-  });
 
   const toggleMenu = () => {
     isMenuVisible.value = !isMenuVisible.value;
@@ -194,7 +188,7 @@
         {{ video?.levelWorkout?.levelWorkout || livestream?.livestreamLevelWorkout?.levelWorkout }}
       </span>
       <span v-if="video" class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-        duration
+        genreDuration(video?.duration)
       }}</span>
     </div>
     <div class="flex items-center gap-9">

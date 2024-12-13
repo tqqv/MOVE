@@ -43,12 +43,12 @@
 
   const selectCategoryOptions = ref('');
   const selectLevelWorkoutOptions = ref('');
-  const selectedSortBy = ref(props.sortByOptions[0].value);
+  const selectedSortBy = ref(props.sortByOptions[0].sortBy);
   const selectedOrder = ref(props.sortByOptions[0].order);
 
   // CREATE PARAM TO BE
   const handleSortChange = (newValue) => {
-    selectedSortBy.value = newValue.value || '';
+    selectedSortBy.value = newValue.sortBy || '';
     selectedOrder.value = newValue.order;
   };
 

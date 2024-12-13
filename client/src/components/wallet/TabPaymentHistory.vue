@@ -138,7 +138,7 @@
       <!-- TABLE -->
 
       <DataTable
-        v-else-if="!isLoadingPaymentHistory"
+        v-else
         :value="paymentHistoryData"
         rowGroupMode="subheader"
         dataKey="id"
@@ -169,7 +169,7 @@
       <!-- ------------- -->
 
       <div
-        v-else-if="paymentHistoryData.length === 0"
+        v-if="paymentHistoryData.length === 0"
         class="h-full flex justify-center items-center pb-20"
       >
         <EmptyPage

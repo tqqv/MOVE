@@ -19,6 +19,10 @@ const createLivestream = async(data) => {
         message: 'Cannot be empty'
       }
     }
+    const currentUtcTime = new Date().toISOString();
+
+    data.createdAt = currentUtcTime;
+
     const newLiveStream = await Livestream.create(data);
     const channel = await Channel.findOne({
       where: {
