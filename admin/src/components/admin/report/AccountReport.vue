@@ -110,7 +110,7 @@
       <div class="flex flex-col gap-y-1.5 px-3 text-sm">
         <div class="flex gap-x-1 flex-wrap">
           <span class="font-semibold whitespace-nowrap">Channel name: </span>
-          <span class="">{{ props.accountDetail?.Channel?.channelName }}</span>
+          <span class="truncate">{{ props.accountDetail?.Channel?.channelName }} </span>
         </div>
         <div class="flex gap-x-1 flex-wrap">
           <span class="font-semibold">Bio: </span>

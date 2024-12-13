@@ -54,6 +54,12 @@ const getAllSystemConfig = async() => {
 
 const getSystemConfigByKey = async(key) => {
   try {
+    if(!key) {
+      return {
+        status: 400,
+        message: 'Cannot be empty.'
+      }
+    }
     const systemConfig = await SystemConfig.findOne({where: {key}})
 
     if(!systemConfig) {
@@ -78,6 +84,7 @@ const getSystemConfigByKey = async(key) => {
 }
 
 const editSystemConfig = async(systemConfigId, value) => {
+  console.log(systemConfigId, value);
   try {
     // Tìm DonationItem trong DB
     if(!value){
@@ -96,7 +103,7 @@ const editSystemConfig = async(systemConfigId, value) => {
       }
     }
 
-    await systemConfig.update(value)
+    await systemConfig.update({value: value})
 
     return {
       status: 200,

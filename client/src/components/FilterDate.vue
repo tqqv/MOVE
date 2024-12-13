@@ -20,6 +20,7 @@
       type: [Date, String],
       default: null,
     },
+    isValidateDate: Boolean,
   });
 
   const selectedDate = ref(props.defaultDate);
@@ -56,8 +57,8 @@
       :class="['w-[150px]  text-xs']"
       dateFormat="dd/mm/yy"
       showIcon
-      :maxDate="today"
-      :minDate="startDate"
+      v-bind:maxDate="isValidateDate ? null : today"
+      v-bind:minDate="isValidateDate ? null : startDate"
     ></Calendar>
   </div>
 </template>

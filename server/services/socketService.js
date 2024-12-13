@@ -1,5 +1,6 @@
 const intervals = {};   // Lưu trữ các bộ đếm setInterval cho mỗi channelId
 
+const { isValidUUID } = require("../utils/formatChecker");
 const { get } = require("../utils/redis/base/redisBaseService");
 const { getChatHistory, handleChatMessage, validateMessage } = require("../utils/redis/stream/redisChatService");
 const { updateStreamStats, getStreamStats, filterRoomsForDeletion } = require("../utils/redis/stream/redisStreamService");
@@ -78,7 +79,9 @@ const broadcastStreamStats = async (channelId) => {
 const connectSocket = (socket) => {
     socket.on('disconnecting', () => {
         const rooms = Array.from(socket.rooms);
-        let validRoom = filterRoomsForDeletion(rooms);
+        const validRooms = rooms.filter(room => isValidUUID(room));
+
+        let validRoom = filterRoomsForDeletion(validRooms);
         validRoom.forEach(async (key) => {
             const parts = key.split(':');
             const [, channelId, fields] = parts;
@@ -93,10 +96,12 @@ const connectSocket = (socket) => {
     // Gửi tin nhắn
     _io.emit('receiveMessage', 'Welcome to the socket!');
     // Thông báo cho admin rằng user đã join vào room
-    socket.on('joinRoom', async (channelId) => {
-
-        // socket.join(channelId);
-        await onClientJoinChannel(socket, channelId);
+    socket.on('joinRoom', async (roomName) => {
+        if(!isValidUUID(roomName)) {
+            socket.join(roomName);
+        } else {
+            await onClientJoinChannel(socket, roomName);
+        }
     })
 
     socket.on('chatMessage', async (data) => {

@@ -2,8 +2,8 @@ let Vimeo = require('vimeo').Vimeo;
 let client = new Vimeo(process.env.VIMEO_CLIENT_ID, process.env.VIMEO_CLIENT_SECRET, process.env.VIMEO_ACCESS_TOKEN);
 const fs = require('fs');
 const db = require("../models/index.js");
+const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword, FeaturedContent } = db;
 const { Op, where } = require('sequelize');
-const {  Video, Category, User, Sequelize, LevelWorkout, sequelize, Channel, Rating, Subscribe, Comment, ViewVideo, Keyword, VideoKeyword } = db;
 const { v4: uuidv4 } = require('uuid');
 const WEIGHTS = require('../models/enum/constants.js');
 const axios = require('axios');
@@ -11,6 +11,7 @@ const { generateVideosYouMayLike } = require('../utils/AI/services/youmaylike/ge
 const { generateVideoEmbeddings } = require('../utils/AI/services/youmaylike/generateEmbeddings.js');
 const { generateUserProfile } = require('../utils/AI/services/youmaylike/generateUserProfile.js');
 const _redis = require('../utils/redis/config.js');
+const { createNotification } = require('./notificationService.js');
 
 const generateUploadLink = async (fileName, fileSize) => {
   return new Promise((resolve, reject) => {
@@ -168,12 +169,28 @@ const updateVideoService = async (videoId, updateData) => {
     const video = await Video.update(updateData, {
       where: { id: videoId }
     });
+
+    const videoInfor = await Video.findOne({
+      where: { id: videoId }
+    });
+
     if (!video) {
       return {
         status: 404,
         message: 'Video updated failed',
         data: null
       };
+    }
+    if(updateData.status == "public") {
+      await createNotification(
+        "followedChannel",
+        "newVideo",
+        null,
+        videoInfor.dataValues.channelId,
+        videoInfor.dataValues.channelId,
+        null,
+        videoId
+      )
     }
     return {
       status: 200,
@@ -562,6 +579,74 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
       totalPages: Math.ceil(videos.count/pageSize)
     }
   };
+};
+
+const getVideoByChannelAndTitleService = async (data, page, pageSize, channelId) => {
+  try {
+    // Chuyển đổi dữ liệu đầu vào
+    const normalData = data ? data.trim().toLowerCase() : null;
+    // Điều kiện lọc video
+    const whereCondition = {
+      status: 'public',
+      channelId,
+      isBanned: false,
+    };
+
+    // Thêm điều kiện tìm kiếm theo tiêu đề nếu có
+    if (normalData) {
+      whereCondition.title = { [Op.like]: `%${normalData}%` };
+    }
+
+    const videos = await Video.findAndCountAll({
+      where: whereCondition,
+      include: [
+        {
+          model: Channel,
+          as: 'channel',
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+        },
+        {
+          model: Category,
+          as: 'category',
+          attributes: ['title'],
+        },
+        {
+          model: LevelWorkout,
+          as: 'levelWorkout',
+          attributes: ['levelWorkout'],
+        },
+      ],
+      attributes: {
+        include: [
+          [
+            sequelize.literal(`(
+              SELECT AVG(rating)
+              FROM ratings
+              WHERE ratings.videoId = Video.id
+            )`),
+            'averageRating',
+          ],
+        ],
+      },
+      order: [['createdAt', 'DESC']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize * 1,
+    });
+
+    return {
+      status: 200,   data: {
+        videos,
+        totalPages: Math.ceil(videos.count/pageSize)
+      },
+      message: 'Successfully',
+    };
+  } catch (error) {
+    return {
+      status: 400,
+      data: null,
+      message: error.message,
+    };
+  }
 };
 
 const getVideoByVideoIdService = async (videoId) => {
@@ -1241,6 +1326,21 @@ const increaseView = async(userId, videoId, ip, viewTime) => {
     if(!user || (user && checkView)){
       video.viewCount += 1;
       await video.save()
+      // Lấy current date và chuyển sang UTC
+      const currentDate = new Date();
+      const startOfDayUTC = new Date(currentDate.toISOString().split('T')[0] + 'T00:00:00.000Z');
+
+      const featuredContent = await FeaturedContent.findOne({
+        where: { videoId: videoId, date: startOfDayUTC },
+      });
+
+      // Nếu tồn tại, tăng viewIncrease
+      if (featuredContent) {
+        console.log("come");
+
+        featuredContent.viewIncrease += 1;
+        await featuredContent.save();
+      }
       return {
         status: 200,
         message: "+1 view"
@@ -1255,6 +1355,20 @@ const increaseView = async(userId, videoId, ip, viewTime) => {
       video.viewCount += 1;
       await video.save()
       if(viewData) {
+        // Lấy current date và chuyển sang UTC
+        const currentDate = new Date().toISOString().split("T")[0]; // YYYY-MM-DD định dạng UTC
+
+        // Kiểm tra trong FeaturedContents
+        const featuredContent = await FeaturedContent.findOne({
+          where: { videoId: videoId, date: currentDate },
+        });
+
+        // Nếu tồn tại, tăng viewIncrease
+        if (featuredContent) {
+          featuredContent.viewIncrease += 1;
+          await featuredContent.save();
+        }
+
         return {
           status: 200,
           message: "Add viewer data successfully."
@@ -1730,5 +1844,6 @@ module.exports = {
   getVideoYouMayLikeService,
   fetchGeoData,
   reupStreamService,
-  getLatestReupStreamService
+  getLatestReupStreamService,
+  getVideoByChannelAndTitleService
 };

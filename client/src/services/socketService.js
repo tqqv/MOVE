@@ -1,4 +1,6 @@
 import livestreamSocket from '@/utils/socket';
+import { getAllRoomNotifications } from './notification';
+import { useNotificationStore } from '@/stores';
 
 // LIVESTREAM SOCKET EVENTS
 const joinRoom = (channelId) => {
@@ -59,6 +61,35 @@ const sendMessage = (channelId, messageData) => {
   });
 };
 
+const joinAllRooms = async () => {
+  try {
+    const roomsResponse = await getAllRoomNotifications();
+    const notificationStore = useNotificationStore();
+    if (roomsResponse.error) {
+      console.error('Error fetching room notifications:', roomsResponse.message);
+      return;
+    }
+
+    const rooms = roomsResponse.data.data;
+
+    if (!livestreamSocket.connected) {
+      livestreamSocket.connect();
+    }
+
+    // Join từng room
+    rooms.forEach((room) => {
+      livestreamSocket.emit('joinRoom', room);
+    });
+
+    // Lắng nghe sự kiện `notifications`
+    livestreamSocket.on('notifications', (notification) => {
+      notificationStore.addNotification(notification);
+    });
+  } catch (error) {
+    console.error('Error in joinAllRooms:', error);
+  }
+};
+
 export {
   joinRoom,
   listenStreamReady,
@@ -67,4 +98,5 @@ export {
   listenChatHistory,
   listenNewMessage,
   sendMessage,
+  joinAllRooms,
 };

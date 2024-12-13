@@ -1,6 +1,6 @@
 const express = require("express");
 const { verifyStreamer } = require("../middlewares/verifyToken");
-const { createMethodWithdrawController, createLinkStripeVerifyController, updateVerifyAccountStripeController, cashoutController, deleleStripeAccountId, getWithdrawInforController, getListCashoutHistoryController, sendMailConfirmWithdrawMethodController, checkOtpCodeController, deleteWithdrawInforController, exchangeRepsController } = require("../controllers/cashoutController");
+const { createMethodWithdrawController, createLinkStripeVerifyController, updateVerifyAccountStripeController, cashoutController, deleleStripeAccountId, getWithdrawInforController, getListCashoutHistoryController, sendMailConfirmWithdrawMethodController, checkOtpCodeController, deleteWithdrawInforController, exchangeRepsController, getSystemConfigByKeyController } = require("../controllers/cashoutController");
 const cashoutRoute = express.Router();
 
 cashoutRoute.get('/verifyOtp/:otp', verifyStreamer, checkOtpCodeController);
@@ -16,5 +16,6 @@ cashoutRoute.post('/exchange', verifyStreamer, exchangeRepsController);
 cashoutRoute.delete('/delete/:accountId', deleleStripeAccountId);
 cashoutRoute.delete('/deleteWithdrawInfor/:stripeBankId', verifyStreamer, deleteWithdrawInforController);
 
+cashoutRoute.get("/getSystemConfigByKey/:key", verifyStreamer, getSystemConfigByKeyController)
 
 module.exports = cashoutRoute;

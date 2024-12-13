@@ -42,7 +42,7 @@ const loginAdminController = async (req, res, next) => {
   if (loginResult.cookie) {
     setCookies([
       {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
-      {name: 'isLogin', value: 'true', days: 15}
+      {name: 'isLoginAdmin', value: 'true', days: 15}
     ])(req, res);
   }
 
@@ -66,6 +66,11 @@ const logoutController = async (req, res, next) => {
   clearCookies([
     {name: 'accessToken', options: { httpOnly: true }},
     {name: 'isLogin'}
+  ])(req, res, next);
+
+  clearCookies([
+    {name: 'accessTokenAdmin', options: { httpOnly: true }},
+    {name: 'isLoginAdmin'}
   ])(req, res, next);
 
   responseHandler(200, null, "Logout successful")(req, res, next);
@@ -135,6 +140,7 @@ const googleCallbackController = (req, res, next) => {
         setCookies([
           {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: {httpOnly: true}},
           {name: 'isLogin', value: 'true', days: 15},
+          {name: 'role', value: loginResult.data.role, days: 15}
         ])(req, res);
         res.redirect(process.env.CLIENT_HOST);
       }

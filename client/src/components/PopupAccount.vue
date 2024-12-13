@@ -17,6 +17,7 @@
     try {
       const response = await getLogout();
       localStorage.removeItem('isLogin');
+      localStorage.removeItem('role');
       userStore.clearUserData();
 
       toast.success(response?.data.message || 'Logout successful!');

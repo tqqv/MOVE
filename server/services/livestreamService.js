@@ -7,6 +7,7 @@ const StreamKeys = require("../utils/redis/key/streamKey.js");
 const _redis = require("../utils/redis/config.js");
 const { getTopDonatorsWithDetails, clearStreamStats } = require("../utils/redis/stream/redisStreamService.js");
 const { fetchGeoData } = require("./videoService.js");
+const { createNotification } = require("./notificationService.js");
 const { Livestream, Donation, Rating, sequelize, Channel, User, Category, LevelWorkout, Subscribe, Sequelize, ViewVideo } = db;
 
 const createLivestream = async(data) => {
@@ -31,6 +32,15 @@ const createLivestream = async(data) => {
 
     _io.to(channel.id).emit('socketLiveStatus', 'streamPublished');
     await set(`channel_${channel.id}_live_status`, 'streamPublished');
+    await createNotification(
+      "followedChannel",
+      "newStream",
+      null,
+      newLiveStream.streamerId,
+      newLiveStream.streamerId,
+      null,
+      null
+    )
     return {
       status: 200,
       data: newLiveStream,

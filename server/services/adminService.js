@@ -3,7 +3,7 @@ var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
 const validateUsername = require("../middlewares/validateUsername.js");
-const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment } = db;
+const { User, RequestChannel, Livestream, Video, Payment, Withdraw, Channel, sequelize, Report, Comment, Ban } = db;
 const { createChannel, generatedStreamKey } = require("./channelService.js");
 
 const setStatusRequestChannel = async(userId, status, text) => {
@@ -373,7 +373,7 @@ const unbanAccount = async (userId) => {
 
 const unbanChannel = async(channelId) => {
   try {
-    const channel = await Channel.fineOne({where: {id: channelId, isBanned: true}})
+    const channel = await Channel.findOne({where: {id: channelId, isBanned: true}})
     if(!channel) {
       return {
         status: 404,
