@@ -12,7 +12,7 @@
   import Request from '../icons/request.vue';
   import Logout from '../icons/logout.vue';
   import Booking from '../icons/booking.vue';
-  import Percent from '../icons/percent.vue';
+  // import Percent from '../icons/percent.vue';
   import { useUserStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
@@ -43,17 +43,17 @@
   const menuItems = [
     { name: 'Dashboard', icon: HomeIcon, link: '/' },
     {
-      name: 'REP$ System',
+      name: 'REPs System',
       icon: CashoutIcon,
       link: '/reps/revenue',
       hasDropdown: true,
       submenu: [
         { name: 'Revenue', link: '/reps/revenue' },
+        { name: 'REPs Item Management', link: '/reps/discount' },
         { name: 'Donate Item', link: '/reps/donate' },
-        { name: 'Discount Item', link: '/reps/discount' },
       ],
     },
-    { name: 'System Config', icon: Percent, link: '/system-config' },
+    // { name: 'System Config', icon: Percent, link: '/system-config' },
     { name: 'User Management', icon: User, link: '/users' },
     { name: 'Category Management', icon: Category, link: '/category' },
     { name: 'Level Management', icon: Level, link: '/levelworkout' },

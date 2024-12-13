@@ -25,7 +25,8 @@ const loginController = async (req, res, next) => {
   if (loginResult.cookie) {
     setCookies([
       {name: loginResult.cookie.cookieName, value: loginResult.cookie.token, days: 15, options: { httpOnly: true }},
-      {name: 'isLogin', value: 'true', days: 15}
+      {name: 'isLogin', value: 'true', days: 15},
+      {name: 'role', value: loginResult.data.role, days: 15}
     ])(req, res);
   }
 
@@ -65,7 +66,8 @@ const registerController = async (req, res, next) => {
 const logoutController = async (req, res, next) => {
   clearCookies([
     {name: 'accessToken', options: { httpOnly: true }},
-    {name: 'isLogin'}
+    {name: 'isLogin'},
+    {name: 'role'}
   ])(req, res, next);
 
   clearCookies([
@@ -206,7 +208,7 @@ const getBannedController = async (req, res, next) => {
   const userId = req.user.id;
   const result = await getBanned(userId);
 
-  responseHandler(result.status, null, result.message)(req, res, next);
+  responseHandler(result.status, result.data, result.message)(req, res, next);
 };
 
 
