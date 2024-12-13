@@ -1,9 +1,11 @@
 const db = require("../models/index.js");
-const { RepPackage } = db;
+const { RepPackage, Payment } = db;
 
 const getListRepPackage = async() => {
   try {
-    const list = await RepPackage.findAll();
+    const list = await RepPackage.findAll({
+      order: [['rep', 'asc']]
+    });
 
     return {
       status: 200,
@@ -29,16 +31,28 @@ const createRepPackage = async(data) => {
       }
     }
 
-    let discount;
+    if (data.rep < 1 || data.amount < 1) {
+      return {
+          status: 400,
+          message: 'Invalid rep or amount value. Rep or amount must be > 0.'
+      };
+    }
+
+    if (data.discount < 0 || data.discount > 100) {
+      return {
+          status: 400,
+          message: 'Invalid discount value. The discount must be between 0 and 100 (<=> 0-100%).'
+      };
+    }
 
     if(!data.discount) {
-      discount = 0
+      data.discount = 0
     }
 
     const newRepPackage = await RepPackage.create({
       rep: data.rep,
       amount: data.amount,
-      discount: discount
+      discount: data.discount/100
     })
 
     return {
@@ -93,6 +107,26 @@ const editRepPackage = async(repPackageId, data) => {
       }
     }
 
+    if (data.rep && data.rep < 1 || data.amount && data.amount < 1) {
+      return {
+          status: 400,
+          message: 'Invalid rep or amount value. Rep or amount must be > 0.'
+      };
+    }
+
+    if (data.discount && (data.discount < 0 || data.discount > 100)) {
+      return {
+          status: 400,
+          message: 'Invalid discount value. The discount must be between 0 and 100 (<=> 0-100%).'
+      };
+    }
+
+    if(data.discount) {
+      data.discount = data.discount/100
+    }else {
+      data.discount = 0
+    }
+
     await repPackage.update(data)
 
     return {
@@ -113,12 +147,22 @@ const editRepPackage = async(repPackageId, data) => {
 const deleteRepPackage = async (repPackageId) => {
   try {
     const repPackage = await RepPackage.findByPk(repPackageId);
+
     if (!repPackage) {
       return {
         status: 404,
         data: null,
         message: "Rep Package not found."
       };
+    }
+
+    const payment = await Payment.findOne({where: {repPackageId}})
+
+    if(payment){
+      return {
+        status: 400,
+        message: "This rep package is in use on payment."
+      }
     }
 
     await repPackage.destroy();

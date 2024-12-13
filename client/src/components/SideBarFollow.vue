@@ -28,10 +28,6 @@
     () => userStore.followers,
     (newFollowers) => {},
   );
-
-  onMounted(() => {
-    console.log(userStore.followCategories);
-  });
 </script>
 
 <template>
@@ -93,9 +89,7 @@
             <div
               :class="[
                 'flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0',
-                userFollower.followChannel.isLive
-                  ? 'border-[3px] border-red'
-                  : '',
+                userFollower.followChannel.isLive ? 'border-[3px] border-red' : '',
               ]"
             >
               <img
@@ -254,7 +248,9 @@
           :to="`/browse/categories/${userFollowCategory.category?.title}`"
           v-tooltip="userFollowCategory.category?.title"
         >
-          <div class="flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0">
+          <div
+            class="flex items-center justify-center size-[44px] rounded-full p-[2px] flex-shrink-0"
+          >
             <img
               :src="userFollowCategory.category?.imgUrl || 'default-avatar.png'"
               alt="Avatar"

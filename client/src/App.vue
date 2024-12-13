@@ -2,10 +2,12 @@
   import { useUserStore } from '@/stores/user.store';
   import { onBeforeMount, onMounted } from 'vue';
   import GlobalLoading from './components/GlobalLoading.vue';
-  import { useLoadingStore } from './stores';
+  import { useLoadingStore, useNotificationStore } from './stores';
+  import { joinAllRooms } from './services/socketService';
+  import { getLogout } from './services/auth';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
-
+  const notificationStore = useNotificationStore();
   const getCookie = (cname) => {
     let name = cname + '=';
     let decodedCookie = decodeURIComponent(document.cookie);
@@ -25,19 +27,33 @@
   onBeforeMount(() => {
     if (getCookie('isLogin')) {
       localStorage.setItem('isLogin', 'true');
+      localStorage.setItem('role', getCookie('role'));
     }
   });
   //Load data navbar when F5
 
-  onMounted(() => {
+  onMounted(async () => {
     const isLogin = localStorage.getItem('isLogin');
 
     if (isLogin === 'true') {
-      userStore.fetchUserProfile();
-      userStore.loadFollowers();
-      userStore.loadFollowCategories();
+      await userStore.fetchUserProfile();
+      await userStore.loadFollowers();
+      await userStore.loadFollowCategories();
+      notificationStore.fetchQuantifyNotifications();
+      joinAllRooms();
+      const role = localStorage.getItem('role');
+
+      if (role !== userStore.user.role) {
+        const res = await getLogout();
+        if (res && res.status === 200) {
+          userStore.clearUserData();
+          localStorage.removeItem('isLogin');
+          localStorage.removeItem('role');
+        }
+      }
     }
   });
+
   onMounted(() => {
     loadingStore.showLoading();
     setTimeout(() => {

@@ -1,5 +1,5 @@
 const db = require("../models/index.js");
-const { Category, CategoryFollow, Video, sequelize } = db;
+const { Category, CategoryFollow, Video, Livestream, sequelize } = db;
 
 const createCategory = async(data) => {
   try {
@@ -74,10 +74,18 @@ const getCateById = async(cateId) => {
 const editCategory = async(cateId, data) => {
   try {
     // Tìm cate trong DB
+    if(!cateId || !data) {
+      return {
+        status: 400,
+        data: null,
+        message: "Cannot be empty."
+      }
+    }
+
     const category = await Category.findByPk(cateId)
     if(!category) {
       return {
-        status: 400,
+        status: 404,
         data: null,
         message: "Category not found"
       }
@@ -110,12 +118,23 @@ const editCategory = async(cateId, data) => {
 const deleteCategory = async (cateId) => {
   try {
     const category = await Category.findByPk(cateId);
+
     if (!category) {
       return {
         status: 404,
         data: null,
         message: "Category not found."
       };
+    }
+
+    const video = await Video.findOne({where: {categoryId: cateId}})
+    const livestream = await Livestream.findOne({where: {categoryId: cateId}})
+
+    if(video || livestream){
+      return {
+        status: 400,
+        message: "This category is in use by a video or livestream."
+      }
     }
 
     await category.destroy();
@@ -155,6 +174,7 @@ const getAllCategoryWithView = async() => {
         }
       ],
       group: ['Category.id'],
+      order: [[sequelize.col('totalViews'), 'DESC']],
     })
 
     return {
@@ -226,6 +246,54 @@ const getCateByTitle = async (title) => {
   }
 }
 
+const getAllCategoryAdmin = async(page, pageSize) => {
+  try {
+    const listCate = await Category.findAndCountAll({
+      attributes: [
+        'id',
+        'imgUrl',
+        'title',
+        'description',
+        'createdAt',
+        'updatedAt',
+        [sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM videos
+          WHERE videos.categoryId = Category.id
+        )`), 'videoCount'],
+        [sequelize.literal(`(
+          SELECT COUNT(*)
+          FROM livestreams
+          WHERE livestreams.categoryId = Category.id
+        )`), 'livestreamCount'],
+        [sequelize.literal(`(
+          SELECT SUM(viewCount)
+          FROM videos
+          WHERE videos.categoryId = Category.id
+        )`), 'totalViews'],
+      ],
+      order: [[sequelize.col('totalViews'), 'DESC']],
+      offset: (page - 1) * pageSize,
+      limit: pageSize,
+    });
+
+    return {
+      status: 200,
+      data: {
+        listCate,
+        totalPages: Math.ceil(listCate.count/pageSize)
+      },
+      message: "Get list successfully."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    }
+  }
+}
+
 module.exports = {
   createCategory,
   getAllCategory,
@@ -233,5 +301,6 @@ module.exports = {
   editCategory,
   deleteCategory,
   getAllCategoryWithView,
-  getCateByTitle
+  getCateByTitle,
+  getAllCategoryAdmin
 }

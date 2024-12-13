@@ -1,5 +1,6 @@
 const db = require("../models/index.js");
-const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, ReactionComment, DonationItem, Report } = db;
+const { createNotification } = require("./notificationService.js");
+const { Comment, Video, Category, User, Sequelize, LevelWorkout, Channel, NotificationEntity, DonationItem, Report } = db;
 
 const checkLevelAndGetParentId = async (parentId) => {
   // Tìm cha của comment được reply
@@ -115,8 +116,18 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
       ...updateOperations
     ]);
 
-
-        // Fetch comment with the associated DonationItem
+    if (commentInfor.parentId) {
+      await createNotification(
+        "comment",
+        "mention",
+        (channelId ? null: userId),
+        channelId,
+        (parentCommentChecker.channelId || parentCommentChecker.userId),
+        comment.dataValues.id,
+        comment.dataValues.videoId
+      )
+    }
+    // Fetch comment with the associated DonationItem
     const commentWithDonationItem = await Comment.findOne({
       where: { id: comment.id },
       include: [
@@ -157,6 +168,7 @@ const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
     where: {
       parentId: null,
       videoId: videoId,
+      isBanned: false
     },
     attributes: {
       include: [
@@ -239,7 +251,8 @@ const getCommentsByVideo = async (videoId, page, pageSize, userId) => {
 
 const getCommentsByChannelId = async (userId, channelId, page, pageSize, responseCondition, sortCondition) => {
     let whereCondition = {
-      parentId: null
+      parentId: null,
+      isBanned: false
     };
     if (responseCondition.isResponsed == "true") {
       whereCondition = {
@@ -361,6 +374,7 @@ const getChildCommentsByParentId = async (parentId, page, pageSize, userId) => {
   const comments = await Comment.findAndCountAll({
     where: {
       parentId: parentId,
+      isBanned: false
     },
     attributes: {
       include: [

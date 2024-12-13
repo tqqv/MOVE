@@ -107,7 +107,7 @@
         },
       });
 
-      if (confirm) {
+      if (confirm.setupIntent) {
         const data = {
           cardName,
           paymentMethodId: confirm.setupIntent.payment_method,
@@ -128,6 +128,7 @@
           toast.error('Insert failed');
         }
       } else {
+        toast.error(confirm.error.message);
         console.error('Error: Confirmation failed');
       }
     } catch (error) {

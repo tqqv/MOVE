@@ -1,7 +1,7 @@
 <script setup>
   import { onMounted, ref, watch } from 'vue';
   import Dropdown from 'primevue/dropdown';
-  const emit = defineEmits();
+  const emit = defineEmits(['change']);
 
   const props = defineProps({
     options: {
@@ -16,12 +16,11 @@
       type: [Array, String],
     },
     optionLabel: { type: String, default: 'name' },
-    defaultValue: { type: [String, Number], default: null }, // Giá trị mặc định
+    defaultValue: { type: [Object, Number, String], default: null },
   });
 
   const selectedOption = ref(null);
 
-  // Watch for selectedOption change and emit the new value
   watch(selectedOption, (newValue) => {
     if (newValue) {
       emit('change', newValue);
@@ -33,21 +32,13 @@
     (newOptions) => {
       if (newOptions && newOptions.length > 0) {
         selectedOption.value =
-          newOptions.find((option) => option.value === props.defaultValue) || newOptions[0];
+          newOptions.find(
+            (option) => option.value === (props.defaultValue?.value || props.defaultValue),
+          ) || newOptions[0];
       }
     },
     { immediate: true },
   );
-
-  onMounted(() => {
-    if (props.options && props.options.length > 0) {
-      // Nếu có giá trị defaultValue, tìm kiếm trong options
-      selectedOption.value =
-        props.defaultValue !== null
-          ? props.options.find((option) => option.value === props.defaultValue) || props.options[0]
-          : props.options[0];
-    }
-  });
 </script>
 
 <template>

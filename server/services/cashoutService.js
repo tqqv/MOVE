@@ -1,7 +1,7 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { createStripeAccountId, updateStripeAccount, retrieveAccountStripe, createStripeLinkVerify, createPayout, retrievePayout, deleteWithdrawMethod, createNewBankAccount } = require("./stripeService.js");
-const { Channel, User, WithdrawInfor, Withdraw, sequelize } = db;
+const { Channel, User, WithdrawInfor, Withdraw, SystemConfig, sequelize } = db;
 
 
 const createMethodWithdraw = async(channelId, bankToken) => {
@@ -161,7 +161,6 @@ const cashout = async(channelId, repInput) => {
         message: 'Insert your bank account',
       };
     }
-console.log(repInput);
 
     if (repInput < 2500) {
       return {
@@ -179,9 +178,9 @@ console.log(repInput);
       };
     }
 
-    const amount = parseFloat((repInput * 0.015*0.3).toFixed(2));
+    const withdrawRate = await SystemConfig.findOne({where: {key: "withdrawRate"}})
 
-// const amount = (repInput * 0.005).toFixed(2);
+    const amount = parseFloat((repInput * withdrawRate.value * 0.015).toFixed(2));
 
     const payout = await createPayout(channel.stripeAccountId, channel.WithdrawInfors[0].stripeBankId, amount)
 
@@ -198,7 +197,7 @@ console.log(repInput);
       }
     )
 
-    await Channel.decrement('rep', { 
+    await Channel.decrement('rep', {
       by: repInput,
       where: {
         id: channelId
@@ -392,6 +391,58 @@ const deleteWithdrawInfor = async(channelId, stripeBankId) => {
   }
 }
 
+const exchangeReps = async (channelId, rep) => {
+  try {
+    const channel = await Channel.findByPk(channelId);
+    if (!channel) {
+      return {
+        status: 404,
+        message: "Channel not found."
+      };
+    }
+
+    if (channel.rep < rep) {
+      return {
+        status: 400,
+        message: "Insufficient reps in the channel."
+      };
+    }
+
+    const withdrawRate = await SystemConfig.findOne({ where: { key: "withdrawRate" } });
+    if (!withdrawRate || !withdrawRate.value) {
+      return {
+        status: 500,
+        message: "Withdraw rate configuration is missing."
+      };
+    }
+
+    await Channel.decrement('rep', {
+      by: rep,
+      where: {
+        id: channelId
+      }
+    });
+
+    const repExchange = Math.round(rep * withdrawRate.value);
+
+    await User.increment(
+      { REPs: repExchange },
+      { where: { id: channel.userId } }
+    );
+
+    return {
+      status: 200,
+      message: "Reps successfully exchanged.",
+    };
+
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message || "Internal Server Error"
+    };
+  }
+};
+
 module.exports = {
   createMethodWithdraw,
   updateVerifyAccountStripe,
@@ -399,5 +450,6 @@ module.exports = {
   cashout,
   getListCashoutHistory,
   getWithdrawInfor,
-  deleteWithdrawInfor
+  deleteWithdrawInfor,
+  exchangeReps,
 }

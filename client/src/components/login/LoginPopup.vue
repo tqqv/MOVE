@@ -32,6 +32,7 @@
         userStore.loadFollowCategories();
         popupStore.closeLoginPopup();
         toast.success(response.message || 'Login successful!');
+        localStorage.setItem('role', response.data.role);
       }
     } catch (error) {
       toast.error(error.response?.data.message || 'Login failed');

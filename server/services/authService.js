@@ -1,7 +1,7 @@
 var bcrypt = require("bcryptjs");
 var jwt = require("jsonwebtoken");
 const db = require("../models/index.js");
-const { User, RequestChannel, Channel } = db;
+const { User, RequestChannel, Channel, Ban } = db;
 var nodemailer = require("nodemailer");
 const { randomFixedInteger } = require("../utils/generator.js");
 const { v4: uuidv4 } = require('uuid');
@@ -162,6 +162,15 @@ const login = async (userData) => {
     };
   }
 
+  if (user.isBanned) {
+    const banned = await Ban.findOne({ where: { userId: user.id } });
+
+    if (banned && banned.expiresAt && new Date(banned.expiresAt).toDateString() === new Date().toDateString()) {
+      user.isBanned = false;
+      await Promise.all([banned.destroy(), user.save()]);
+    }
+  }
+
   let token = null
 
   if (user.role === "streamer") {
@@ -227,7 +236,7 @@ const loginAdmin = async (userData) => {
   // set token in cookies
   return {
     cookie: {
-      cookieName: "accessToken",
+      cookieName: "accessTokenAdmin",
       token: token,
     },
     status: 200,
@@ -648,6 +657,29 @@ const sendMailConfirmWithdrawMethod = async (userId) => {
   }
 };
 
+const getBanned = async(userId) => {
+  try {
+    const banned = await Ban.findOne({where: {userId}})
+    if(!banned) {
+      return {
+        status: 404,
+        message: "Banned check not found."
+      }
+    }
+
+    return {
+      status: 200,
+      data: banned,
+      message: "Get bannned successful."
+    }
+  } catch (error) {
+    return {
+      status: 500,
+      message: error.message,
+    };
+  }
+}
+
 module.exports = {
   login,
   register,
@@ -663,4 +695,5 @@ module.exports = {
   sendMailConfirmWithdrawMethod,
   verifyOtp,
   loginAdmin,
+  getBanned,
 };

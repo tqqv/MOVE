@@ -14,6 +14,7 @@ const {
   facebookLogin,
   sendMailVerifyFacebookController,
   verifyAccountFacebookController,
+  getBannedController,
 } = require("../controllers/authController");
 const { verifyUser, verifyAdmin } = require("../middlewares/verifyToken");
 
@@ -40,5 +41,8 @@ authRouter.get("/facebook", facebookLogin);
 authRouter.get("/facebook/callback", facebookCallback);
 authRouter.post("/facebook/mail-verify", sendMailVerifyFacebookController);
 authRouter.post("/facebook/verify-account/:token", verifyAccountFacebookController);
+
+//banned
+authRouter.get("/getBanned", verifyUser, getBannedController);
 
 module.exports = authRouter;

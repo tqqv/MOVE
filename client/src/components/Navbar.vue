@@ -1,5 +1,5 @@
 <script setup>
-  import { ref, onMounted, onBeforeUnmount, watch } from 'vue';
+  import { ref, onMounted, onBeforeUnmount, watch, computed } from 'vue';
   import logo from '@assets/logo.svg';
   import verified from '@icons/verified.vue';
   import notification from '@icons/notification.vue';
@@ -14,7 +14,7 @@
   import PopupAccount from '@components/PopupAccount.vue';
   import Notification from '@/components/notification/Notification.vue';
   import Login from '@/pages/Login.vue';
-  import { usePopupStore } from '@/stores';
+  import { useNotificationStore, usePopupStore } from '@/stores';
   import ForgotPasswordPopup from '@/components/popup/ForgotPasswordPopup.vue';
   import { useUserStore } from '@/stores/user.store';
   import { RouterLink, useRouter } from 'vue-router';
@@ -38,6 +38,7 @@
   const popupStore = usePopupStore();
   const userStore = useUserStore();
   const tabStore = useTabStore();
+  const notificationStore = useNotificationStore();
   const getRepsStore = useGetRepsStore();
   const isOpenOrder = ref(false);
   const isMobileMenuOpen = ref(false);
@@ -58,6 +59,11 @@
   const videos = ref([]);
   const users = ref([]);
   const loading = ref(true);
+
+  const quantityNotifications = computed(() => {
+    return notificationStore?.quantityNotifications?.unRecievedCount || 0;
+  });
+
   // SEARCH
   const toggleShowMoreMenu = () => {
     isShowMore.value = !isShowMore.value;
@@ -75,8 +81,13 @@
 
   const toggleNotiMenu = () => {
     isNotiMenuOpen.value = !isNotiMenuOpen.value;
+    if (quantityNotifications.value > 0) {
+      notificationStore.markReceivedQuantity();
+    }
+    if (quantityNotifications.value === 0) {
+      return;
+    }
   };
-
   const toggleGetREPsMenu = () => {
     isGetREPsMenuOpen.value = !isGetREPsMenuOpen.value;
 
@@ -236,6 +247,8 @@
   };
 
   // SEARCH
+
+  // NOTIFICATION
 
   onMounted(() => {
     document.addEventListener('click', handleClickOutside);
@@ -456,15 +469,17 @@
               </div>
             </template>
 
+            <!-- NOTIFICATION -->
             <div class="relative" id="noti-menu-button">
               <div class="relative cursor-pointer" @click="toggleNotiMenu">
                 <div class="mt-0.5">
                   <notification fill="fill-white" class="scale-100" />
                 </div>
                 <div
+                  v-if="quantityNotifications > 0"
                   class="absolute top-[-9px] left-3 size-5 bg-[#ef4444] flex justify-center items-center rounded-full text-[11px] border-2 border-white"
                 >
-                  4
+                  {{ quantityNotifications }}
                 </div>
               </div>
               <div

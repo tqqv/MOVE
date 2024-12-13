@@ -13,12 +13,13 @@
   const handleLogout = async () => {
     try {
       const response = await getLogout();
-      localStorage.removeItem('isLogin');
+      localStorage.removeItem('isLoginAdmin');
+      localStorage.removeItem('role');
       userStore.clearUserData();
 
       toast.success(response?.data.message || 'Logout successful!');
       emit('closeAllPopups');
-      router.push('/');
+      router.push('/login');
     } catch (error) {
       toast.error(error.response?.data.message || 'Logout failed');
     }

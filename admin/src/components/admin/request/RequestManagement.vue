@@ -8,8 +8,8 @@
   import ConfirmDialog from 'primevue/confirmdialog';
   import { useConfirm } from 'primevue/useconfirm';
   import Filter from '@/components/Filter.vue';
+  import Skeleton from 'primevue/skeleton';
   import axiosInstance from '@/services/axios';
-  import Button from 'primevue/button';
   import { formatDateData, formatNumber } from '@/utils';
 
   const confirm = useConfirm();
@@ -22,29 +22,41 @@
   const showRejectDialog = ref(false);
   const reason = ref('');
   const showError = ref(false);
+  const isLoading = ref(true);
   const pageSizeOptions = [
     { id: 1, name: 10, value: 10 },
     { id: 2, name: 20, value: 20 },
     { id: 3, name: 30, value: 30 },
   ];
+  const sortByStatus = [
+    { id: 0, name: 'All', value: '' },
+    { id: 1, name: 'Pending', value: 'pending' },
+    { id: 2, name: 'Approved', value: 'approved' },
+    { id: 3, name: 'Rejected', value: 'rejected' },
+  ];
   const selectedPageSize = ref(pageSizeOptions[0].value);
+  const selectedSortByStatus = ref(sortByStatus[0].value);
+
+  const handleSortChange = (newValue) => {
+    selectedSortByStatus.value = newValue.value || '';
+  };
 
   const getAllUsers = async () => {
     try {
       const response = await getAllUsersRequest(
         currentPage.value,
         selectedPageSize.value,
-        filterStatus.value,
+        selectedSortByStatus.value,
       );
       if (response.status === 200) {
         requests.value = response.data.data.data.rows;
         totalPage.value = response.data.data.totalPages;
         totalRequest.value = response.data.data.data.count;
-      } else {
-        toast.error('Invalid email or password');
       }
     } catch (error) {
-      toast.error('Login failed');
+      toast.error(error.message);
+    } finally {
+      isLoading.value = false;
     }
   };
 
@@ -165,7 +177,7 @@
     });
   };
 
-  watch([selectedPageSize], () => {
+  watch([selectedPageSize, selectedSortByStatus], () => {
     currentPage.value = 1;
     getAllUsers();
   });
@@ -178,59 +190,60 @@
 <template>
   <section class="bg-[#FAFAFB]">
     <div class="container">
+      <div class="flex justify-between items-start mb-7">
+        <h1 class="text-2xl font-bold">Request to channel</h1>
+        <div class="flex gap-x-5">
+          <Filter title="Status" :options="sortByStatus" @change="handleSortChange" />
+        </div>
+      </div>
       <div class="card bg-white p-4 shadow rounded-lg">
-        <DataTable :value="requests" stripedRows showGridlines>
-          <template #header>
-            <div class="flex flex-wrap gap-2 items-center justify-between">
-              <h1 class="font-bold text-[20px]">Request to channel</h1>
-              <div class="flex gap-x-5">
-                <button
-                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
-                  :class="{
-                    'text-white bg-primary border-primary': filterStatus === '',
-                    'text-primary border-primary hover:bg-primary hover:text-white':
-                      filterStatus !== '',
-                  }"
-                  @click="applyFilter('')"
-                >
-                  All
-                </button>
-                <button
-                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
-                  :class="{
-                    'text-white bg-primary border-primary': filterStatus === 'pending',
-                    'text-primary border-primary hover:bg-primary hover:text-white':
-                      filterStatus !== 'pending',
-                  }"
-                  @click="applyFilter('pending')"
-                >
-                  Pending
-                </button>
-                <button
-                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
-                  :class="{
-                    'text-white bg-primary border-primary': filterStatus === 'approved',
-                    'text-primary border-primary hover:bg-primary hover:text-white':
-                      filterStatus !== 'approved',
-                  }"
-                  @click="applyFilter('approved')"
-                >
-                  Approved
-                </button>
-                <button
-                  class="border px-4 py-2 rounded-lg font-bold w-[120px]"
-                  :class="{
-                    'text-white bg-primary border-primary': filterStatus === 'rejected',
-                    'text-primary border-primary hover:bg-primary hover:text-white':
-                      filterStatus !== 'rejected',
-                  }"
-                  @click="applyFilter('rejected')"
-                >
-                  Rejected
-                </button>
-              </div>
-            </div>
-          </template>
+        <DataTable
+          v-if="isLoading"
+          :value="
+            Array(4).fill({
+              username: '',
+              email: '',
+              REPs: '',
+              totalReportCount: '',
+              createdAt: '',
+              status: '',
+            })
+          "
+          stripedRows
+        >
+          <Column header="User">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="User.email" header="Email">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column header="Balance (REPs)">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="totalReportCount" header="Being Reported">
+            <template #body> <Skeleton /> </template
+          ></Column>
+          <Column field="createdAt" header="Create at">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column field="status" header="Status" dataType="boolean">
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+          <Column>
+            <template #body>
+              <Skeleton />
+            </template>
+          </Column>
+        </DataTable>
+        <DataTable v-else :value="requests" stripedRows>
           <template #empty>
             <p class="text-center">No requests found.</p>
           </template>
@@ -247,9 +260,9 @@
             </template>
           </Column>
           <Column field="User.email" header="Email"></Column>
-          <Column header="Balance">
+          <Column header="Balance (REPs)">
             <template #body="{ data }">
-              <span>{{ formatNumber(data.User.REPs) }} <strong>REP$</strong></span>
+              <span>{{ formatNumber(data.User.REPs) }}</span>
             </template>
           </Column>
           <Column field="totalReportCount" header="Being Reported"></Column>
