@@ -97,7 +97,9 @@ const connectSocket = (socket) => {
     _io.emit('receiveMessage', 'Welcome to the socket!');
     // Thông báo cho admin rằng user đã join vào room
     socket.on('joinRoom', async (roomName) => {
-        if(!isValidUUID(roomName)) {
+        if(!isValidUUID(roomName) && !Number.isInteger(roomName * 1)) {
+            console.log("bug ne");
+            
             socket.join(roomName);
         } else {
             await onClientJoinChannel(socket, roomName);

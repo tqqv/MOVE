@@ -11,7 +11,8 @@
   } from '@/services/socketService';
   import { useRoute } from 'vue-router';
   import ScrollWrapper from '@/layouts/ScrollWrapper.vue';
-
+  import dayjs from 'dayjs';
+  import utc from 'dayjs/plugin/utc';
   const route = useRoute();
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
@@ -19,19 +20,19 @@
   const liveStatus = ref(null);
   const metricsData = ref(null);
   // TIME START STREAM
+  dayjs.extend(utc);
   const elapsedTime = ref(0);
   let timer;
 
   const startTimer = () => {
-    const createdAt = new Date(liveStreamStore.liveStreamData.createdAt);
-    if (createdAt) {
+    const createdAt = dayjs(liveStreamStore.liveStreamData.createdAt).utc();
+    if (createdAt.isValid()) {
       timer = setInterval(() => {
-        const currentTime = new Date();
-        elapsedTime.value = Math.floor((currentTime - createdAt) / 1000);
+        const currentTime = dayjs().utc();
+        elapsedTime.value = Math.floor(currentTime.diff(createdAt, 'second'));
       }, 1000);
     }
   };
-
   const stopTimer = () => {
     if (timer) {
       clearInterval(timer);
