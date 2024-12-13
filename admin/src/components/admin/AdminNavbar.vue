@@ -112,7 +112,7 @@
 
         <div class="w-full items-center justify-end gap-x-6 hidden md:flex">
           <div class="relative" id="noti-menu-button">
-            <div class="relative cursor-pointer" @click="toggleNotiMenu">
+            <!-- <div class="relative cursor-pointer" @click="toggleNotiMenu">
               <div class="mt-0.5">
                 <notificationBell fill="#1c2434" class="scale-100" />
               </div>
@@ -121,7 +121,7 @@
               >
                 1
               </div>
-            </div>
+            </div> -->
             <div
               v-if="isNotiMenuOpen"
               id="noti-menu"
