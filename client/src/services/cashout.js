@@ -84,6 +84,22 @@ const getCashoutHistory = async (page, pageSize, startDate, endDate, status) => 
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const createExchange = async (rep) => {
+  try {
+    const response = await axios.post('/cashout/exchange', { rep });
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+const getSystemConfigByKey = async () => {
+  try {
+    const response = await axios.get('cashout/getSystemConfigByKey/withdrawRate', {});
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   createWithdrawInfor,
   getWithdrawInfor,
@@ -94,4 +110,6 @@ export {
   sendMail,
   verifyOtp,
   getCashoutHistory,
+  createExchange,
+  getSystemConfigByKey,
 };

@@ -61,7 +61,7 @@
         formatDateData(startDate.value),
         formatDateData(endDate.value),
       );
-      bookingHistoryData.value = response.data.data.bookingHistory?.rows2;
+      bookingHistoryData.value = response.data.data.bookingHistory?.rows;
 
       totalData.value = response.data.data.bookingHistory.count;
       totalPage.value = response.data.data.totalPages;
@@ -178,7 +178,7 @@
       <!------------->
       <!-- TABLE -->
       <DataTable
-        v-else-if="!isLoadingBookingHistory"
+        v-else
         :value="bookingHistoryData"
         rowGroupMode="subheader"
         dataKey="id"
@@ -246,7 +246,7 @@
       <!------------->
       <!-- EMPTY -->
       <div
-        v-else-if="bookingHistoryData.length === 0"
+        v-if="bookingHistoryData.length === 0"
         class="h-full flex justify-center items-center pb-20"
       >
         <EmptyPage

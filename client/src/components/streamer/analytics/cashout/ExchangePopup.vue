@@ -1,7 +1,7 @@
 <script setup>
   import { ref, watch, computed } from 'vue';
   import Dialog from 'primevue/dialog';
-  import { createPayout } from '@/services/cashout';
+  import { createExchange } from '@/services/cashout';
   import { toast } from 'vue3-toastify';
   import { useUserStore } from '@/stores';
   import { formatNumber, formatPercentage, formatView } from '@/utils';
@@ -11,21 +11,20 @@
   const userStore = useUserStore();
   const isLoadingWithdraw = ref(false);
   const props = defineProps({
-    isWithdrawVisible: Boolean,
+    isExchangeVisible: Boolean,
     title: String,
-    minWithdraw: String,
     exchangeRate: Number,
     clearInput: Boolean,
     systemConfigByKey: Number,
   });
 
   const emit = defineEmits([
-    'toogleWithdrawVisible',
+    'toogleExchangeVisible',
     'toogleProcessingPaymentVisible',
-    'dataFromWithdraw',
+    'dataFromExchange',
   ]);
-  const toogleWithdrawVisible = () => {
-    emit('toogleWithdrawVisible');
+  const toogleExchangeVisible = () => {
+    emit('toogleExchangeVisible');
   };
 
   const handleWithdrawAll = () => {
@@ -33,10 +32,6 @@
   };
 
   const toogleProcessingPaymentVisible = async () => {
-    if (!repInput || repInput.value < 2500) {
-      toast.error(`You need to enter a REPs value greater than ${props.minWithdraw}.`);
-      return;
-    }
     if (
       !repInput.value ||
       isNaN(repInput.value) ||
@@ -49,17 +44,12 @@
     isLoadingWithdraw.value = true;
 
     try {
-      console.log(repInput.value);
-
-      const res = await createPayout(repInput.value);
-      console.log(res);
-      console.log(repInput.value);
+      const res = await createExchange(repInput.value);
 
       if (res && res.status === 200) {
-        emit('toogleProcessingPaymentVisible');
-        emit('dataFromWithdraw', estimatedValue);
-        toogleWithdrawVisible();
-
+        emit('dataFromExchange', estimatedValue);
+        toogleExchangeVisible();
+        toast.success('Exchange REPs Channel Wallet to User Wallet successful');
         await userStore.fetchUserProfile();
       } else {
         console.error(res.message);
@@ -73,7 +63,7 @@
 
   const estimatedValue = computed(() => {
     const repValue = parseFloat(repInput.value) || 0;
-    return (repValue * props.systemConfigByKey * 0.015).toFixed(2);
+    return Math.round(repValue * props.systemConfigByKey);
   });
   watch(repInput, (newValue) => {
     const maxRep = userStore.user?.Channel.rep || 0;
@@ -94,11 +84,11 @@
 <template>
   <div class="card flex justify-center">
     <Dialog
-      :visible="isWithdrawVisible"
+      :visible="isExchangeVisible"
       :modal="true"
       :draggable="false"
       :header="props.title"
-      @update:visible="toogleWithdrawVisible"
+      @update:visible="toogleExchangeVisible"
       :style="{ width: '40rem' }"
     >
       <div class="text-black space-y-4">
@@ -110,8 +100,8 @@
         </div>
         <div class="flex flex-col text-base w-2/3">
           <div class="flex gap-x-2 pb-2">
-            <div>Withdraw value</div>
-            <div>(Estimated value ${{ formatNumber(estimatedValue) }})</div>
+            <div>REPs value</div>
+            <div>(Estimated received {{ formatNumber(estimatedValue) }} REPS)</div>
           </div>
           <div class="flex items-center gap-x-4">
             <div class="relative text-[14px] rounded-lg normal_password flex-1">
@@ -119,18 +109,17 @@
                 type="number"
                 required
                 class="password_custom h-full"
-                :placeholder="minWithdraw"
                 v-model="repInput"
                 :max="userStore.user?.Channel.rep"
               />
             </div>
-            <div class="text-primary cursor-pointer" @click="handleWithdrawAll">Withdraw all</div>
+            <div class="text-primary cursor-pointer" @click="handleWithdrawAll">Exchange all</div>
           </div>
         </div>
         <div class="flex justify-end">
           <button @click="toogleProcessingPaymentVisible" class="btn w-[170px]">
             <smallLoading v-if="isLoadingWithdraw" fill="white" fill_second="#13d0b4" />
-            <span v-else>Withdraw</span>
+            <span v-else>Exchange</span>
           </button>
         </div>
       </div>
