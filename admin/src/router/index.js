@@ -20,6 +20,7 @@ import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
 setActivePinia(pinia);
 import { useUserStore } from '@/stores';
+import BookingManagement from '@/components/admin/booking/BookingManagement.vue';
 
 const routes = [
   {
@@ -42,6 +43,7 @@ const routes = [
       { path: 'reps/donate', component: DonateItem },
       { path: 'reps/discount', component: DiscountItem },
       { path: 'system-config', component: SystemConfig },
+      { path: 'booking-management', component: BookingManagement },
       { path: 'users/:id', component: UserDetail },
       { path: 'report/:reportType/:reportId', component: ReportDetail },
     ],

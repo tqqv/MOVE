@@ -60,7 +60,7 @@
   const getStartAndEndOfMonth = (date) => {
     if (!date) return { startOfMonth: null, endOfMonth: null };
 
-    const startOfMonth = new Date();
+    const startOfMonth = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
     const endOfMonth = new Date(date.getFullYear(), date.getMonth() + 1, 0);
 
     return {
@@ -134,7 +134,10 @@
     const { startOfMonth, endOfMonth } = getStartAndEndOfMonth(new Date());
 
     // conver sang iso date utc
-    const isoStartOfMonth = new Date();
+    const isoStartOfMonth = new Date(
+      Date.UTC(startOfMonth.getFullYear(), startOfMonth.getMonth(), startOfMonth.getDate()),
+    ).toISOString();
+    console.log(isoStartOfMonth);
 
     const isoEndOfMonth = new Date(
       endOfMonth.getTime() - endOfMonth.getTimezoneOffset() * 60000,
