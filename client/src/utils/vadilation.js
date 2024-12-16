@@ -17,7 +17,10 @@ export const changePasswordSchema = yup.object({
 });
 
 export const signUpSchema = yup.object({
-  email: yup.string().email('Invalid email format').required('Email is required'),
+  email: yup
+    .string()
+    .required('Email is required')
+    .matches(/^[^\s@]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/, 'Invalid email format'),
 
   password: yup
     .string()
