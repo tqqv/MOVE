@@ -13,6 +13,7 @@
   import DonateModal from './DonateModal.vue';
   import GetREPS from './getReps/GetREPS.vue';
   import Skeleton from 'primevue/skeleton';
+  import LiveIcon from './LiveIcon.vue';
   const props = defineProps({
     isUserAction: {
       type: Boolean,
@@ -194,14 +195,12 @@
         </div>
       </RouterLink>
       <div>
-        <p class="text-[20px] flex items-center gap-x-4">
-          <RouterLink :to="`/user/${usernameDetails}`" class="">{{
+        <p class="text-[20px] flex items-center">
+          <RouterLink :to="`/user/${usernameDetails}`" class="mr-3">{{
             channelDetails ? channelDetails.channelName : usernameDetails
           }}</RouterLink>
-          <Verified v-if="channelDetails?.popularCheck" class="fill-blue mt-0.5" />
-          <span v-if="channelDetails" class="whitespace-nowrap">
-            {{ channelDetails.isLive ? 'is now online' : 'is now offline' }}
-          </span>
+          <Verified v-if="channelDetails?.popularCheck" class="fill-blue mt-0.5 mr-3" />
+          <LiveIcon v-if="channelDetails.isLive" />
         </p>
 
         <p v-if="channelDetails" class="text-[14px] text-body">
@@ -210,7 +209,6 @@
       </div>
     </div>
     <!-- User Action -->
-
     <div v-if="channelDetails" class="flex items-center pt-2">
       <div
         v-if="username !== props.usernameDetails"
