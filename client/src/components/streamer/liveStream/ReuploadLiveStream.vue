@@ -7,6 +7,7 @@
   import SmallLoading from '@/components/icons/smallLoading.vue';
   import { useLiveStreamStore } from '@/stores';
   import { reUploadLive } from '@/services/liveStream';
+  import UploadSuccess from '@/components/icons/uploadSuccess.vue';
 
   const liveStreamStore = useLiveStreamStore();
 
@@ -203,30 +204,26 @@
             <span>Loading...</span>
           </div>
         </div>
-        <span class="text-sm font-medium"
-          >{{ uploadProgress === 0 ? 0 : uploadProgress - 5 }}%</span
-        >
+        <span class="text-sm font-medium">{{ uploadProgress === 0 ? 0 : uploadProgress }}%</span>
       </div>
       <div class="w-full bg-gray-dark rounded-full h-2.5">
         <div
           class="bg-primary h-2.5 rounded-full"
-          :style="{ width: ` ${uploadProgress === 100 ? uploadProgress - 5 : uploadProgress}%` }"
+          :style="{ width: ` ${uploadProgress === 100 ? uploadProgress : uploadProgress}%` }"
         ></div>
       </div>
     </div>
   </div>
 
   <!-- Uploaded Video Display -->
-  <div v-if="uploadedVideoUrl" class="mt-4 rounded-md overflow-hidden">
-    <iframe
-      :src="`${uploadedVideoUrl}&title=0&byline=0&portrait=0`"
-      width="100%"
-      height="260"
-      frameborder="0"
-      allow="autoplay; fullscreen; picture-in-picture"
-      allowfullscreen
-    >
-    </iframe>
+  <div
+    v-if="uploadedVideoUrl"
+    class="flex flex-col justify-center items-center mt-4 rounded-md overflow-hidden"
+  >
+    <UploadSuccess />
+    <h1>Video uploaded successfully</h1>
+    <h1 class="text-sm text-footer my-2">Click the button to publish it</h1>
+
   </div>
 
   <!-- Empty State -->
@@ -234,8 +231,7 @@
     v-else-if="!isUploading"
     class="flex flex-col items-center justify-center rounded-md py-20 bg-gray-light/40 border-2 border-dashed border-gray-dark mt-3"
   >
-    <EmptyImage />
-    <p class="mt-4 text-gray-500">No video uploaded yet</p>
+    <EmptyImage title="Upload your record" subTitle="No video uploaded yet" />
   </div>
   <div v-if="uploadedVideoUrl && !publish" class="flex justify-end mt-3">
     <div @click="handlePublicLive" class="btn w-32 text-center cursor-pointer">

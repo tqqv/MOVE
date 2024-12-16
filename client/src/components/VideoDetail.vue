@@ -14,6 +14,8 @@
   import GetREPS from './getReps/GetREPS.vue';
   import Skeleton from 'primevue/skeleton';
   import LiveIcon from './LiveIcon.vue';
+  import { getAllReportChannelTypes, reportAccount } from '@/services/report';
+  import ReportDialog from './ReportDialog.vue';
   const props = defineProps({
     isUserAction: {
       type: Boolean,
@@ -52,6 +54,7 @@
       type: Boolean,
       default: false,
     },
+    idUser: String,
   });
 
   const emit = defineEmits(['updateFollowers']);
@@ -146,6 +149,45 @@
     );
   });
 
+  // handle report account
+  const listReportAccount = ref();
+  const fetchListReportChannel = async () => {
+    try {
+      const response = await getAllReportChannelTypes();
+      if (response.error) {
+        popupStore.openLoginPopup();
+      } else {
+        listReportAccount.value = response.data;
+        popupStore.openReportChannel();
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const showDialogReportAccount = async () => {
+    try {
+      await fetchListReportChannel();
+      isMenuVisible.value = false;
+    } catch (error) {
+      console.log('Failed to fetch report channels:', error);
+    }
+  };
+
+  const selectReportAccount = ref(null);
+  const handleSubmitReportChannel = async () => {
+    if (selectReportAccount.value.id) {
+      try {
+        const response = await reportAccount(props.idUser, selectReportAccount.value.id);
+        toast.success('Report channel sent successfully');
+        popupStore.closeReportChannel();
+        popupStore.openReportSuccess();
+        return response.data;
+      } catch (error) {
+        console.log(error);
+      }
+    }
+  };
+
   onMounted(() => {
     if (userStore.user) {
       userStore.loadFollowers();
@@ -200,7 +242,7 @@
             channelDetails ? channelDetails.channelName : usernameDetails
           }}</RouterLink>
           <Verified v-if="channelDetails?.popularCheck" class="fill-blue mt-0.5 mr-3" />
-          <LiveIcon v-if="channelDetails.isLive" />
+          <LiveIcon v-if="channelDetails?.isLive" />
         </p>
 
         <p v-if="channelDetails" class="text-[14px] text-body">
@@ -262,6 +304,43 @@
         v-if="hiddenReport"
         :channelId="channelDetails.id"
         :channelName="channelDetails.channelName"
+      />
+    </div>
+    <!-- REPORT ACCOUNT -->
+    <div v-if="!channelDetails" class="relative menu-container">
+      <button
+        aria-expanded="false"
+        aria-controls="menu"
+        class="pi pi-ellipsis-v text-primary text-[20px]"
+        @click="toggleMenu"
+      />
+      <div
+        v-if="isMenuVisible"
+        class="absolute mb-2 h-[40px] bg-white shadow rounded-md z-50 p-2 right-0 mt-2"
+      >
+        <ul class="flex items-center justify-center h-full m-0 p-0">
+          <li
+            class="flex items-center gap-x-2 text-[12px] cursor-pointer text-start hover:bg-gray-dark px-3 py-1 rounded truncate"
+            @click="showDialogReportAccount"
+          >
+            <i class="pi pi-flag text-sm"></i>
+            <span class="truncate"> Report account</span>
+          </li>
+        </ul>
+      </div>
+      <ReportDialog
+        title="account"
+        groupName="reportTypeAccount"
+        :reportType="listReportAccount"
+        :titleReport="`Report ${usernameDetails}`"
+        :selectedReport="selectReportAccount"
+        :isReportVisible="popupStore.showReportChannel"
+        :isReportSuccessVisible="popupStore.showReportSuccess"
+        @update:selectedReport="selectReportAccount = $event"
+        @hide="popupStore.closeReportChannel"
+        @submit="handleSubmitReportChannel"
+        @close="popupStore.closeReportSuccess"
+        @hideSuccess="popupStore.closeReportSuccess"
       />
     </div>
   </div>

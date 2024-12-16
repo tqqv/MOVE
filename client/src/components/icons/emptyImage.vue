@@ -1,3 +1,16 @@
+<script setup>
+  const props = defineProps({
+    title: {
+      type: String,
+      default: 'Click to upload thumbnail ',
+    },
+    subTitle: {
+      type: String,
+      default: 'PNG, JPG (MAX. 800x400px)',
+    },
+  });
+</script>
+
 <template>
   <svg
     class="w-8 h-8 mb-4 text-gray-500"
@@ -15,7 +28,7 @@
     />
   </svg>
   <p class="mb-2 text-sm text-gray-500">
-    <span class="font-semibold"> Click to upload thumbnail </span>
+    <span class="font-semibold"> {{ title }}</span>
   </p>
-  <p class="text-xs text-gray-500">PNG, JPG (MAX. 800x400px)</p>
+  <p class="text-xs text-gray-500">{{ subTitle }}</p>
 </template>
