@@ -38,11 +38,18 @@
   const isDateDetailVisible = ref(false);
   const selectedDate = ref('');
   const dateDetails = ref([]);
-  const toggleDateDetailVisible = async (date) => {
+  const openDateDetail = async (date) => {
     selectedDate.value = date;
     await fetchDateDetail(date);
-    isDateDetailVisible.value = !isDateDetailVisible.value;
+    isDateDetailVisible.value = true;
   };
+
+  const closeDateDetail = () => {
+    isDateDetailVisible.value = false;
+    selectedDate.value = '';
+    dateDetails.value = [];
+  };
+
   const fetchDateDetail = async (datetime) => {
     try {
       const response = await getDateDetailAnalytics(datetime);
@@ -232,7 +239,7 @@
         <Column field="View" header="Action">
           <template #body="{ data }">
             <div
-              @click="toggleDateDetailVisible(data.date)"
+              @click="openDateDetail(data.date)"
               class="flex items-center cursor-pointer text-primary"
             >
               <span class="pi pi-eye mr-2"></span>
@@ -290,7 +297,7 @@
     </div>
   </section>
   <DetailDateAnalytics
-    @toggleDateDetailVisible="toggleDateDetailVisible"
+    @closeDateDetail="closeDateDetail"
     :isDateDetailVisible="isDateDetailVisible"
     :dateDetails="dateDetails"
     title="Date Detail Analytics"

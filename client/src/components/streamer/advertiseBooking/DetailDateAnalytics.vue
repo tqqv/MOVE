@@ -14,10 +14,10 @@
     selectedDate: Object,
   });
 
-  const emit = defineEmits(['toggleDateDetailVisible']);
+  const emit = defineEmits(['closeDateDetail']);
 
   const toggleDateDetailVisible = () => {
-    emit('toggleDateDetailVisible');
+    emit('closeDateDetail');
   };
 </script>
 

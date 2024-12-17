@@ -132,14 +132,17 @@
   };
   const featchBookedDated = async () => {
     const { startOfMonth, endOfMonth } = getStartAndEndOfMonth(new Date());
+    const today = new Date();
+    today.setDate(today.getDate() - 1);
 
+    const isoPreviousDay = today.toISOString();
     // conver sang iso date utc
-    const isoStartOfMonth = new Date();
+    // const isoStartOfMonth = new Date();
 
     const isoEndOfMonth = new Date(
       endOfMonth.getTime() - endOfMonth.getTimezoneOffset() * 60000,
     ).toISOString();
-    await fetchBookedDates(isoStartOfMonth, isoEndOfMonth);
+    await fetchBookedDates(isoPreviousDay, isoEndOfMonth);
   };
   onMounted(async () => {
     // ---------------------///
