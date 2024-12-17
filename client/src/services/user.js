@@ -99,6 +99,24 @@ const getCheckFollowCate = async (cateId) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+
+const getStreamKey = async () => {
+  try {
+    const response = await axios.get('channel/getOBSStreamKey');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
+const randomStreamKey = async () => {
+  try {
+    const response = await axios.get('channel/createStreamKey');
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
 export {
   getProfile,
   getCheckFollowCate,
@@ -112,4 +130,6 @@ export {
   getProfilebyUsername,
   postFollowCate,
   getBanned,
+  getStreamKey,
+  randomStreamKey,
 };
