@@ -314,8 +314,6 @@ const searchVideoChannel = async(data, limit, offset) => {
       offset: offsetInt
     });
 
-
-
     const user = await User.findAll({
       include: [
         {
@@ -330,6 +328,7 @@ const searchVideoChannel = async(data, limit, offset) => {
               )`),
               'followCount' // Alias to store the result as followCount
             ]]
+            ,required: false
         }
       ],
       attributes: ['username', 'avatar'],

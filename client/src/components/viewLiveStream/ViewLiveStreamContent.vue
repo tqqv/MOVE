@@ -34,7 +34,7 @@
       (props.connectOBS == null && !props.liveStatus)
     "
   />
-  <div class="container py-6">
+  <div class="container p-[20px]">
     <OfflineTitle
       v-if="props.liveStreamData?.livestream"
       :livestream="props.liveStreamData?.livestream"

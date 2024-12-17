@@ -26,8 +26,9 @@
   const channelId = ref(null);
 
   const channelDetails = ref({});
-  const usernameDetails = ref({});
-  const avatarDetails = ref({});
+  const usernameDetails = ref('');
+  const avatarDetails = ref('');
+  const idUser = ref('');
   const followChannelDetails = ref({});
   const loading = ref(true);
   const errorData = ref(null);
@@ -43,6 +44,8 @@
         channelDetails.value = result.data.Channel;
         usernameDetails.value = result.data.username;
         avatarDetails.value = result.data.avatar;
+        idUser.value = result.data.id;
+
         if (channelDetails.value !== null) {
           channelId.value = result.data.Channel.id;
         }
@@ -106,6 +109,7 @@
       :username="username"
       :usernameDetails="usernameDetails"
       :avatarDetails="avatarDetails"
+      :idUser="idUser"
       @updateFollowers="fetchChannelData"
       :hiddenReport="true"
       class="pl-3"

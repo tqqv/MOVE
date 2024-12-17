@@ -83,6 +83,7 @@ const searchUser = async (data, page, pageSize) => {
                 )`),
                 'followCount'
               ]]
+              ,required: false
           }
         ],
         attributes: ['username', 'avatar'],

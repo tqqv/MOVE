@@ -20,7 +20,6 @@
   const props = defineProps({
     isEmailSent: {
       type: Boolean,
-      required: true,
     },
     handleVerifiedEmail: {
       type: Function,
@@ -69,10 +68,12 @@
   };
 
   // VERIFY EMAIL
-  const emit = defineEmits(['verifyEmail']);
+  const emit = defineEmits(['updateEmail']);
 
   const handleEmailVerification = () => {
-    emit('verifyEmail', profileData.value.email);
+    if (props.handleVerifiedEmail) {
+      props.handleVerifiedEmail(profileData.value.email);
+    }
   };
 
   const handleEmailClick = () => {
@@ -231,6 +232,13 @@
     },
     { immediate: true },
   );
+
+  watch(
+    () => profileData.value.email,
+    (newEmail) => {
+      emit('updateEmail', newEmail);
+    },
+  );
 </script>
 <template>
   <form @submit.prevent="handleUpdate" class="my-2">
@@ -385,8 +393,9 @@
             <DatePicker
               v-else
               v-model="profileData.dob"
-              dateFormat="yy-mm-dd"
+              dateFormat="yy/mm/dd"
               :class="{ 'error-border': errors.dob }"
+              :manualInput="false"
               :model-value="new Date(profileData.dob)"
             />
             <span v-if="errors.dob" class="error_message">{{ errors.dob }}</span>
@@ -444,7 +453,7 @@
           </div>
         </div>
       </div>
-      <Button :disabled="!isProfileChanged" type="submit" class="btn w-full md:w-1/4 mt-8">
+      <Button :disabled="!isProfileChanged" type="submit" class="btn w-full min-w-64 md:w-1/4 mt-8">
         <template #default>
           <SmallLoading v-if="isLoading" fill="white" fill_second="#13d0b4" />
           <span v-else>Save settings</span>

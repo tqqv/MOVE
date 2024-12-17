@@ -17,6 +17,7 @@
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
+  import Notification from '../icons/notification.vue';
 
   const route = useRoute();
   const userStore = useUserStore();
@@ -60,6 +61,7 @@
     { name: 'Report Management', icon: Flag, link: '/report' },
     { name: 'Booking management', icon: Booking, link: '/booking-management' },
     { name: 'Request Channel', icon: Request, link: '/request' },
+    { name: 'System notification', icon: Notification, link: '/system-notification' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
   ];
 </script>

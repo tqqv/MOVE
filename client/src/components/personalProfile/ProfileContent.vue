@@ -30,6 +30,7 @@
   const isEmailSent = ref(false);
   const emailVerified = computed(() => userStore?.user?.isVerified);
   const isLoading = ref(false);
+  const emailUpdate = ref('');
   // CHECK SEND MAIL STATUS
 
   const checkEmailSentStatus = () => {
@@ -67,6 +68,14 @@
     } finally {
       isLoading.value = false;
     }
+  };
+
+  const updateEmail = (newEmail) => {
+    emailUpdate.value = newEmail;
+  };
+
+  const handleSendVerify = () => {
+    handleVerifiedEmail(emailUpdate.value);
   };
 
   const showRequestToStreamer = computed(() => {
@@ -149,7 +158,7 @@
         </h1>
         <Button
           v-if="!isEmailSent"
-          @click="handleVerifiedEmail(user.email)"
+          @click="handleSendVerify"
           class="btn hidden md:block w-36 whitespace-nowrap"
         >
           <template #default>
@@ -211,7 +220,11 @@
             </TabList>
             <TabPanels>
               <TabPanel v-for="tab in tabs" :key="tab.value" :value="tab.value">
-                <component :is="tab.component" />
+                <component
+                  :is="tab.component"
+                  :handleVerifiedEmail="handleVerifiedEmail"
+                  @updateEmail="updateEmail"
+                />
               </TabPanel>
             </TabPanels>
           </Tabs>
