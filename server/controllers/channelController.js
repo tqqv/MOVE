@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { followChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel, getAllInforFollow, createStreamKey, validateStreamKey, endStream, overviewAnalytic } = require("../services/channelService");
+const { followChannel, listSubscribeOfChannel, listSubscribeOfUser, getProfileChannel, editProfileChannel, viewChannel, searchVideoChannel, getAllInforFollow, createStreamKey, validateStreamKey, endStream, overviewAnalytic, generateNewOBSStreamKey, getOBSStreamKey } = require("../services/channelService");
 
 
 
@@ -72,6 +72,20 @@ const createStreamKeyController = async(req, res, next) => {
   responseHandler(result.status, result.data, result.message)(req, res, next);
 }
 
+const getOBSStreamKeyController = async(req, res, next) => {
+  const channelId = req.user.channelId;
+  const result = await getOBSStreamKey(channelId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
+const generateNewOBSStreamKeyController = async(req, res, next) => {
+  const channelId = req.user.channelId;
+  const result = await generateNewOBSStreamKey(channelId);
+
+  responseHandler(result.status, result.data, result.message)(req, res, next);
+}
+
 const validateStreamKeyController = async(req, res, next) => {
   const streamKey = req.body.streamKey;
   const result = await validateStreamKey(streamKey);
@@ -104,4 +118,6 @@ module.exports = {
   validateStreamKeyController,
   endStreamController,
   overviewAnalyticController,
+  getOBSStreamKeyController,
+  generateNewOBSStreamKeyController
 }
