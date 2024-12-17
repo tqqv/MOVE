@@ -73,6 +73,9 @@ const listSubscribeOfChannel = async (channelId) => {
 const getProfileChannel = async(userId) =>{
   try {
     const channel = await Channel.findOne({
+      attributes: {
+        exclude: ["streamKey"],  // Đặt `exclude` trong `attributes`
+      },
       include: [{
         model: User,
         attributes: ["username"],
@@ -483,6 +486,78 @@ const createStreamKey = async(channelId) => {
   }
 }
 
+const generateNewOBSStreamKey = async (channelId) => {
+  try {
+    console.log("hehehe");
+
+    const channel = await Channel.findOne({
+      where: { id: channelId }, // Tìm bản ghi theo khóa chính
+      include: [{
+        model: User,
+        attributes: ["username"], // Bao gồm username từ User
+      }]
+    });
+
+    if (channel) {
+      channel.streamKey = await generatedStreamKey();
+      await channel.save();
+
+      return {
+        status: 200,
+        data: `${channel.User.username}?streamKey=${channel.streamKey}`,
+        message: "Create stream key successfully."
+      };
+    }
+
+    return {
+      status: 404,
+      data: null,
+      message: "Channel not found."
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+}
+
+
+const getOBSStreamKey = async (channelId) => {
+  try {
+    const channel = await Channel.findByPk(channelId, {
+      include: [{
+        model: User,
+        attributes: ["username"] // Bao gồm thuộc tính username từ bảng User
+      }]
+    });
+
+    if (channel) {
+      return {
+        status: 200,
+        data: `${channel.User.username}?streamKey=${channel.streamKey}`,
+        message: "Get stream key successfully."
+      };
+    }
+
+    return {
+      status: 404,
+      data: null,
+      message: "Channel not found."
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      status: 500,
+      data: null,
+      message: error.message
+    };
+  }
+}
+
+
 const validateStreamKey = async (streamKey) => {
   try {
     const channel = await Channel.findOne({where: {streamKey: streamKey}});
@@ -789,4 +864,6 @@ module.exports = {
   endStream,
   generatedStreamKey,
   overviewAnalytic,
+  getOBSStreamKey,
+  generateNewOBSStreamKey
 }
