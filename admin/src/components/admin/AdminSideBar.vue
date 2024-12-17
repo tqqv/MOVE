@@ -61,7 +61,7 @@
     { name: 'Report Management', icon: Flag, link: '/report' },
     { name: 'Booking management', icon: Booking, link: '/booking-management' },
     { name: 'Request Channel', icon: Request, link: '/request' },
-    { name: 'System notification', icon: Notification, link: 'system-notification' },
+    { name: 'System notification', icon: Notification, link: '/system-notification' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
   ];
 </script>
