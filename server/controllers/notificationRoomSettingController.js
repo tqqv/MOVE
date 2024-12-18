@@ -1,5 +1,5 @@
 const responseHandler = require("../middlewares/responseHandler");
-const { createNotificationRoomSetting, getAllNotificationRoomSetting } = require("../services/notificationRoomSettingService.js");
+const { updateNotificationRoomSetting, getAllNotificationRoomSetting } = require("../services/notificationRoomSettingService.js");
 
 
 const createNotificationRoomSettingController = async (req, res, next) => {

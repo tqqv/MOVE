@@ -1,38 +1,119 @@
-const { Sequelize } = require("sequelize");
+const { Sequelize, Op } = require("sequelize");
 const db = require("../models/index.js");
 const { getAllCategoryWithView } = require("./categoryService.js");
 const { listSubscribeOfChannel } = require("./channelService.js");
 const { listSubscribeOfUser } = require("./userService.js");
 const { NotificationRoomSetting, NotificationEntity } = db;
 
+const updateNotificationRoomSetting = async (userNotifierId, channelNotifierId, data) => {
+    try {
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        return {
+          status: 400,
+          data: null,
+          message: 'Request data cannot be empty or invalid'
+        };
+      }
 
-const updateNotificationRoomSetting = async(data) => {
-  try {
-    if(!data){
+      const entityNames = data.map(item => Object.keys(item)[0]);
+
+      // Lấy danh sách entity từ NotificationEntity
+      const notificationEntities = await NotificationEntity.findAll({
+        where: {
+          entityName: { [Op.in]: entityNames }
+        },
+        attributes: ['id', 'entityName']
+      });
+
+      if (notificationEntities.length === 0) {
+        return {
+          status: 404,
+          data: null,
+          message: 'No matching notification entities found'
+        };
+      }
+
+      // Lấy danh sách entityId
+      const entityIds = notificationEntities.map(entity => entity.dataValues.id);
+
+      // Lấy settings hiện tại từ NotificationRoomSetting
+      const existingSettings = await NotificationRoomSetting.findAll({
+        where: {
+          userNotifierId: channelNotifierId ? null : userNotifierId,
+          channelNotifierId,
+          notificationEntityId: { [Op.in]: entityIds }
+        }
+      });
+
+      const existingSettingsMap = Object.fromEntries(
+        existingSettings.map(setting => [setting.dataValues.notificationEntityId, setting])
+      );
+
+      // Chuẩn bị dữ liệu để cập nhật và thêm mới
+      const settingsToUpdate = [];
+      const settingsToInsert = [];
+
+      notificationEntities.forEach(entity => {
+        const isEnabled = data.find(item => Object.keys(item)[0] === entity.entityName)[entity.entityName];
+        const existingSetting = existingSettingsMap[entity.id];
+
+        if (existingSetting) {
+          // Nếu đã tồn tại, kiểm tra cần cập nhật không
+          if (existingSetting.isEnabled !== isEnabled) {
+            settingsToUpdate.push({
+              id: existingSetting.id,
+              isEnabled,
+              updatedAt: new Date()
+            });
+          }
+        } else {
+          // Nếu chưa tồn tại, thêm vào danh sách để tạo mới
+          settingsToInsert.push({
+            userNotifierId: channelNotifierId ? null : userNotifierId,
+            channelNotifierId,
+            notificationEntityId: entity.id,
+            isEnabled,
+            createdAt: new Date(),
+            updatedAt: new Date()
+          });
+        }
+      });
+
+      // Cập nhật các settings đã tồn tại
+      if (settingsToUpdate.length > 0) {
+        await Promise.all(
+          settingsToUpdate.map(setting =>
+            NotificationRoomSetting.update(
+              { isEnabled: setting.isEnabled, updatedAt: setting.updatedAt },
+              { where: { id: setting.id } }
+            )
+          )
+        );
+      }
+
+      // Thêm mới các settings chưa tồn tại
+      if (settingsToInsert.length > 0) {
+        await NotificationRoomSetting.bulkCreate(settingsToInsert);
+      }
+
       return {
-        status: 400,
+        status: 200,
+        data: {
+          updated: settingsToUpdate,
+          inserted: settingsToInsert
+        },
+        message: 'Notification settings updated successfully'
+      };
+    } catch (error) {
+      console.log(error);
+
+      return {
+        status: 500,
         data: null,
-        message: 'Req data cannot be empty'
+        message: error.message
       }
     }
-
-    const newNotiRoomSetting = await NotificationRoomSetting.create(data)
-
-    return {
-      status: 200,
-      data: newNotiRoomSetting,
-      message: 'Created notificaiton entity successfully'
-    }
-  } catch (error) {
-    console.log(error);
-
-    return {
-      status: 500,
-      data: null,
-      message: error.message
-    }
   }
-}
 
 const getAllNotificationRoomSetting = async (userId, channelId) => {
   try {
