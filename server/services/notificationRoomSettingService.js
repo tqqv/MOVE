@@ -5,23 +5,11 @@ const { listSubscribeOfChannel } = require("./channelService.js");
 const { listSubscribeOfUser } = require("./userService.js");
 const { NotificationRoomSetting, NotificationEntity } = db;
 
-const updateNotificationRoomSetting = async (userNotifierId, channelNotifierId, data) => {
+
+async function updateNotificationRoomSetting(userNotifierId, channelNotifierId, data) {
     try {
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        return {
-          status: 400,
-          data: null,
-          message: 'Request data cannot be empty or invalid'
-        };
-      }
-
-      const entityNames = data.map(item => Object.keys(item)[0]);
-
-      // Lấy danh sách entity từ NotificationEntity
+      // Lấy danh sách notification entities
       const notificationEntities = await NotificationEntity.findAll({
-        where: {
-          entityName: { [Op.in]: entityNames }
-        },
         attributes: ['id', 'entityName']
       });
 
@@ -35,6 +23,10 @@ const updateNotificationRoomSetting = async (userNotifierId, channelNotifierId, 
 
       // Lấy danh sách entityId
       const entityIds = notificationEntities.map(entity => entity.dataValues.id);
+      console.log(userNotifierId, channelNotifierId);
+
+      console.log("nè: ", userNotifierId);
+      console.log("nè: ", channelNotifierId);
 
       // Lấy settings hiện tại từ NotificationRoomSetting
       const existingSettings = await NotificationRoomSetting.findAll({
@@ -53,8 +45,16 @@ const updateNotificationRoomSetting = async (userNotifierId, channelNotifierId, 
       const settingsToUpdate = [];
       const settingsToInsert = [];
 
+      // Kiểm tra logic "all"
+      const allSetting = data.find(item => item.all !== undefined);
+      const allValue = allSetting ? allSetting.all : null;
+
       notificationEntities.forEach(entity => {
-        const isEnabled = data.find(item => Object.keys(item)[0] === entity.entityName)[entity.entityName];
+        // Nếu "all" có giá trị, tất cả các entity sẽ được đặt giá trị theo "all"
+        const isEnabled = allValue !== null
+          ? allValue
+          : data.find(item => Object.keys(item)[0] === entity.entityName)?.[entity.entityName];
+
         const existingSetting = existingSettingsMap[entity.id];
 
         if (existingSetting) {
@@ -111,9 +111,10 @@ const updateNotificationRoomSetting = async (userNotifierId, channelNotifierId, 
         status: 500,
         data: null,
         message: error.message
-      }
+      };
     }
-  }
+}
+
 
 const getAllNotificationRoomSetting = async (userId, channelId) => {
   try {
