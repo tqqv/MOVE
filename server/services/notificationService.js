@@ -15,7 +15,6 @@ const createNotification = async( entityName, entityAction, userActorId, channel
         attributes: ["id", "roomNamePattern"]
       });
       const roomName = notificationEntity.roomNamePattern.replace("{selfId}", recieverId).replace("{channelId}", recieverId)
-      console.log("Tao test: ", userActorId);
 
       const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId});
 
@@ -88,7 +87,6 @@ const createNotification = async( entityName, entityAction, userActorId, channel
 };
 
 const formatNotificationData = (item) => {
-  // console.log("checker2 ",item.notificationEntity?.notificationTranslation);
   let notificationTranslation = item.notificationEntity?.notificationTranslation.map(translation => {
     return {
       translatedContent: translation.dataValues.translatedContent,
@@ -141,13 +139,22 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
       notifierCondition.userNotifierId = userNotifierId;
     }
 
+    const roomConditions = {
+      [Op.or]: [
+          { roomName: { [Op.in]: notifierRoom.isOn } }, // Các phòng đang bật
+          {
+              [Op.and]: [
+                  { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Các phòng bị muted
+                  { updatedAt: { [Op.in]: notifierRoom.muted.map((room) => room.updatedAt) } } // Với updatedAt tương ứng
+              ]
+          }
+      ]
+    };
+
     // Lấy danh sách thông báo
     const notifications = await Notification.findAndCountAll({
       distinct: true,
-      where: {
-        roomName: { [Op.in]: notifierRoom },
-
-      },
+      where: roomConditions,
       attributes: [
         "id",
         "createdAt",
@@ -232,6 +239,17 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
 
     // điều kiện
     const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId), channelNotifierId)).data
+    const roomConditions = {
+      [Op.or]: [
+          { roomName: { [Op.in]: notifierRoom.isOn } }, // Các phòng đang bật
+          {
+              [Op.and]: [
+                  { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Các phòng bị muted
+                  { updatedAt: { [Op.in]: notifierRoom.muted.map((room) => room.updatedAt) } } // Với updatedAt tương ứng
+              ]
+          }
+      ]
+    };
 
     let userOrChannelCondition;
     if (channelNotifierId) {
@@ -246,9 +264,7 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
 
     const unReadNoti = await Notification.findAndCountAll({
       distinct: true,
-      where: {
-        roomName: { [Op.in]: notifierRoom },
-      },
+      where: roomConditions,
       attributes: [
         "id",
         "createdAt",
