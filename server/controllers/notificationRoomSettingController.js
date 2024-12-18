@@ -13,8 +13,8 @@ const createNotificationRoomSettingController = async (req, res, next) => {
 }
 
 const getAllNotificationRoomSettingController = async(req, res, next) => {
-    const userId = req.user.id;
     const channelId = req.user.channelId;
+    const userId = channelId ? null : req.user.id;
     const result = await getAllNotificationRoomSetting(userId, channelId)
 
     responseHandler(result.status, result.data, result.message)(req, res, next);

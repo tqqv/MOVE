@@ -53,7 +53,24 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
             disableRoomCondition = { channelNotifierId: channelId, isEnabled: false };
         }
 
+        // // ktra có muted all hay chưa
+        // const isMutedAll = await NotificationRoomSetting.findAll({
+        //   where: {
+        //     ...disableRoomCondition,
+
+        //   },
+        //   attributes: ['notificationEntityId'], // Chỉ lấy notificationEntityId
+        // })
+        // if(isMutedAll) {
+        //   return {
+        //     status: 200,
+        //     data: [], // Chuyển Set thành mảng
+        //     message: 'This account has muted all notification.',
+        //   };
+        // }
+
         // Lấy danh sách defaultRoom từ NotificationEntity
+
         const defaultRoom = await NotificationEntity.findAll({
             where: defaultRoomCondition,
             attributes: ["id", "role", "isDynamicRoomName", "roomNamePattern"]
@@ -66,8 +83,7 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
         });
 
         // Tạo danh sách các notificationEntityId bị disable
-        const disabledIds = disableRoom.map((room) => room.notificationEntityId);
-
+        const disabledIds = disableRoom.map((room) => room.dataValues.notificationEntityId);
         // Lọc defaultRoom để loại bỏ các phòng bị disable
         const filteredRooms = defaultRoom.filter(
             (room) => !disabledIds.includes(room.id)
@@ -85,8 +101,9 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
             if (roomName.includes("{channelId}")) {
                 // Lặp qua các channelIds và thay thế {channelId} trong roomNamePattern
                 channelIds.forEach(channel => {
-                    let updatedRoomName = roomName.replace("{selfId}", userId || "");
-                    updatedRoomName = updatedRoomName.replace("{channelId}", channel);
+                    // let updatedRoomName = roomName.replace("{selfId}", userId || "");
+                    let updatedRoomName = roomName.replace("{channelId}", channel);
+                    // console.log("addNe: ", updatedRoomName);
                     roomNameSet.add(updatedRoomName); // Thêm vào Set để tự động loại bỏ trùng lặp
                 });
             } else {

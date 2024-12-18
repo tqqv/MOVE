@@ -68,10 +68,6 @@ const createNotification = async( entityName, entityAction, userActorId, channel
         ]
       })
 
-      console.log(fullNotification);
-
-      console.log(formatNotificationData(fullNotification));
-
       /// Luồng realtime
       _io.to(roomName).emit('notifications', formatNotificationData(fullNotification));
 
@@ -133,17 +129,17 @@ const formatNotificationData = (item) => {
 const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSize) => {
   try {
     // điều kiện
-    const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
+    const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId) , channelNotifierId)).data
 
     let notifierCondition = {};
 
-  if (channelNotifierId) {
-    // Nếu có channelNotifierId, chỉ tìm theo channelNotifierId
-    notifierCondition.channelNotifierId = channelNotifierId;
-  } else if (userNotifierId) {
-    // Nếu không có channelNotifierId, tìm theo userNotifierId
-    notifierCondition.userNotifierId = userNotifierId;
-  }
+    if (channelNotifierId) {
+      // Nếu có channelNotifierId, chỉ tìm theo channelNotifierId
+      notifierCondition.channelNotifierId = channelNotifierId;
+    } else if (userNotifierId) {
+      // Nếu không có channelNotifierId, tìm theo userNotifierId
+      notifierCondition.userNotifierId = userNotifierId;
+    }
 
     // Lấy danh sách thông báo
     const notifications = await Notification.findAndCountAll({
@@ -235,7 +231,7 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
   try {
 
     // điều kiện
-    const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
+    const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId), channelNotifierId)).data
 
     let whereClause;
 
