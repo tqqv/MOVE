@@ -23,10 +23,10 @@
   );
 
   const onYearChange = (year) => {
-    console.log(year.value);
-
     selectedYear.value = year.value;
-    emit('yearSelected', year.value);
+    console.log(selectedYear.value);
+
+    emit('yearSelected', selectedYear.value);
   };
 
   const lineChart = ref(null);
@@ -116,7 +116,7 @@
           display: true,
         },
       },
-//
+      //
     };
 
     if (chartInstance) {
