@@ -184,8 +184,8 @@
 <template>
   <div
     v-show="openLiveChat"
-    class="max-w-[333px] min-w-[333px] bg-white hidden justify-between flex-col text-black md:flex"
-    :class="isStreamer ? 'rounded-md sticky' : 'sticky top-[64px] h-[calc(100vh-64px)]'"
+    class="md:max-w-[333px] md:min-w-[333px] bg-white justify-between flex-col text-black md:flex"
+    :class="isStreamer ? 'rounded-md sticky' : 'sticky top-[64px] h-full md:h-[calc(100vh-64px)]'"
   >
     <!-- TOPBAR -->
     <div
@@ -194,7 +194,7 @@
     >
       <div
         v-if="!isStreamer"
-        class="flex cursor-pointer p-2 justify-center items-center hover:bg-[#ADADB859] rounded-md"
+        class=" cursor-pointer p-2 justify-center items-center hover:bg-[#ADADB859] rounded-md"
         @click="handleOpenLiveChat"
         v-tooltip="'Collapse'"
       >
@@ -211,12 +211,12 @@
       :isStreamer="isStreamer"
     />
     <div
-      class="flex flex-col flex-grow justify-between border-l-2 border-gray-dark"
+      class="flex flex-col h-full flex-grow justify-between border-l-2 border-gray-dark"
       :class="{ 'border-none shadow-md rounded-md border-l-0': isStreamer }"
     >
       <!-- CONTENT -->
       <div
-        class="max-h-full h-[30px] flex-grow pb-1 relative"
+        class="md:max-h-full h-32 md:h-[30px] flex-grow pb-1 relative"
         :class="{ 'max-h-[440px]  h-[70px]': isStreamer }"
       >
         <NewDonation :listDonation="props.listDonation" />
@@ -392,7 +392,7 @@
       <!-- INPUT -->
       <div
         v-if="userStore.user"
-        class="pt-3 pb-2 px-2 border-t-2 border-gray-dark"
+        class="h-[190px] md:h-[130px] pt-3 pb-2 px-2 border-t-2 border-gray-dark"
         :class="{ 'rounded-b-md': isStreamer }"
       >
         <!-- HIDDEN AFTER FOLLOW -->

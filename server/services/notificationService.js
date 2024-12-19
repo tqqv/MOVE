@@ -128,7 +128,6 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
   try {
     // điều kiện
     const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId) , channelNotifierId)).data
-
     let notifierCondition = {};
 
     if (channelNotifierId) {
@@ -141,15 +140,22 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
 
     const roomConditions = {
       [Op.or]: [
-          { roomName: { [Op.in]: notifierRoom.isOn } }, // Các phòng đang bật
-          {
+        { roomName: { [Op.in]: notifierRoom.isOn } }, // Active rooms
+        notifierRoom.muted.length > 0
+          ? {
               [Op.and]: [
-                  { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Các phòng bị muted
-                  { updatedAt: { [Op.in]: notifierRoom.muted.map((room) => room.updatedAt) } } // Với updatedAt tương ứng
+                { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Muted rooms
+                { 
+                  updatedAt: { 
+                    [Op.lt]: Math.min(...notifierRoom.muted.map((room) => new Date(room.updatedAt))) 
+                  } 
+                } // Notifications older than the muted room's updatedAt
               ]
-          }
-      ]
+            }
+          : null // No muted conditions if muted is empty
+      ].filter(Boolean) // Remove null conditions
     };
+
 
     // Lấy danh sách thông báo
     const notifications = await Notification.findAndCountAll({

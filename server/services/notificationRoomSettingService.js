@@ -213,10 +213,75 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
           message: error.message,
       };
   }
+};const getNotificationSettingStatus = async (userNotifierId, channelNotifierId) => {
+  try {
+    let notifierCondition = {};
+    let roleNotifierCondition = {};
+    if (channelNotifierId) {
+      notifierCondition.channelNotifierId = channelNotifierId;
+    } else if (userNotifierId) {
+      notifierCondition.userNotifierId = userNotifierId;
+      roleNotifierCondition.role = "user"
+    }
+
+    // Lấy danh sách tất cả các entityName từ bảng NotificationEntity (DISTINCT)
+    const allEntities = await NotificationEntity.findAll({
+      attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("entityName")), "entityName"]],
+      where: roleNotifierCondition
+    });
+
+    // Lấy danh sách các thiết lập đã lưu từ NotificationRoomSetting
+    const savedSettings = await NotificationRoomSetting.findAll({
+      where: notifierCondition,
+      include: [
+        {
+          model: NotificationEntity,
+          attributes: ["entityName"],
+          as: "notificationEntity",
+        },
+      ],
+    });
+
+    // Chuyển savedSettings thành object để dễ truy cập
+    const savedSettingsMap = savedSettings.reduce((acc, item) => {
+      const entityName = item.notificationEntity.entityName;
+      acc[entityName] = item.isEnabled; // Gán giá trị isEnabled
+      return acc;
+    }, {});
+
+    // Kết hợp dữ liệu từ allEntities và savedSettings
+    const result = allEntities.map(entity => {
+      const entityName = entity.entityName;
+      return {
+        entityName,
+        isEnabled: savedSettingsMap[entityName] !== undefined
+          ? savedSettingsMap[entityName] // Sử dụng giá trị đã lưu
+          : true, // Mặc định là true nếu không tồn tại
+      };
+    });
+
+    // Kiểm tra nếu có bất kỳ isEnabled = true
+    const hasEnabled = result.some(item => item.isEnabled);
+
+    // Thêm {"all": true/false} vào phản hồi
+    return {
+      status: 200,
+      data: [ { entityName: "all", isEnabled: hasEnabled}, ...result],
+      message: "Get list setting noti status success",
+    };
+  } catch (error) {
+    return {
+      status: 500,
+      data: null,
+      message: error.message,
+    };
+  }
 };
+
 
 
 module.exports = {
   getAllNotificationRoomSetting,
-  updateNotificationRoomSetting
+  updateNotificationRoomSetting,
+  getNotificationSettingStatus
 }

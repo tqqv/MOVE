@@ -104,7 +104,7 @@
         @click="handleRate"
         id="rate-menu-button"
       >
-        <i :class="iconClass" class="mr-1"></i> {{ title }}
+        <i :class="iconClass" class="mr-1 text-lg"></i> <span class="hidden md:block">{{ title }}</span>
       </button>
     </div>
 
