@@ -81,7 +81,7 @@
 </script>
 
 <template>
-  <div class="relative menu-container">
+  <div class="hidden md:block relative menu-container">
     <button
       aria-expanded="false"
       aria-controls="menu"

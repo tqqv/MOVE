@@ -198,8 +198,8 @@
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">
-      <span v-if="video" class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-        video?.category.title || livestream?.category?.title
+      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
+        video?.category?.title || livestream?.category?.title
       }}</span
       ><span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
         {{ video?.levelWorkout?.levelWorkout || livestream?.livestreamLevelWorkout?.levelWorkout }}
