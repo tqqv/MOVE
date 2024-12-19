@@ -145,7 +145,7 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
           {
               [Op.and]: [
                   { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Các phòng bị muted
-                  { updatedAt: { [Op.in]: notifierRoom.muted.map((room) => room.updatedAt) } } // Với updatedAt tương ứng
+                  { updatedAt: { [Op.lt]: Math.min(...notifierRoom.muted.map((room) => new Date(room.updatedAt))) } } // Lấy notification cũ hơn thời điểm updatedAt của muted room              ]
               ]
           }
       ]
