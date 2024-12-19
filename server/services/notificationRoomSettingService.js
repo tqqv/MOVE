@@ -216,15 +216,18 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
 };const getNotificationSettingStatus = async (userNotifierId, channelNotifierId) => {
   try {
     let notifierCondition = {};
+    let roleNotifierCondition = {};
     if (channelNotifierId) {
       notifierCondition.channelNotifierId = channelNotifierId;
     } else if (userNotifierId) {
       notifierCondition.userNotifierId = userNotifierId;
+      roleNotifierCondition.role = "user"
     }
 
     // Lấy danh sách tất cả các entityName từ bảng NotificationEntity (DISTINCT)
     const allEntities = await NotificationEntity.findAll({
       attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("entityName")), "entityName"]],
+      where: roleNotifierCondition
     });
 
     // Lấy danh sách các thiết lập đã lưu từ NotificationRoomSetting
