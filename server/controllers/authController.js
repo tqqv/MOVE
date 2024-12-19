@@ -78,6 +78,15 @@ const logoutController = async (req, res, next) => {
   responseHandler(200, null, "Logout successful")(req, res, next);
 };
 
+const logoutAdminController = async (req, res, next) => {
+  clearCookies([
+    {name: 'accessTokenAdmin', options: { httpOnly: true }},
+    {name: 'isLoginAdmin'}
+  ])(req, res, next);
+
+  responseHandler(200, null, "Logout successful")(req, res, next);
+};
+
 
 
 //Verify account
@@ -228,5 +237,6 @@ module.exports = {
   sendMailVerifyFacebookController,
   verifyAccountFacebookController,
   loginAdminController,
-  getBannedController
+  getBannedController,
+  logoutAdminController
 };

@@ -36,8 +36,6 @@
   // };
 
   const toggleBuyREPs = async () => {
-    console.log(props.purchaseOptions);
-
     emit('selectOption', props.purchaseOptions);
 
     popupStore.toggleCompletePurchaseVisible();

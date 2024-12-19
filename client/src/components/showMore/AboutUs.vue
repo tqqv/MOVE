@@ -1,54 +1,86 @@
 <script setup></script>
 
 <template>
-  <div class="container mx-auto py-10 px-4 lg:px-20 bg-gray-50 rounded-lg shadow-lg">
+  <div class="container mx-auto py-10 px-4 lg:px-20">
     <!-- Header Section -->
-    <div class="mb-8">
-      <h1 class="text-4xl font-bold text-black mb-4">About Us</h1>
-      <p class="text-lg">
-        Redefining how sports fans connect, engage, and experience the thrill of the game.
-      </p>
+    <div class="flex items-center pl-4">
+      <span class="font-bold text-[32px]">About us</span>
     </div>
+    <div class="py-20 relative">
+      <div class="w-full max-w-7xl px-4 md:px-5 lg:px-5 mx-auto">
+        <div class="w-full justify-start items-center gap-12 grid lg:grid-cols-2 grid-cols-1">
+          <!-- Image Section -->
+          <div
+            class="w-full justify-center items-start gap-6 grid sm:grid-cols-2 grid-cols-1 lg:order-first order-last"
+          >
+            <div
+              class="pt-24 lg:justify-center sm:justify-end justify-start items-start gap-2.5 flex"
+            >
+              <img
+                class="rounded-xl object-cover"
+                src="https://images.pexels.com/photos/8007405/pexels-photo-8007405.jpeg?auto=compress&cs=tinysrgb&w=600"
+                alt="Sports Live Stream"
+              />
+            </div>
+            <img
+              class="sm:ml-0 ml-auto rounded-xl object-cover"
+              src="https://images.pexels.com/photos/2765871/pexels-photo-2765871.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1"
+              alt="Upload Video Content"
+            />
+          </div>
 
-    <!-- Hero Image -->
-    <div class="mb-10">
-      <img
-        src="https://res.cloudinary.com/dg9imqwrd/image/upload/v1733192163/li1twt1mk5mrti2w4cbo.png"
-        alt="Sports Live Stream"
-        class="w-full h-80 object-cover rounded-lg shadow-md"
-      />
-    </div>
+          <!-- Text Section -->
+          <div
+            class="w-full flex-col justify-center lg:items-start items-center gap-10 inline-flex"
+          >
+            <div class="w-full flex-col justify-center items-start gap-8 flex">
+              <div class="w-full flex-col justify-start lg:items-start items-center gap-3 flex">
+                <h2
+                  class="text-gray-900 text-4xl font-bold font-manrope leading-normal lg:text-start text-center"
+                >
+                  Your Ultimate Sports Video Platform
+                </h2>
+                <p
+                  class="text-gray-500 text-base font-normal leading-relaxed lg:text-start text-center"
+                >
+                  MOVE is revolutionizing how sports enthusiasts connect and share experiences. From
+                  live streaming major tournaments to uploading personal sports highlights, we bring
+                  the world of sports closer to you.
+                </p>
+              </div>
 
-    <!-- Content Section -->
-    <div class="">
-      <h2 class="text-3xl font-semibold text-black mb-4">Our Mission</h2>
-      <p class="mb-6 leading-relaxed">
-        Our mission is to create a dynamic and interactive space where sports lovers from around the
-        world can unite, share experiences, and celebrate their passion for sports. Whether you're
-        into football, basketball, extreme sports, or fitness challenges, MOVE is your go-to
-        destination for authentic, high-quality sports content.
-      </p>
+              <!-- Key Highlights -->
+              <div
+                class="w-full lg:justify-start justify-center items-center sm:gap-10 gap-5 inline-flex"
+              >
+                <div class="flex-col justify-start items-start inline-flex">
+                  <h3 class="text-gray-900 text-4xl font-bold font-manrope leading-normal">10K+</h3>
+                  <h6 class="text-gray-500 text-base font-normal leading-relaxed">
+                    Live Streams Hosted
+                  </h6>
+                </div>
+                <div class="flex-col justify-start items-start inline-flex">
+                  <h4 class="text-gray-900 text-4xl font-bold font-manrope leading-normal">50K+</h4>
+                  <h6 class="text-gray-500 text-base font-normal leading-relaxed">
+                    Videos Uploaded
+                  </h6>
+                </div>
+                <div class="flex-col justify-start items-start inline-flex">
+                  <h4 class="text-gray-900 text-4xl font-bold font-manrope leading-normal">1M+</h4>
+                  <h6 class="text-gray-500 text-base font-normal leading-relaxed">Engaged Users</h6>
+                </div>
+              </div>
+            </div>
 
-      <h2 class="text-3xl font-semibold text-black mb-4">Why Choose MOVE?</h2>
-      <ul class="list-disc list-inside space-y-4 mb-6">
-        <li>
-          <strong>Live Streaming Excellence:</strong> Catch live events from major sports leagues
-          and exclusive tournaments. Our cutting-edge streaming technology ensures smooth and
-          uninterrupted experiences.
-        </li>
-        <li>
-          <strong>Diverse Video Content:</strong> Watch everything from game highlights and player
-          interviews to in-depth documentaries and user-generated content from the sports community.
-        </li>
-        <li>
-          <strong>Interactive Features:</strong> Engage with live chats, fan polls, and other
-          interactive elements during streams to feel like part of the action.
-        </li>
-        <li>
-          <strong>For Athletes and Creators:</strong> MOVE empowers athletes, coaches, and content
-          creators to share their journeys, connect with fans, and inspire the next generation.
-        </li>
-      </ul>
+            <!-- Call to Action Button -->
+            <button
+              class="sm:w-fit w-full px-3.5 py-2 bg-indigo-600 hover:bg-indigo-800 transition-all duration-700 ease-in-out rounded-lg shadow-[0px_1px_2px_0px_rgba(16,_24,_40,_0.05)] justify-center items-center flex"
+            >
+              <span class="px-1.5 text-white text-sm font-medium leading-6">Explore MOVE Now</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>

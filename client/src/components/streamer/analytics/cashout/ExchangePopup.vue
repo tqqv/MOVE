@@ -32,6 +32,10 @@
   };
 
   const toogleProcessingPaymentVisible = async () => {
+    if (!repInput || repInput.value < 100) {
+      toast.error(`You need to enter a REPs value greater than 100.`);
+      return;
+    }
     if (
       !repInput.value ||
       isNaN(repInput.value) ||

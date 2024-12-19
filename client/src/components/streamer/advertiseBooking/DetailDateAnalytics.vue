@@ -73,7 +73,7 @@
                 "
                 :src="dateDetails?.featuredContent[0]?.video?.thumbnailUrl"
                 alt="Thumbnail"
-                class="w-[400px] h-[200px] object-cover"
+                class="w-[400px] h-[200px] object-cover shadow-md rounded-md"
               />
             </div>
             <div>
@@ -122,15 +122,15 @@
                 <img
                   :src="dateDetails?.liveInfor.thumbnailUrl"
                   alt="Thumbnail"
-                  class="w-[400px] h-[200px] object-cover"
+                  class="w-[400px] h-[200px] object-cover shadow-md rounded-md"
                 />
               </div>
-              <div>
+              <div class="pt-4">
                 <h1 class="font-semibold truncate w-[100px]">
                   {{ dateDetails?.liveInfor.title || 'No title available' }}
                 </h1>
               </div>
-              <div class="flex justify-between">
+              <div class="flex justify-between pt-4">
                 <span class="font-bold">Total REPs Earned:</span>
                 <span class="font-semibold"
                   >{{ formatNumber(dateDetails?.totalRepFromLivestream || 0) }} REPs</span
@@ -138,6 +138,7 @@
               </div>
             </div>
             <EmptyPage
+              v-else
               isMid="true"
               title="No data livestream found"
               subTitle="No live stream data is available at the moment. Please check back later."

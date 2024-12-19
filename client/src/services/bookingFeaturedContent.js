@@ -72,6 +72,15 @@ const getDateDetailAnalytics = async (datetime) => {
     return { error: true, status: error.response.status, message: error.response.data.message };
   }
 };
+const postClickFeatured = async (data) => {
+  try {
+    const response = await axios.post('featuredContent/clickIncrease', data);
+    return response;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
 export {
   getBookedStatus,
   getBookedByDate,
@@ -79,4 +88,5 @@ export {
   postCancelBooking,
   getBookingHistory,
   getDateDetailAnalytics,
+  postClickFeatured,
 };

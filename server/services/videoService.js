@@ -420,6 +420,10 @@ const getAllVideosService = async (page, pageSize) => {
               'followCount'
             ]],
           as: 'channel',
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: Category,
@@ -477,6 +481,10 @@ const getLatestReupStreamService = async (channelId) => {
               ],
             ],
             as: 'channel',
+            include: [{
+              model: User,
+              attributes: ['username']
+            }],
           },
           {
             model: Category,
@@ -544,8 +552,16 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
     include: [
       {
         model: Channel,
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
         as: 'channel',
-        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
       },
       {
         model: LevelWorkout,
@@ -558,8 +574,10 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
         attributes: ['title'],
         as: 'category',
         where: category ? {title: category} : {}
-      }
-    ],
+      },
+      
+    ], 
+   
     order: [[sortCondition.sortBy, sortCondition.order]],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
@@ -604,6 +622,10 @@ const getVideoByChannelAndTitleService = async (data, page, pageSize, channelId)
           model: Channel,
           as: 'channel',
           attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: Category,
@@ -818,7 +840,11 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
         {
           model: Channel,
           as: 'channel',
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: LevelWorkout,
@@ -1247,7 +1273,11 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
         {
           model: Channel,
           as: 'channel',
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: LevelWorkout,

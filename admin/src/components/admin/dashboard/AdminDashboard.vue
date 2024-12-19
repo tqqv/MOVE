@@ -97,14 +97,14 @@
   const handleYearChange = (year) => {
     selectedYear.value = year;
 
-    fetchDataChartMoney(year);
+    fetchDataChartMoney(selectedYear.value);
   };
 
   onMounted(() => {
     fetchStatistic();
     fetchTop5UserDeposit();
     fetchTop5Channel();
-    fetchDataChartMoney(selectedYear.value);
+    // fetchDataChartMoney(selectedYear.value);
     fetchDataUserType();
   });
 </script>

@@ -8,19 +8,37 @@ const { v4: uuidv4 } = require('uuid');
 const { totp } = require('otplib');
 const { Op } = require("sequelize");
 
-const generateJwtToken = (user) => {
-  return new Promise((resolve, reject) => {
-    try {
-      const token = jwt.sign(
+const generateJwtToken = async (user) => {
+  try {
+    if (user.isBanned) {
+      const banned = await Ban.findOne({ where: { userId: user.id } });
+
+      if (banned && banned.expiresAt && new Date(banned.expiresAt).toDateString() === new Date().toDateString()) {
+        user.isBanned = false;
+        await Promise.all([banned.destroy(), user.save()]);
+      }
+    }
+
+    let token;
+
+    if (user.role === "streamer") {
+      const channel = await Channel.findOne({ where: { userId: user.id } });
+      token = jwt.sign(
+        { id: user.id, role: user.role, channelId: channel.id },
+        process.env.JWT_SECRET_KEY,
+        { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
+      );
+    } else {
+      token = jwt.sign(
         { id: user.id, role: user.role },
         process.env.JWT_SECRET_KEY,
         { expiresIn: process.env.TOKEN_EXPIRES_LOGIN }
       );
-      resolve(token);
-    } catch (error) {
-      reject(error);
     }
-  });
+    return token;
+  } catch (error) {
+    throw error;
+  }
 };
 
 async function generateUniqueReferralCode() {
@@ -291,7 +309,7 @@ const sendMailVerify = async (email, id) => {
       to: email,
       subject: "Email Verification With MOVE",
       html: `
-        <h2 style="color: #04ddb2;">Reset Your Password</h2>
+        <h2 style="color: #04ddb2;">Email verification</h2>
         <p>Dear ${email},</p>
         <p>Please click the link below to verify your email address:</p>
       <a href="${verificationUrl}"
