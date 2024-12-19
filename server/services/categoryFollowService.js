@@ -17,7 +17,7 @@ const getCateFollowByUserIdService = async(userId) => {
                     Sequelize.literal(`(
                     SELECT SUM(viewCount) 
                     FROM videos 
-                    WHERE videos.categoryId = category.id
+                    WHERE videos.categoryId = category.id && status = 'public'
                     )`), 'totalViews'
                   ]
                 ]

@@ -128,8 +128,6 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
   try {
     // điều kiện
     const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId) , channelNotifierId)).data
-    console.log(notifierRoom);
-    
     let notifierCondition = {};
 
     if (channelNotifierId) {
@@ -157,6 +155,7 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
           : null // No muted conditions if muted is empty
       ].filter(Boolean) // Remove null conditions
     };
+
 
     // Lấy danh sách thông báo
     const notifications = await Notification.findAndCountAll({

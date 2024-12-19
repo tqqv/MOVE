@@ -168,7 +168,7 @@ const getAllCategoryWithView = async() => {
           sequelize.literal(`(
           SELECT SUM(viewCount)
           FROM videos
-          WHERE videos.categoryId = Category.id
+          WHERE videos.categoryId = Category.id && status = 'public'
           )`),
           'totalViews'
         ]
@@ -210,7 +210,7 @@ const getCateByTitle = async (title) => {
           sequelize.literal(`(
           SELECT SUM(viewCount)
           FROM videos
-          WHERE videos.categoryId = Category.id
+          WHERE videos.categoryId = Category.id && status = 'public'
           )`),
           'totalViews'
         ],
