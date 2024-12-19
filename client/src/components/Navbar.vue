@@ -344,7 +344,7 @@
             </div>
           </div>
         </div>
-        <div class="w-1/5 h-8 flex justify-center items-center">
+        <div class="w-full md:w-1/5 h-8 flex md:justify-center items-center">
           <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
         </div>
         <div class="w-2/5 items-center justify-end gap-x-6 hidden md:flex">

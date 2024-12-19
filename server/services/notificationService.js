@@ -237,18 +237,18 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
     // điều kiện
     const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
 
-    let whereClause;
-
-    if(channelNotifierId) {
-      whereClause = channelNotifierId
-      ? `channelNotifierId = '${channelNotifierId}'`
-      : `userNotifierId IS NULL`;
+    let userOrChannelCondition;
+    if (channelNotifierId) {
+      userOrChannelCondition = {
+        channelNotifierId,
+      };
     } else {
-      whereClause = `userNotifierId = '${userNotifierId}'`
+      userOrChannelCondition = {
+        userNotifierId: userNotifierId,
+      };
     }
 
-    const unReadNoti = await Notification.
-    findAndCountAll({
+    const unReadNoti = await Notification.findAndCountAll({
       distinct: true,
       where: {
         roomName: { [Op.in]: notifierRoom },
@@ -263,7 +263,8 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
           as: "visitStatus",
           attributes: ["status"],
           where: {
-            status: "recieved"
+            status: "recieved",
+            ...userOrChannelCondition
           }
         },
         {

@@ -685,10 +685,10 @@ const getProfileByUserName = async(username) => {
               WHERE subscribes.channelId = Channel.id
             )`),
             'followCount'
-          ]
-        ],
+          ]  
+        ],required: false
       }],
-      attributes: ['username', 'avatar']
+      attributes: ['username', 'avatar', 'id']
     })
 
     if(!user) {

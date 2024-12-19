@@ -75,7 +75,7 @@
           >Browse</RouterLink
         >
       </div>
-      <div class="flex flex-col gap-y-2 h-full overflow-y-auto scrollbar-custom px-3 mr-0.5">
+      <div class="flex flex-col gap-y-2 h-full overflow-y-auto scrollbar-custom px-3">
         <!-- HAVE FOLLOWING CHANNEL -->
         <div v-if="userStore.followers.length && userStore.user" class="flex flex-col mt-2 gap-y-2">
           <p class="mb-3 text-body font-semibold">Follow channel</p>
@@ -267,4 +267,27 @@
   </div>
 </template>
 
-<style></style>
+<style>
+  .scrollbar-custom::-webkit-scrollbar {
+    width: 6px;
+    background-color: transparent;
+  }
+
+  .scrollbar-custom:hover::-webkit-scrollbar {
+    background-color: #fff;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-thumb {
+    background-color: #fff;
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom::-webkit-scrollbar-track {
+    background-color: #fff;
+    border-radius: 4px;
+  }
+
+  .scrollbar-custom:hover::-webkit-scrollbar-thumb {
+    background-color: rgba(19, 208, 180, 0.8);
+  }
+</style>
