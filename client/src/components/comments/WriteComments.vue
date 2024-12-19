@@ -3,6 +3,8 @@
   import EmojiPicker from 'vue3-emoji-picker';
   import { postComments } from '@/services/comment';
   import { useUserStore } from '@/stores';
+  import { useStreamerStore } from '@/stores';
+
   import Login from '@/pages/Login.vue';
   import { usePopupStore } from '@/stores';
   import { useTabStore } from '@/stores';
@@ -14,10 +16,14 @@
   const commentText = ref('');
   const emit = defineEmits(['sendComment']);
   const userStore = useUserStore();
+  const streamerStore = useStreamerStore();
+
   const popupStore = usePopupStore();
   const tabStore = useTabStore();
 
-  const avatar = computed(() => userStore.user?.avatar || avatarDefault);
+  const avatar = computed(
+    () => streamerStore.streamerChannel?.avatar || userStore.user?.avatar || avatarDefault,
+  );
 
   const props = defineProps({
     fetchComments: {
@@ -79,12 +85,18 @@
         commentInput.blur();
         const newComment = {
           ...response.data.data,
+          channelComments: {
+            avatar: streamerStore.streamerChannel?.avatar,
+            channelName: streamerStore.streamerChannel?.channelName,
+            popularCheck: streamerStore.streamerChannel?.popularCheck,
+          },
           userComments: {
-            avatar: userStore.user.avatar,
-            username: userStore.user.username,
-            isVerified: userStore.user.isVerified,
+            avatar: userStore.user?.avatar,
+            username: userStore.user?.username,
+            isVerified: userStore.user?.isVerified,
           },
         };
+
         emit('sendComment', newComment);
       } else {
         console.error('Failed to create comment');

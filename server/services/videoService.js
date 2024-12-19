@@ -544,6 +544,10 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
     include: [
       {
         model: Channel,
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
         as: 'channel',
         attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
       },
@@ -558,8 +562,10 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
         attributes: ['title'],
         as: 'category',
         where: category ? {title: category} : {}
-      }
-    ],
+      },
+      
+    ], 
+   
     order: [[sortCondition.sortBy, sortCondition.order]],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,
@@ -818,7 +824,11 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
         {
           model: Channel,
           as: 'channel',
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: LevelWorkout,

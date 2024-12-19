@@ -84,7 +84,11 @@
             v-for="userFollower in userStore.followers"
             :key="userFollower.id"
             class="flex items-center justify-start gap-x-2 cursor-pointer hover:bg-primary-light/20 rounded-md p-1"
-            :to="`/user/${userFollower.followChannel.User.username}`"
+            :to="
+              userFollower.followChannel?.isLive
+                ? `/live/${userFollower.followChannel?.User?.username}`
+                : `/user/${userFollower.followChannel?.User?.username}`
+            "
           >
             <div
               :class="[

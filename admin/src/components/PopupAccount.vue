@@ -63,7 +63,7 @@
               : userStore.user?.username
           }}
         </h1>
-        <verified v-if="props.user.isVerified" class="ml-1 mb-1 fill-blue" />
+        <verified v-if="props.user.Channel.popularCheck" class="ml-1 mb-1 fill-blue" />
       </RouterLink>
       <hr class="h-px bg-gray-dark border-0 mb-4" />
       <div class="flex flex-col justify-start text-[13px]">
