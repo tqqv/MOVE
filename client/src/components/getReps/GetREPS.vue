@@ -55,11 +55,11 @@
           @click="toggleGetREPsMenu"
           class="pi pi-times text-[20px] absolute right-[16px] top-[15%] cursor-pointer"
         />
-        <h1 class="font-bold text-xl">Buy REP$</h1>
+        <h1 class="font-bold text-xl">Buy REPs</h1>
       </div>
 
       <div v-else class="relative pb-4">
-        <h1 class="font-bold text_subTitle">Buy REP$</h1>
+        <h1 class="font-bold text_subTitle">Buy REPs</h1>
         <i
           @click="toggleGetREPsMenu"
           class="pi pi-times text-[20px] absolute right-[16px] top-[15%] cursor-pointer"

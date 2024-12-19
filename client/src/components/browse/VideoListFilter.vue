@@ -175,14 +175,14 @@
       </div>
     </div>
     <!-- MOBILE -->
-    <div class="flex md:hidden">
+    <!-- <div class="flex md:hidden">
       <button
         class="flex items-center gap-x-3 px-4 py-2 bg-primary rounded-lg text-white font-semibold"
       >
         <i class="pi pi-sort-alt text-sm"></i>
         <p>Sort & Filter</p>
       </button>
-    </div>
+    </div> -->
 
     <GirdVideo :videos="videos" :loading="loading" />
     <div

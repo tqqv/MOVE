@@ -351,17 +351,17 @@
               >
               <!-- ------ABOUT US PAGE------------ -->
 
-              <div class="relative" id="show-more-button">
+              <div class="relative flex justify-center items-center" id="show-more-button">
                 <div
-                  class="relative flex items-center justify-center cursor-pointer h-[30px] w-[40px]"
+                  class="relative flex items-center justify-center cursor-pointer mt-1"
                   @click="toggleShowMoreMenu"
                 >
-                  <div class="font-bold text-xl">. . .</div>
+                  <div class="font-bold"><i class="pi pi-ellipsis-v"> </i></div>
                 </div>
                 <div
                   v-if="isShowMore"
                   id="show-more"
-                  class="absolute left-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                  class="absolute left-0 b z-10 top-10 origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                   role="menu"
                   aria-orientation="vertical"
                   aria-labelledby="show-more-button"
@@ -475,11 +475,7 @@
                     <div class="px-4 py-5">
                       <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                         <RouterLink
-                          :to="
-                            !userStore.user?.Channel?.isLive
-                              ? '/streaming/stream-setup'
-                              : '/streaming/dashboard-live'
-                          "
+                          :to="'/streaming/stream-setup'"
                           class="flex flex-row items-center gap-x-2 group cursor-pointer"
                         >
                           <GoLive />

@@ -9,3 +9,4 @@ notificationRouter.post('/', createNotificationController);
 notificationRouter.get('/', verifyToken, getAllNotificationController);
 
 module.exports = notificationRouter;
+ 

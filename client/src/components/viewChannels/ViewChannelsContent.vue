@@ -100,7 +100,7 @@
 </script>
 
 <template>
-  <section class="px-10 flex-grow">
+  <section class="px-4 md:px-10 flex-grow">
     <VideoDetail
       :is-user-action="true"
       :is-button-gift-r-e-ps-visible="true"

@@ -306,7 +306,7 @@ const filterRoomsForDeletion = (rooms) => {
 
     // Filter rooms theo điều kiện và chỉ map với currentViews
     const roomKeys = roomsArray
-        .filter(room => (isValidUUID(room) || room))
+        .filter(room => (isValidUUID(room) || Number.isInteger(room * 1)))
         .map(room => streamKeys.currentViews(room));
 
     return roomKeys;

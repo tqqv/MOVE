@@ -112,7 +112,11 @@
         :theLastLiveStream="theLastLiveStream"
       />
     </div>
-    <LiveChat :liveStreamData="liveStreamData.channel?.id" :listDonation="listDonation" />
+    <LiveChat
+      :liveStreamData="liveStreamData.channel?.id"
+      :listDonation="listDonation"
+      :topDonators="metricsData?.topDonators"
+    />
   </div>
 </template>
 

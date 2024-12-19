@@ -16,6 +16,7 @@
   import Donate from '@/components/icons/donate.vue';
   import PopupInstructionLive from './PopupInstructionLive.vue';
   import PopupInstructionDonate from './PopupInstructionDonate.vue';
+  import { getStreamKey, randomStreamKey } from '@/services/user';
 
   const props = defineProps({
     connectOBS: String,
@@ -34,7 +35,7 @@
   const isLiveStreamSelected = ref(true);
 
   // DATA LIVESTREAM
-  const streamKey = computed(() => userStore.user?.Channel.streamKey || '');
+  const streamKey = ref('');
   const streamId = computed(() => userStore.user?.Channel.id);
   const title = ref('');
   const description = ref('');
@@ -106,15 +107,6 @@
     }
   };
 
-  // GET STREAMER KEY
-  const fetchStreamerKey = async () => {
-    try {
-      const response = await changeStreamKey();
-      streamKey.value = userStore.user.username + streamKey.value + response.data;
-    } catch (error) {
-      console.log(error);
-    }
-  };
   // HANDLE LIVE WEBCAM
   const handleLiveWebCam = () => {
     toast.info('We are developing this feature');
@@ -147,9 +139,22 @@
     popupStore.openInstructionDonate();
   };
 
+  const showStreamKey = ref(false);
+  // CALL STREAM KEY
+  const fetchStreamKey = async () => {
+    try {
+      const response = await getStreamKey();
+      streamKey.value = response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   onMounted(async () => {
     await categoriesStore.fetchCategories();
     await levelWorkoutStore.fetchLevelWorkout();
+    await fetchStreamKey();
+
     // await fetchStreamerKey();
   });
 </script>
@@ -211,6 +216,7 @@
                   <div class="input_custom bg-gray-light truncate">
                     {{ streamURL }}
                   </div>
+
                   <div
                     v-tooltip.top="'copy stream url'"
                     class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
@@ -221,7 +227,15 @@
                 </div>
                 <h1 class="font-semibold mb-4 mt-5">Stream key</h1>
                 <div class="flex items-center gap-x-3 mb-2">
-                  <div class="input_custom bg-gray-light truncate">{{ streamKey }}</div>
+                  <input
+                    v-model="streamKey"
+                    :type="showStreamKey ? 'text' : 'password'"
+                    class="input_custom bg-gray-light truncate"
+                    autocomplete="off"
+                    readonly
+                    onfocus="this.removeAttribute('readonly');"
+                    disabled
+                  />
                   <div
                     v-tooltip.top="'copy stream key'"
                     class="flex justify-center items-center text-white p-3 rounded-full bg-primary-light cursor-pointer hover:bg-primary"
@@ -229,6 +243,12 @@
                   >
                     <i class="pi pi-link text-xl"></i>
                   </div>
+                </div>
+                <div
+                  @click="showStreamKey = !showStreamKey"
+                  class="text_link cursor-pointer w-fit mb-2 ml-1"
+                >
+                  Show
                 </div>
                 <p class="text-xs text-body">
                   This stream key is valid until you log out of MOVE. Once you start to preview the

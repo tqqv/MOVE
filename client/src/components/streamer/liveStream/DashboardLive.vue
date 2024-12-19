@@ -8,6 +8,7 @@
     elapsedTime: Number,
     metricsData: Object,
   });
+  
 </script>
 <template>
   <section>

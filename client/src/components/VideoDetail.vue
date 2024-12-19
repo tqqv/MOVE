@@ -251,7 +251,10 @@
       </div>
     </div>
     <!-- User Action -->
-    <div v-if="channelDetails" class="flex items-center pt-2">
+    <div
+      v-if="channelDetails"
+      class="flex items-center pt-8 justify-center md:justify-start md:pt-0"
+    >
       <div
         v-if="username !== props.usernameDetails"
         class="text-primary text-[13px] font-bold flex items-center gap-x-1 cursor-pointer uppercase mr-9"
@@ -340,3 +343,4 @@
     </div>
   </div>
 </template>
+

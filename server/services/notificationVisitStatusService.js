@@ -66,7 +66,19 @@ const markAllNotiAsRecievied = async(userNotifierId, channelNotifierId) => {
 
     const notifierRoom = (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data;
 
-    if (notifierRoom.length == 0 ) {
+    const roomConditions = {
+      [Op.or]: [
+          { roomName: { [Op.in]: notifierRoom.isOn } }, // Các phòng đang bật
+          {
+              [Op.and]: [
+                  { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Các phòng bị muted
+                  { updatedAt: { [Op.in]: notifierRoom.muted.map((room) => room.updatedAt) } } // Với updatedAt tương ứng
+              ]
+          }
+      ]
+    };
+
+    if (notifierRoom.isOn.length == 0 ) {
       return {
         status: 200,
         data: [],
@@ -84,7 +96,7 @@ const markAllNotiAsRecievied = async(userNotifierId, channelNotifierId) => {
     // Lấy danh sách notification thỏa mãn điều kiện
     const notificationsToMark = await Notification.findAll({
       where: {
-        roomName: { [Op.in]: notifierRoom }, // Lọc roomName dựa trên notifierRooms
+        ...roomConditions, // Lọc roomName dựa trên notifierRooms
         ...(lastClickedAt && { createdAt: { [Op.gt]: lastClickedAt } }), // Nếu có lastClickedAt
       },
     });

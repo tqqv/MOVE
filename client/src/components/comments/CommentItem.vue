@@ -219,6 +219,17 @@
     }
   });
   const commentClasses = ref('');
+
+  // HANDLE BG-COMMENT
+  const extractCommentId = () => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+      return hash.replace('#comment-', '');
+    }
+    return null;
+  };
+  const commentId = extractCommentId();
+
   onMounted(() => {
     if (props.comment.isNew) {
       commentClasses.value =
@@ -244,7 +255,7 @@
 
 <template>
   <div
-    class="flex gap-x-4"
+    class="flex gap-x-4 pt-2"
     :id="`comment-${comment.id}`"
     :class="[
       commentClasses,
@@ -310,6 +321,7 @@
         ref="textElement"
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="break-all text-sm text-black"
+        :class="commentId === comment?.id ? 'bg-primary/20 p-2 pb-3 rounded-md' : ''"
       >
         <div ref="textElement" v-html="displayedText()" />
         <div v-if="isLongText || isTallText">

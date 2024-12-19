@@ -23,6 +23,10 @@ const createLivestream = async(data) => {
 
     data.createdAt = currentUtcTime;
 
+    if(data.streamKey.includes('streamKey=')){
+      data.streamKey = data.streamKey.split('streamKey=')[1];
+    }
+
     const newLiveStream = await Livestream.create(data);
     const channel = await Channel.findOne({
       where: {
