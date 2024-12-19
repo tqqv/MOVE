@@ -59,9 +59,9 @@
             : 'border-[3px] border-transparent',
         ]"
         :to="
-          video.livestreamChannel
-            ? `/live/${video.livestreamChannel.User.username}`
-            : `/user/${video.channel.User?.username}`
+          video.channel?.isLive || video?.livestreamChannel?.isLive
+            ? `/live/${video.channel?.User?.username || video?.livestreamChannel?.User?.username}`
+            : `/user/${video.channel?.User?.username || video?.livestreamChannel?.User?.username}`
         "
       >
         <img
@@ -97,15 +97,14 @@
         <!-- Truncate channelName with tooltip -->
         <div class="flex items-center">
           <RouterLink
-            :to="`/user/${video.channel?.User?.username}`"
-            class="text_secondary whitespace-nowrap"
+            :to="
+              video.channel
+                ? `/user/${video?.channel?.User?.username}`
+                : `/user/${video?.livestreamChannel?.User?.username}`
+            "
+            class="text_secondary truncate w-[90px]"
             :title="video.channel?.channelName || video.livestreamChannel?.channelName"
-            >{{
-              truncateDescripton(
-                video.channel?.channelName || video.livestreamChannel?.channelName,
-                12,
-              )
-            }}</RouterLink
+            >{{ video.channel?.channelName || video.livestreamChannel?.channelName }}</RouterLink
           >
           <span
             v-if="video.channel?.popularCheck || video.livestreamChannel?.popularCheck"

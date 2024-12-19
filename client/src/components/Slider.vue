@@ -128,8 +128,12 @@
               <div class="flex flex-col justify-center">
                 <!-- CHANNEL NAME -->
                 <div class="flex items-center pt-2">
-                  <p class="text-[18px] flex items-center">
-                    <RouterLink :to="`/user/${slide.video.channel.User.username}`">
+                  <p class="text-[18px] flex items-center whitespace-nowrap">
+                    <RouterLink
+                      :to="`/user/${slide.video.channel.User.username}`"
+                      class="truncate w-[130px]"
+                      :title="slide.video.channel.User.username"
+                    >
                       <span class="mr-2">
                         {{ slide.video?.channel.channelName || slide?.channelBooking.channelName }}
                       </span>

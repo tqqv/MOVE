@@ -530,6 +530,10 @@ const getAllInforFollow = async(userId) => {
         model: Channel,
         as: 'channel',
         attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
       },
       {
         model: LevelWorkout,

@@ -18,7 +18,7 @@
 
   const liveStreamDetails = ref([{}]);
   const page = ref(1);
-  const pageSize = ref(200);
+  const pageSize = ref(1000);
   const ageStats = ref(null);
   const genderStats = ref(null);
   const dataByIp = ref(null);
@@ -126,10 +126,10 @@
             <span class="text-xs text-[#666666] uppercase">Views</span>
             <span class="text-sm">{{ formatView(liveStreamDetails.totalView) }}</span>
           </div>
-          <div class="flex justify-between">
+          <!-- <div class="flex justify-between">
             <span class="text-xs text-[#666666] uppercase">avg. view time</span>
             <span class="text-sm">{{ formatAvgViewTime(liveStreamDetails.avgView) }}</span>
-          </div>
+          </div> -->
           <div class="flex justify-between">
             <span class="text-xs text-[#666666] uppercase">Ratings</span>
             <div class="flex items-center">

@@ -17,6 +17,9 @@
   import CommentPage from '@/components/comments/CommentPage.vue';
   import VideoCard from '@/components/VideoCard.vue';
   import { useUserStore } from '@/stores';
+  import { useStreamerStore } from '@/stores';
+
+  const streamerStore = useStreamerStore();
 
   const userStore = useUserStore();
   const { user } = userStore;
@@ -175,6 +178,9 @@
     initializePlayer();
     await fetchVideoById();
     await fetchWatchAlso();
+    if (userStore.user && userStore.user.role !== 'user') {
+      streamerStore.fetchProfileChannel();
+    }
   });
 
   onBeforeUnmount(() => {
