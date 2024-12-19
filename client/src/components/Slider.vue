@@ -107,7 +107,8 @@
               <img
                 v-else
                 :src="
-                  slide.channelBooking?.channelLivestreams.thumbnailUrl || slide.video?.thumbnailUrl
+                  slide.channelBooking?.channelLivestreams[0].thumbnailUrl ||
+                  slide.video?.thumbnailUrl
                 "
                 alt="Thumbnail"
                 class="w-full h-full object-cover"

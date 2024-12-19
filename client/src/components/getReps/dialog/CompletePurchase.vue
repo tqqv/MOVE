@@ -240,8 +240,6 @@
       :modal="true"
       :draggable="false"
       :header="props.title"
-      @show="lockScroll"
-      @hide="unlockScroll"
       @update:visible="popupStore.toggleCompletePurchaseVisible"
       :style="{ width: '40rem' }"
     >
