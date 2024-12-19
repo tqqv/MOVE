@@ -71,6 +71,15 @@ const getNotificationStatus = async () => {
   }
 };
 
+const editNotificationStatus = async (data) => {
+  try {
+    const response = await axios.post('/notificationRoomSetting', data);
+    return response.data;
+  } catch (error) {
+    return { error: true, status: error.response.status, message: error.response.data.message };
+  }
+};
+
 export {
   getAllNotifications,
   getQuantity,
@@ -80,4 +89,5 @@ export {
   getAllNotificationsUnRead,
   getAllRoomNotifications,
   getNotificationStatus,
+  editNotificationStatus,
 };

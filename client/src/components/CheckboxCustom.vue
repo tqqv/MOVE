@@ -4,7 +4,6 @@
   const props = defineProps({
     label: {
       type: String,
-      required: true,
     },
     checked: {
       type: Boolean,
@@ -12,7 +11,6 @@
     },
     groupName: {
       type: String,
-      required: true,
     },
   });
 

@@ -266,7 +266,7 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
     // Thêm {"all": true/false} vào phản hồi
     return {
       status: 200,
-      data: [...result, { all: hasEnabled }],
+      data: [ { entityName: "all", isEnabled: hasEnabled}, ...result],
       message: "Get list setting noti status success",
     };
   } catch (error) {
