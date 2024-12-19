@@ -4,7 +4,7 @@ const { getAllNotificationRoomSettingController, createNotificationRoomSettingCo
 const notificationRoomSettingRouter = express.Router();
 
 
-notificationRoomSettingRouter.post('/', createNotificationRoomSettingController);
+notificationRoomSettingRouter.post('/', verifyToken, createNotificationRoomSettingController);
 notificationRoomSettingRouter.get('/', verifyToken, getAllNotificationRoomSettingController);
 
 module.exports = notificationRoomSettingRouter;

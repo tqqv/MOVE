@@ -70,7 +70,7 @@ const joinAllRooms = async () => {
       return;
     }
 
-    const rooms = roomsResponse.data.data;
+    const rooms = roomsResponse.data.data.isOn;
 
     if (!livestreamSocket.connected) {
       livestreamSocket.connect();
@@ -96,7 +96,7 @@ const disconnectAllRooms = async () => {
       return;
     }
 
-    const rooms = roomsResponse.data.data;
+    const rooms = roomsResponse.data.data.isOn;
 
     // Leave từng room
     rooms.forEach((room) => {
