@@ -164,7 +164,14 @@ const getAllCategoryWithView = async() => {
         'createdAt',
         'updatedAt',
         'id',
-        [sequelize.fn('SUM', sequelize.col('categoryVideos.viewCount')), 'totalViews']
+        [
+          sequelize.literal(`(
+          SELECT SUM(viewCount)
+          FROM videos
+          WHERE videos.categoryId = Category.id
+          )`),
+          'totalViews'
+        ]
       ],
       include: [
         {
@@ -199,7 +206,14 @@ const getCateByTitle = async (title) => {
         'id',
         'imgUrl',
         'title',
-        [sequelize.fn('SUM', sequelize.fn('DISTINCT', sequelize.col('categoryVideos.viewCount'))), 'totalViews'],
+        [
+          sequelize.literal(`(
+          SELECT SUM(viewCount)
+          FROM videos
+          WHERE videos.categoryId = Category.id
+          )`),
+          'totalViews'
+        ],
         [
           sequelize.literal(`(
             SELECT Count(categoryId)
