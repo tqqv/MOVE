@@ -33,21 +33,21 @@
   const emailUpdate = ref('');
   // CHECK SEND MAIL STATUS
 
-  const checkEmailSentStatus = () => {
-    const emailSentData = localStorage.getItem('emailVerificationSent');
-    if (emailSentData) {
-      const { timestamp, email } = JSON.parse(emailSentData);
-      const fifteenMinutes = 15 * 60 * 1000;
-      const now = new Date().getTime();
+  // const checkEmailSentStatus = () => {
+  //   const emailSentData = localStorage.getItem('emailVerificationSent');
+  //   if (emailSentData) {
+  //     const { timestamp, email } = JSON.parse(emailSentData);
+  //     const fifteenMinutes = 15 * 60 * 1000;
+  //     const now = new Date().getTime();
 
-      if (now - timestamp < fifteenMinutes && email === user.value?.email) {
-        isEmailSent.value = true;
-      } else {
-        localStorage.removeItem('emailVerificationSent');
-        isEmailSent.value = false;
-      }
-    }
-  };
+  //     if (now - timestamp < fifteenMinutes && email === user.value?.email) {
+  //       isEmailSent.value = true;
+  //     } else {
+  //       localStorage.removeItem('emailVerificationSent');
+  //       isEmailSent.value = false;
+  //     }
+  //   }
+  // };
 
   const handleVerifiedEmail = async (email) => {
     try {
@@ -58,7 +58,7 @@
           timestamp: new Date().getTime(),
           email: email,
         };
-        localStorage.setItem('emailVerificationSent', JSON.stringify(emailSentData));
+        // localStorage.setItem('emailVerificationSent', JSON.stringify(emailSentData));
         isEmailSent.value = true;
         toast.success('Verification email sent successfully');
       }
@@ -75,7 +75,11 @@
   };
 
   const handleSendVerify = () => {
-    handleVerifiedEmail(emailUpdate.value);
+    if (emailUpdate.value === '') {
+      handleVerifiedEmail(user?.email);
+    } else {
+      handleVerifiedEmail(emailUpdate.value);
+    }
   };
 
   const showRequestToStreamer = computed(() => {
@@ -130,7 +134,7 @@
 
   onMounted(() => {
     fetchStatusRequestToStreamer();
-    checkEmailSentStatus();
+    // checkEmailSentStatus();
   });
 </script>
 

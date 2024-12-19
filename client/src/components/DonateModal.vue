@@ -213,7 +213,7 @@
           <Skeleton width="3rem" height="1rem"></Skeleton>
         </div>
       </div>
-      <div v-if="!props.loadingItem" class="flex justify-center gap-x-12 mx-3 py-3">
+      <div v-if="!props.loadingItem" class="flex justify-center  gap-x-7 md:gap-x-12 mx-3 py-3">
         <div
           v-for="donateValue in donationItems"
           :key="donateValue.id"

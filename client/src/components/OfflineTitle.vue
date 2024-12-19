@@ -219,7 +219,7 @@
           class="text-primary text-[13px] font-bold flex items-center uppercase"
           @click="toggleShare"
         >
-          <share class="mr-1" /> Share
+          <share class="mr-1" /> <span class=" hidden md:block">Share</span>
         </button>
         <div
           v-if="isShareVisible"

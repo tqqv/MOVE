@@ -53,7 +53,7 @@
       :isGiftVisible="true"
       :isStreamPage="true"
     />
-    <Tabs value="about" class="p-0">
+    <Tabs value="about" class=" p-0">
       <TabList class="!p-0">
         <Tab value="about">About</Tab>
       </TabList>

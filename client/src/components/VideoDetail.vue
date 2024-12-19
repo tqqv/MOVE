@@ -283,7 +283,7 @@
           Gift REPs <i class="pi pi-angle-right" />
         </div>
         <DonateModal
-          class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
+          class="hidden md:block absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isButtonGiftVisible"
           @toggleButtonGiftVisible="toggleButtonGiftVisible"
           @toggleGetREPsMenu="toggleGetREPsMenu"
@@ -294,6 +294,7 @@
           :listDonation="props.listDonation"
           @closeDonateModal="isButtonGiftVisible = false"
         />
+
         <GetREPS
           class="absolute bottom-full w-[200px] h-auto bg-white shadow rounded-md z-50 right-0 mb-2"
           v-if="isGetREPsMenuOpen"
@@ -346,6 +347,18 @@
         @hideSuccess="popupStore.closeReportSuccess"
       />
     </div>
+    <!-- MOBIEL -->
+    <DonateModal
+      class="block md:hidden !w-full z-50 h-auto bg-white shadow rounded-md !ml-0"
+      v-if="isButtonGiftVisible"
+      @toggleButtonGiftVisible="toggleButtonGiftVisible"
+      @toggleGetREPsMenu="toggleGetREPsMenu"
+      :donationItems="donationItems"
+      :loadingItem="loadingItem"
+      :liveStreamData="props.liveStreamData"
+      :channelId="props.channelId"
+      :listDonation="props.listDonation"
+      @closeDonateModal="isButtonGiftVisible = false"
+    />
   </div>
 </template>
-
