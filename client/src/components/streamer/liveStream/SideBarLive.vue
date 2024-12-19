@@ -11,6 +11,7 @@
   import { createLiveStream, endLiveStream, updateLiveStream } from '@/services/liveStream';
   import { formatTimeInStream } from '@/utils';
   import Skeleton from 'primevue/skeleton';
+  import { getStreamKey } from '@/services/user';
 
   const props = defineProps({
     connectOBS: String,
@@ -27,7 +28,7 @@
   const router = useRouter();
   const route = useRoute();
   const isShow = ref(true);
-  const showGoLivePopup = ref(false);
+  const streamKey = ref('');
   const liveStreamId = computed(() => liveStreamStore.liveStreamData?.id || '');
 
   // SETUP STEP
@@ -64,7 +65,7 @@
       try {
         const response = await createLiveStream(liveStreamStore.liveStreamData);
         // console.log(response);
-        liveStreamStore.updateLiveStreamData(response.data);
+        // liveStreamStore.updateLiveStreamData(response.data);
         // emit('startTimer');
         router.push('/streaming/dashboard-live', { replace: true });
         setUpSteps.value[2].tick = false;
@@ -74,13 +75,24 @@
     }
   };
 
+  // GET STREAM KEY
+  const fetchStreamKey = async () => {
+    try {
+      const response = await getStreamKey();
+      streamKey.value = response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleEndLive = async () => {
+    fetchStreamKey();
     try {
       await updateLiveStream({
         livestreamId: liveStreamId.value,
         duration: props.elapsedTime,
       });
-      const response = await endLiveStream({ streamKey: streamerStore.streamerChannel.streamKey });
+      await endLiveStream({ streamKey: streamKey.value });
       // console.log(response);
       // router.push('/streaming/dashboard-live');
     } catch (error) {
@@ -107,6 +119,7 @@
     async (newValue) => {
       if (newValue === 'streamEnded') {
         emit('stopTimer');
+        handleEndLive();
         await liveStreamStore.fetchLiveStreamData(streamerStore.streamerChannel?.User?.username);
       } else if (newValue === 'streamReady') {
         setUpSteps.value[1].tick = true;

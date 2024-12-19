@@ -74,12 +74,21 @@
       isFetchLoadMore.value = true;
       page.value += 1;
       loadMore.value = true;
+
       const params = {
         page: page.value,
         pageSize: pageSize.value,
       };
+
       try {
-        const response = await getAllNotifications(params);
+        let response;
+        if (selectedTab.value == 'all') {
+          response = await getAllNotifications(params);
+        }
+        if (selectedTab.value == 'unread') {
+          console.log('123');
+          response = await getAllNotificationsUnRead(params);
+        }
         listNotifications.value.notifications.rows.push(...response.data.data.notifications.rows);
       } catch (error) {
         console.log(error);
@@ -89,6 +98,7 @@
       }
     }
   };
+
   // HANDLE SCROLL
   const handleScroll = () => {
     if (notificationsContainer.value) {

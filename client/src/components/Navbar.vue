@@ -323,7 +323,7 @@
 
               <div class="relative flex justify-center items-center" id="show-more-button">
                 <div
-                  class="relative flex items-center justify-center cursor-pointer  mt-1 "
+                  class="relative flex items-center justify-center cursor-pointer mt-1"
                   @click="toggleShowMoreMenu"
                 >
                   <div class="font-bold"><i class="pi pi-ellipsis-v"> </i></div>
@@ -445,11 +445,7 @@
                     <div class="px-4 py-5">
                       <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                         <RouterLink
-                          :to="
-                            !userStore.user?.Channel?.isLive
-                              ? '/streaming/stream-setup'
-                              : '/streaming/dashboard-live'
-                          "
+                          :to="'/streaming/stream-setup'"
                           class="flex flex-row items-center gap-x-2 group cursor-pointer"
                         >
                           <GoLive />

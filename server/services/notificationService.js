@@ -311,10 +311,11 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
     })
     return {
       status: 200,
-      data: {notifications: unReadNoti},
-      totalPages: Math.ceil(unReadNoti.count / pageSize),
-      page,
-      pageSize,
+      data: {notifications: unReadNoti,
+        totalPages: Math.ceil(unReadNoti.count / pageSize),
+        page,
+        pageSize,
+      },
       message: "Get unread notification succeesfully!"
     }
   } catch (error) {
