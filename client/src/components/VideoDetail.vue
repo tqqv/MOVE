@@ -269,12 +269,7 @@
       <div class="relative">
         <div
           @click="toggleButtonGiftVisible"
-          v-if="
-            (username !== props.usernameDetails &&
-              props.liveStreamData?.channel?.isLive === true &&
-              isStreamPage) ||
-            (!isStreamPage && isGiftVisible)
-          "
+          v-if="username !== props.usernameDetails && isGiftVisible"
           class="btn text-[13px] font-bold flex items-center cursor-pointer"
         >
           Gift REPs <i class="pi pi-angle-right" />
