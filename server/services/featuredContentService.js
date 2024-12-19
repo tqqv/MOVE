@@ -92,7 +92,7 @@ const getAllFeatureContentService = async (datetime) => {
           datetime
         )
       },
-      attributes: [],
+      attributes: ["id"],
       include: [
         {
           model: Channel,

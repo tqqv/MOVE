@@ -103,7 +103,6 @@
                 : `/user/${video?.livestreamChannel?.User?.username}`
             "
             class="text_secondary truncate w-[90px]"
-
             :title="video.channel?.channelName || video.livestreamChannel?.channelName"
             >{{ video.channel?.channelName || video.livestreamChannel?.channelName }}</RouterLink
           >
@@ -131,7 +130,7 @@
           <span v-if="video.category?.title" class="bg-[#EEEEEE] rounded-full px-3 py-2">
             {{ video.category?.title || video.livestreamChannel?.category.title }}
           </span>
-          <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
+          <span class="bg-[#EEEEEE] rounded-full px-3 py-2 w-[80px]">{{
             video.levelWorkout?.levelWorkout || video.livestreamLevelWorkout?.levelWorkout
           }}</span>
         </div>

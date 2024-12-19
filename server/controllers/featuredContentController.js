@@ -67,7 +67,7 @@ const getBookingStatsController = async(req, res, next) => {
 }
 
 const increaseClickFeaturedController = async(req, res, next) => {
-    const featuredContentId = req.params.featuredContentId;
+    const featuredContentId = req.body.featuredContentId;
     const result = await increaseClickFeaturedService(featuredContentId);
     responseHandler(result.status, result.data, result.message)(req, res, next);
 }
