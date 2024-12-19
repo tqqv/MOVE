@@ -125,7 +125,6 @@
   const activeTab = computed(() => tabStore.activeTab);
 
   const onTabChange = (event) => {
-    console.log('Tab changed to:', event);
     tabStore.setActiveTab(event);
   };
 

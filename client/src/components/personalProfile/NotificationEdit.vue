@@ -1,12 +1,33 @@
 <script setup>
-  import { ref } from 'vue';
+  import { onMounted, ref } from 'vue';
   import CheckboxCustom from '../CheckboxCustom.vue';
+  import { getNotificationStatus } from '@/services/notification';
 
-  const allNoti = ref(true);
+  const listNotificationStatus = ref([]);
 
-  function updateSelection(value) {
-    allNoti.value = value;
-  }
+  const fetchNotificationStatus = async () => {
+    try {
+      const response = await getNotificationStatus();
+      listNotificationStatus.value = response.data;
+      console.log(listNotificationStatus.value);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const updateSelection = (value) => {
+    if (listNotificationStatus.value[0]) {
+      // Check if listNotificationStatus has data
+      listNotificationStatus.value[0].isEnabled = value === 'true';
+      console.log(listNotificationStatus.value[0].isEnabled);
+    } else {
+      console.warn('Notification status is not available yet.');
+    }
+  };
+
+  onMounted(() => {
+    fetchNotificationStatus();
+  });
 </script>
 <template>
   <div class="mb-5">
@@ -15,21 +36,22 @@
       Get notified on updates that are relevant to you! You may also receive additional emails for
       any updates on MOVE.
     </p>
-    <div class="flex gap-x-10 mt-3 text-[14px]">
+    <div
+      class="flex gap-x-10 mt-3 text-[14px]"
+      v-if="listNotificationStatus && listNotificationStatus[0]"
+    >
       <CheckboxCustom
-        label="Yes"
-        groupName="all"
-        :checked="allNoti === true"
-        @update:modelValue="updateSelection(true)"
+        label="On"
+        :checked="listNotificationStatus[5].isEnabled === true"
+        @update:modelValue="(value) => updateSelection(value ? 'true' : 'false')"
       />
       <CheckboxCustom
-        label="No"
-        groupName="all"
-        :checked="allNoti === false"
-        @update:modelValue="updateSelection(false)"
+        label="Off"
+        :checked="listNotificationStatus[5].isEnabled === false"
+        @update:modelValue="(value) => updateSelection(value ? 'false' : 'true')"
       />
     </div>
-    <div v-if="allNoti">
+    <div>
       <h2 class="font-bold mt-4 text-[14px]">Live stream notifications</h2>
       <p class="text-[#666666] text-[14px]">Notify me when the channel I follow goes live.</p>
       <div class="flex gap-x-10 mt-3 text-[14px]">
