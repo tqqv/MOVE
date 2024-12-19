@@ -420,6 +420,10 @@ const getAllVideosService = async (page, pageSize) => {
               'followCount'
             ]],
           as: 'channel',
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: Category,
@@ -477,6 +481,10 @@ const getLatestReupStreamService = async (channelId) => {
               ],
             ],
             as: 'channel',
+            include: [{
+              model: User,
+              attributes: ['username']
+            }],
           },
           {
             model: Category,
@@ -545,7 +553,11 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
       {
         model: Channel,
         as: 'channel',
-        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+        attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
       },
       {
         model: LevelWorkout,
@@ -604,6 +616,10 @@ const getVideoByChannelAndTitleService = async (data, page, pageSize, channelId)
           model: Channel,
           as: 'channel',
           attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: Category,
@@ -818,7 +834,11 @@ const getListVideoByFilter = async(page, pageSize, level, category, sortConditio
         {
           model: Channel,
           as: 'channel',
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: LevelWorkout,
@@ -1247,7 +1267,11 @@ const getListVideoByChannel = async(channelId, page, pageSize, sortCondition, da
         {
           model: Channel,
           as: 'channel',
-          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck']
+          attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+          include: [{
+            model: User,
+            attributes: ['username']
+          }],
         },
         {
           model: LevelWorkout,
