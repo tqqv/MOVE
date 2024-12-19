@@ -96,10 +96,15 @@
       if (response.status === 200) {
         const newComment = {
           ...response.data.data,
+          channelComments: {
+            avatar: userStore.user?.Channel?.avatar,
+            username: userStore.user?.Channel?.channelName,
+            popularCheck: userStore.user?.Channel?.popularCheck,
+          },
           userComments: {
-            avatar: userStore.user.avatar,
-            username: userStore.user.username,
-            isVerified: userStore.user.isVerified,
+            avatar: userStore.user?.avatar,
+            username: userStore.user?.username,
+            isVerified: userStore.user?.isVerified,
           },
         };
         commentStore.handleSendComment(newComment);

@@ -38,7 +38,7 @@
     <video
       ref="frameVideo"
       class="w-[70vw] h-[70%] object-cover"
-      :class="{ 'h-full ': isStreamer || isSlider }"
+      :class="{ 'h-full': isStreamer || isSlider }"
       playsinline
       controls
       autoplay

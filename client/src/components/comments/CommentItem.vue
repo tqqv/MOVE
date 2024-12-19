@@ -283,7 +283,7 @@
           </h1></RouterLink
         >
 
-        <span v-if="comment.channelComments?.popularCheck">
+        <span v-if="comment?.channelComments?.popularCheck">
           <Verified class="fill-blue" />
         </span>
         <div v-if="comment.rep > 0" class="flex gap-x-2 items-center whitespace-nowrap">
