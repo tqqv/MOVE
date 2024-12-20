@@ -76,7 +76,7 @@
 
   const handleSendVerify = () => {
     if (emailUpdate.value === '') {
-      handleVerifiedEmail(user?.email);
+      handleVerifiedEmail(userStore?.user?.email);
     } else {
       handleVerifiedEmail(emailUpdate.value);
     }
