@@ -189,7 +189,9 @@ const updateVideoService = async (videoId, updateData) => {
         videoInfor.dataValues.channelId,
         videoInfor.dataValues.channelId,
         null,
-        videoId
+        videoId,
+        null,
+        null
       )
     }
     return {
@@ -575,9 +577,9 @@ const getVideoByUserIdService = async (channelId, page, pageSize, level, categor
         as: 'category',
         where: category ? {title: category} : {}
       },
-      
-    ], 
-   
+
+    ],
+
     order: [[sortCondition.sortBy, sortCondition.order]],
     offset: (page - 1) * pageSize,
     limit: pageSize * 1,

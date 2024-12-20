@@ -44,7 +44,9 @@ const reactionComment = async(userId, commentId, reactionType) => {
         (channel ? channel.id : null),
         comment.channelId || comment.userId,
         comment.id,
-        comment.videoId
+        comment.videoId,
+        null,
+        null
       )
       return {
         status: 200,

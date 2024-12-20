@@ -1,9 +1,9 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { getAllNotificationRoomSetting } = require("./notificationRoomSettingService.js");
-const { Notification, NotificationTranslation, User, Channel, NotificationEntity, NotificationVisitStatus, Comment, Video, Sequelize} = db;
+const { DonationItem, Notification, NotificationTranslation, User, Channel, NotificationEntity, NotificationVisitStatus, Comment, Video, Livestream, Sequelize} = db;
 
-const createNotification = async( entityName, entityAction, userActorId, channelActorId, recieverId, targetCommentId, targetVideoId ) => {
+const createNotification = async( entityName, entityAction, userActorId, channelActorId, recieverId, targetCommentId, targetVideoId, targetLivestreamId, donationItemId) => {
     try {
 
       // Luồng update db
@@ -16,7 +16,10 @@ const createNotification = async( entityName, entityAction, userActorId, channel
       });
       const roomName = notificationEntity.roomNamePattern.replace("{selfId}", recieverId).replace("{channelId}", recieverId)
 
-      const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId});
+      console.log("targetLivestreamId: ", targetLivestreamId );
+      console.log("donationItemId: ", donationItemId );
+
+      const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId, targetLivestreamId, donationItemId });
 
       const fullNotification = await Notification.findOne({
         where: {
@@ -63,7 +66,17 @@ const createNotification = async( entityName, entityAction, userActorId, channel
             model: Video,
             as: "targetVideo",
             attributes: ["id", "title", "thumbnailUrl"]
-          }
+          },
+          {
+            model: Livestream,
+            as: "targetLivestream",
+            attributes: ["id", "title", "thumbnailUrl"]
+          },
+          {
+            model: DonationItem,
+            as: "donationItem",
+            attributes: ["name", "image", "reps"]
+          },
         ]
       })
 
@@ -87,6 +100,8 @@ const createNotification = async( entityName, entityAction, userActorId, channel
 };
 
 const formatNotificationData = (item) => {
+  console.log("item: ", item);
+
   let notificationTranslation = item.notificationEntity?.notificationTranslation.map(translation => {
     return {
       translatedContent: translation.dataValues.translatedContent,
@@ -120,7 +135,18 @@ const formatNotificationData = (item) => {
           id: item.targetVideo.dataValues.id,
           title: item.targetVideo.dataValues.title,
           thumbnailUrl: item.targetVideo.dataValues.thumbnailUrl
-      } : null
+      } : null,
+      targetLivestream: item.targetLivestream ? {
+        id: item.targetLivestream.dataValues.id,
+        title: item.targetLivestream.dataValues.title,
+        thumbnailUrl: item.targetLivestream.dataValues.thumbnailUrl
+      } : null,
+      targetdonationItem: item.donationItem ? {
+        name: item.donationItem.dataValues.name,
+        image: item.donationItem.dataValues.image,
+        reps: item.donationItem.dataValues.reps
+      } : null,
+
   });
 }
 
@@ -145,10 +171,10 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
           ? {
               [Op.and]: [
                 { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Muted rooms
-                { 
-                  updatedAt: { 
-                    [Op.lt]: Math.min(...notifierRoom.muted.map((room) => new Date(room.updatedAt))) 
-                  } 
+                {
+                  updatedAt: {
+                    [Op.lt]: Math.min(...notifierRoom.muted.map((room) => new Date(room.updatedAt)))
+                  }
                 } // Notifications older than the muted room's updatedAt
               ]
             }

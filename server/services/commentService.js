@@ -124,7 +124,22 @@ const createComment = async (videoId, userId, channelId, commentInfor) => {
         channelId,
         (parentCommentChecker.channelId || parentCommentChecker.userId),
         comment.dataValues.id,
-        comment.dataValues.videoId
+        comment.dataValues.videoId,
+        null,
+        null
+      )
+    }
+    if(commentInfor.donationItemId) {
+      await createNotification(
+        "rep",
+        "recieve",
+        (channelId ? null: userId),
+        channelId,
+        video.channelId,
+        comment.dataValues.id,
+        comment.dataValues.videoId,
+        null,
+        commentInfor.donationItemId
       )
     }
     // Fetch comment with the associated DonationItem
