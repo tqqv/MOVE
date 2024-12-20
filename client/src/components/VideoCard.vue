@@ -127,10 +127,10 @@
         </div>
 
         <div class="flex gap-2 items-center text-[10px] font-bold mb-2 text-black">
-          <span v-if="video.category?.title" class="bg-[#EEEEEE] rounded-full px-3 py-2">
+          <span v-if="video.category?.title" class="bg-[#EEEEEE] rounded-full px-3 py-2 ">
             {{ video.category?.title || video.livestreamChannel?.category.title }}
           </span>
-          <span class="bg-[#EEEEEE] rounded-full px-3 py-2 w-[80px]">{{
+          <span class="bg-[#EEEEEE] rounded-full px-3 py-2 ">{{
             video.levelWorkout?.levelWorkout || video.livestreamLevelWorkout?.levelWorkout
           }}</span>
         </div>
