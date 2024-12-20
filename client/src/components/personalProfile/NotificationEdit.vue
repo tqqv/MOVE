@@ -26,11 +26,6 @@
       subtitle: 'Notify me when someone comments or replies to my comment.',
     },
     {
-      title: 'Follow notifications',
-      subtitle:
-        'Get notified on updates that are relevant to you! You may also receive additional emails for any updates on MOVE.',
-    },
-    {
       title: 'System notifications',
       subtitle:
         'Get notified on updates that are relevant to you! You may also receive additional emails for any updates on MOVE.',
@@ -109,9 +104,9 @@
   };
 
   const handleEditNotificationStatus = async () => {
-    // if (!updateListNotificationStatus.value.length) {
-    //   return;
-    // }
+    if (!updateListNotificationStatus.value.length) {
+      return;
+    }
     try {
       isLoading.value = true;
       await editNotificationStatus(updateListNotificationStatus.value);
