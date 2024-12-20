@@ -149,7 +149,7 @@
     <div class="container">
       <div class="items-center space-y-4">
         <Divider class="flex-grow mt-1" />
-        <div><span class="font-bold text-[24px] whitespace-nowrap">Video you may like</span></div>
+        <div><span class="font-bold text-[24px] whitespace-nowrap">Top videos</span></div>
       </div>
       <GirdVideo :videos="videos" :loading="isLoadingSlider" />
       <div
