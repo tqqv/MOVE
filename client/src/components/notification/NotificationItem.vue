@@ -36,7 +36,11 @@
 </script>
 <template>
   <RouterLink
-    :to="`/video/${notification?.targetVideo?.id}`"
+    :to="
+      notification?.targetVideo
+        ? `/video/${notification?.targetVideo?.id}`
+        : `/live/${notification?.channelActor?.User?.username}`
+    "
     class="flex gap-x-3 items-start pb-3 p-3 mb-1 min-h-20 rounded-md hover:bg-gray-light relative cursor-pointer"
     :class="{
       'bg-primary/15 hover:bg-primary/15':

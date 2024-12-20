@@ -34,7 +34,7 @@
       (props.connectOBS == null && !props.liveStatus)
     "
   />
-  <div class="container py-6">
+  <div class="container p-[20px]">
     <OfflineTitle
       v-if="props.liveStreamData?.livestream"
       :livestream="props.liveStreamData?.livestream"
@@ -53,7 +53,7 @@
       :isGiftVisible="true"
       :isStreamPage="true"
     />
-    <Tabs value="about" class="p-0">
+    <Tabs value="about" class=" p-0">
       <TabList class="!p-0">
         <Tab value="about">About</Tab>
       </TabList>

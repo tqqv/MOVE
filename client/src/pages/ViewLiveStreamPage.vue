@@ -87,9 +87,9 @@
 
 <template>
   <Navbar />
-  <div class="flex pt-[64px] h-screen">
+  <div class="flex flex-col md:flex-row pt-[64px] h-screen">
     <SideBarFollow />
-    <div class="flex-1 overflow-x-none pb-4 overflow-y-scroll">
+    <div class="md:flex-1 overflow-x-none md:pb-4 overflow-y-scroll">
       <RouterLink
         v-if="theLastLiveStream"
         :to="`/video/${theLastLiveStream.id}`"
@@ -112,7 +112,11 @@
         :theLastLiveStream="theLastLiveStream"
       />
     </div>
-    <LiveChat :liveStreamData="liveStreamData.channel?.id" :listDonation="listDonation" />
+    <LiveChat
+      :liveStreamData="liveStreamData.channel?.id"
+      :listDonation="listDonation"
+      :topDonators="metricsData?.topDonators"
+    />
   </div>
 </template>
 

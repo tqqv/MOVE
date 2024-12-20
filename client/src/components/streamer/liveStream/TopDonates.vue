@@ -18,7 +18,7 @@ import MedalBronze from '@/components/icons/medalBronze.vue';
 <template>
   <div>
     <div
-      v-if="props.liveStreamData?.topDonators > 0"
+      v-if="props.liveStreamData?.topDonators.length > 0"
       v-for="(user, index) in props.liveStreamData?.topDonators"
       :key="index"
       class="flex justify-between items-center mb-4"

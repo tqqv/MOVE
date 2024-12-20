@@ -15,6 +15,7 @@
   import Random from '@/components/icons/random.vue';
   import Skeleton from 'primevue/skeleton';
   import SmallLoading from '@/components/icons/smallLoading.vue';
+  import { getStreamKey, randomStreamKey } from '@/services/user';
 
   const streamerStore = useStreamerStore();
   const showStreamKey = ref(false);
@@ -28,6 +29,8 @@
     instaUrl: '',
     youtubeUrl: '',
   });
+
+  const streamKey = ref('');
   const initialProfileData = ref({ ...profileData.value });
   const errors = ref({});
   const loading = ref(false);
@@ -51,7 +54,7 @@
   // COPY STREAMKEY
   const handleCopyStreamKey = () => {
     copyToClipboard(
-      profileData.value.streamKey,
+      streamKey.value,
       'Successfully copied to clipboard',
       'Failed copied to clipboard',
     );
@@ -121,9 +124,18 @@
   // CHANGE STREAM KEY
   const handleChangeStreamKey = async () => {
     try {
-      const response = await changeStreamKey();
-      profileData.value.streamKey = response.data;
-      toast.success('Stream key updated successfully');
+      const response = await randomStreamKey();
+      streamKey.value = response.data;
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // CALL STREAM KEY
+  const fetchStreamKey = async () => {
+    try {
+      const response = await getStreamKey();
+      streamKey.value = response.data;
     } catch (error) {
       console.log(error);
     }
@@ -131,11 +143,12 @@
 
   onMounted(async () => {
     await streamerStore.fetchProfileChannel();
+    fetchStreamKey();
     if (streamerStore.streamerChannel) {
       profileData.value = {
         avatar: streamerStore.streamerChannel.avatar,
         username: streamerStore.streamerChannel.User.username,
-        streamKey: streamerStore.streamerChannel.streamKey,
+        streamKey: streamKey.value,
         channelName: streamerStore.streamerChannel.channelName,
         bio: streamerStore.streamerChannel.bio,
         facebookUrl: streamerStore.streamerChannel.facebookUrl,
@@ -166,7 +179,7 @@
       </div>
       <div v-else class="flex justify-center mt-6 mb-2 gap-x-4">
         <input
-          v-model="profileData.streamKey"
+          v-model="streamKey"
           :type="showStreamKey ? 'text' : 'password'"
           class="input_custom"
           autocomplete="off"

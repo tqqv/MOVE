@@ -27,6 +27,7 @@
   import { useTabStore } from '@/stores/tab.store';
   import { useGetRepsStore } from '@/stores/getReps.store';
   import { getPaymentHistory } from '@/services/payment';
+  import { toast } from 'vue3-toastify';
 
   import GetREPS from './getReps/GetREPS.vue';
   import ProcessingPayment from '@components/getReps/dialog/ProcessingPayment.vue';
@@ -34,6 +35,12 @@
   import Stream from './icons/Stream.vue';
   import CompletePurchase from '@/components/getReps/dialog/CompletePurchase.vue';
   import ListShowMore from './showMore/listShowMore.vue';
+  import Dashboard from './icons/dashboard.vue';
+  import Wallet from './icons/wallet.vue';
+  import { formatNumber } from '@/utils';
+  import { disconnectAllRooms } from '@/services/socketService';
+  import { getLogout } from '@/services/auth';
+  import Setting from './icons/setting.vue';
 
   const popupStore = usePopupStore();
   const userStore = useUserStore();
@@ -49,6 +56,7 @@
   const isPaymentHistoryFetched = ref(false);
   const isShowMore = ref(false);
   const router = useRouter();
+  const isDropdownVisible = ref(false);
 
   const isFirstTime = ref(false);
   // SEARCH
@@ -178,6 +186,28 @@
 
   const handleBlur = () => {
     onFocused.value = false;
+  };
+
+  const handleClickAvt = () => {
+    isMobileMenuOpen.value = false;
+  }
+
+  const toggleDropdown = () => {
+    isDropdownVisible.value = !isDropdownVisible.value;
+  }
+
+  const handleLogout = async () => {
+    try {
+      disconnectAllRooms();
+      const response = await getLogout();
+      localStorage.removeItem('isLogin');
+      localStorage.removeItem('role');
+      userStore.clearUserData();
+      isMobileMenuOpen.value = false;
+      router.push('/');
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleSearch = (e) => {
@@ -321,17 +351,17 @@
               >
               <!-- ------ABOUT US PAGE------------ -->
 
-              <div class="relative" id="show-more-button">
+              <div class="relative flex justify-center items-center" id="show-more-button">
                 <div
-                  class="relative flex items-center justify-center cursor-pointer h-[30px] w-[40px]"
+                  class="relative flex items-center justify-center cursor-pointer mt-1"
                   @click="toggleShowMoreMenu"
                 >
-                  <div class="font-bold text-xl">. . .</div>
+                  <div class="font-bold"><i class="pi pi-ellipsis-v"> </i></div>
                 </div>
                 <div
                   v-if="isShowMore"
                   id="show-more"
-                  class="absolute left-0 z-10 mt-[25px] origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
+                  class="absolute left-0 b z-10 top-10 origin-top-right rounded-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none text-black border-none"
                   role="menu"
                   aria-orientation="vertical"
                   aria-labelledby="show-more-button"
@@ -344,8 +374,8 @@
             </div>
           </div>
         </div>
-        <div class="w-1/5 h-8 flex justify-center items-center">
-          <RouterLink to="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></RouterLink>
+        <div class="w-full md:w-1/5 h-8 flex md:justify-center items-center ml-[60px]">
+          <a href="/"><img class="h-8 w-auto" :src="logo" alt="Madison" /></a>
         </div>
         <div class="w-2/5 items-center justify-end gap-x-6 hidden md:flex">
           <!-- User -->
@@ -445,11 +475,7 @@
                     <div class="px-4 py-5">
                       <div class="flex flex-col gap-y-4 px-1 justify-start text-[13px] text-nowrap">
                         <RouterLink
-                          :to="
-                            !userStore.user?.Channel?.isLive
-                              ? '/streaming/stream-setup'
-                              : '/streaming/dashboard-live'
-                          "
+                          :to="'/streaming/stream-setup'"
                           class="flex flex-row items-center gap-x-2 group cursor-pointer"
                         >
                           <GoLive />
@@ -536,26 +562,36 @@
     <!-- Mobile menu, show/hide based on menu state. -->
     <div v-if="isMobileMenuOpen" class="md:hidden h-[100vh]" id="mobile-menu">
       <div class="space-y-1 px-4 pb-3 pt-2">
+        <RouterLink
+        :to="`/user/${userStore.user.username}`"
+        class="flex flex-row gap-x-3 items-center pb-3"
+        @click="handleClickAvt"
+        v-if="userStore?.user"
+      >
         <div class="flex items-center gap-x-2">
-          <Avatar
-            image="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-            class="size-[48px]"
-            shape="circle"
+          <div class="flex items-center justify-center size-12 rounded-full flex-shrink-0">
+          <img
+            :src="
+              userStore.user?.Channel ? userStore.user?.Channel?.avatar : userStore.user?.avatar
+            "
+            :alt="userStore.user.username"
+            alt="Avatar"
+            class="w-full h-full rounded-full object-cover"
           />
-          <h2 class="text-[17px] font-semibold text-nowrap">duckies</h2>
-          <verified class="fill-blue mt-[-2px]" />
         </div>
+          <h2 class="text-[17px] font-semibold text-nowrap">{{
+            userStore.user?.Channel
+              ? userStore.user?.Channel?.channelName
+              : userStore.user?.username
+          }}</h2>
+          <verified v-if="userStore.user?.Channel?.popularCheck" class="fill-blue mt-[-2px]" />
+        </div>
+      </RouterLink>
         <div class="flex items-center justify-between py-3 gap-x-6">
           <div class="w-[100%]">
-            <Button class="btn w-[100%]">
+            <Button class="btn w-[100%]" v-if="userStore.user?.Channel" @click="popupStore.openUploadVideoPopup">
               <upload />
               <p class="text-nowrap">Upload a video</p>
-            </Button>
-          </div>
-          <div class="w-[100%]">
-            <Button class="btn w-[100%]">
-              <rep />
-              <p class="text-nowrap">Get REP$</p>
             </Button>
           </div>
         </div>
@@ -566,35 +602,88 @@
           href="#"
           class="relative flex items-center rounded-md text_nav text-gray-300 hover:bg-gray-700 hover:text-white py-3"
         >
-          <div class="active-nav"></div>
-          <p class="mx-4">Following</p>
+          <RouterLink to="/following"
+          @click="handleClickAvt"
+          v-if="userStore?.user"
+          class="mx-4">Following</RouterLink>
         </a>
         <a
           href="#"
           class="relative flex items-center rounded-md text_nav text-gray-300 hover:bg-gray-700 hover:text-white py-3"
         >
-          <div></div>
-          <p class="mx-4">Browse</p>
+        <RouterLink to="/browse/categories"
+          @click="handleClickAvt"
+          class="mx-4">Browse</RouterLink>
         </a>
-        <a
-          href="#"
-          class="relative flex items-center rounded-md text_nav text-gray-300 hover:bg-gray-700 hover:text-white py-3"
-        >
-          <div></div>
-          <p class="mx-4">Settings</p>
-        </a>
-        <a
-          href="#"
-          class="relative flex items-center rounded-md text_nav text-gray-300 hover:bg-gray-700 hover:text-white py-3"
-        >
-          <p class="mx-4">More</p>
-          <i class="pi pi-angle-down text-[24px]"></i>
-        </a>
-        <Button class="mx-4 btn px-[40px] text-nowrap mt-5">Logout</Button>
+        <div class="relative" v-if="userStore?.user">
+          <a
+            href="#"
+            class="relative flex items-center rounded-md text_nav text-gray-300 hover:bg-gray-700 hover:text-white py-3"
+            @click.prevent="toggleDropdown"
+          >
+            <p class="mx-4">More</p>
+            <i class="pi pi-angle-down text-[24px]"></i>
+          </a>
+          <div
+            v-if="isDropdownVisible"
+            class="absolute top-full mt-2 w-40 bg-gray-700 text-white rounded-md shadow-md"
+          >
+            <RouterLink
+              v-if="userStore.user.role === 'streamer'"
+              to="/dashboard-streamer"
+              class="flex flex-row items-center gap-x-2 group cursor-pointer px-8"
+              @click="handleClickAvt"
+            >
+              <Dashboard class="fill-white group-hover:fill-primary" />
+              <h1 class="mb-1 group-hover:text-primary">Dashboard</h1>
+            </RouterLink>
+            <RouterLink
+              to="/wallet/payment-method"
+              class="flex flex-row items-center gap-x-2 group cursor-pointer"
+              @click="handleClickAvt"
+            >
+              <div class="flex flex-row items-center gap-x-2 group cursor-pointer px-8 mt-3">
+                <Wallet class="fill-white group-hover:fill-primary" />
+                <h1 class="mb-1 group-hover:text-primary text-nowrap">
+                  Wallet ({{ formatNumber(userStore.user?.REPs) ?? 0 }} REPs)
+                </h1>
+              </div>
+            </RouterLink>
+            <RouterLink
+            to="/personal-profile"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer px-8 mt-3"
+            @click="handleClickAvt"
+            >
+            <Setting class="fill-white group-hover:fill-primary" />
+            <h1 class="group-hover:text-primary">Setting</h1>
+          </RouterLink>
+          </div>
+        </div>
+        <Button class="mx-4 btn px-[40px] text-nowrap mt-5" v-if="userStore?.user" :class="{'mt-[150px]': isDropdownVisible}" @click="handleLogout">Logout</Button>
+        <Button class="mx-4 btn px-[40px] text-nowrap mt-5" v-else="userStore?.user" @click="openLoginPopup">Login</Button>
       </div>
       <div class="mx-4">
-        <p>Term of Service</p>
-        <p>Privacy policy</p>
+        <RouterLink
+            to="/about-us"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer"
+            @click="handleClickAvt"
+            >
+            <h1 class="group-hover:text-primary">About Us</h1>
+        </RouterLink>
+        <RouterLink
+            to="/faq"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer mt-3"
+            @click="handleClickAvt"
+            >
+            <h1 class="group-hover:text-primary">FAQ</h1>
+        </RouterLink>
+        <RouterLink
+            to="/community-guidelines"
+            class="flex flex-row items-center gap-x-2 group cursor-pointer mt-3"
+            @click="handleClickAvt"
+            >
+            <h1 class="group-hover:text-primary">Community Guidelines</h1>
+        </RouterLink>
       </div>
     </div>
   </nav>

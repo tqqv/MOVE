@@ -3,7 +3,7 @@
   import Eye from '@/components/icons/eye.vue';
   import Like from '@/components/icons/rate.vue';
   import LogoIcon from '@/components/icons/logoIcon.vue';
-  import { formatTimeInStream } from '@/utils';
+  import { formatRating, formatTimeInStream } from '@/utils';
   import User from '@/components/icons/user.vue';
   import Reply from '@/components/icons/reply.vue';
   import Share from '@/components/icons/share.vue';
@@ -88,26 +88,14 @@
       <Like fill="white" width="20px" />
     </div>
     <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
-      <p class="font-medium">{{ liveStreamData?.avgRates ?? '0' }}</p>
+      <p class="font-medium">{{ formatRating(liveStreamData?.avgRates) ?? '0' }}</p>
       <p class="text-sm">Rating</p>
     </div>
     <div v-else class="flex flex-col">
-      <p class="font-medium">{{ metricsData?.avgRates ?? '0' }}</p>
+      <p class="font-medium">{{ formatRating(metricsData?.avgRates) ?? '0' }}</p>
       <p class="text-sm">Rating</p>
     </div>
   </div>
   <!-- Total share -->
-  <div class="flex justify-start items-center gap-x-3">
-    <div class="flex size-8 justify-center items-center bg-primary rounded-full">
-      <Share fill="white" width="14px" />
-    </div>
-    <div v-if="liveStatus === 'streamEnded'" class="flex flex-col">
-      <p class="font-medium">{{ liveStreamData?.totalShare ?? '0' }}</p>
-      <p class="text-sm">Share</p>
-    </div>
-    <div v-else class="flex flex-col">
-      <p class="font-medium">{{ metricsData?.totalShares ?? '0' }}</p>
-      <p class="text-sm">Share</p>
-    </div>
-  </div>
+
 </template>

@@ -4,7 +4,10 @@ const { Model } = require("sequelize");
 module.exports = (sequelize, DataTypes) => {
   class NotificationRoomSetting extends Model {
   static associate(models) {
-    this.belongsTo(models.Channel, { foreignKey: "channelId" });
+    this.belongsTo(models.NotificationEntity, {
+      foreignKey: 'notificationEntityId',
+      as: 'notificationEntity', // Alias for the users that follow this category
+    });
   }
   }
   NotificationRoomSetting.init(

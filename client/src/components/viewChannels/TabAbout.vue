@@ -33,17 +33,17 @@
   <div class="space-y-8">
     <div class="grid grid-cols-10 gap-6 pt-2">
       <div class="col-span-7 bg-black text-white p-3 rounded-lg space-y-2">
-        <span class="font-bold text-[17px]">About {{ channelDetails.channelName }}</span>
-        <p v-if="channelDetails.bio && channelDetails.bio.length > 0" class="text-sm break-words">
+        <span class="font-bold md:text-[17px]">About {{ channelDetails.channelName }}</span>
+        <p v-if="channelDetails.bio && channelDetails.bio.length > 0" class="text-xs md:text-sm break-words">
           {{ channelDetails.bio }}
         </p>
         <p v-else class="text-sm break-words italic">No information found.</p>
       </div>
       <div class="col-span-3 space-y-2">
-        <span class="font-bold text-[17px] text-black">Social network</span>
+        <span class="text-sm font-bold md:text-[17px] text-black">Social network</span>
         <div
           v-if="channelDetails.facebookUrl || channelDetails.youtubeUrl || channelDetails.instaUrl"
-          class="flex gap-4"
+          class="flex flex-col md:flex-row gap-4"
         >
           <a
             v-if="channelDetails.facebookUrl"

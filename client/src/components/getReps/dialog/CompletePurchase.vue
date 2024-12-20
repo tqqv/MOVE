@@ -148,7 +148,6 @@
       popupStore.showOpenBuyREPs = false;
       popupStore.isCompletePurchaseVisible = false;
       //cancel
-      if (popupStore.isCancelPayment) return;
       const res = await checkout(dataCheckout);
 
       // Kiểm tra kết quả trả về từ API
@@ -164,7 +163,7 @@
         // console.log('Payment failed!');
         emit('toggleOpenOrder'); // Hiện popup "Payment Failed"
         popupStore.isOrderSuccessful = false;
-        toast.error(res.message)
+        toast.error(res.message);
       }
     } catch (error) {
       console.error('Error during checkout:', error.message);
@@ -180,6 +179,7 @@
     if (isSubmitting.value) return;
     isSubmitting.value = true;
     isLoadingSubmit.value = true;
+
     try {
       if (cardStore.card) {
         await handleCheckout(cardStore.card.paymentMethodId); // Checkout nếu đã có thẻ
@@ -197,6 +197,7 @@
             console.error('paymentMethodId not found after saving card.');
             return;
           }
+
           await handleCheckout(cardStore.card.paymentMethodId);
         } else {
           const paymentMethodId = await handleUseCardOneTime();
@@ -204,6 +205,7 @@
             console.error('Error: PaymentMethodId not generated.');
             return;
           }
+
           await handleCheckout(paymentMethodId);
         }
       }
@@ -238,8 +240,6 @@
       :modal="true"
       :draggable="false"
       :header="props.title"
-      @show="lockScroll"
-      @hide="unlockScroll"
       @update:visible="popupStore.toggleCompletePurchaseVisible"
       :style="{ width: '40rem' }"
     >

@@ -79,9 +79,7 @@ const broadcastStreamStats = async (channelId) => {
 const connectSocket = (socket) => {
     socket.on('disconnecting', () => {
         const rooms = Array.from(socket.rooms);
-        const validRooms = rooms.filter(room => isValidUUID(room));
-
-        let validRoom = filterRoomsForDeletion(validRooms);
+        let validRoom = filterRoomsForDeletion(rooms);
         validRoom.forEach(async (key) => {
             const parts = key.split(':');
             const [, channelId, fields] = parts;
@@ -95,11 +93,10 @@ const connectSocket = (socket) => {
     getNumOfConnectInAllRooms();
     // Gửi tin nhắn
     _io.emit('receiveMessage', 'Welcome to the socket!');
-    // Thông báo cho admin rằng user đã join vào room
     socket.on('joinRoom', async (roomName) => {
         if(!isValidUUID(roomName) && !Number.isInteger(roomName * 1)) {
             console.log("bug ne");
-            
+
             socket.join(roomName);
         } else {
             await onClientJoinChannel(socket, roomName);

@@ -1,9 +1,9 @@
 const { Op } = require("sequelize");
 const db = require("../models/index.js");
 const { getAllNotificationRoomSetting } = require("./notificationRoomSettingService.js");
-const { Notification, NotificationTranslation, User, Channel, NotificationEntity, NotificationVisitStatus, Comment, Video, Sequelize} = db;
+const { DonationItem, Notification, NotificationTranslation, User, Channel, NotificationEntity, NotificationVisitStatus, Comment, Video, Livestream, Sequelize} = db;
 
-const createNotification = async( entityName, entityAction, userActorId, channelActorId, recieverId, targetCommentId, targetVideoId ) => {
+const createNotification = async( entityName, entityAction, userActorId, channelActorId, recieverId, targetCommentId, targetVideoId, targetLivestreamId, donationItemId) => {
     try {
 
       // Luồng update db
@@ -15,9 +15,11 @@ const createNotification = async( entityName, entityAction, userActorId, channel
         attributes: ["id", "roomNamePattern"]
       });
       const roomName = notificationEntity.roomNamePattern.replace("{selfId}", recieverId).replace("{channelId}", recieverId)
-      console.log("Tao test: ", userActorId);
 
-      const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId});
+      console.log("targetLivestreamId: ", targetLivestreamId );
+      console.log("donationItemId: ", donationItemId );
+
+      const newNotification = await Notification.create({notificationEntityId: notificationEntity.id, userActorId, channelActorId, roomName, targetCommentId, targetVideoId, targetLivestreamId, donationItemId });
 
       const fullNotification = await Notification.findOne({
         where: {
@@ -64,13 +66,19 @@ const createNotification = async( entityName, entityAction, userActorId, channel
             model: Video,
             as: "targetVideo",
             attributes: ["id", "title", "thumbnailUrl"]
-          }
+          },
+          {
+            model: Livestream,
+            as: "targetLivestream",
+            attributes: ["id", "title", "thumbnailUrl"]
+          },
+          {
+            model: DonationItem,
+            as: "donationItem",
+            attributes: ["name", "image", "reps"]
+          },
         ]
       })
-
-      console.log(fullNotification);
-
-      console.log(formatNotificationData(fullNotification));
 
       /// Luồng realtime
       _io.to(roomName).emit('notifications', formatNotificationData(fullNotification));
@@ -92,7 +100,8 @@ const createNotification = async( entityName, entityAction, userActorId, channel
 };
 
 const formatNotificationData = (item) => {
-  // console.log("checker2 ",item.notificationEntity?.notificationTranslation);
+  console.log("item: ", item);
+
   let notificationTranslation = item.notificationEntity?.notificationTranslation.map(translation => {
     return {
       translatedContent: translation.dataValues.translatedContent,
@@ -126,32 +135,58 @@ const formatNotificationData = (item) => {
           id: item.targetVideo.dataValues.id,
           title: item.targetVideo.dataValues.title,
           thumbnailUrl: item.targetVideo.dataValues.thumbnailUrl
-      } : null
+      } : null,
+      targetLivestream: item.targetLivestream ? {
+        id: item.targetLivestream.dataValues.id,
+        title: item.targetLivestream.dataValues.title,
+        thumbnailUrl: item.targetLivestream.dataValues.thumbnailUrl
+      } : null,
+      targetdonationItem: item.donationItem ? {
+        name: item.donationItem.dataValues.name,
+        image: item.donationItem.dataValues.image,
+        reps: item.donationItem.dataValues.reps
+      } : null,
+
   });
 }
 
 const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSize) => {
   try {
     // điều kiện
-    const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
-
+    const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId) , channelNotifierId)).data
     let notifierCondition = {};
 
-  if (channelNotifierId) {
-    // Nếu có channelNotifierId, chỉ tìm theo channelNotifierId
-    notifierCondition.channelNotifierId = channelNotifierId;
-  } else if (userNotifierId) {
-    // Nếu không có channelNotifierId, tìm theo userNotifierId
-    notifierCondition.userNotifierId = userNotifierId;
-  }
+    if (channelNotifierId) {
+      // Nếu có channelNotifierId, chỉ tìm theo channelNotifierId
+      notifierCondition.channelNotifierId = channelNotifierId;
+    } else if (userNotifierId) {
+      // Nếu không có channelNotifierId, tìm theo userNotifierId
+      notifierCondition.userNotifierId = userNotifierId;
+    }
+
+    const roomConditions = {
+      [Op.or]: [
+        { roomName: { [Op.in]: notifierRoom.isOn } }, // Active rooms
+        notifierRoom.muted.length > 0
+          ? {
+              [Op.and]: [
+                { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Muted rooms
+                {
+                  updatedAt: {
+                    [Op.lt]: Math.min(...notifierRoom.muted.map((room) => new Date(room.updatedAt)))
+                  }
+                } // Notifications older than the muted room's updatedAt
+              ]
+            }
+          : null // No muted conditions if muted is empty
+      ].filter(Boolean) // Remove null conditions
+    };
+
 
     // Lấy danh sách thông báo
     const notifications = await Notification.findAndCountAll({
       distinct: true,
-      where: {
-        roomName: { [Op.in]: notifierRoom },
-
-      },
+      where: roomConditions,
       attributes: [
         "id",
         "createdAt",
@@ -235,24 +270,33 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
   try {
 
     // điều kiện
-    const notifierRoom =  (await getAllNotificationRoomSetting(userNotifierId, channelNotifierId)).data
+    const notifierRoom =  (await getAllNotificationRoomSetting((channelNotifierId ? null : userNotifierId), channelNotifierId)).data
+    const roomConditions = {
+      [Op.or]: [
+          { roomName: { [Op.in]: notifierRoom.isOn } }, // Các phòng đang bật
+          {
+              [Op.and]: [
+                  { roomName: { [Op.in]: notifierRoom.muted.map((room) => room.roomName) } }, // Các phòng bị muted
+                  { updatedAt: { [Op.in]: notifierRoom.muted.map((room) => room.updatedAt) } } // Với updatedAt tương ứng
+              ]
+          }
+      ]
+    };
 
-    let whereClause;
-
-    if(channelNotifierId) {
-      whereClause = channelNotifierId
-      ? `channelNotifierId = '${channelNotifierId}'`
-      : `userNotifierId IS NULL`;
+    let userOrChannelCondition;
+    if (channelNotifierId) {
+      userOrChannelCondition = {
+        channelNotifierId,
+      };
     } else {
-      whereClause = `userNotifierId = '${userNotifierId}'`
+      userOrChannelCondition = {
+        userNotifierId: userNotifierId,
+      };
     }
 
-    const unReadNoti = await Notification.
-    findAndCountAll({
+    const unReadNoti = await Notification.findAndCountAll({
       distinct: true,
-      where: {
-        roomName: { [Op.in]: notifierRoom },
-      },
+      where: roomConditions,
       attributes: [
         "id",
         "createdAt",
@@ -263,7 +307,8 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
           as: "visitStatus",
           attributes: ["status"],
           where: {
-            status: "recieved"
+            status: "recieved",
+            ...userOrChannelCondition
           }
         },
         {
@@ -311,10 +356,11 @@ const getUnReadNotification = async(userNotifierId, channelNotifierId, page, pag
     })
     return {
       status: 200,
-      data: {notifications: unReadNoti},
-      totalPages: Math.ceil(unReadNoti.count / pageSize),
-      page,
-      pageSize,
+      data: {notifications: unReadNoti,
+        totalPages: Math.ceil(unReadNoti.count / pageSize),
+        page,
+        pageSize,
+      },
       message: "Get unread notification succeesfully!"
     }
   } catch (error) {

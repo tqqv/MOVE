@@ -37,14 +37,14 @@
       >
 
       <div
-        class="text-xs absolute bottom-2 left-2 flex items-center font-bold text-white bg-black/80 px-3 py-1 gap-x-2 rounded-md"
+        class="text-[11px] absolute bottom-2 left-2 flex items-center font-semibold text-white bg-black/80 p-1 gap-x-1 rounded-md"
       >
-        <i class="pi pi-eye mt-[0.7px] text-xs" />
+        <i class="pi pi-eye mt-[0.7px] text-[11px]" />
         <span>{{ formatView(video.viewCount || video.currentViews) }}</span>
       </div>
       <div
         v-if="!video.livestreamChannel"
-        class="absolute bottom-2 right-4 text-white text-xs font-bold bg-black/80 px-3 py-1 rounded-md"
+        class="absolute bottom-2 right-2 text-white text-[11px] font-semibold bg-black/80 p-1 rounded-md"
       >
         <span>{{ formatDuration(video.duration) }}</span>
       </div>
@@ -59,9 +59,9 @@
             : 'border-[3px] border-transparent',
         ]"
         :to="
-          video.livestreamChannel
-            ? `/live/${video.livestreamChannel.User.username}`
-            : `/user/${video.channel.User?.username}`
+          video.channel?.isLive || video?.livestreamChannel?.isLive
+            ? `/live/${video.channel?.User?.username || video?.livestreamChannel?.User?.username}`
+            : `/user/${video.channel?.User?.username || video?.livestreamChannel?.User?.username}`
         "
       >
         <img
@@ -71,8 +71,8 @@
         />
       </RouterLink>
 
-      <div class="pl-3 flex-1 w-full truncate">
-        <div class="flex items-center w-full justify-between">
+      <div class="pl-2 flex-1 w-full">
+        <div class="flex items-start w-full justify-between text-sm">
           <!-- Tiêu đề chiếm 2/3 không gian -->
           <RouterLink
             :to="
@@ -80,13 +80,13 @@
                 ? `/live/${video.livestreamChannel.User.username}`
                 : `/video/${video.id}`
             "
-            class="text-sm md:text-base lg:text-lg font-bold text-black truncate"
+            class="font-semibold text-black truncate-2-lines leading-5"
             :title="video.title"
           >
-            {{ truncateDescripton(video.title, 28) }}
+            {{ video.title }}
           </RouterLink>
 
-          <div class="flex items-center flex-shrink-0">
+          <div class="flex items-center flex-shrink-0 ml-1">
             <rate class="mr-1 mb-[0.5px] flex-shrink-0" />
             <span class="text-sm font-bold flex-shrink-0">{{
               formatRating(video.ratings || video.avgRates || 0)
@@ -95,17 +95,16 @@
         </div>
 
         <!-- Truncate channelName with tooltip -->
-        <div class="flex items-center">
+        <div class="flex items-center mt-1 text-xs">
           <RouterLink
-            :to="`/user/${video.channel?.User?.username}`"
-            class="text_secondary whitespace-nowrap"
+            :to="
+              video.channel
+                ? `/user/${video?.channel?.User?.username}`
+                : `/user/${video?.livestreamChannel?.User?.username}`
+            "
+            class="text_secondary truncate w-[90px]"
             :title="video.channel?.channelName || video.livestreamChannel?.channelName"
-            >{{
-              truncateDescripton(
-                video.channel?.channelName || video.livestreamChannel?.channelName,
-                12,
-              )
-            }}</RouterLink
+            >{{ video.channel?.channelName || video.livestreamChannel?.channelName }}</RouterLink
           >
           <span
             v-if="video.channel?.popularCheck || video.livestreamChannel?.popularCheck"
@@ -115,12 +114,12 @@
           </span>
         </div>
 
-        <div class="flex items-center space-x-1 text_secondary my-2">
-          <span v-if="video.category?.title" class="flex items-center">
-            {{ video.category?.title || video.livestreamChannel?.category.title }}
+        <div class="flex items-center space-x-1 text-xs text-footer my-1">
+          <span v-if="video.duration" class="flex items-center">
+            {{ genreDuration(video.duration) }}
           </span>
           <div v-if="!video.livestreamChannel?.isLive" class="flex items-center">
-            <span class="font-bold text-xl px-1 mb-[0.5px] leading-none">•</span>
+            <span class="font-bold text-xl px-1 mb-1 leading-none">•</span>
           </div>
           <span v-if="!video.livestreamChannel?.isLive" lass="whitespace-nowrap"
             >Post {{ formatDate(video.createdAt) }}</span
@@ -128,14 +127,25 @@
         </div>
 
         <div class="flex gap-2 items-center text-[10px] font-bold mb-2 text-black">
-          <span class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
+          <span v-if="video.category?.title" class="bg-[#EEEEEE] rounded-full px-3 py-2 ">
+            {{ video.category?.title || video.livestreamChannel?.category.title }}
+          </span>
+          <span class="bg-[#EEEEEE] rounded-full px-3 py-2 ">{{
             video.levelWorkout?.levelWorkout || video.livestreamLevelWorkout?.levelWorkout
-          }}</span>
-          <span v-if="video.duration" class="bg-[#EEEEEE] rounded-full px-3 py-2">{{
-            genreDuration(video.duration)
           }}</span>
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<style scoped>
+  .truncate-2-lines {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
+  }
+</style>

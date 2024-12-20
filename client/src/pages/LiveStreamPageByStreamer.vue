@@ -13,6 +13,7 @@
   import ScrollWrapper from '@/layouts/ScrollWrapper.vue';
   import dayjs from 'dayjs';
   import utc from 'dayjs/plugin/utc';
+  import router from '@/router';
   const route = useRoute();
   const streamerStore = useStreamerStore();
   const liveStreamStore = useLiveStreamStore();
@@ -66,6 +67,11 @@
   onMounted(async () => {
     await streamerStore.fetchProfileChannel();
     handleConnectOBS();
+    if (liveStatus.value === 'streamPublished') {
+      router.push('/streaming/dashboard-live');
+    } else {
+      router.push('/streaming/stream-setup');
+    }
   });
 
   onUnmounted(async () => {
@@ -123,6 +129,15 @@
       if (newPath.includes('dashboard-live')) {
         await streamerStore.fetchProfileChannel();
         handleConnectOBS();
+      }
+    },
+  );
+
+  watch(
+    () => liveStatus.value,
+    (newValue) => {
+      if (newValue === null) {
+        console.log(123);
       }
     },
   );

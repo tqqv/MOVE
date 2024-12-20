@@ -29,7 +29,7 @@
   const withdrawInforStore = useWithdrawInfor();
 
   const userStore = useUserStore();
-  const exchangeRate = ref(0.015 * 0.3);
+  // const exchangeRate = ref(0.015 * 0.3);
   const minWithdraw = ref(2500);
   const isRemoveVisible = ref(false);
   const isUpdateSuccessful = ref(false);
@@ -222,7 +222,11 @@
             <div class="space-y-2">
               <div class="text-[17px] font-bold">No bank information available</div>
             </div>
-            <button class="btn bg-[#707070] text-[#CCCCCC]">Withdraw</button>
+            <div class="flex gap-x-4">
+              <button @click="toogleExchangeVisible" class="btn">Exchange</button>
+
+              <button class="btn bg-[#707070] text-[#CCCCCC]">Withdraw</button>
+            </div>
           </div>
         </div>
       </div>

@@ -2,8 +2,8 @@
   const emit = defineEmits(['closeAllPopups']);
 </script>
 <template>
-  <div class="shadow-lg rounded-lg w-[194px] bg-white text-black p-6">
-    <ul class="space-y-2">
+  <div class="shadow-lg rounded-lg w-[194px] bg-white text-black p-4">
+    <ul class="flex flex-col gap-y-3">
       <RouterLink :to="`/about-us`" @click="emit('closeAllPopups')">
         <li class="group">
           <span class="block hover:text-primary font-medium transition-colors duration-200">

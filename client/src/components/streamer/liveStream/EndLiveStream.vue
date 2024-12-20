@@ -79,8 +79,8 @@
         </div>
       </div>
       <!-- RIGHT -->
-      <div class="flex max-w-[540px] flex-col gap-y-3">
-        <div class="flex flex-col self-start p-4 bg-white rounded-lg shadow-md w-fit">
+      <div class="flex max-w-[570px] flex-col gap-y-3">
+        <div class="flex flex-col self-start p-4 bg-white rounded-lg shadow-md w-full">
           <h1 class="font-semibold mb-4">Top donates</h1>
           <div class="flex flex-col gap-y-4">
             <TopDonates :liveStreamData="liveStreamStore.liveStreamData" />

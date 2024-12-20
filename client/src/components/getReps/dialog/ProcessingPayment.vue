@@ -43,9 +43,9 @@
           <div class="text-primary font-bold flex justify-center">Processing your payment…</div>
         </div>
       </div>
-      <div class="flex justify-center cursor-pointer">
+      <!-- <div class="flex justify-center cursor-pointer">
         <button @click="toggleCancel" class="text-primary">Cancel</button>
-      </div>
+      </div> -->
     </Dialog>
   </div>
 </template>

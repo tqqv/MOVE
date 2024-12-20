@@ -30,23 +30,24 @@
   const isEmailSent = ref(false);
   const emailVerified = computed(() => userStore?.user?.isVerified);
   const isLoading = ref(false);
+  const emailUpdate = ref('');
   // CHECK SEND MAIL STATUS
 
-  const checkEmailSentStatus = () => {
-    const emailSentData = localStorage.getItem('emailVerificationSent');
-    if (emailSentData) {
-      const { timestamp, email } = JSON.parse(emailSentData);
-      const fifteenMinutes = 15 * 60 * 1000;
-      const now = new Date().getTime();
+  // const checkEmailSentStatus = () => {
+  //   const emailSentData = localStorage.getItem('emailVerificationSent');
+  //   if (emailSentData) {
+  //     const { timestamp, email } = JSON.parse(emailSentData);
+  //     const fifteenMinutes = 15 * 60 * 1000;
+  //     const now = new Date().getTime();
 
-      if (now - timestamp < fifteenMinutes && email === user.value?.email) {
-        isEmailSent.value = true;
-      } else {
-        localStorage.removeItem('emailVerificationSent');
-        isEmailSent.value = false;
-      }
-    }
-  };
+  //     if (now - timestamp < fifteenMinutes && email === user.value?.email) {
+  //       isEmailSent.value = true;
+  //     } else {
+  //       localStorage.removeItem('emailVerificationSent');
+  //       isEmailSent.value = false;
+  //     }
+  //   }
+  // };
 
   const handleVerifiedEmail = async (email) => {
     try {
@@ -57,7 +58,7 @@
           timestamp: new Date().getTime(),
           email: email,
         };
-        localStorage.setItem('emailVerificationSent', JSON.stringify(emailSentData));
+        // localStorage.setItem('emailVerificationSent', JSON.stringify(emailSentData));
         isEmailSent.value = true;
         toast.success('Verification email sent successfully');
       }
@@ -66,6 +67,18 @@
       toast.error('Failed to send verification email');
     } finally {
       isLoading.value = false;
+    }
+  };
+
+  const updateEmail = (newEmail) => {
+    emailUpdate.value = newEmail;
+  };
+
+  const handleSendVerify = () => {
+    if (emailUpdate.value === '') {
+      handleVerifiedEmail(user?.email);
+    } else {
+      handleVerifiedEmail(emailUpdate.value);
     }
   };
 
@@ -116,13 +129,12 @@
   const activeTab = computed(() => tabStore.activeTab);
 
   const onTabChange = (event) => {
-    console.log('Tab changed to:', event);
     tabStore.setActiveTab(event);
   };
 
   onMounted(() => {
     fetchStatusRequestToStreamer();
-    checkEmailSentStatus();
+    // checkEmailSentStatus();
   });
 </script>
 
@@ -149,7 +161,7 @@
         </h1>
         <Button
           v-if="!isEmailSent"
-          @click="handleVerifiedEmail(user.email)"
+          @click="handleSendVerify"
           class="btn hidden md:block w-36 whitespace-nowrap"
         >
           <template #default>
@@ -211,7 +223,11 @@
             </TabList>
             <TabPanels>
               <TabPanel v-for="tab in tabs" :key="tab.value" :value="tab.value">
-                <component :is="tab.component" />
+                <component
+                  :is="tab.component"
+                  :handleVerifiedEmail="handleVerifiedEmail"
+                  @updateEmail="updateEmail"
+                />
               </TabPanel>
             </TabPanels>
           </Tabs>

@@ -83,13 +83,7 @@
           <div v-if="categories.length" class="">
             <div class="flex justify-between items-center">
               <h1 class="text_subTitle mb-2">Categories</h1>
-              <RouterLink
-                :to="`/total-search?q=${query}&type=categories`"
-                v-if="categories.length == 8"
-                class="text-primary text-sm cursor-pointer"
-              >
-                View all <i class="pi pi-chevron-right text-xs"></i>
-              </RouterLink>
+             
             </div>
             <div
               class="grid gap-x-6 gap-y-10 pt-2 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"

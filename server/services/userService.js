@@ -15,7 +15,7 @@ const getProfile = async (id) => {
       attributes: ['id', 'username', 'email', 'fullName', 'isVerified', 'avatar', 'gender', 'dob', 'REPs', 'country', 'state', 'city', 'isBanned','role'],
       include: [{
         model: Channel,
-        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck', 'streamKey', 'rep', 'isBanned']
+        attributes: ['id','channelName', 'avatar', 'isLive', 'popularCheck', 'rep', 'isBanned']
       }]
     });
     if(!user){
@@ -530,6 +530,10 @@ const getAllInforFollow = async(userId) => {
         model: Channel,
         as: 'channel',
         attributes: ['channelName', 'avatar', 'isLive', 'popularCheck'],
+        include: [{
+          model: User,
+          attributes: ['username']
+        }],
       },
       {
         model: LevelWorkout,
@@ -682,9 +686,9 @@ const getProfileByUserName = async(username) => {
             )`),
             'followCount'
           ]
-        ],
+        ],required: false
       }],
-      attributes: ['username', 'avatar']
+      attributes: ['username', 'avatar', 'id']
     })
 
     if(!user) {

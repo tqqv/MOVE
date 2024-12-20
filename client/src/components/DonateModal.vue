@@ -96,10 +96,15 @@
       if (response.status === 200) {
         const newComment = {
           ...response.data.data,
+          channelComments: {
+            avatar: userStore.user?.Channel?.avatar,
+            username: userStore.user?.Channel?.channelName,
+            popularCheck: userStore.user?.Channel?.popularCheck,
+          },
           userComments: {
-            avatar: userStore.user.avatar,
-            username: userStore.user.username,
-            isVerified: userStore.user.isVerified,
+            avatar: userStore.user?.avatar,
+            username: userStore.user?.username,
+            isVerified: userStore.user?.isVerified,
           },
         };
         commentStore.handleSendComment(newComment);
@@ -208,7 +213,7 @@
           <Skeleton width="3rem" height="1rem"></Skeleton>
         </div>
       </div>
-      <div v-if="!props.loadingItem" class="flex justify-center gap-x-12 mx-3 py-3">
+      <div v-if="!props.loadingItem" class="flex justify-center  gap-x-7 md:gap-x-12 mx-3 py-3">
         <div
           v-for="donateValue in donationItems"
           :key="donateValue.id"

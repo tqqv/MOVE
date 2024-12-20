@@ -53,14 +53,15 @@ const routes = [
   {
     path: '/',
     component: UserLayout,
+    meta: { title: 'Move' },
     children: [
       { path: '', component: HomePage },
       {
         path: 'personal-profile',
         component: ProfileContent,
-        meta: { roles: ['user', 'streamer'] },
+        meta: { roles: ['user', 'streamer'], title: 'Setting Profile' },
       },
-      { path: 'user/:username', component: ViewChannelsContent },
+      { path: 'user/:username', component: ViewChannelsContent, meta: { title: 'Profile | Move' } },
       {
         path: 'browse',
         component: BrowseContent,
@@ -68,10 +69,15 @@ const routes = [
           {
             path: 'categories',
             component: TabCategories,
+            meta: { title: 'Categories | Browse' },
           },
-          { path: 'top-videos', component: TabTopVideo },
-          { path: 'most_viewed', component: TabMostView },
-          { path: 'highest_rated', component: TabHighestRated },
+          { path: 'top-videos', component: TabTopVideo, meta: { title: 'Top Videos | Browse' } },
+          { path: 'most_viewed', component: TabMostView, meta: { title: 'Most Viewed | Browse' } },
+          {
+            path: 'highest_rated',
+            component: TabHighestRated,
+            meta: { title: 'Highest Rated | Browse' },
+          },
         ],
       },
       {
@@ -79,15 +85,23 @@ const routes = [
         component: WalletContent,
         meta: { roles: ['user', 'streamer'] },
         children: [
-          { path: 'payment-method', component: TabPaymentMethod },
-          { path: 'payment-history', component: TabPaymentHistory },
+          {
+            path: 'payment-method',
+            component: TabPaymentMethod,
+            meta: { title: 'Your Wallet | Wallet' },
+          },
+          {
+            path: 'payment-history',
+            component: TabPaymentHistory,
+            meta: { title: 'Payment History | Wallet' },
+          },
         ],
       },
-      { path: 'search', component: SearchContent },
+      { path: 'search', component: SearchContent, meta: { title: 'Search' } },
       {
         path: 'following',
         component: Following,
-        meta: { roles: ['user', 'streamer'] },
+        meta: { roles: ['user', 'streamer'], title: 'Your following' },
       },
       {
         path: 'total-search',
@@ -96,25 +110,42 @@ const routes = [
           query: route.query.q,
           type: route.query.type,
         }),
+        meta: { title: 'Total Search' },
       },
-      { path: 'video/:videoId', component: VideoDetails },
-      { path: 'browse/categories/:category', component: CategoryDetailsContent },
-      { path: 'about-us', component: AboutUs },
-      { path: 'faq', component: FAQ },
-      { path: 'community-guidelines', component: CommunityGuidelines },
+      { path: 'video/:videoId', component: VideoDetails, meta: { title: 'Video | Move' } },
+      {
+        path: 'browse/categories/:category',
+        component: CategoryDetailsContent,
+        meta: { title: 'Category' },
+      },
+      { path: 'about-us', component: AboutUs, meta: { title: 'About Us' } },
+      { path: 'faq', component: FAQ, meta: { title: 'FAQ' } },
+      { path: 'community-guidelines', component: CommunityGuidelines, meta: { title: 'Category' } },
     ],
   },
   // LIVE STREAM LAYOUT
-  { path: '/live/:username', component: ViewLiveStreamPage },
-  { path: '/reset-password/:token', component: ResetPassword },
-  { path: '/verify-email/:token', component: VerifyEmail },
-  { path: '/banned', component: BanPage },
+  {
+    path: '/live/:username',
+    component: ViewLiveStreamPage,
+    meta: { title: 'Live Stream | Move ' },
+  },
+  { path: '/reset-password/:token', component: ResetPassword, meta: { title: 'Reset Password' } },
+  { path: '/verify-email/:token', component: VerifyEmail, meta: { title: 'Verify Email' } },
+  { path: '/banned', component: BanPage, meta: { title: 'Ban | Move' } },
   {
     path: '/overlay',
     component: ScreenSupportLive,
     children: [
-      { path: ':channelId&type=chatbox', component: ScreenChat },
-      { path: ':channelId&type=donation', component: ScreenDonation },
+      {
+        path: ':channelId&type=chatbox',
+        component: ScreenChat,
+        meta: { title: 'Support Chat | Streamer' },
+      },
+      {
+        path: ':channelId&type=donation',
+        component: ScreenDonation,
+        meta: { title: 'Support Donation | Streamer' },
+      },
     ],
   },
   // Streamer router
@@ -123,30 +154,54 @@ const routes = [
     component: StreamerLayout,
     meta: { roles: ['streamer'] },
     children: [
-      { path: '', component: DashboardStreamer },
-      { path: 'comments', component: CommentStreamer },
-      { path: 'channel-setting', component: ChannelSetting },
-      { path: 'videos', component: VideoSetting },
-      { path: 'analytics', component: Overview },
-      { path: 'video-analytics', component: VideoAnalytics },
-      { path: 'video-analytics/:videoId', component: InDepthAnalytics },
+      { path: '', component: DashboardStreamer, meta: { title: 'Dashboard' } },
+      {
+        path: 'comments',
+        component: CommentStreamer,
+        meta: { title: 'Manage Comment | Dashboard' },
+      },
+      {
+        path: 'channel-setting',
+        component: ChannelSetting,
+        meta: { title: 'Setting Channel | Dashboard' },
+      },
+      { path: 'videos', component: VideoSetting, meta: { title: 'Manage Video | Dashboard' } },
+      { path: 'analytics', component: Overview, meta: { title: 'Overview Analytic | Dashboard' } },
+      {
+        path: 'video-analytics',
+        component: VideoAnalytics,
+        meta: { title: 'Video Analytic | Dashboard' },
+      },
+      {
+        path: 'video-analytics/:videoId',
+        component: InDepthAnalytics,
+        meta: { title: 'Video Analytic' },
+      },
 
-      { path: 'live-stream-analytics', component: LiveStreamAnalytics },
+      {
+        path: 'live-stream-analytics',
+        component: LiveStreamAnalytics,
+        meta: { title: 'Livestream Analytics | Dashboard' },
+      },
       {
         path: 'cashout',
         component: Cashout,
+        meta: { title: 'Cash Out | Dashboard' },
       },
       {
         path: 'booking-featured',
         component: AdvertiseBooking,
+        meta: { title: 'Manage Booking | Dashboard' },
       },
       {
         path: 'booking-history',
         component: BookingHistory,
+        meta: { title: 'Booking History | Dashboard' },
       },
       {
         path: 'cashout-history',
         component: CashoutHistory,
+        meta: { title: 'Cash Out History | Dashboard' },
       },
     ],
   },
@@ -156,8 +211,8 @@ const routes = [
     component: LiveStreamPageByStreamer,
     meta: { roles: ['streamer'] },
     children: [
-      { path: 'stream-setup', component: SetUpLive },
-      { path: 'dashboard-live', component: DashboardLive },
+      { path: 'stream-setup', component: SetUpLive, meta: { title: 'Setup Live' } },
+      { path: 'dashboard-live', component: DashboardLive, meta: { title: 'Dashboard Live' } },
     ],
   },
   {
@@ -173,6 +228,8 @@ const router = createRouter({
 });
 
 router.beforeEach(async (to, from, next) => {
+  document.title = to.meta.title || 'Move';
+  next();
   const userStore = useUserStore();
   if (!userStore.user) {
     await userStore.fetchUserProfile();

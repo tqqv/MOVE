@@ -25,7 +25,7 @@
 
 <template>
   <!-- not shown yet -->
-  <div class="">
+  <div class="hidden md:block">
     <div
       class="flex flex-col justify-center gap-y-2 border-2 border-gray-dark border-r-0 border-t-0"
       :class="{ 'border-x-0': isStreamer }"

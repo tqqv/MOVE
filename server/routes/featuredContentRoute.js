@@ -12,6 +12,6 @@ featuredContentRouter.get('/bookedStatus', verifyStreamer, getBookingFeatureCont
 featuredContentRouter.get('/getBookedByDate', verifyStreamer, getBookDateDetailController);
 featuredContentRouter.get('/getBookingHistory', verifyStreamer, getBookingHistoryController);
 featuredContentRouter.get('/getBookingStats', verifyStreamer, getBookingStatsController);
-featuredContentRouter.post('/clickIncrease/:featuredContentId', increaseClickFeaturedController);
+featuredContentRouter.post('/clickIncrease', increaseClickFeaturedController);
 
 module.exports = featuredContentRouter;

@@ -41,7 +41,7 @@
 
 <template>
   <div class="flex justify-content-center items-center">
-    <h1 v-if="title" class="whitespace-nowrap uppercase text_subTitle text-[12px] mr-4">
+    <h1 v-if="title" class="hidden md:block whitespace-nowrap uppercase text_subTitle text-[12px] mr-4">
       {{ title }}
     </h1>
     <Dropdown

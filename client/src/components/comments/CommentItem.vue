@@ -219,6 +219,17 @@
     }
   });
   const commentClasses = ref('');
+
+  // HANDLE BG-COMMENT
+  const extractCommentId = () => {
+    const hash = window.location.hash;
+    if (hash && hash.startsWith('#comment-')) {
+      return hash.replace('#comment-', '');
+    }
+    return null;
+  };
+  const commentId = extractCommentId();
+
   onMounted(() => {
     if (props.comment.isNew) {
       commentClasses.value =
@@ -244,7 +255,7 @@
 
 <template>
   <div
-    class="flex gap-x-4"
+    class="flex gap-x-4 pt-2"
     :id="`comment-${comment.id}`"
     :class="[
       commentClasses,
@@ -256,7 +267,7 @@
     <div class="flex-shrink-0">
       <RouterLink :to="`/user/${comment.userComments?.username}`">
         <img
-          :src="comment?.userComments?.avatar"
+          :src="comment?.channelComments?.avatar || comment?.userComments?.avatar"
           alt="Avatar"
           class="size-10 object-cover rounded-full"
       /></RouterLink>
@@ -278,10 +289,12 @@
 
       <div class="flex justify-between items-center gap-x-4 w-fit">
         <RouterLink :to="`/user/${comment.userComments?.username}`">
-          <h1 class="font-bold">{{ comment.userComments?.username }}</h1></RouterLink
+          <h1 class="font-bold">
+            {{ comment.channelComments?.channelName || comment.userComments?.username }}
+          </h1></RouterLink
         >
 
-        <span v-if="comment.userComments?.isVerified">
+        <span v-if="comment?.channelComments?.popularCheck">
           <Verified class="fill-blue" />
         </span>
         <div v-if="comment.rep > 0" class="flex gap-x-2 items-center whitespace-nowrap">
@@ -308,6 +321,7 @@
         ref="textElement"
         v-if="!comment.commentReport?.some((report) => report.status === 'approved')"
         class="break-all text-sm text-black"
+        :class="commentId === comment?.id ? 'bg-primary/20 p-2 pb-3 rounded-md' : ''"
       >
         <div ref="textElement" v-html="displayedText()" />
         <div v-if="isLongText || isTallText">

@@ -1,6 +1,6 @@
 <script setup>
   import { computed, onMounted, onUnmounted, ref } from 'vue';
-  import { formatRating, formatDuration, formatView, genreDuration } from '@/utils';
+  import { formatRating, formatDuration, formatView, genreDuration, formatDate } from '@/utils';
   import { toast } from 'vue3-toastify';
   import share from '@icons/share.vue';
   import axiosInstance from '@/services/axios';
@@ -161,11 +161,25 @@
         toast.error(`Can't copy this link: `, err);
       });
   };
+  // show more handle
+  const showFullText = ref(false);
+  const maxLength = 250;
+  const truncatedText = computed(() => {
+    const text = props.video?.description || props?.livestream?.description;
+    if (showFullText.value || text.length <= maxLength) {
+      return text;
+    }
+    return text.substring(0, maxLength) + '...';
+  });
+
+  const toggleText = () => {
+    showFullText.value = !showFullText.value;
+  };
 </script>
 
 <template>
   <div class="flex items-center justify-between">
-    <h3 class="text-[20px] whitespace-nowrap text-black">
+    <h3 class="text-[20px] whitespace-nowrap text-black font-semibold">
       {{ video?.title || livestream?.title }}
     </h3>
     <div class="flex items-center">
@@ -175,21 +189,21 @@
       }}</span>
     </div>
   </div>
-  <div class="flex items-center mb-2 text-[13px] mt-2">
+  <div class="flex items-center text-[13px] mt-2 mb-3">
     <span class="text-red">
       {{ formatView(video?.viewCount ?? props.metricsData?.currentViews) }} view
     </span>
-    <span class="font-bold text-sm px-2">•</span>
-    <span class="text-primary">{{ video?.category.title || livestream?.category?.title }}</span>
+    <span class="font-bold text-sm px-2 text-body">•</span>
+    <span class="text-primary">{{ formatDate(video?.createdAt || livestream?.createdAt) }}</span>
   </div>
   <div class="flex items-center justify-between">
     <div class="flex gap-2 items-center text-[11px] font-bold">
-      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
+      <span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
+        video?.category?.title || livestream?.category?.title
+      }}</span
+      ><span class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">
         {{ video?.levelWorkout?.levelWorkout || livestream?.livestreamLevelWorkout?.levelWorkout }}
       </span>
-      <span v-if="video" class="bg-[#EEEEEE] rounded-full text-black py-2 px-4">{{
-        genreDuration(video?.duration)
-      }}</span>
     </div>
     <div class="flex items-center gap-9">
       <Rate
@@ -205,7 +219,7 @@
           class="text-primary text-[13px] font-bold flex items-center uppercase"
           @click="toggleShare"
         >
-          <share class="mr-1" /> Share
+          <share class="mr-1" /> <span class=" hidden md:block">Share</span>
         </button>
         <div
           v-if="isShareVisible"
@@ -274,6 +288,29 @@
         @hideSuccess="closeSuccess"
       />
       <ReportStream v-if="reportType === 'stream'" :liveStreamId="video?.id" />
+    </div>
+  </div>
+  <div class="p-2 bg-gray-light mt-4 rounded-md">
+    <div class="flex flex-col gap-y-2 text-xs text-body">
+      <div v-if="video?.duration" class="flex gap-x-3 font-semibold">
+        <span>Type duration: </span>
+        <span>{{ genreDuration(video?.duration) }} </span>
+      </div>
+      <div class="flex gap-x-3 flex-col items-start">
+        <p class="text-xs">
+          {{ truncatedText }}
+        </p>
+        <button
+          v-if="
+            (props?.video?.description && props.video.description.length > maxLength) ||
+            (props?.livestream?.description && props.livestream.description.length > maxLength)
+          "
+          class="text-xs font-semibold cursor-pointer mt-1"
+          @click="toggleText"
+        >
+          {{ showFullText ? 'Show Less' : 'Show More' }}
+        </button>
+      </div>
     </div>
   </div>
 </template>
