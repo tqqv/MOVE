@@ -43,8 +43,6 @@ const routes = [
       { path: 'reps/donate', component: DonateItem },
       { path: 'reps/discount', component: DiscountItem },
       { path: 'system-config', component: SystemConfig },
-      { path: 'system-notification', component: NotificationSystem },
-
       { path: 'users/:id', component: UserDetail },
       { path: 'report/:reportType/:reportId', component: ReportDetail },
     ],

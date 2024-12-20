@@ -12,7 +12,7 @@
 
   const tabs = ref([
     { title: 'Channel', component: markRaw(ChannelProfileSetting), value: '0' },
-    { title: 'Notification', component: markRaw(NotificationEdit), value: '1' },
+    // { title: 'Notification', component: markRaw(NotificationEdit), value: '1' },
   ]);
 </script>
 <template>

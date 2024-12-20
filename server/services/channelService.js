@@ -590,7 +590,7 @@ const validateStreamKey = async (streamKey) => {
 const endStream = async(data) => {
   try {
     console.log('data key ', data.streamKey);
-    
+
     const channel = await Channel.findOne({where: {streamKey:  data.streamKey.split('streamKey=')[1]}});
 
     if(!channel){

@@ -47,6 +47,8 @@ const createLivestream = async(data) => {
       newLiveStream.streamerId,
       newLiveStream.streamerId,
       null,
+      null,
+      null,
       null
     )
     return {

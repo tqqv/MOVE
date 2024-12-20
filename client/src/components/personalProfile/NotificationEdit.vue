@@ -19,26 +19,16 @@
     },
     {
       title: 'Followed channel notifications',
-      subtitle: 'Notify me when the channel I follow goes live.',
+      subtitle: 'Notify me when the channel I followed goes live or uploads new video.',
     },
     {
       title: 'Comments notification',
-      subtitle: 'Notify me when someone comments or replies to my comment.',
-    },
-    {
-      title: 'Follow notifications',
-      subtitle:
-        'Get notified on updates that are relevant to you! You may also receive additional emails for any updates on MOVE.',
-    },
-    {
-      title: 'System notifications',
-      subtitle:
-        'Get notified on updates that are relevant to you! You may also receive additional emails for any updates on MOVE.',
+      subtitle: 'Notify me when someone replies or reactions to my comment.',
     },
     {
       title: 'REPs notifications',
       subtitle:
-        'Get notified on updates that are relevant to you! You may also receive additional emails for any updates on MOVE.',
+        'Notify me when someone donates to my video or livestream.',
     },
   ]);
 
@@ -50,18 +40,13 @@
     },
     {
       title: 'Followed channel notifications',
-      subtitle: 'Notify me when the channel I follow goes live.',
+      subtitle: 'Notify me when the channel I followed goes live or uploads new video.',
     },
     {
       title: 'Comments notification',
-      subtitle: 'Notify me when someone comments or replies to my comment.',
+      subtitle: 'Notify me when someone replies or reactions to my comment.',
     },
-    {
-      title: 'System notifications',
-      subtitle:
-        'Get notified on updates that are relevant to you! You may also receive additional emails for any updates on MOVE.',
-    },
-  ]);
+  ])
 
   const notificationList = computed(() =>
     userStore?.user?.Channel ? listTitleChannel.value : listTitleUser.value,
@@ -109,9 +94,9 @@
   };
 
   const handleEditNotificationStatus = async () => {
-    // if (!updateListNotificationStatus.value.length) {
-    //   return;
-    // }
+    if (!updateListNotificationStatus.value.length) {
+      return;
+    }
     try {
       isLoading.value = true;
       await editNotificationStatus(updateListNotificationStatus.value);
