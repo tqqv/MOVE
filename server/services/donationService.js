@@ -2,6 +2,7 @@ const { Sequelize } = require("sequelize");
 const db = require("../models/index.js");
 const { avgRates } = require("../utils/redis/key/streamKey.js");
 const { updateStreamStats, reRankingTopDonators } = require("../utils/redis/stream/redisStreamService.js");
+const { createNotification } = require("./notificationService.js");
 const { Donation, Livestream, DonationItem, Channel, User } = db;
 
 const donateLivestream = async (userId, donatorChannelId, livestreamId, donationItemId, content) => {
@@ -113,6 +114,18 @@ const donateLivestream = async (userId, donatorChannelId, livestreamId, donation
       },
       totalDonateValue
     )
+
+    await createNotification(
+      "rep",
+      "recieve",
+      (donatorChannelId ? null : user.id),
+      donatorChannelId,
+      livestream.streamerId,
+      null,
+      null,
+      livestreamId,
+      donationItemId
+    );
 
     return {
       status: 200,

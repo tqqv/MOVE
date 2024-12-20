@@ -34,6 +34,16 @@ module.exports = (sequelize, DataTypes) => {
     as: 'targetVideo',
   });
 
+  this.belongsTo(models.Livestream, {
+    foreignKey: 'targetLivestreamId',
+    as: 'targetLivestream',
+  });
+
+  this.belongsTo(models.DonationItem, {
+    foreignKey: 'donationItemId',
+    as: 'donationItem',
+  });
+
   }
   }
   Notification.init(
@@ -88,6 +98,24 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: true,
         references: {
           model: 'videos',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+      },
+      targetLivestreamId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'livestreams',
+          key: 'id',
+        },
+        onDelete: 'CASCADE',
+      },
+      donationItemId: {
+        type: DataTypes.UUID,
+        allowNull: true,
+        references: {
+          model: 'donationItems',
           key: 'id',
         },
         onDelete: 'CASCADE',
