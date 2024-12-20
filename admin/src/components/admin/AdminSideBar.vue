@@ -23,8 +23,10 @@
   const router = useRouter();
   const isDropdownOpen = ref(false);
 
-  const toggleDropdown = () => {
-    isDropdownOpen.value = !isDropdownOpen.value;
+  const dropdownState = ref({});
+
+  const toggleDropdown = (name) => {
+    dropdownState.value[name] = !dropdownState.value[name];
   };
 
   const handleLogout = async () => {
@@ -63,6 +65,14 @@
     // { name: 'System notification', icon: Notification, link: '/system-notification' },
     { name: 'Settings', icon: SettingIcon, link: '/setting' },
   ];
+  const isActive = (item) => {
+    if (route.path === item.link) return true;
+    if (item.hasDropdown) {
+      return item.submenu.some((subitem) => route.path === subitem.link);
+    }
+    return false;
+  };
+  console.log(menuItems);
 </script>
 
 <template>
@@ -79,30 +89,28 @@
             <div
               class="p-4 cursor-pointer group hover:bg-[#333a48] flex gap-x-4 font-semibold items-center rounded-md text-white"
               :class="{
-                'bg-primary/85 font-bold hover:bg-primary/85':
-                  (route.path === item.link && item.link === '/') ||
-                  (item.link !== '/' && route.path.startsWith(item.link) && route.path !== '/'),
+                'bg-primary/85 font-bold hover:bg-primary/85': isActive(item),
               }"
-              @click="item.hasDropdown && toggleDropdown()"
+              @click="item.hasDropdown && toggleDropdown(item.name)"
             >
               <component :is="item.icon" fill="#fff" />
               <p class="text-sm">{{ item.name }}</p>
               <span
                 v-if="item.hasDropdown"
                 class="ml-auto"
-                :class="isDropdownOpen ? 'pi pi-angle-up' : 'pi pi-angle-down'"
+                :class="dropdownState[item.name] ? 'pi pi-angle-up' : 'pi pi-angle-down'"
               ></span>
             </div>
           </router-link>
 
           <!-- Submenu -->
-          <ul v-if="isDropdownOpen && item.hasDropdown" class="ml-4 mt-1">
+          <ul v-if="dropdownState[item.name] && item.hasDropdown" class="ml-4 mt-1">
             <li v-for="subitem in item.submenu" :key="subitem.name" class="block mx-2 mb-1">
               <router-link :to="subitem.link" class="block">
                 <div
-                  class="p-2 cursor-pointer group hover:text-white flex items-center rounded-md text-gray-dark"
+                  class="p-2 cursor-pointer group hover:bg-primary/20 flex items-center rounded-md text-gray-dark"
                   :class="{
-                    ' font-bold  text-white': route.path.startsWith(subitem.link),
+                    'font-bold  text-white': route.path === subitem.link,
                   }"
                 >
                   <p class="text-sm">{{ subitem.name }}</p>
