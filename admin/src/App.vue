@@ -3,7 +3,7 @@
   import { onBeforeMount, onMounted } from 'vue';
   import GlobalLoading from './components/GlobalLoading.vue';
   import { useLoadingStore } from './stores';
-import { getLogout } from './services/auth';
+  import { getLogout } from './services/auth';
   const userStore = useUserStore();
   const loadingStore = useLoadingStore();
 
@@ -30,23 +30,18 @@ import { getLogout } from './services/auth';
   });
   //Load data navbar when F5
 
-  onMounted(async() => {
+  onMounted(async () => {
     const isLogin = localStorage.getItem('isLoginAdmin');
 
     if (isLogin === 'true') {
       await userStore.fetchUserProfile();
       // await userStore.loadFollowers();
       // await userStore.loadFollowCategories();
-      const role = localStorage.getItem('role')
-      console.log(role);
-      console.log(userStore.user.role);
+      const role = localStorage.getItem('role');
 
-
-      if(role !== userStore.user.role) {
-        console.log("hiiiii");
-
+      if (role !== userStore.user.role) {
         const res = await getLogout();
-        if(res && res.status === 200) {
+        if (res && res.status === 200) {
           userStore.clearUserData();
           localStorage.removeItem('isLoginAdmin');
           localStorage.removeItem('role');

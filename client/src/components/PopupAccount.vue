@@ -4,7 +4,7 @@
   import logout from '@icons/logout.vue';
   import dashboard from '@icons/dashboard.vue';
   import setting from '@icons/setting.vue';
-  import { useUserStore } from '@/stores';
+  import { useUserStore, useStreamerStore } from '@/stores';
   import { toast } from 'vue3-toastify';
   import { getLogout } from '@/services/auth';
   import { useRouter } from 'vue-router';
@@ -13,6 +13,7 @@
   const emit = defineEmits(['closeAllPopups']);
 
   const userStore = useUserStore();
+  const streamerStore = useStreamerStore();
   const router = useRouter();
   const handleLogout = async () => {
     try {
@@ -21,6 +22,7 @@
       localStorage.removeItem('isLogin');
       localStorage.removeItem('role');
       userStore.clearUserData();
+      streamerStore.clearStreamer();
 
       toast.success(response?.data.message || 'Logout successful!');
       emit('closeAllPopups');
