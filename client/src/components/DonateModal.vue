@@ -172,15 +172,16 @@
         donateInComment(selectedValue.value?.id, messageDonate.value);
       } else if (props.liveStreamData?.livestream?.id) {
         donateInLive(selectedValue.value?.id, messageDonate.value);
+        handleSendMessage();
       }
     } else {
       if (props.liveStreamData?.livestream?.id) {
         donateInLive(selectedValue.value?.id, selectPresentMessage.value?.message);
+        handleSendMessage();
       } else if (videoId.value) {
         donateInComment(selectedValue.value?.id, selectPresentMessage.value?.message);
       }
     }
-    handleSendMessage();
     messageDonate.value = '';
   };
 </script>
@@ -213,7 +214,7 @@
           <Skeleton width="3rem" height="1rem"></Skeleton>
         </div>
       </div>
-      <div v-if="!props.loadingItem" class="flex justify-center  gap-x-7 md:gap-x-12 mx-3 py-3">
+      <div v-if="!props.loadingItem" class="flex justify-center gap-x-7 md:gap-x-12 mx-3 py-3">
         <div
           v-for="donateValue in donationItems"
           :key="donateValue.id"
