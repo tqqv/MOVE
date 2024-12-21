@@ -1,3 +1,7 @@
+html {
+  scroll-behavior: smooth;
+}
+
 .shadow {
   box-shadow: rgba(0, 0, 0, 0.075) 0px 5px 15px;
 }
@@ -15,4 +19,252 @@
 .scrollbar-custom::-webkit-scrollbar-track {
   background-color: rgb(19, 208, 180, 0.2);
   border-radius: 4px;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge, and Firefox */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.padding-nav {
+  padding-top: 102px;
+}
+
+.active-nav {
+  width: 4px;
+  height: 20px;
+  position: absolute;
+  background-color: white;
+  left: 0;
+}
+
+.p-tablist-active-bar {
+  display: none;
+}
+
+.p-tablist-tab-list {
+  gap: 30px;
+}
+
+.p-tab {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.p-tab-active {
+  border-color: #13d0b4;
+  color: #13d0b4;
+  border-width: 0 0 4px 0;
+  font-weight: bold;
+}
+
+/* CUSTOM DIALOG */
+
+.p-tabpanels {
+  padding-bottom: 0;
+}
+
+.p-tablist {
+  padding: 0 18px;
+}
+
+/* .p-tablist-tab-list {
+  justify-content: center;
+} */
+
+/* dialog upload video */
+.p-fileupload-advanced .p-message {
+  margin-bottom: 36px;
+}
+
+.p-fileupload-advanced {
+  border-color: #13d0b4;
+}
+
+.p-fileupload-header {
+  display: none;
+}
+
+.p-fileupload-content {
+  padding: 0;
+}
+
+/* progress bar */
+.p-progressbar-value {
+  background-color: #3be0c8;
+}
+
+.hide-progress-value .p-progressbar-label {
+  display: none;
+}
+
+.custom-dropdown {
+  .p-select-label {
+    color: #13d0b4;
+  }
+}
+
+.p-select-option {
+  font-size: 12px;
+  color: black;
+}
+
+.p-icon {
+  color: #13d0b4;
+}
+
+/* spinner */
+.custom-spinner {
+  padding: 8px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: #3be0c8;
+  --_m: conic-gradient(#0000 10%, #000), linear-gradient(#000 0 0) content-box;
+  -webkit-mask: var(--_m);
+  mask: var(--_m);
+  -webkit-mask-composite: source-out;
+  mask-composite: subtract;
+  animation: l3 1s infinite linear;
+}
+
+@keyframes l3 {
+  to {
+    transform: rotate(1turn);
+  }
+}
+
+/* CUSTOM DIALOG */
+.p-dialog-header {
+  padding: 20px 20px 5px 20px;
+}
+
+.p-dialog-title {
+  font-weight: 700;
+  font-size: 20px;
+}
+
+.p-dialog {
+  margin: 0 12px;
+}
+
+.video-player {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* 16:9 */
+  width: 100%;
+  overflow: hidden;
+  height: 0;
+}
+
+.video-player iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: black;
+  border: none;
+}
+
+.video-settings {
+  display: none;
+}
+
+.p-row-even:hover {
+  background: #e6fffb;
+}
+
+.p-row-odd:hover {
+  background: #e6fffb;
+}
+
+.p-datatable-tbody tr:hover .video-settings {
+  display: block;
+}
+
+.p-checkbox .p-checkbox-icon {
+  color: white;
+}
+/* 
+input::placeholder {
+  all: unset !important;
+  color: #a9a9a9 !important;
+} */
+
+/* CUSTOM TOOLTIPS */
+.p-tooltip .p-tooltip-text {
+  background-color: #39393a;
+  color: #fff;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  margin: 5px;
+}
+
+.p-tooltip-right .p-tooltip-arrow {
+  border-right-color: #39393a;
+  margin-left: 5px;
+}
+
+.p-tooltip-top .p-tooltip-arrow {
+  border-top-color: #39393a;
+  margin-bottom: 5px;
+}
+
+.p-tooltip-bottom .p-tooltip-arrow {
+  border-bottom-color: #39393a;
+  margin-top: 5px;
+}
+
+.p-tooltip-left .p-tooltip-arrow {
+  border-left-color: #39393a;
+  margin-right: 5px;
+}
+
+/* Custom animation */
+.p-tooltip {
+  transition: transform 0.2s ease-in-out;
+}
+
+/* Custom position */
+.p-tooltip[data-position='top'] {
+  margin-bottom: 10px;
+}
+
+.p-tooltip[data-position='bottom'] {
+  margin-top: 10px;
+}
+
+/* CUSTOM DIALOG PRIMEVUE */
+.p-dialog-title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fade-in {
+  animation: fade-in 1.2s cubic-bezier(0.39, 0.575, 0.565, 1) both;
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+.p-dialog-mask {
+  overflow: auto !important;
+}
+
+body.p-overflow-hidden {
+  overflow: auto !important;
 }

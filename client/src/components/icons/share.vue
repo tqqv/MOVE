@@ -1,25 +1,28 @@
 <script setup>
   const props = defineProps({
-    width: String,
-    height: String,
-    fill: String,
+    width: {
+      type: String,
+      default: '18.133',
+    },
+    height: {
+      type: String,
+      default: '20',
+    },
+    fill: {
+      type: String,
+      default: '#13d0b4',
+    },
     stroke: String,
   });
 </script>
 <template>
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    :width="width ? width : '18px'"
-    :height="height ? height : '20px'"
-    class="overflow-visible"
-  >
-    <g :class="[fill, stroke]">
-      <path
-        id="Path_598"
-        data-name="Path 598"
-        d="M504.6,398.07V404a.986.986,0,0,1-.99.99H488.2a.986.986,0,0,1-.99-.99V392.39a.986.986,0,0,1,.99-.99h6.19l-1.98,1.98h-3.22v9.64h10.27l.1.1.1-.1h2.97v-2.97Zm3.45-4.88a.209.209,0,0,1-.08.16l-6.84,4.76a.2.2,0,0,1-.11.03.293.293,0,0,1-.09-.02.194.194,0,0,1-.1-.17v-2.8c-1.47-.22-5.43-.26-8.4,4.66a.192.192,0,0,1-.16.09.127.127,0,0,1-.06-.01.184.184,0,0,1-.13-.19c0-.09.52-8.47,8.75-8.73v-2.53a.194.194,0,0,1,.1-.17.2.2,0,0,1,.2.01l6.84,4.76A.176.176,0,0,1,508.05,393.19Z"
-        transform="translate(-487.21 -388.249)"
-      />
-    </g>
+  <svg xmlns="http://www.w3.org/2000/svg" :width="width" :height="height" viewBox="0 0 18.113 20">
+    <path
+      id="Icon_ionic-md-share"
+      data-name="Icon ionic-md-share"
+      d="M19.586,17.265a2.75,2.75,0,0,0-1.968.754L10.4,13.848a3.379,3.379,0,0,0,.1-.7,3.378,3.378,0,0,0-.1-.7l7.114-4.12a3.019,3.019,0,1,0-.959-2.211,3.359,3.359,0,0,0,.1.7l-7.114,4.12a3.037,3.037,0,0,0-2.069-.8A2.987,2.987,0,0,0,4.5,13.144a3.038,3.038,0,0,0,5.1,2.211l7.165,4.171a2.521,2.521,0,0,0-.1.653,2.926,2.926,0,1,0,2.926-2.914Z"
+      transform="translate(-4.5 -3.094)"
+      :fill="fill"
+    />
   </svg>
 </template>

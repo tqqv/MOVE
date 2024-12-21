@@ -19,6 +19,9 @@ export default {
       'pink': '#FF7BB8',
       'gray-dark': '#E0E0E0',
       'gray-light': '#EEEEEE',
+      'yellow-light': "#FFF6E6",
+      'yellow-dark': "#FFB564",
+      'purple': "#e05fcd"
     },
   },
   plugins: [],
