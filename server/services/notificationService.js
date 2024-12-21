@@ -70,7 +70,18 @@ const createNotification = async( entityName, entityAction, userActorId, channel
           {
             model: Livestream,
             as: "targetLivestream",
-            attributes: ["id", "title", "thumbnailUrl"]
+            attributes: ["id", "title", "thumbnailUrl"],
+            include: [
+              {
+                model: Channel,
+                as: 'livestreamChannel',
+                attributes: ['isLive'],
+                include: {
+                  model: User,
+                  attributes: ['username', 'id', 'role']
+                }
+              },
+            ],
           },
           {
             model: DonationItem,
@@ -137,10 +148,23 @@ const formatNotificationData = (item) => {
           thumbnailUrl: item.targetVideo.dataValues.thumbnailUrl
       } : null,
       targetLivestream: item.targetLivestream ? {
-        id: item.targetLivestream.dataValues.id,
-        title: item.targetLivestream.dataValues.title,
-        thumbnailUrl: item.targetLivestream.dataValues.thumbnailUrl
-      } : null,
+          id: item.targetLivestream.dataValues.id,
+          title: item.targetLivestream.dataValues.title,
+          thumbnailUrl: item.targetLivestream.dataValues.thumbnailUrl,
+          livestreamChannel: item.targetLivestream.dataValues.livestreamChannel
+            ? {
+                isLive: item.targetLivestream.dataValues.livestreamChannel.dataValues.isLive,
+                User: item.targetLivestream.dataValues.livestreamChannel.dataValues.User
+                  ? {
+                      username: item.targetLivestream.dataValues.livestreamChannel.dataValues.User?.dataValues?.username || null,
+                      id: item.targetLivestream.dataValues.livestreamChannel.dataValues.User?.dataValues?.id || null,
+                      role: item.targetLivestream.dataValues.livestreamChannel.dataValues.User?.dataValues?.role || null,
+                    }
+                  : null,
+              }
+            : null,
+        }
+      : null,
       targetdonationItem: item.donationItem ? {
         name: item.donationItem.dataValues.name,
         image: item.donationItem.dataValues.image,
@@ -238,7 +262,23 @@ const getAllNotification = async(userNotifierId, channelNotifierId, page, pageSi
           model: Video,
           as: "targetVideo",
           attributes: ["id", "title", "thumbnailUrl"]
-        }
+        },
+        {
+          model: Livestream,
+          as: "targetLivestream",
+          attributes: ["id", "title", "thumbnailUrl"],
+          include: [
+            {
+              model: Channel,
+              as: 'livestreamChannel',
+              attributes: ['isLive'],
+              include: {
+                model: User,
+                attributes: ['username', 'id', 'role']
+              }
+            },
+          ],
+        },
       ],
       order: [['createdAt', 'DESC']],
       offset: (page - 1) * pageSize,
