@@ -66,7 +66,7 @@
           :to="
             newNotification?.targetVideo
               ? `/video/${newNotification.targetVideo.id}`
-              : `/live/${newNotification?.channelActor?.User?.username}`
+              : `/live/${newNotification?.targetLivestream?.livestreamChannel?.User?.username}`
           "
           class="flex gap-x-3 pt-3 pb-1 hover:bg-gray-light px-2 rounded-md"
           @click="handleMakeRead(newNotification?.id)"
