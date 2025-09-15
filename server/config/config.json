@@ -1,0 +1,23 @@
+{
+  "test": {
+    "username": "move_admin",
+    "password": "Trnhvu100302",
+    "database": "move",
+    "host": "database-1.c72kcqygazja.ap-southeast-2.rds.amazonaws.com",
+    "dialect": "mysql"
+  },
+  "development": {
+    "username": "move_admin",
+    "password": "Trnhvu100302",
+    "database": "move",
+    "host": "database-1.c72kcqygazja.ap-southeast-2.rds.amazonaws.com",
+    "dialect": "mysql"
+  },
+  "production": {
+    "username": "move_admin",
+    "password": "Trnhvu100302",
+    "database": "move",
+    "host": "database-1.c72kcqygazja.ap-southeast-2.rds.amazonaws.com",
+    "dialect": "mysql"
+  }
+}
