@@ -213,7 +213,9 @@ const getAllNotificationRoomSetting = async (userId, channelId) => {
           message: error.message,
       };
   }
-};const getNotificationSettingStatus = async (userNotifierId, channelNotifierId) => {
+};
+
+const getNotificationSettingStatus = async (userNotifierId, channelNotifierId) => {
   try {
     let notifierCondition = {};
     let roleNotifierCondition = {};
