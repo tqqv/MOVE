@@ -47,7 +47,7 @@ passport.use(
         }
         return done(null, existingGoogleAccount)
     } catch (error) {
-        throw new Error(error)
+        return done(error, null);
     }
   })
 );
@@ -57,7 +57,7 @@ passport.serializeUser((user, done) => {
   });
 
 passport.deserializeUser((id, done) => {
-    User.findById(id)
+    User.findByPk(id)
     .then((user) => {
         done(null, user);
     })
