@@ -14,7 +14,7 @@
   const showConfirmPassword = ref(false);
 
   const handleGoogleLogin = () => {
-    const url = `${import.meta.env.VITE_API_URL}auth/google`;
+    const url = `${import.meta.env.VITE_API_URL}/auth/google`;
     window.open(url, '_self');
   };
   const submitSignupForm = async (values) => {
