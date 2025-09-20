@@ -53,12 +53,14 @@ passport.use(
 );
 
 passport.serializeUser((user, done) => {
+    log("serializeUser", user)
     done(null, user.id);
   });
 
 passport.deserializeUser((id, done) => {
     User.findByPk(id)
     .then((user) => {
+        log("deserializeUser", user)
         done(null, user);
     })
     .catch((error) => done(error) )
