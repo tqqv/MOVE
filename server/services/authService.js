@@ -338,24 +338,15 @@ const sendMailVerify = async (email, id) => {
   }
 };
 
-const verifyAccount = async (userId, token) => {
+const verifyAccount = async (token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY);
-    if(userId !== decoded.userId){
-      return {
-        status: 404,
-        message: "Not right"
-      }
-    }
+
     const user = await User.findByPk(decoded.userId);
     if (!user) {
-      return {
-        status: 400,
-        message: "User not found",
-      };
+      return { status: 400, message: "User not found" };
     }
 
-    // Nếu user đổi email
     if (user.email !== decoded.email) {
       user.email = decoded.email;
     }
@@ -363,24 +354,16 @@ const verifyAccount = async (userId, token) => {
     user.isVerified = true;
     await user.save();
 
-    return {
-      status: 200,
-      message: "Email verified successfully",
-    };
+    return { status: 200, message: "Email verified successfully" };
   } catch (error) {
     console.error("Email verification error:", error);
     if (error instanceof jwt.JsonWebTokenError) {
-      return {
-        status: 400,
-        message: "Invalid or expired token",
-      };
+      return { status: 400, message: "Invalid or expired token" };
     }
-    return {
-      status: 500,
-      message: "Internal server error",
-    };
+    return { status: 500, message: "Internal server error" };
   }
 };
+
 //// Send mail and verify account - END
 
 // logic Forgot password - START

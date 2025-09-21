@@ -100,8 +100,7 @@ const sendMailVerifyController = async (req, res, next) => {
 
 const verifyAccountController = async (req, res, next) => {
   const token = req.params.token;
-  const userId = req.user.id;
-  const result = await verifyAccount(userId, token);
+  const result = await verifyAccount(token);
 
   responseHandler(result.status, null, result.message)(req, res, next);
 };
