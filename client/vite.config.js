@@ -1,10 +1,9 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import { fileURLToPath, URL } from 'node:url'
 
-import { fileURLToPath, URL } from 'node:url';
-
-// https://vitejs.dev/config/
 export default defineConfig({
+  base: '/', // rất quan trọng để build asset path chuẩn cho Vercel
   plugins: [vue()],
   resolve: {
     alias: {
@@ -18,4 +17,7 @@ export default defineConfig({
       '@utils': fileURLToPath(new URL('./src/utils', import.meta.url)),
     },
   },
-});
+  build: {
+    outDir: 'dist', // Vercel expect dist/
+  },
+})
