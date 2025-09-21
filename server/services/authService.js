@@ -303,9 +303,8 @@ const sendMailVerify = async (email, id) => {
     }
 
     const verificationToken = generateVerificationToken(id, email);
-
     const verificationUrl = `${process.env.CLIENT_HOST}/verify-email/${verificationToken}`;
-
+    console.log(verificationUrl);
     const mailOptions = {
       from: `"MOVE ADMIN" <${process.env.EMAIL_USER}>`,
       to: email,
