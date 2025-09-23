@@ -1,47 +1,61 @@
 # MOVE
 
-### init local db
+### Initialize Local Database
 
-1. Kết nối đến MySQL bằng tài khoản root hoặc tài khoản có đủ quyền:
+1. Connect to MySQL using the `root` user or an account with sufficient privileges:
    mysql -u root -p;
 
-2. Tạo cơ sở dữ liệu:
+2. Create the database:
    CREATE DATABASE `move`;
 
-3. Chọn cơ sở dữ liệu:
+3. Select the database:
    USE `move`;
 
-4. Thoát mysql
+4. Exit MySQL:
+   exit;
 
-- exit
+---
 
-### update local database/ cập nhật local database nếu có thay đổi trong file migration
+### Update Local Database (If Migrations Change)
 
-1.  Chạy migration
-    - npx sequelize-cli db:migrate
+1. Run migrations:
+   npx sequelize-cli db:migrate
 
-### modify table // thêm xóa thuộc tính hay sử bảng trên table
+---
 
-1.  Update file model
-2.  Tạo migration
+### Modify Tables (Add/Remove/Update Fields or Create Tables)
 
-    ### Case: thay đổi thêm/xóa/update thuộc tính
+1. Update the model file accordingly.
 
-        - Tạo migration mới cho bản đó trong db
-            - npx sequelize-cli migration:generate --name migration-name
-        vd: npx sequelize-cli migration:generate --name  add-age-to-user
-            => Sau khi tạo thành công thì check trong folder migrations sẽ có file.js về migration đó. (...-create-tablename.js)
+2. Generate migration:
 
-    ### Case: thêm bảng
+   #### Case: Add/Remove/Update fields
 
-        - Tạo migration cho db
-            - npx sequelize-cli migration:generate --name create-tablename
-            => Sau khi tạo thành công thì check trong folder migrations sẽ có file.js về migration đó. (...-create-tablename.js)
+   - Generate a new migration file:
+     npx sequelize-cli migration:generate --name migration-name
 
-3.  Chạy migration
-    - npx sequelize-cli db:migrate
+     Example:
+     npx sequelize-cli migration:generate --name add-age-to-user
 
-### Để ý có thể bug khi chạy mấy lệnh trên ở terminal
+     After generation, check the `migrations/` folder for the new file
+     (e.g., `...-add-age-to-user.js`).
 
-    - lệnh npx thường file chạy tới folder server mới dùng được.
-    - lệnh mysql thường phải có ; ở cuối.
+   #### Case: Add new table
+
+   - Generate migration for the new table:
+     npx sequelize-cli migration:generate --name create-tablename
+
+     Example:
+     npx sequelize-cli migration:generate --name create-users
+
+     A new migration file will appear in the `migrations/` folder.
+
+3. Run the migration:
+   npx sequelize-cli db:migrate
+
+---
+
+### Notes
+
+- `npx` commands should be run from the correct folder (usually the `/server` folder).
+- MySQL commands must end with a `;`
