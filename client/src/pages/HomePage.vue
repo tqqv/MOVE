@@ -24,6 +24,7 @@ const pageSize = ref(8);
 const loading = ref(true);
 const loadingMore = ref(false);
 const isFetchingMore = ref(false);
+const isFeaturedVisible = ref(false); // To lazy load Featured section
 
 const formatDate = () => {
   const date = new Date();
@@ -106,6 +107,28 @@ onMounted(() => {
     setTimeout(() => fetchDataSlider(currentDate.value), 0);
   }
 
+  // Lazy load Featured section when it comes into view
+  const featuredSection = document.querySelector('#featured-section');
+  if (featuredSection && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            isFeaturedVisible.value = true;
+            observer.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.1 } // Trigger when 10% of the section is visible
+    );
+    observer.observe(featuredSection);
+  } else {
+    // Fallback: render after a delay
+    setTimeout(() => {
+      isFeaturedVisible.value = true;
+    }, 1000);
+  }
+
   // Infinite scroll listener
   const container = document.querySelector('.flex-1.overflow-y-scroll');
   container?.addEventListener('near-bottom', loadMoreData);
@@ -120,7 +143,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <section>
+  <section v-if="isFeaturedVisible" id="featured-section">
     <div class="container items-center">
       <div class="flex items-center">
         <span class="font-bold text-[24px] pr-8">Featured</span>
@@ -129,6 +152,18 @@ onUnmounted(() => {
 
       <div class="mt-14">
         <Slider :dataSlider="dataSlider" :isLoadingSlider="isLoadingSlider" :lazy="true" />
+      </div>
+    </div>
+  </section>
+  <!-- Placeholder or skeleton for Featured when not visible -->
+  <section v-else id="featured-section" class="min-h-[400px] bg-gray-100 rounded-lg">
+    <div class="container items-center">
+      <div class="flex items-center">
+        <span class="font-bold text-[24px] pr-8">Featured</span>
+        <Divider class="flex-grow mt-1" />
+      </div>
+      <div class="mt-14">
+        <Skeleton width="100%" height="350px" />
       </div>
     </div>
   </section>

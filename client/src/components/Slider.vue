@@ -102,6 +102,7 @@
                 isSlider="true"
                 v-if="slide.channelBooking && currentSlide === i"
                 :username="slide?.channelBooking.User.username"
+                :poster="slide.channelBooking?.channelLivestreams[0].thumbnailUrl"
               />
 
               <img
