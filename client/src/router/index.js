@@ -1,149 +1,110 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomePage from '@/pages/HomePage.vue';
-import ResetPassword from '@/pages/ResetPassword.vue';
-import StreamerLayout from '@/layouts/StreamerLayout.vue';
-import ChannelSetting from '@/components/streamer/channelProfile/ChannelSetting.vue';
-import DashboardStreamer from '@/components/streamer/dashboard/DashboardStreamer.vue';
-import CommentStreamer from '@/components/streamer/comment/CommentStreamer.vue';
-import UserLayout from '@/layouts/UserLayout.vue';
-import ProfileContent from '@/components/personalProfile/ProfileContent.vue';
-import ViewChannelsContent from '@/components/viewChannels/ViewChannelsContent.vue';
-import BrowseContent from '@/components/browse/BrowseContent.vue';
-import CategoryDetailsContent from '@/components/CategoryDetails/CategoryDetailsContent.vue';
-import SearchContent from '@/components/search/SearchContent.vue';
-import LiveStreamPageByStreamer from '@/pages/LiveStreamPageByStreamer.vue';
-import SetUpLive from '@/components/streamer/liveStream/SetUpLive.vue';
-import DashboardLive from '@/components/streamer/liveStream/DashboardLive.vue';
-import VideoDetails from '@/pages/VideoDetails.vue';
-import VideoSetting from '@/pages/VideoSetting.vue';
-import PageNotFound from '@/pages/PageNotFound.vue';
-import TabCategories from '@/components/browse/TabCategories.vue';
-import TabHighestRated from '@/components/browse/TabHighestRated.vue';
-import TabTopVideo from '@/components/browse/TabTopVideo.vue';
-import TabMostView from '@/components/browse/TabMostView.vue';
-import Overview from '@/components/streamer/analytics/overview/Overview.vue';
-import VideoAnalytics from '@/components/streamer/analytics/videoAnalytics/VideoAnalytics.vue';
-import ViewLiveStreamPage from '@/pages/ViewLiveStreamPage.vue';
-import InDepthAnalytics from '@/components/streamer/analytics/videoAnalytics/InDepthAnalytics.vue';
-import WalletContent from '@/components/wallet/WalletContent.vue';
-import TabPaymentMethod from '@/components/wallet/TabPaymentMethod.vue';
-import TabPaymentHistory from '@/components/wallet/TabPaymentHistory.vue';
-import Following from '@/pages/Following.vue';
-import SearchTotal from '@/components/search/SearchTotal.vue';
-import Cashout from '@/components/streamer/analytics/cashout/Cashout.vue';
-import LiveStreamAnalytics from '@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue';
-import VerifyEmail from '@/components/VerifyEmail.vue';
-import ScreenChat from '@/components/screenObs/ScreenChat.vue';
-import ScreenDonation from '@/components/screenObs/ScreenDonation.vue';
-import ScreenSupportLive from '@/components/screenObs/ScreenSupportLive.vue';
-import CashoutHistory from '@/components/streamer/analytics/cashout/CashoutHistory.vue';
-import AdvertiseBooking from '@/components/streamer/advertiseBooking/AdvertiseBooking.vue';
-import AboutUs from '@/components/showMore/AboutUs.vue';
-import FAQ from '@/components/showMore/FAQ.vue';
-import CommunityGuidelines from '@/components/showMore/CommunityGuidelines.vue';
-import BookingHistory from '@/components/streamer/advertiseBooking/BookingHistory.vue';
-import BanPage from '@/pages/BanPage.vue';
 import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
 setActivePinia(pinia);
 import { useUserStore } from '@/stores';
 
+// Lazy loading is used to reduce initial bundle size by splitting the code into smaller chunks.
+// Each component is loaded only when the route is accessed, creating separate chunks for better performance.
+// This avoids loading all components upfront, reducing the initial load time and improving user experience.
+// Chunk splitting allows browsers to cache individual chunks, so returning users load faster for previously visited pages.
+
 const routes = [
   // User router
   {
     path: '/',
-    component: UserLayout,
+    component: () => import('@/layouts/UserLayout.vue'),
     meta: { title: 'Move' },
     children: [
-      { path: '', component: HomePage },
+      { path: '', component: () => import('@/pages/HomePage.vue') },
       {
         path: 'personal-profile',
-        component: ProfileContent,
+        component: () => import('@/components/personalProfile/ProfileContent.vue'),
         meta: { roles: ['user', 'streamer'], title: 'Setting Profile' },
       },
-      { path: 'user/:username', component: ViewChannelsContent, meta: { title: 'Profile | Move' } },
+      { path: 'user/:username', component: () => import('@/components/viewChannels/ViewChannelsContent.vue'), meta: { title: 'Profile | Move' } },
       {
         path: 'browse',
-        component: BrowseContent,
+        component: () => import('@/components/browse/BrowseContent.vue'),
         children: [
           {
             path: 'categories',
-            component: TabCategories,
+            component: () => import('@/components/browse/TabCategories.vue'),
             meta: { title: 'Categories | Browse' },
           },
-          { path: 'top-videos', component: TabTopVideo, meta: { title: 'Top Videos | Browse' } },
-          { path: 'most_viewed', component: TabMostView, meta: { title: 'Most Viewed | Browse' } },
+          { path: 'top-videos', component: () => import('@/components/browse/TabTopVideo.vue'), meta: { title: 'Top Videos | Browse' } },
+          { path: 'most_viewed', component: () => import('@/components/browse/TabMostView.vue'), meta: { title: 'Most Viewed | Browse' } },
           {
             path: 'highest_rated',
-            component: TabHighestRated,
+            component: () => import('@/components/browse/TabHighestRated.vue'),
             meta: { title: 'Highest Rated | Browse' },
           },
         ],
       },
       {
         path: 'wallet',
-        component: WalletContent,
+        component: () => import('@/components/wallet/WalletContent.vue'),
         meta: { roles: ['user', 'streamer'] },
         children: [
           {
             path: 'payment-method',
-            component: TabPaymentMethod,
+            component: () => import('@/components/wallet/TabPaymentMethod.vue'),
             meta: { title: 'Your Wallet | Wallet' },
           },
           {
             path: 'payment-history',
-            component: TabPaymentHistory,
+            component: () => import('@/components/wallet/TabPaymentHistory.vue'),
             meta: { title: 'Payment History | Wallet' },
           },
         ],
       },
-      { path: 'search', component: SearchContent, meta: { title: 'Search' } },
+      { path: 'search', component: () => import('@/components/search/SearchContent.vue'), meta: { title: 'Search' } },
       {
         path: 'following',
-        component: Following,
+        component: () => import('@/pages/Following.vue'),
         meta: { roles: ['user', 'streamer'], title: 'Your following' },
       },
       {
         path: 'total-search',
-        component: SearchTotal,
+        component: () => import('@/components/search/SearchTotal.vue'),
         props: (route) => ({
           query: route.query.q,
           type: route.query.type,
         }),
         meta: { title: 'Total Search' },
       },
-      { path: 'video/:videoId', component: VideoDetails, meta: { title: 'Video | Move' } },
+      { path: 'video/:videoId', component: () => import('@/pages/VideoDetails.vue'), meta: { title: 'Video | Move' } },
       {
         path: 'browse/categories/:category',
-        component: CategoryDetailsContent,
+        component: () => import('@/components/CategoryDetails/CategoryDetailsContent.vue'),
         meta: { title: 'Category' },
       },
-      { path: 'about-us', component: AboutUs, meta: { title: 'About Us' } },
-      { path: 'faq', component: FAQ, meta: { title: 'FAQ' } },
-      { path: 'community-guidelines', component: CommunityGuidelines, meta: { title: 'Category' } },
+      { path: 'about-us', component: () => import('@/components/showMore/AboutUs.vue'), meta: { title: 'About Us' } },
+      { path: 'faq', component: () => import('@/components/showMore/FAQ.vue'), meta: { title: 'FAQ' } },
+      { path: 'community-guidelines', component: () => import('@/components/showMore/CommunityGuidelines.vue'), meta: { title: 'Category' } },
     ],
   },
   // LIVE STREAM LAYOUT
   {
     path: '/live/:username',
-    component: ViewLiveStreamPage,
+    component: () => import('@/pages/ViewLiveStreamPage.vue'),
     meta: { title: 'Live Stream | Move ' },
   },
-  { path: '/reset-password/:token', component: ResetPassword, meta: { title: 'Reset Password' } },
-  { path: '/verify-email/:token', component: VerifyEmail, meta: { title: 'Verify Email' } },
-  { path: '/banned', component: BanPage, meta: { title: 'Ban | Move' } },
+  { path: '/reset-password/:token', component: () => import('@/pages/ResetPassword.vue'), meta: { title: 'Reset Password' } },
+  { path: '/verify-email/:token', component: () => import('@/components/VerifyEmail.vue'), meta: { title: 'Verify Email' } },
+  { path: '/banned', component: () => import('@/pages/BanPage.vue'), meta: { title: 'Ban | Move' } },
   {
     path: '/overlay',
-    component: ScreenSupportLive,
+    component: () => import('@/components/screenObs/ScreenSupportLive.vue'),
     children: [
       {
         path: ':channelId&type=chatbox',
-        component: ScreenChat,
+        component: () => import('@/components/screenObs/ScreenChat.vue'),
         meta: { title: 'Support Chat | Streamer' },
       },
       {
         path: ':channelId&type=donation',
-        component: ScreenDonation,
+        component: () => import('@/components/screenObs/ScreenDonation.vue'),
         meta: { title: 'Support Donation | Streamer' },
       },
     ],
@@ -151,56 +112,56 @@ const routes = [
   // Streamer router
   {
     path: '/dashboard-streamer',
-    component: StreamerLayout,
+    component: () => import('@/layouts/StreamerLayout.vue'),
     meta: { roles: ['streamer'] },
     children: [
-      { path: '', component: DashboardStreamer, meta: { title: 'Dashboard' } },
+      { path: '', component: () => import('@/components/streamer/dashboard/DashboardStreamer.vue'), meta: { title: 'Dashboard' } },
       {
         path: 'comments',
-        component: CommentStreamer,
+        component: () => import('@/components/streamer/comment/CommentStreamer.vue'),
         meta: { title: 'Manage Comment | Dashboard' },
       },
       {
         path: 'channel-setting',
-        component: ChannelSetting,
+        component: () => import('@/components/streamer/channelProfile/ChannelSetting.vue'),
         meta: { title: 'Setting Channel | Dashboard' },
       },
-      { path: 'videos', component: VideoSetting, meta: { title: 'Manage Video | Dashboard' } },
-      { path: 'analytics', component: Overview, meta: { title: 'Overview Analytic | Dashboard' } },
+      { path: 'videos', component: () => import('@/pages/VideoSetting.vue'), meta: { title: 'Manage Video | Dashboard' } },
+      { path: 'analytics', component: () => import('@/components/streamer/analytics/overview/Overview.vue'), meta: { title: 'Overview Analytic | Dashboard' } },
       {
         path: 'video-analytics',
-        component: VideoAnalytics,
+        component: () => import('@/components/streamer/analytics/videoAnalytics/VideoAnalytics.vue'),
         meta: { title: 'Video Analytic | Dashboard' },
       },
       {
         path: 'video-analytics/:videoId',
-        component: InDepthAnalytics,
+        component: () => import('@/components/streamer/analytics/videoAnalytics/InDepthAnalytics.vue'),
         meta: { title: 'Video Analytic' },
       },
 
       {
         path: 'live-stream-analytics',
-        component: LiveStreamAnalytics,
+        component: () => import('@/components/streamer/analytics/liveStreamAnalytics/LiveStreamAnalytics.vue'),
         meta: { title: 'Livestream Analytics | Dashboard' },
       },
       {
         path: 'cashout',
-        component: Cashout,
+        component: () => import('@/components/streamer/analytics/cashout/Cashout.vue'),
         meta: { title: 'Cash Out | Dashboard' },
       },
       {
         path: 'booking-featured',
-        component: AdvertiseBooking,
+        component: () => import('@/components/streamer/advertiseBooking/AdvertiseBooking.vue'),
         meta: { title: 'Manage Booking | Dashboard' },
       },
       {
         path: 'booking-history',
-        component: BookingHistory,
+        component: () => import('@/components/streamer/advertiseBooking/BookingHistory.vue'),
         meta: { title: 'Booking History | Dashboard' },
       },
       {
         path: 'cashout-history',
-        component: CashoutHistory,
+        component: () => import('@/components/streamer/analytics/cashout/CashoutHistory.vue'),
         meta: { title: 'Cash Out History | Dashboard' },
       },
     ],
@@ -208,17 +169,17 @@ const routes = [
   // Live stream by streamer
   {
     path: '/streaming',
-    component: LiveStreamPageByStreamer,
+    component: () => import('@/pages/LiveStreamPageByStreamer.vue'),
     meta: { roles: ['streamer'] },
     children: [
-      { path: 'stream-setup', component: SetUpLive, meta: { title: 'Setup Live' } },
-      { path: 'dashboard-live', component: DashboardLive, meta: { title: 'Dashboard Live' } },
+      { path: 'stream-setup', component: () => import('@/components/streamer/liveStream/SetUpLive.vue'), meta: { title: 'Setup Live' } },
+      { path: 'dashboard-live', component: () => import('@/components/streamer/liveStream/DashboardLive.vue'), meta: { title: 'Dashboard Live' } },
     ],
   },
   {
     path: '/:pathMatch(.*)*',
-    component: PageNotFound,
-    name: PageNotFound,
+    component: () => import('@/pages/PageNotFound.vue'),
+    name: 'PageNotFound',
   },
 ];
 
