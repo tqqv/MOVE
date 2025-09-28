@@ -61,12 +61,6 @@
     }
   };
 
-  const getVimeoId = (url) => {
-    if (!url) return null;
-    const match = url.match(/vimeo\.com\/(\d+)/) || url.match(/\/videos\/(\d+)/);
-    return match ? match[1] : null;
-  };
-
   const fetchVideoById = async () => {
     try {
       isVideoLoading.value = true;
@@ -124,20 +118,12 @@
   };
 
   const initializePlayer = () => {
-    if (!video.value || !video.value.videoUrl) return;
-
     if (playerInstance) {
       playerInstance.destroy();
     }
 
-    const vimeoId = getVimeoId(video.value.videoUrl);
-    if (!vimeoId) {
-      console.error('Invalid Vimeo URL:', video.value.videoUrl);
-      return;
-    }
-
     playerInstance = new Player(vimeoPlayer.value, {
-      id: vimeoId,
+      id: videoId.value,
       loop: false,
       autoplay: true,
       title: false,
@@ -189,9 +175,9 @@
   };
 
   onMounted(async () => {
+    initializePlayer();
     await fetchVideoById();
     await fetchWatchAlso();
-    initializePlayer();
     if (userStore.user && userStore.user.role !== 'user') {
       streamerStore.fetchProfileChannel();
     }
@@ -203,9 +189,9 @@
   watch(videoId, async (newVideoId) => {
     actualWatchTime = 0;
     lastUpdateTime = 0;
+    initializePlayer();
     await fetchVideoById();
     await fetchWatchAlso();
-    initializePlayer();
   });
   watch(videoId, (newVideoId) => {
     currentVideoId.value = newVideoId;
