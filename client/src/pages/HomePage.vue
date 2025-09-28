@@ -5,10 +5,8 @@ import Divider from '@/components/Divider.vue';
 import CategoryImage from '@/components/CategoryImage.vue';
 import { getDataSlider } from '@/services/home';
 import GirdVideo from '@/components/GirdVideo.vue';
-import SmallLoading from '@/components/icons/smallLoading.vue';
 import { getAllCategoriesHaveView, getTopVideo } from '@/services/browse';
-import { fetchViewLiveStreamByUsername } from '@/services/liveStream';
-import { getAllVideos } from '@/services/video';
+
 import Skeleton from 'primevue/skeleton';
 
 const categories = ref([]);
@@ -16,12 +14,10 @@ const dataSlider = ref([]);
 const isLoadingSlider = ref(true);
 const videos = ref([]);
 const currentDate = ref('');
-const localDate = new Date();
 
 const currentPage = ref(1);
 const totalPage = ref();
 const pageSize = ref(8);
-const loading = ref(true);
 const loadingMore = ref(false);
 const isFetchingMore = ref(false);
 const isFeaturedVisible = ref(false); // To lazy load Featured section

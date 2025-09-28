@@ -28,7 +28,7 @@
             : `/video/${video.id}`
         "
       >
-        <img :src="video.thumbnailUrl" class="aspect-[16/9] rounded-md object-cover w-full h-full"
+        <img :src="video.thumbnailUrl" class="aspect-[16/9] rounded-md object-cover w-full h-full" loading="lazy"
       /></router-link>
       <span
         v-if="video.livestreamChannel?.isLive"
@@ -67,6 +67,7 @@
         <img
           :src="video.channel?.avatar || video.livestreamChannel?.avatar"
           alt="Avatar"
+          loading="lazy"
           class="w-full h-full rounded-full object-cover"
         />
       </RouterLink>

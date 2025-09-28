@@ -112,6 +112,7 @@
                   slide.video?.thumbnailUrl
                 "
                 alt="Thumbnail"
+                loading="lazy"
                 class="w-full h-full object-cover"
               />
             </RouterLink>
@@ -134,6 +135,7 @@
                     <img
                       :src="slide.video?.channel.avatar || slide?.channelBooking.avatar"
                       alt="Avatar"
+                      loading="lazy"
                       class="w-full h-full rounded-full object-cover"
                     /></div
                 ></RouterLink>

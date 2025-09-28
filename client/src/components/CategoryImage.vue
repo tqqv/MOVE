@@ -37,7 +37,8 @@
     <img
       :src="category.imgUrl || category.category?.imgUrl"
       :alt="category.title || category.category?.title"
-      class="rounded-lg w-full h-full object-cover"
+      loading="lazy"
+      class="rounded-lg w-full h-[360px] object-cover"
     />
     <h3 class="mt-2 text_subTitle">{{ category.title || category.category?.title }}</h3>
     <p class="text_secondary">
